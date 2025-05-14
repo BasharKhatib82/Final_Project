@@ -10,15 +10,15 @@ const Tasks = () => {
   }, []);
 
   const fetchTasks = () => {
-    // axios
-    //   .get("http://localhost:3000/auth/tasks")
-    //   .then((res) => {
-    //     setTasks(res.data.Result);
-    //     console.log(res.data);
-    //   })
-    //   .catch((err) => {
-    //     console.error(err);
-    //   });
+    axios
+      .get("http://localhost:3000/auth/tasks")
+      .then((res) => {
+        setTasks(res.data.Result);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   return (

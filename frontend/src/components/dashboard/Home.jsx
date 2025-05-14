@@ -10,7 +10,7 @@ const Home = () => {
   });
 
   useEffect(() => {
-    // fetchDashboardData();
+    fetchDashboardData();
   }, []);
 
   const fetchDashboardData = async () => {

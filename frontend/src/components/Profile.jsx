@@ -12,7 +12,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // fetchBusinessInfo();
+    fetchBusinessInfo();
   }, []);
 
   const fetchBusinessInfo = async () => {

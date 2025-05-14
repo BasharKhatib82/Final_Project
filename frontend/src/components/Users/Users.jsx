@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import Button from "../Buttons/Button";
 
@@ -8,7 +8,6 @@ const Users = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [showInactive, setShowInactive] = useState(false);
   const [statusFilter, setStatusFilter] = useState("active");
   const navigate = useNavigate();
 
@@ -102,8 +101,8 @@ const Users = () => {
 
   return (
     <div>
-      <div className="main mt2rem">
-        <h2 className="text-center font-blue fontXL mp2rem">רשימת עובדים</h2>
+      <div className="main-dash mt2rem">
+        <h2 className="text-center font-blue fontXL mp2rem">רשימת משתמשים</h2>
         <div className="filters-container">
           <Button linkTo="/dashboard/add_user" label="הוספת משתמש חדש" />
           <select
@@ -111,16 +110,16 @@ const Users = () => {
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="active">הצג תפקידים פעילים בלבד</option>
-            <option value="inactive">הצג תפקידים לא פעילים בלבד</option>
-            <option value="all">הצג את כל התפקידים</option>
+            <option value="active">הצג משתמשים פעילים בלבד</option>
+            <option value="inactive">הצג משתמשים לא פעילים בלבד</option>
+            <option value="all">הצג את כל המשתמשים</option>
           </select>
 
           <div className="search-wrapper">
             <input
               type="text"
               className="search-input"
-              placeholder="🔍  חיפוש תפקיד לפי שם ..."
+              placeholder="🔍  חיפוש משתמש לפי שם ..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -149,7 +148,21 @@ const Users = () => {
           </thead>
           <tbody>
             {allUsers
-              .filter((user) => showInactive || user.is_active)
+              .filter((user) => {
+                const term = searchTerm.toLowerCase();
+                const nameMatch = user.role_name.toLowerCase().includes(term);
+                const statusText = user.is_active ? "פעיל" : "לא פעיל";
+                const statusMatch = statusText.includes(term);
+
+                const statusCheck =
+                  statusFilter === "all"
+                    ? true
+                    : statusFilter === "active"
+                    ? user.is_active
+                    : !user.is_active;
+
+                return statusCheck && (nameMatch || statusMatch);
+              })
               .map((user) => (
                 <tr
                   key={user.user_id}

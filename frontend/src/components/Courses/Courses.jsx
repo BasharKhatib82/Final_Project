@@ -10,15 +10,15 @@ const Courses = () => {
   }, []);
 
   const fetchData = () => {
-    // axios
-    //   .get("http://localhost:3000/auth/courses")
-    //   .then((res) => {
-    //     setCourses(res.data.Result);
-    //     console.log(res.data);
-    //   })
-    //   .catch((err) => {
-    //     console.error(err);
-    //   });
+    axios
+      .get("http://localhost:3000/auth/courses")
+      .then((res) => {
+        setCourses(res.data.Result);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   return (

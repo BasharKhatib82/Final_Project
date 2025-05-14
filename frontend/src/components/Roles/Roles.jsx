@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Popup from "../Popup";
 import Button from "../Buttons/Button";
 
@@ -99,146 +99,134 @@ const Roles = () => {
   };
 
   return (
-    <div className="main mt2rem">
-      <div className="main">
-        <h2 className="text-center font-blue fontXL mp2rem">רשימת תפקידים</h2>
-        <div className="filters-container">
-          <Button linkTo="/dashboard/add_role" label="הוספת תפקיד חדש" />
-          <select
-            className="status-select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="active">הצג תפקידים פעילים בלבד</option>
-            <option value="inactive">הצג תפקידים לא פעילים בלבד</option>
-            <option value="all">הצג את כל התפקידים</option>
-          </select>
+    <div className="main-dash mt2rem">
+      <h2 className="text-center font-blue fontXL mp2rem">רשימת תפקידים</h2>
+      <div className="filters-container">
+        <Button linkTo="/dashboard/add_role" label="הוספת תפקיד חדש" />
+        <select
+          className="status-select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="active">הצג תפקידים פעילים בלבד</option>
+          <option value="inactive">הצג תפקידים לא פעילים בלבד</option>
+          <option value="all">הצג את כל התפקידים</option>
+        </select>
 
-          <div className="search-wrapper">
-            <input
-              type="text"
-              className="search-input"
-              placeholder="🔍  חיפוש תפקיד לפי שם ..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {searchTerm && (
-              <button
-                className="clear-search"
-                onClick={() => setSearchTerm("")}
-                aria-label="נקה חיפוש"
-              >
-                ❌
-              </button>
-            )}
-          </div>
+        <div className="search-wrapper">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="🔍  חיפוש תפקיד לפי שם ..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              className="clear-search"
+              onClick={() => setSearchTerm("")}
+              aria-label="נקה חיפוש"
+            >
+              ❌
+            </button>
+          )}
         </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th className="col5per">מזהה</th>
-              <th className="col10per">שם תפקיד</th>
-              <th className="col5per">ניהול משתמשים</th>
-              <th className="col5per">צפייה בדוחות</th>
-              <th className="col5per">שייך פניות</th>
-              <th className="col5per">עריכת קורסים</th>
-              <th className="col5per">ניהול משימות</th>
-              <th className="col5per">גישה לנתונים</th>
-              <th className="col5per">סטטוס</th>
-              <th className="col10per">פעולות</th>
-            </tr>
-          </thead>
-          <tbody>
-            {allRoles
-              .filter((role) => {
-                const term = searchTerm.toLowerCase();
-                const nameMatch = role.role_name.toLowerCase().includes(term);
-                const statusText = role.is_active ? "פעיל" : "לא פעיל";
-                const statusMatch = statusText.includes(term);
-
-                const statusCheck =
-                  statusFilter === "all"
-                    ? true
-                    : statusFilter === "active"
-                    ? role.is_active
-                    : !role.is_active;
-
-                return statusCheck && (nameMatch || statusMatch);
-              })
-              .map((role) => (
-                <tr
-                  key={role.role_id}
-                  className={!role.is_active ? "f-c-b-gray" : ""}
-                >
-                  <td>{role.role_id}</td>
-                  <td>{role.role_name}</td>
-                  <td
-                    className={
-                      role.can_manage_users ? "status-yes" : "status-no"
-                    }
-                  >
-                    {role.can_manage_users ? "✓" : "✗"}
-                  </td>
-                  <td
-                    className={
-                      role.can_view_reports ? "status-yes" : "status-no"
-                    }
-                  >
-                    {role.can_view_reports ? "✓" : "✗"}
-                  </td>
-                  <td
-                    className={
-                      role.can_assign_leads ? "status-yes" : "status-no"
-                    }
-                  >
-                    {role.can_assign_leads ? "✓" : "✗"}
-                  </td>
-                  <td
-                    className={
-                      role.can_edit_courses ? "status-yes" : "status-no"
-                    }
-                  >
-                    {role.can_edit_courses ? "✓" : "✗"}
-                  </td>
-                  <td
-                    className={
-                      role.can_manage_tasks ? "status-yes" : "status-no"
-                    }
-                  >
-                    {role.can_manage_tasks ? "✓" : "✗"}
-                  </td>
-                  <td
-                    className={
-                      role.can_access_all_data ? "status-yes" : "status-no"
-                    }
-                  >
-                    {role.can_access_all_data ? "✓" : "✗"}
-                  </td>
-                  <td className={role.is_active ? "status-yes" : "status-no"}>
-                    {role.is_active ? "פעיל" : "לא פעיל"}
-                  </td>
-                  <td>
-                    <button
-                      className="btn-edit fontBtnDash"
-                      onClick={() => handleEdit(role.role_id)}
-                    >
-                      עריכה
-                    </button>
-                    {role.is_active && (
-                      <button
-                        className="btn-delete fontBtnDash"
-                        onClick={() => handleDelete(role.role_id)}
-                      >
-                        מחיקה
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
       </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th className="col5per">מזהה</th>
+            <th className="col10per">שם תפקיד</th>
+            <th className="col5per">ניהול משתמשים</th>
+            <th className="col5per">צפייה בדוחות</th>
+            <th className="col5per">שייך פניות</th>
+            <th className="col5per">עריכת קורסים</th>
+            <th className="col5per">ניהול משימות</th>
+            <th className="col5per">גישה לנתונים</th>
+            <th className="col5per">סטטוס</th>
+            <th className="col10per">פעולות</th>
+          </tr>
+        </thead>
+        <tbody>
+          {allRoles
+            .filter((role) => {
+              const term = searchTerm.toLowerCase();
+              const nameMatch = role.role_name.toLowerCase().includes(term);
+              const statusText = role.is_active ? "פעיל" : "לא פעיל";
+              const statusMatch = statusText.includes(term);
+
+              const statusCheck =
+                statusFilter === "all"
+                  ? true
+                  : statusFilter === "active"
+                  ? role.is_active
+                  : !role.is_active;
+
+              return statusCheck && (nameMatch || statusMatch);
+            })
+            .map((role) => (
+              <tr
+                key={role.role_id}
+                className={!role.is_active ? "f-c-b-gray" : ""}
+              >
+                <td>{role.role_id}</td>
+                <td>{role.role_name}</td>
+                <td
+                  className={role.can_manage_users ? "status-yes" : "status-no"}
+                >
+                  {role.can_manage_users ? "✓" : "✗"}
+                </td>
+                <td
+                  className={role.can_view_reports ? "status-yes" : "status-no"}
+                >
+                  {role.can_view_reports ? "✓" : "✗"}
+                </td>
+                <td
+                  className={role.can_assign_leads ? "status-yes" : "status-no"}
+                >
+                  {role.can_assign_leads ? "✓" : "✗"}
+                </td>
+                <td
+                  className={role.can_edit_courses ? "status-yes" : "status-no"}
+                >
+                  {role.can_edit_courses ? "✓" : "✗"}
+                </td>
+                <td
+                  className={role.can_manage_tasks ? "status-yes" : "status-no"}
+                >
+                  {role.can_manage_tasks ? "✓" : "✗"}
+                </td>
+                <td
+                  className={
+                    role.can_access_all_data ? "status-yes" : "status-no"
+                  }
+                >
+                  {role.can_access_all_data ? "✓" : "✗"}
+                </td>
+                <td className={role.is_active ? "status-yes" : "status-no"}>
+                  {role.is_active ? "פעיל" : "לא פעיל"}
+                </td>
+                <td>
+                  <button
+                    className="btn-edit fontBtnDash"
+                    onClick={() => handleEdit(role.role_id)}
+                  >
+                    עריכה
+                  </button>
+                  {role.is_active && (
+                    <button
+                      className="btn-delete fontBtnDash"
+                      onClick={() => handleDelete(role.role_id)}
+                    >
+                      מחיקה
+                    </button>
+                  )}
+                </td>
+              </tr>
+            ))}
+        </tbody>
+      </table>
 
       {popup.show && popup.type !== "confirm" && (
         <Popup

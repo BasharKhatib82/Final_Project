@@ -10,15 +10,15 @@ const Hours = () => {
   }, []);
 
   const fetchHours = () => {
-    // axios
-    //   .get("http://localhost:3000/auth/hours") // ודא שהנתיב קיים בצד השרת
-    //   .then((res) => {
-    //     setHours(res.data.Result);
-    //     console.log(res.data);
-    //   })
-      // .catch((err) => {
-      //   console.error(err);
-      // });
+    axios
+      .get("http://localhost:3000/auth/hours") // ודא שהנתיב קיים בצד השרת
+      .then((res) => {
+        setHours(res.data.Result);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   return (

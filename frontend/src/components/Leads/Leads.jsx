@@ -11,15 +11,15 @@ const Leads = () => {
   }, []);
 
   const fetchLeads = () => {
-    // axios
-    //   .get("http://localhost:3000/auth/leads") // ודא שהנתיב קיים ב־Node.js
-    //   .then((res) => {
-    //     setLeads(res.data.Result);
-    //     console.log(res.data);
-    //   })
-    //   .catch((err) => {
-    //     console.error(err);
-    //   });
+    axios
+      .get("http://localhost:3000/auth/leads") // ודא שהנתיב קיים ב־Node.js
+      .then((res) => {
+        setLeads(res.data.Result);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   };
 
   return (
