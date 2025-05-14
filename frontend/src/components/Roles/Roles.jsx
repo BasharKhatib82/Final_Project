@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Popup from "../Popup";
+import Button from "../Buttons/Button";
 
 const Roles = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -98,13 +99,11 @@ const Roles = () => {
   };
 
   return (
-    <div>
-      <div className="main mt2rem">
+    <div className="main mt2rem">
+      <div className="main">
         <h2 className="text-center font-blue fontXL mp2rem">רשימת תפקידים</h2>
         <div className="filters-container">
-          <Link to="/dashboard/add_role" className="btn-add-dash fontBtnDash ">
-            הוספת תפקיד חדש
-          </Link>
+          <Button linkTo="/dashboard/add_role" label="הוספת תפקיד חדש" />
           <select
             className="status-select"
             value={statusFilter}

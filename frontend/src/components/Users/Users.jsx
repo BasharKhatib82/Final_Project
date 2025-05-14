@@ -2,11 +2,14 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
+import Button from "../Buttons/Button";
 
 const Users = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [showInactive, setShowInactive] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("active");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -100,17 +103,37 @@ const Users = () => {
   return (
     <div>
       <div className="main mt2rem">
-        <h2 className="text-center font-blue fontXL">רשימת עובדים</h2>
-        <div className="add-wrapper">
-          <Link to="/dashboard/add_user" className="btn-add-dash fontBtnDash">
-            הוספת עובד חדש
-          </Link>
-          <button
-            onClick={() => setShowInactive((prev) => !prev)}
-            className="btn-filter-dash fontBtnDash"
+        <h2 className="text-center font-blue fontXL mp2rem">רשימת עובדים</h2>
+        <div className="filters-container">
+          <Button linkTo="/dashboard/add_user" label="הוספת משתמש חדש" />
+          <select
+            className="status-select"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
           >
-            {showInactive ? "הסתר עובדים לא פעילים" : "הצג עובדים לא פעילים"}
-          </button>
+            <option value="active">הצג תפקידים פעילים בלבד</option>
+            <option value="inactive">הצג תפקידים לא פעילים בלבד</option>
+            <option value="all">הצג את כל התפקידים</option>
+          </select>
+
+          <div className="search-wrapper">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="🔍  חיפוש תפקיד לפי שם ..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button
+                className="clear-search"
+                onClick={() => setSearchTerm("")}
+                aria-label="נקה חיפוש"
+              >
+                ❌
+              </button>
+            )}
+          </div>
         </div>
         <table>
           <thead>

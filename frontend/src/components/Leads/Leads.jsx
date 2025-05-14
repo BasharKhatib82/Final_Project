@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import Button from "../Buttons/Button";
 
 const Leads = () => {
   const [leads, setLeads] = useState([]);
@@ -22,13 +23,11 @@ const Leads = () => {
   };
 
   return (
-    <div className="container">
+    <div className="main mt2rem">
       <div className="main">
-        <h3 className="title">רשימת פניות</h3>
-        <div className="add-wrapper">
-          <Link to="/dashboard/add_lead" className="btn-add-dash">
-            הוספת פנייה חדשה
-          </Link>
+        <h2 className="text-center font-blue fontXL mp2rem">רשימת פניות</h2>
+        <div className="filters-container">
+          <Button linkTo="/dashboard/add_lead" label="הוספת פנייה חדשה" />
         </div>
         <table>
           <thead>
