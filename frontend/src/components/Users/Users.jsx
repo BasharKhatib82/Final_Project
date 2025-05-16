@@ -150,7 +150,11 @@ const Users = () => {
             {allUsers
               .filter((user) => {
                 const term = searchTerm.toLowerCase();
-                const nameMatch = user.role_name.toLowerCase().includes(term);
+                const nameMatch = roles
+                  .find((r) => r.role_id === user.role_id)
+                  ?.role_name.toLowerCase()
+                  .includes(term);
+
                 const statusText = user.is_active ? "פעיל" : "לא פעיל";
                 const statusMatch = statusText.includes(term);
 
