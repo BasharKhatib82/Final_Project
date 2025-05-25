@@ -1,0 +1,178 @@
+/* ✅ עיצוב כללי */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1.5rem;
+  gap: 1rem;
+}
+
+.pagination button {
+  background-color: #4e89ff;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+  background-color: #3a6cd6;
+}
+
+.pagination button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* טבלה */
+.log-table-container {
+  overflow-x: auto;
+  margin-top: 1rem;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.log-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.log-table thead {
+  background-color: #f0f0f0;
+}
+
+.log-table th,
+.log-table td {
+  text-align: center;
+  padding: 0.75rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.log-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* 🔍 חיפוש וסינון */
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 1rem;
+  direction: rtl;
+}
+
+.filters input[type="text"],
+.filters input[type="date"] {
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  min-width: 180px;
+  transition: border 0.3s, box-shadow 0.3s;
+}
+
+.filters input:focus {
+  border-color: #4e89ff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(78, 137, 255, 0.4);
+}
+
+/* 📤 Dropdown */
+.export-dropdown {
+  position: relative;
+}
+
+.export-dropdown > button {
+  padding: 0.5rem 1rem;
+  background-color: #4e89ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.export-menu {
+  position: absolute;
+  top: 110%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 0.5rem;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  min-width: 140px;
+}
+
+.export-menu button {
+  display: block;
+  width: 100%;
+  text-align: right;
+  padding: 0.5rem 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.export-menu button:hover {
+  background-color: #f0f0f0;
+}
+
+/* 📧 שליחת מייל */
+.send-mail-section {
+  display: flex;
+  gap: 1rem;
+  direction: rtl;
+}
+
+.send-mail-section input[type="email"] {
+  padding: 0.5rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  flex: 1;
+}
+
+.send-mail-section button {
+  padding: 0.5rem 1rem;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.send-mail-section button:hover {
+  background-color: #3e9444;
+}
+
+/* 📱 מובייל */
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters input {
+    width: 100%;
+  }
+
+  .send-mail-section {
+    flex-direction: column;
+  }
+
+  .send-mail-section input,
+  .send-mail-section button {
+    width: 100%;
+  }
+}

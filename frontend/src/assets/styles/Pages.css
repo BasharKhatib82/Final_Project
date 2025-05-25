@@ -1,0 +1,1089 @@
+/* ----------------------------------------------- */
+/* הגדרת פריסת עמוד */
+
+.container {
+  width: 1400px;
+  max-width: 100%;
+  margin: 0 auto;
+  height: 100%;
+}
+
+.main {
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+/* ----------------------------------------------- */
+/* CSS for header */
+
+.header {
+  width: 100%;
+  direction: ltr;
+  letter-spacing: 0.1rem;
+  background-color: #f5f5f5e1;
+}
+.navbar {
+  padding: 2rem 2rem;
+  direction: rtl;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 1400px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* ----------------------------------------------- */
+/* תפריט ראשי כפתורים ( קישורים ) */
+
+.navbar-links,
+.navbar-links-login-out {
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+}
+
+.active-link,
+.inactive-link {
+  padding: 0.8rem 2.5rem;
+  background-color: #0053b4;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.active-link {
+  background-color: #0054b4b9;
+}
+
+.inactive-link:hover,
+.active-link:hover {
+  transform: scale(1.02);
+}
+
+.active-link-logout {
+  background-color: #ff4d4d;
+}
+
+.inactive-link-logout:hover,
+.active-link-logout:hover {
+  transform: scale(1.02);
+}
+
+/* ----------------------------------------------- */
+/*  לוגו תפריט*/
+
+.logo {
+  height: 5rem;
+  transition: transform 0.3s ease;
+}
+.logo:hover {
+  transform: scale(1.1);
+}
+
+/* ----------------------------------------------- */
+/* עיצוב תוף דפים ציבוריים */
+
+.content {
+  text-align: center;
+  background-color: #ffffffdd;
+  border-radius: 7px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.description {
+  font-size: 2.5rem;
+  width: 70%;
+  color: #444;
+  margin: 0 auto;
+}
+
+/* רשימת תכונות */
+.features-list {
+  list-style: none;
+  margin: 0 auto;
+  text-align: right;
+  width: 70%;
+}
+
+.features-list li::before {
+  content: " ✔ ";
+  color: #4a91e2;
+}
+
+.features-list li {
+  background-color: #084fc917;
+  margin: 1rem 0;
+  padding: 1rem 1rem;
+  border-radius: 7px;
+  color: #000000;
+  font-size: 2rem;
+  font-weight: 500;
+  text-align: right;
+}
+
+/* סיסמת סיום */
+.slogan {
+  font-size: 3rem;
+  color: #0077cc;
+  font-style: italic;
+}
+
+/* ----------------------------------------------- */
+/* עיצוב חלון כינסת משתמש */
+
+.login {
+  height: 27rem;
+  width: 30rem;
+  max-width: 100%;
+  margin: 0 auto;
+  background: #ffffffc7;
+  padding: 2rem 2.5rem;
+  border-radius: 7px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.148);
+  text-align: right;
+}
+
+.label-login {
+  font-size: 1.6rem;
+  margin: 1rem;
+  line-height: 2.8rem;
+}
+.form-login {
+  width: 100%;
+  padding: 1.2rem;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  box-sizing: border-box;
+  font-size: 1.4rem;
+  transition: 0.3s ease;
+}
+
+/* הסרת חצים ב-Chrome, Safari, Edge */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* הסרת חצים ב-Firefox */
+input[type="number"] {
+  appearance: textfield;
+}
+
+/* עיצוב תיבות כתיב ברגע לחיצה */
+.form-login:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+.btn-login {
+  width: 100%;
+  padding: 1rem;
+  background-color: #0053b4;
+  color: white;
+  font-size: 1.8rem;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: 0.3s ease;
+  display: block; /* שיהיה בלוק */
+  margin-left: auto; /* מרכז מצד שמאל */
+  margin-right: auto; /* מרכז מצד ימין */
+  margin-top: 2.5rem;
+}
+
+.btn-login:hover {
+  background-color: #0054b4b9;
+}
+
+.massage-err {
+  color: rgb(222, 75, 1);
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+/* ------------------------------------------------------------------------------- */
+/* CSS for footer */
+
+.footer {
+  background-color: #f5f5f5e1;
+  color: #2c2b2c;
+  text-align: center;
+  padding: 1rem;
+  font-size: 1.5rem;
+}
+.footer p {
+  direction: ltr;
+  letter-spacing: 0.1rem;
+}
+
+/* ------------------------------------------------------------------------------- */
+/* Dashboard */
+
+.container-dashboard {
+  display: flex;
+  margin: auto;
+  height: 100%;
+  width: 100%;
+  background-color: #ffffffda;
+}
+
+.title-dashboard {
+  text-align: center;
+  background-color: #1f2937e7;
+  margin: 0;
+  padding: 1.5rem 0rem;
+  color: white;
+  width: 100%;
+}
+
+.main-dashboard {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+}
+
+/* ------------------------------------------------------------------------------- */
+/* Sidebar */
+.sidebar {
+  width: 13%;
+  background-color: #1f2937e7;
+  padding: 4rem;
+  color: white;
+  padding-top: 3rem;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-header {
+  text-align: center;
+  padding-bottom: 3rem;
+}
+
+.title-sidebar {
+  font-size: 3rem;
+  font-weight: bold;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-item {
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  text-decoration: none;
+  color: #f0f0f0;
+  font-size: 1.8rem;
+  padding: 1rem;
+  border-radius: 7px;
+  transition: background 0.3s, color 0.3s;
+}
+
+.sidebar-link:hover {
+  background-color: #374151;
+  color: #4a90e2;
+}
+
+.sidebar-item:active {
+  background-color: #374151;
+  color: #4a90e2;
+}
+
+.icon {
+  font-size: 20px;
+}
+
+.title-header {
+  font-size: 1.5rem;
+  border-radius: 7px;
+  color: #1f2937;
+  background-color: #2d4358c5;
+  padding: 1px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* -------------------------------------------22222222222222222222222222-------------------- */
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: rem;
+  margin: 2rem 0;
+}
+
+.card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  font-size: 1.4rem;
+  min-width: 220px;
+  text-align: center;
+  margin: 1rem;
+}
+.icon {
+  margin-left: 0.5rem;
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+/* עטיפת כפתור הוספה */
+
+/*  כפתור מעבר לדף הוספה */
+.btn-add-dash {
+  padding: 1rem 2rem;
+  background-color: #0053b4;
+  color: white;
+  font-size: 1.4rem;
+  border: none;
+  border-radius: 7px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-add-dash:hover {
+  background-color: #0054b4b9;
+}
+
+/* כפתור הוספה */
+.btn-add {
+  padding: 1rem 0rem;
+  background-color: #0053b4;
+  color: white;
+  font-size: 1.6rem;
+  border: none;
+  border-radius: 7px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 30%;
+  display: block;
+  margin: 0 auto;
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+}
+
+.btn-add:hover {
+  background-color: #0054b4b9;
+}
+
+/* ---------------------------------------------------------------------------------------------- */
+/* טבלה כללית */
+
+table {
+  table-layout: fixed;
+  margin-right: 2.5%;
+  width: 95%;
+  border-collapse: collapse;
+  background-color: white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.234);
+  overflow: hidden;
+  border-radius: 7px;
+}
+
+th,
+td {
+  border-bottom: 1px solid #eee;
+  text-align: center;
+  font-size: 1.4rem;
+  width: 8%;
+  padding: 1rem;
+}
+
+th {
+  background-color: #f3f4f6;
+  font-weight: bold;
+  padding: 1.5rem 0rem;
+  font-size: 1.5rem;
+}
+
+tr:hover {
+  background-color: #f9fafb;
+}
+
+/* TODO: כפתורי פעולה בטבלה */
+.btn-edit,
+.btn-delete {
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 0.3rem;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  color: white;
+}
+
+/* כפתור עריכה */
+.btn-edit {
+  background-color: #3b82f6;
+}
+.btn-edit:hover {
+  background-color: #2563eb;
+}
+
+/* כפתור מחיקה */
+.btn-delete {
+  background-color: #ef4444;
+}
+.btn-delete:hover {
+  background-color: #dc2626;
+}
+
+/* ------------------------------------------------------------------------------------ */
+/* עיצוב טופס עדכון תפקיד */
+/* עיטוף כללי של הטופס */
+
+.update-role-form {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  margin: 2rem auto;
+  width: 30%;
+  background-color: #f8f9fa;
+  padding: 2rem 4rem;
+  border-radius: 7px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease-in-out;
+}
+
+/* תוויות שדות */
+.update-role-form label {
+  display: block;
+  font-size: 1.4rem;
+  color: #2c371f;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+  margin-top: 1rem;
+  margin-right: 1rem;
+}
+
+/* שדות טקסט וקלטים */
+.update-role-form input,
+.update-role-form select {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1.2=3rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.update-role-form input:focus,
+.update-role-form select:focus {
+  border-color: #0053b4;
+  outline: none;
+}
+
+/* כפתור עדכון */
+.update-role-form .btn-update {
+  margin-top: 2rem;
+  background-color: #0053b4;
+  color: white;
+  padding: 1rem;
+  width: 100%;
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.update-role-form .btn-update:hover {
+  background-color: #003c8c;
+}
+
+/* 55555555555555555555555555555555555555555555555555 */
+/* עיצוב טופס הוספת משתמש */
+/* .form-group {
+  font-family: sans-serif;
+  margin-top: 1rem;
+  width: 30%;
+  margin: 0 auto;
+  background-color: #ff0000;
+  padding: 1.5rem;
+  border-radius: 7px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.form-group label {
+  display: block;
+  font-size: 1.6rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  color: #333333;
+}
+
+.form-add {
+  margin-top: 1rem;
+  width: 50%;
+  padding: 0.7rem;
+  border: 1px solid #ccc;
+  border-radius: 7px;
+  font-size: 1.6rem;
+  box-sizing: border-box;
+}
+
+input {
+  margin-top: 0.3rem;
+}
+
+textarea.form-add {
+  resize: vertical;
+} */
+
+.success-message {
+  max-width: 600px;
+  margin: 4rem auto;
+  padding: 2.5rem;
+  background-color: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  border-radius: 7px;
+  text-align: center;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.success-message h2 {
+  color: #2e7d32;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+.success-message p {
+  color: #4caf50;
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+.success-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.btn-back {
+  background-color: #0288d1;
+  color: white;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 7px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+}
+
+.btn-back:hover {
+  background-color: #0277bd;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  direction: rtl;
+}
+
+.popup-box {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 7px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  min-width: 300px;
+  max-width: 400px;
+  text-align: center;
+}
+
+.popup-box.success {
+  border-top: 6px solid #4a90e2;
+}
+
+.popup-box.error {
+  border-top: 6px solid #f44336;
+}
+
+.popup-box button {
+  margin-top: 1.5rem;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 7px;
+  background-color: #4a90e2;
+  color: white;
+  cursor: pointer;
+}
+
+.popup-box button:hover {
+  background-color: #357ab8;
+}
+
+.popup-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.popup-buttons button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.popup-box.confirm {
+  border-top: 6px solid #fbc02d;
+}
+
+/* ----------------------------------------------- */
+/* ! הגדרות כלליות  */
+
+.h100 {
+  height: 100%;
+}
+.w100 {
+  width: 100%;
+}
+.rad7px {
+  border-radius: 7px;
+}
+.fontXS {
+  font-size: 0.1rem;
+}
+.fontS {
+  font-size: 1.4rem;
+}
+.fontSM {
+  font-size: 1.6rem;
+}
+.fontM {
+  font-size: 1.8rem;
+}
+.fontL {
+  font-size: 2.4rem;
+}
+.fontXL {
+  font-size: 3.4rem;
+}
+.fontBtnMenu {
+  font-size: 1.6rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+.fontBtnDash {
+  font-size: 1.4rem;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+/* font */
+.font-red {
+  color: rgba(255, 0, 0, 0.879);
+}
+
+.font-blue {
+  color: #0053b4;
+}
+
+.font-gray {
+  color: rgb(177, 177, 177);
+}
+
+.text-center {
+  text-align: center;
+}
+.item-center {
+  align-items: center;
+}
+.jc-sp {
+  justify-content: space-between;
+}
+.jc-c {
+  justify-content: center;
+}
+.jc-s {
+  justify-content: start;
+}
+.df {
+  display: flex;
+}
+.bg-red {
+  background-color: red;
+}
+.h100 {
+  height: 100%;
+}
+.w100pers {
+  width: 100%;
+}
+
+FilterBarRTL {
+  width: 500px;
+  font-size: 2rem;
+}
+
+.w30pers {
+  width: 30%;
+}
+.h90pers {
+  height: 90%;
+}
+.df-fdc-jcsb {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.df-fdc-jcsa {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+}
+.df-fdr-jcsa {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+.mt1rem {
+  margin-top: 1rem;
+}
+.mt2rem {
+  margin-top: 2rem;
+}
+.mt3rem {
+  margin-top: 3rem;
+}
+.mt4rem {
+  margin-top: 5rem;
+}
+.mt5rem {
+  margin-top: 5rem;
+}
+.mp1rem {
+  margin-bottom: 1rem;
+}
+.mp2rem {
+  margin-bottom: 2rem;
+}
+.mp3rem {
+  margin-bottom: 3rem;
+}
+.pt1rem {
+  padding-top: 1rem;
+}
+.pt2rem {
+  padding-top: 2rem;
+}
+.pt3rem {
+  padding-top: 3rem;
+}
+.pt4rem {
+  padding-top: 4rem;
+}
+.pt5rem {
+  padding-top: 5rem;
+}
+.pp1rem {
+  padding-bottom: 1rem;
+}
+.pp2rem {
+  padding-bottom: 2rem;
+}
+.pp3rem {
+  padding-bottom: 3rem;
+}
+
+.pr5rem {
+  padding-right: 5rem;
+}
+
+.col5per {
+  width: 5%;
+}
+.col10per {
+  width: 10%;
+}
+.col15per {
+  width: 15%;
+}
+.col20per {
+  width: 20%;
+}
+.col25per {
+  width: 25%;
+}
+.col30per {
+  width: 30%;
+}
+.col40per {
+  width: 40%;
+}
+.col50per {
+  width: 50%;
+}
+.col90per {
+  width: 90%;
+}
+.col-center {
+  text-align: center;
+}
+.status-yes {
+  color: green;
+  font-weight: bold;
+  text-align: center;
+}
+
+.status-no {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+}
+.f-c-b-gray {
+  background-color: #f3f3f3a3;
+  color: #848484;
+}
+.btn-filter-dash {
+  padding: 1rem 2.5rem;
+  background-color: #1f2937e7;
+
+  color: white;
+  font-size: 1.6rem;
+  border: none;
+  border-radius: 7px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 5rem;
+}
+
+.btn-filter-dash:hover {
+  color: #fff200;
+}
+
+.color-yellow {
+  color: #ffb02e;
+}
+
+.color-red {
+  color: #e63946;
+}
+.color-green {
+  color: green;
+}
+
+.tooltip-wrapper {
+  position: relative;
+  display: inline-block;
+  font-size: 1.8rem;
+  margin-right: 0.6rem;
+  transition: transform 0.25s ease-in-out, color 0.25s ease-in-out;
+  cursor: help;
+}
+
+.custom-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 0.8rem 1.2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  transition: opacity 0.3s, transform 0.3s;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.tooltip-wrapper:hover .custom-tooltip {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(-50%) scale(1.1);
+  color: #fff8f8;
+  font-size: 1.2rem;
+}
+
+/* ------------------------------------------------------ */
+
+/* ------------------------------------------------------ */
+
+.user-info {
+  display: flex;
+  font-family: Assistant;
+  font-size: 1.4rem;
+  color: #ffffff;
+  padding: 0.8rem 2.5rem;
+  background-color: #0053b4;
+  border-radius: 7px;
+  text-decoration: none;
+  gap: 0.5rem;
+  align-content: center;
+  cursor: pointer;
+}
+
+.user-info:hover {
+  background-color: #0054b4b9;
+}
+
+.btn-logout {
+  padding: 0.8rem 2.5rem;
+  background-color: #0053b4;
+  color: white;
+  border: none;
+  border-radius: 7px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.btn-logout:hover {
+  background-color: #0054b4b9;
+}
+
+.left-menu {
+  display: flex;
+  gap: 2rem;
+}
+
+/* Unauthorized.css */
+.unauthorized-container {
+  text-align: center;
+  padding: 4rem 2rem;
+  background-color: #fff0f0;
+  color: #a30000;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  border-radius: 10px;
+  margin: 5rem auto;
+  max-width: 600px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.unauthorized-title {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #d40000;
+}
+
+.unauthorized-message {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  color: #555;
+}
+
+.unauthorized-btn {
+  background-color: #d40000;
+  color: #fff;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.unauthorized-btn:hover {
+  background-color: #a80000;
+}
+
+/* OK : עיצוב תיבת חיפוש תפקיד לפי שם  */
+
+.filters-container {
+  padding-right: 2.5%;
+  max-width: 95%;
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap; /* תומך ברספונסיביות */
+  direction: rtl;
+  justify-content: space-between;
+}
+
+.status-select,
+.search-input {
+  color: gray;
+  padding: 1rem 2rem;
+  font-size: 1.5rem;
+  border-radius: 7px;
+  border: none;
+  background-color: #ffffffb0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* גודל קבוע שמסתדר גם בשורות מתחלפות */
+.status-select {
+  min-width: 40%;
+  margin-left: 1rem;
+}
+.status-select:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+.status-select {
+  appearance: none; /* מסיר את החץ המובנה */
+  -webkit-appearance: none; /* לתמיכה בדפדפנים ישנים */
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23999' height='18' viewBox='0 0 24 24' width='18' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: left 0.8rem center;
+  background-size: 2rem;
+  padding-left: 2.5rem; /* פינוי מקום לאייקון */
+}
+.search-wrapper {
+  position: relative;
+  min-width: 40%;
+}
+
+.search-input {
+  min-width: 92.5%;
+}
+
+.search-input:focus {
+  border-color: #4a90e2;
+  outline: none;
+  box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+}
+
+.clear-search {
+  position: absolute;
+  left: 0.5rem;
+  top: 45%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #999;
+  transition: color 0.2s;
+}
+
+.clear-search:hover {
+  color: #f44336;
+}

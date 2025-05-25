@@ -1,0 +1,28 @@
+:root {
+  font-size: 62.5%;
+}
+
+h1, h2, h3, h4, h5, h6, p {
+    margin: 0;
+    padding: 0;
+}
+#root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+html,
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  direction: rtl;
+  font-family: sans-serif;
+  background-image: url("./assets/img/MainBg.jpg");
+  background-position: 0%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
