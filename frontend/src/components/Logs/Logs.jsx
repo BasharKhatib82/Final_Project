@@ -13,7 +13,7 @@ const Logs = () => {
   const [email, setEmail] = useState("");
   const [showExportMenu, setShowExportMenu] = useState(false);
   const exportRef = useRef();
-  const limit = 12;
+  const limit = 14;
   const totalPages = Math.ceil(total / limit);
   const today = new Date().toISOString().split("T")[0];
 
@@ -153,55 +153,54 @@ const Logs = () => {
   };
 
   return (
-    <div className="container">
-      <div className="main">
-        <h3 className="title">יומן פעולות - תיעוד מערכת</h3>
+    <div className="main-dash mt2rem">
+      <h2 className="text-center font-blue fontXL mp2rem">
+        יומן פעולות - תיעוד מערכת
+      </h2>
 
-        {/* 🔍 חיפוש וסינון + Dropdown */}
-        <div className="filters df-fdr-gap">
-          <input
-            type="text"
-            placeholder="חפש לפי מזהה, שם או פעולה"
-            value={searchTerm}
-            onChange={(e) => {
-              setPage(1);
-              setSearchTerm(e.target.value);
-            }}
-          />
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => {
-              setPage(1);
-              setStartDate(e.target.value);
-            }}
-            max={today}
-          />
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => {
-              setPage(1);
-              setEndDate(e.target.value);
-            }}
-            max={today}
-          />
+      {/* 🔍 חיפוש וסינון + Dropdown */}
+      <div className="filters df-fdr-gap">
+        <input
+          type="text"
+          placeholder="חפש לפי מזהה, שם או פעולה"
+          value={searchTerm}
+          onChange={(e) => {
+            setPage(1);
+            setSearchTerm(e.target.value);
+          }}
+        />
+        <input
+          type="date"
+          value={startDate}
+          onChange={(e) => {
+            setPage(1);
+            setStartDate(e.target.value);
+          }}
+          max={today}
+        />
+        <input
+          type="date"
+          value={endDate}
+          onChange={(e) => {
+            setPage(1);
+            setEndDate(e.target.value);
+          }}
+          max={today}
+        />
 
-          {/* 🔽 Dropdown ייצוא */}
-          <div className="export-dropdown" ref={exportRef}>
-            <button onClick={() => setShowExportMenu(!showExportMenu)}>
-              📤 ייצוא
-            </button>
-            {showExportMenu && (
-              <div className="export-menu">
-                <button onClick={() => exportLogs("excel")}>📥 Excel</button>
-                <button onClick={() => exportLogs("pdf")}>📄 PDF</button>
-                <button onClick={printFilteredLogs}>🖨️ הדפסה</button>
-              </div>
-            )}
-          </div>
+        {/* 🔽 Dropdown ייצוא */}
+        <div className="export-dropdown" ref={exportRef}>
+          <button onClick={() => setShowExportMenu(!showExportMenu)}>
+            📤 ייצוא
+          </button>
+          {showExportMenu && (
+            <div className="export-menu">
+              <button onClick={() => exportLogs("excel")}>📥 Excel</button>
+              <button onClick={() => exportLogs("pdf")}>📄 PDF</button>
+              <button onClick={printFilteredLogs}>🖨️ הדפסה</button>
+            </div>
+          )}
         </div>
-
         {/* 📧 שליחת מייל */}
         <div
           className="df-fdr-gap send-mail-section"
@@ -215,54 +214,51 @@ const Logs = () => {
           />
           <button onClick={sendLogsByEmail}>📤 שלח</button>
         </div>
+      </div>
 
-        {/* 🧾 טבלה */}
-        <div className="log-table-container">
-          <table className="log-table">
-            <thead>
-              <tr>
-                <th>מזהה</th>
-                <th>שם עובד</th>
-                <th>פעולה</th>
-                <th>תאריך ושעה</th>
+      {/* 🧾 טבלה */}
+      <div className="log-table-container">
+        <table className="log-table">
+          <thead>
+            <tr>
+              <th>מזהה</th>
+              <th>שם עובד</th>
+              <th>פעולה</th>
+              <th>תאריך ושעה</th>
+            </tr>
+          </thead>
+          <tbody>
+            {logs.map((log) => (
+              <tr key={log.log_id}>
+                <td>{log.log_id}</td>
+                <td>{log.user_name}</td>
+                <td>{log.action}</td>
+                <td>
+                  {new Date(log.timestamp).toLocaleString("he-IL", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {logs.map((log) => (
-                <tr key={log.log_id}>
-                  <td>{log.log_id}</td>
-                  <td>{log.user_name}</td>
-                  <td>{log.action}</td>
-                  <td>
-                    {new Date(log.timestamp).toLocaleString("he-IL", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-        {/* 🔁 פאגינציה */}
-        <div className="pagination fontS">
-          <button onClick={() => setPage(page - 1)} disabled={page === 1}>
-            ← הקודם
-          </button>
-          <span style={{ margin: "0 1rem" }}>
-            עמוד <strong>{page}</strong> מתוך <strong>{totalPages}</strong>
-          </span>
-          <button
-            onClick={() => setPage(page + 1)}
-            disabled={page >= totalPages}
-          >
-            הבא →
-          </button>
-        </div>
+      {/* 🔁 פאגינציה */}
+      <div className="pagination fontS">
+        <button onClick={() => setPage(page - 1)} disabled={page === 1}>
+          → הקודם
+        </button>
+        <span style={{ margin: "0 1rem" }}>
+          עמוד <strong>{page}</strong> מתוך <strong>{totalPages}</strong>
+        </span>
+        <button onClick={() => setPage(page + 1)} disabled={page >= totalPages}>
+          הבא ←
+        </button>
       </div>
     </div>
   );

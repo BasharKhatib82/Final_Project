@@ -30,9 +30,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // === שליפת עובדים פעילים (רק למנהל כללי) ===
-router.get("/users/active", verifyToken, (req, res) => {
-  if (req.user.role_id !== 1)
-    return res.status(403).json({ message: "אין הרשאות לצפייה" });
+router.get("/active", verifyToken, (req, res) => {
+  // if (req.user.role_id !== 1)
+  //   return res.status(403).json({ message: "אין הרשאות לצפייה" });
 
   const query = "SELECT * FROM users WHERE is_active = 1";
   connection.query(query, (err, results) => {
@@ -43,9 +43,9 @@ router.get("/users/active", verifyToken, (req, res) => {
 });
 
 // === שליפת עובדים לא פעילים (רק למנהל כללי) ===
-router.get("/users/inactive", verifyToken, (req, res) => {
-  if (req.user.role_id !== 1)
-    return res.status(403).json({ message: "אין הרשאות לצפייה" });
+router.get("/inactive", verifyToken, (req, res) => {
+  // if (req.user.role_id !== 1)
+  //   return res.status(403).json({ message: "אין הרשאות לצפייה" });
 
   const query = "SELECT * FROM users WHERE is_active = 0";
   connection.query(query, (err, results) => {

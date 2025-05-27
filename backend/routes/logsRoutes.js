@@ -12,7 +12,7 @@ const connection = dbSingleton.getConnection();
 // ✅ שליפת לוגים
 router.get("/", verifyToken, (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = 12;
+  const limit = 14;
   const offset = (page - 1) * limit;
   const search = req.query.search || "";
   const startDate = req.query.from;

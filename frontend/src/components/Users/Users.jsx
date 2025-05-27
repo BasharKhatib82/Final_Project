@@ -99,104 +99,102 @@ const Users = () => {
     );
   };
 
-  return (
-    <div>
-      <div className="main-dash mt2rem">
-        <h2 className="text-center font-blue fontXL mp2rem">רשימת משתמשים</h2>
-        <div className="filters-container">
-          <Button linkTo="/dashboard/add_user" label="הוספת משתמש חדש" />
-          <select
-            className="status-select"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="active">הצג משתמשים פעילים בלבד</option>
-            <option value="inactive">הצג משתמשים לא פעילים בלבד</option>
-            <option value="all">הצג את כל המשתמשים</option>
-          </select>
+  const filteredUsers = allUsers.filter((user) => {
+    const term = searchTerm.toLowerCase();
+    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
+    const statusText = user.is_active ? "פעיל" : "לא פעיל";
 
-          <div className="search-wrapper">
-            <input
-              type="text"
-              className="search-input"
-              placeholder="🔍  חיפוש משתמש לפי שם ..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {searchTerm && (
-              <button
-                className="clear-search"
-                onClick={() => setSearchTerm("")}
-                aria-label="נקה חיפוש"
-              >
-                ❌
-              </button>
-            )}
-          </div>
+    const statusCheck =
+      statusFilter === "all"
+        ? true
+        : statusFilter === "active"
+        ? user.is_active
+        : !user.is_active;
+
+    return (
+      statusCheck && (fullName.includes(term) || statusText.includes(term))
+    );
+  });
+
+  return (
+    <div className="main-dash mt2rem">
+      <h2 className="text-center font-blue fontXL mp2rem">רשימת משתמשים</h2>
+      <div className="filters-container">
+        <Button linkTo="/dashboard/add_user" label="הוספת משתמש חדש" />
+        <select
+          className="status-select"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="active">הצג משתמשים פעילים בלבד</option>
+          <option value="inactive">הצג משתמשים לא פעילים בלבד</option>
+          <option value="all">הצג את כל המשתמשים</option>
+        </select>
+
+        <div className="search-wrapper">
+          <input
+            type="text"
+            className="search-input"
+            placeholder="🔍  חיפוש משתמש לפי שם ..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          {searchTerm && (
+            <button
+              className="clear-search"
+              onClick={() => setSearchTerm("")}
+              aria-label="נקה חיפוש"
+            >
+              ❌
+            </button>
+          )}
         </div>
-        <table>
-          <thead>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>תעודת זהות</th>
+            <th>שם פרטי</th>
+            <th>שם משפחה</th>
+            <th>תפקיד</th>
+            <th>אימייל</th>
+            <th>סטטוס</th>
+            <th>פעולה</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredUsers.length === 0 ? (
             <tr>
-              <th className="col10per">תעודת זהות</th>
-              <th className="col10per">שם פרטי</th>
-              <th className="col10per">שם משפחה</th>
-              <th className="col10per">תפקיד</th>
-              <th className="col30per">אימייל</th>
-              <th className="col10per">סטטוס</th>
-              <th className="col20per">פעולה</th>
+              <td colSpan="7" className="text-center fontSM font-red">
+                אין עובדים להצגה
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {allUsers.length === 0 ? (
-              <tr>
-                <td colSpan="90" className="text-center fontSM font-red">
-                  אין עובדים להצגה
+          ) : (
+            filteredUsers.map((user) => (
+              <tr
+                key={user.user_id}
+                className={!user.is_active ? "f-c-b-gray" : ""}
+              >
+                <td>{user.user_id}</td>
+                <td>{user.first_name}</td>
+                <td>{user.last_name}</td>
+                <td>{getRoleName(user.role_id)}</td>
+                <td>{user.email}</td>
+                <td className={user.is_active ? "status-yes" : "status-no"}>
+                  {user.is_active ? "פעיל" : "לא פעיל"}
+                </td>
+                <td className="action-buttons">
+                  <button className="btn-edit fontBtnDash">עריכה</button>
+                  {user.is_active && (
+                    <button className="btn-delete fontBtnDash">מחיקה</button>
+                  )}
                 </td>
               </tr>
-            ) : (
-              allUsers
-                .filter((user) => {
-                  const term = searchTerm.toLowerCase();
-                  const nameMatch = user.role_name.toLowerCase().includes(term);
-                  const statusText = user.is_active ? "פעיל" : "לא פעיל";
-                  const statusMatch = statusText.includes(term);
-
-                  const statusCheck =
-                    statusFilter === "all"
-                      ? true
-                      : statusFilter === "active"
-                      ? user.is_active
-                      : !user.is_active;
-
-                  return statusCheck && (nameMatch || statusMatch);
-                })
-                .map((user) => (
-                  <tr
-                    key={user.user_id}
-                    className={!user.is_active ? "f-c-b-gray" : ""}
-                  >
-                    <td>{user.user_id}</td>
-                    <td>{user.first_name}</td>
-                    <td>{user.last_name}</td>
-                    <td>{getRoleName(user.role_id)}</td>
-                    <td>{user.email}</td>
-                    <td className={user.is_active ? "status-yes" : "status-no"}>
-                      {user.is_active ? "פעיל" : "לא פעיל"}
-                    </td>
-                    <td className="action-buttons">
-                      <button className="btn-edit fontBtnDash">עריכה</button>
-                      {user.is_active && (
-                        <button className="btn-delete fontBtnDash">
-                          מחיקה
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-            )}
-          </tbody>
-        </table>
-      </div>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 };

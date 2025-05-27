@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import Button from "../Buttons/Button";
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -22,13 +22,11 @@ const Tasks = () => {
   };
 
   return (
-    <div className="container">
+    <div className="main-dash mt2rem">
       <div className="main">
-        <h3 className="title">רשימת משימות</h3>
-        <div className="add-wrapper">
-          <Link to="/dashboard/add_task" className="btn-add-dash">
-            הוספת משימה חדשה
-          </Link>
+        <h2 className="text-center font-blue fontXL mp2rem">רשימת משימות</h2>
+        <div className="filters-container">
+          <Button linkTo="/dashboard/add_task" label="הוספת משימה חדשה" />
         </div>
         <table>
           <thead>
