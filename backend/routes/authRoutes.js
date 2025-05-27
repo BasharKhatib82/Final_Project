@@ -21,6 +21,7 @@ router.post("/login", async (req, res) => {
           return res
             .status(500)
             .json({ success: false, message: "שגיאה בשרת" });
+
         if (results.length === 0) {
           return res
             .status(401)
@@ -36,6 +37,7 @@ router.post("/login", async (req, res) => {
             .json({ success: false, message: "סיסמה שגויה" });
         }
 
+        // יצירת טוקן
         const token = jwt.sign(
           {
             user_id: user.user_id,
@@ -46,6 +48,7 @@ router.post("/login", async (req, res) => {
           { expiresIn: "1h" }
         );
 
+        // שמירת הטוקן
         res.cookie("token", token, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
@@ -53,14 +56,14 @@ router.post("/login", async (req, res) => {
           sameSite: "Lax",
         });
 
-        // 🧼 מחיקת טוקן קודם של המשתמש
+        // מחיקת טוקן קודם (אם יש)
         connection.query(
           "DELETE FROM active_tokens WHERE user_id = ?",
           [user.user_id],
           (delErr) => {
             if (delErr) console.error("שגיאה במחיקת טוקן קודם:", delErr);
 
-            // ✍️ הכנסת טוקן חדש
+            //  שמירת הטוקן החדש במסד הנתונים
             connection.query(
               "INSERT INTO active_tokens (token, user_id) VALUES (?, ?)",
               [token, user.user_id],
@@ -72,6 +75,10 @@ router.post("/login", async (req, res) => {
                     .json({ success: false, message: "שגיאה בשרת" });
                 }
 
+                // ✅ מפורש user_id רישום פעולה ליומן עם
+                logAction("התחברות למערכת", user.user_id)(req, res, () => {});
+
+                // תגובה ללקוח
                 res.json({
                   success: true,
                   user: {
@@ -103,6 +110,7 @@ router.get("/check", verifyToken, (req, res) => {
 // ✅ התנתקות
 router.post("/logout", (req, res) => {
   const token = req.cookies?.token;
+
   if (token) {
     connection.query(
       "DELETE FROM active_tokens WHERE token = ?",
@@ -113,6 +121,16 @@ router.post("/logout", (req, res) => {
         }
       }
     );
+
+    try {
+      // שליפת מזהה משתמש מהטוקן
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      if (decoded?.user_id) {
+        logAction("התנתקות מהמערכת", decoded.user_id)(req, res, () => {});
+      }
+    } catch (err) {
+      console.warn("שגיאה בפענוח טוקן בעת התנתקות:", err.message);
+    }
   }
 
   res.clearCookie("token");

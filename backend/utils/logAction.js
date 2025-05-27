@@ -1,9 +1,14 @@
 import dbSingleton from "./dbSingleton.js";
+const connection = dbSingleton.getConnection();
 
-function logAction(actionName) {
+/**
+ * רישום פעולה ליומן
+ * @param {string} actionName - שם הפעולה לתיעוד
+ * @param {number|null} UserId - מזהה משתמש ( אם לא סופק req.user לא חובה - יילקח מ   )
+ */
+function logAction(actionName, UserId = null) {
   return (req, res, next) => {
-    const userId = req.user?.user_id;
-    const connection = dbSingleton.getConnection();
+    const userId = UserId || req.user?.user_id;
 
     if (!userId || !actionName) {
       console.warn("logAction skipped – missing userId or actionName");
