@@ -139,8 +139,8 @@ const Home = () => {
           <tbody>
             {stats.logs_by_day.map((row, i) => (
               <tr key={i}>
-                <td>{row.date}</td>
-                <td>{row.total_logs}</td>
+                <td>{row.date.slice(0, 10)}</td>
+                <td>{row.total_logs}  תיעודים</td>
               </tr>
             ))}
           </tbody>

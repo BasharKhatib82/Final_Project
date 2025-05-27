@@ -7,7 +7,7 @@ const connection = dbSingleton.getConnection();
 const router = express.Router();
 
 // ✅ הוספת תפקיד חדש
-router.post("/", verifyToken, (req, res) => {
+router.post("/add", verifyToken, (req, res) => {
   const {
     role_name,
     can_manage_users = 0,
@@ -66,6 +66,8 @@ router.post("/", verifyToken, (req, res) => {
               .json({ Status: false, Error: "שגיאת שרת ביצירת תפקיד" });
           }
 
+          // ✅
+          logAction("הוספת תפקיד חדש")(req, res, () => {});
           res.status(201).json({ Status: true, Result: result });
         }
       );
@@ -73,17 +75,51 @@ router.post("/", verifyToken, (req, res) => {
   );
 });
 
+// ✅ שליפת תפקידים פעילים
+router.get(
+  "/active",
+  verifyToken,
+  logAction("צפייה בתפקידים פעילים"),
+  (req, res) => {
+    connection.query(
+      "SELECT * FROM roles_permissions WHERE active = 1",
+      (err, results) => {
+        if (err)
+          return res.status(500).json({ Status: false, Error: "שגיאת שליפה" });
+        res.status(200).json({ Status: true, Roles: results });
+      }
+    );
+  }
+);
+
+// ✅ שליפת תפקידים לא פעילים
+router.get(
+  "/inactive",
+  verifyToken,
+  logAction("צפייה בתפקידים לא פעילים"),
+  (req, res) => {
+    connection.query(
+      "SELECT * FROM roles_permissions WHERE active = 0",
+      (err, results) => {
+        if (err)
+          return res.status(500).json({ Status: false, Error: "שגיאת שליפה" });
+        res.status(200).json({ Status: true, Roles: results });
+      }
+    );
+  }
+);
+
 // ✅ שליפת כל התפקידים
-router.get("/", verifyToken, logAction("צפייה ברשימת תפקידים"), (req, res) => {
-  connection.query("SELECT * FROM roles_permissions", (err, results) => {
-    if (err)
-      return res.status(500).json({ Status: false, Error: "שגיאת שליפה" });
-    res.status(200).json({ Status: true, Roles: results });
-  });
-});
+// router.get("/", verifyToken, logAction("צפייה ברשימת תפקידים"), (req, res) => {
+//   connection.query("SELECT * FROM roles_permissions", (err, results) => {
+//     if (err)
+//       return res.status(500).json({ Status: false, Error: "שגיאת שליפה" });
+//     res.status(200).json({ Status: true, Roles: results });
+//   });
+// });
 
 // ✅ שליפת תפקיד לפי מזהה
-router.get("/:id", verifyToken, logAction("צפייה בפרטי תפקיד"), (req, res) => {
+router.get("/:id", verifyToken, (req, res) => {
   const roleId = req.params.id;
   connection.query(
     "SELECT * FROM roles_permissions WHERE role_id = ?",
@@ -95,7 +131,8 @@ router.get("/:id", verifyToken, logAction("צפייה בפרטי תפקיד"), (
           .json({ Status: false, Error: "שגיאת שליפה מהשרת" });
       if (results.length === 0)
         return res.status(404).json({ Status: false, Error: "תפקיד לא נמצא" });
-      res.status(200).json({ Status: true, Role: results[0] });
+      logAction("צפייה בפרטי תפקיד"),
+        res.status(200).json({ Status: true, Role: results[0] });
     }
   );
 });
@@ -150,7 +187,7 @@ router.put("/:id", verifyToken, (req, res) => {
           .json({ Status: false, Error: "תפקיד לא נמצא לעדכון" });
       }
 
-      logAction(`: עדכון תפקיד מס' ${role_id}`)(req, res, () => {});
+      logAction(`עדכון תפקיד מס : ${role_id}`)(req, res, () => {});
       res.status(200).json({ Status: true, Message: "עודכן בהצלחה" });
     }
   );
@@ -175,46 +212,12 @@ router.put("/delete/:id", verifyToken, (req, res) => {
           .json({ Status: false, Error: "תפקיד לא נמצא למחיקה" });
       }
 
-      logAction(`: מחיקת תפקיד מס' ${roleId}`)(req, res, () => {});
+      logAction(`מחיקת תפקיד מס : ${roleId}`)(req, res, () => {});
       res
         .status(200)
         .json({ Status: true, Message: "התפקיד הוסר בהצלחה (מחיקה לוגית)" });
     }
   );
 });
-
-// ✅ שליפת תפקידים פעילים
-router.get(
-  "/active",
-  verifyToken,
-  logAction("צפייה בתפקידים פעילים"),
-  (req, res) => {
-    connection.query(
-      "SELECT * FROM roles_permissions WHERE active = 1",
-      (err, results) => {
-        if (err)
-          return res.status(500).json({ Status: false, Error: "שגיאת שליפה" });
-        res.status(200).json({ Status: true, Roles: results });
-      }
-    );
-  }
-);
-
-// ✅ שליפת תפקידים לא פעילים
-router.get(
-  "/inactive",
-  verifyToken,
-  logAction("צפייה בתפקידים לא פעילים"),
-  (req, res) => {
-    connection.query(
-      "SELECT * FROM roles_permissions WHERE active = 0",
-      (err, results) => {
-        if (err)
-          return res.status(500).json({ Status: false, Error: "שגיאת שליפה" });
-        res.status(200).json({ Status: true, Roles: results });
-      }
-    );
-  }
-);
 
 export default router;

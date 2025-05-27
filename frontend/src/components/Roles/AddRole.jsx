@@ -27,7 +27,9 @@ const AddRole = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:8801/add_role", formData)
+      .post("http://localhost:8801/roles/add", formData, {
+        withCredentials: true,
+      })
       .then(() => {
         alert("🎉 תפקיד נוסף בהצלחה!");
         navigate("/dashboard/roles");

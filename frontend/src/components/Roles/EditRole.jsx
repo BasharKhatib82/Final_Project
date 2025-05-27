@@ -18,7 +18,7 @@ const UpdateRoleForm = () => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:8801/role/${id}`)
+      .get(`http://localhost:8801/roles/${id}`, { withCredentials: true })
       .then((res) => {
         setFormData(res.data.Role);
       })
@@ -36,7 +36,9 @@ const UpdateRoleForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .put(`http://localhost:8801/role/${id}`, formData)
+      .put(`http://localhost:8801/roles/${id}`, formData, {
+        withCredentials: true,
+      })
       .then(() => {
         alert("התפקיד עודכן בהצלחה");
         navigate("/dashboard/roles");
@@ -49,7 +51,7 @@ const UpdateRoleForm = () => {
 
   return (
     <form className="update-role-form" onSubmit={handleSubmit}>
-      <h2 className="title text-center fontL">עדכו פרטי תפקיד</h2>
+      <h2 className="title text-center fontL">עדכון פרטי תפקיד</h2>
       <label>שם תפקיד</label>
       <input
         type="text"
