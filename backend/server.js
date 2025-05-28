@@ -27,6 +27,7 @@ app.use("/leads", leadsRouter);
 app.use("/roles", rolesRoutes);
 app.use("/tasks", tasksRouter);
 app.use("/users", usersRoutes);
+app.use("/attendances", usersRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/logs", logsRoutes);
 

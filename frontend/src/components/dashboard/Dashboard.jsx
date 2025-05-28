@@ -47,7 +47,7 @@ function Dashboard() {
             </Link>
           </li>
           <li className="sidebar-item">
-            <Link className="sidebar-link" to="/dashboard/hours">
+            <Link className="sidebar-link" to="/dashboard/attendances">
               <FaClock className="icon" /> ניהול שעות עבודה
             </Link>
           </li>

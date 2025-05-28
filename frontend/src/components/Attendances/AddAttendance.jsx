@@ -2,16 +2,14 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const AddRole = () => {
+const AddAttendance = () => {
   const [formData, setFormData] = useState({
-    role_name: "",
-    can_manage_users: 0,
-    can_view_reports: 0,
-    can_assign_leads: 0,
-    can_edit_courses: 0,
-    can_manage_tasks: 0,
-    can_access_all_data: 0,
-    active: 0,
+    user_id: "",
+    date: 0,
+    check_in: 0,
+    check_out: 0,
+    status: 0,
+    notes: 0,
   });
 
   const navigate = useNavigate();
@@ -27,12 +25,12 @@ const AddRole = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     axios
-      .post("http://localhost:8801/roles/add", formData, {
+      .post("http://localhost:8801/attendances/add", formData, {
         withCredentials: true,
       })
       .then(() => {
-        alert("🎉 תפקיד נוסף בהצלחה!");
-        navigate("/dashboard/roles");
+        alert(" רישום נוסף בהצלחה!");
+        navigate("/dashboard/attendances");
       })
       .catch((err) => {
         console.error(err);
@@ -42,9 +40,9 @@ const AddRole = () => {
 
   return (
     <form className="update-role-form" onSubmit={handleSubmit}>
-      <h2 className="title text-center fontL">הוספת תפקיד חדש</h2>
+      <h2 className="title text-center fontL">הוספת רישום חדש</h2>
 
-      <label>שם תפקיד</label>
+      <label>בחירת עובד</label>
       <input
         type="text"
         name="role_name"
@@ -52,8 +50,7 @@ const AddRole = () => {
         onChange={handleChange}
         required
       />
-
-      <label>ניהול משתמשים</label>
+      <label>תאריך</label>
       <select
         name="can_manage_users"
         value={formData.can_manage_users}
@@ -63,7 +60,7 @@ const AddRole = () => {
         <option value="0">✗ לא</option>
       </select>
 
-      <label>צפייה בדוחות</label>
+      <label>כניסה</label>
       <select
         name="can_view_reports"
         value={formData.can_view_reports}
@@ -73,7 +70,7 @@ const AddRole = () => {
         <option value="0">✗ לא</option>
       </select>
 
-      <label>שייך פניות</label>
+      <label>יציאה</label>
       <select
         name="can_assign_leads"
         value={formData.can_assign_leads}
@@ -83,7 +80,7 @@ const AddRole = () => {
         <option value="0">✗ לא</option>
       </select>
 
-      <label>עריכת קורסים</label>
+      <label>סטטוס</label>
       <select
         name="can_edit_courses"
         value={formData.can_edit_courses}
@@ -93,7 +90,7 @@ const AddRole = () => {
         <option value="0">✗ לא</option>
       </select>
 
-      <label>ניהול משימות</label>
+      <label>הערות</label>
       <select
         name="can_manage_tasks"
         value={formData.can_manage_tasks}
@@ -102,22 +99,14 @@ const AddRole = () => {
         <option value="1">✓ כן</option>
         <option value="0">✗ לא</option>
       </select>
-
-      <label>גישה לכל הנתונים</label>
-      <select
-        name="can_access_all_data"
-        value={formData.can_access_all_data}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
-
       <button className="btn-update " type="submit">
-        הוסף תפקיד
+        שמור
+      </button>
+      <button className="btn-update " type="submit">
+        ביטול
       </button>
     </form>
   );
 };
 
-export default AddRole;
+export default AddAttendance;
