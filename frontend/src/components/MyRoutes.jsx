@@ -4,8 +4,8 @@ import About from "./Pages/About";
 import Contact from "./Pages/Contact";
 import Header from "./Pages/Header";
 import Login from "./Pages/Login";
-import Dashboard from "./dashboard/Dashboard";
-import Home from "./dashboard/Home";
+import Dashboard from "./Dashboard/Dashboard";
+import Home from "./Dashboard/Home"
 import Roles from "./Roles/Roles";
 import AddRole from "./Roles/AddRole";
 import EditRole from "./Roles/EditRole";
@@ -37,7 +37,7 @@ function MyRoutes() {
           <Route path="/contact" element={<Contact />}></Route>
           <Route path="/userlogin" element={<Login />}></Route>
           <Route path="/dashboard" element={<Dashboard />}>
-            <Route path="" element={<Home />}></Route>
+            <Route path="/" element={<Home />}></Route>
             <Route path="/dashboard/roles" element={<Roles />}></Route>
             <Route path="/dashboard/add_role" element={<AddRole />}></Route>
             <Route

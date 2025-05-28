@@ -5,6 +5,7 @@ import multer from "multer";
 import dbSingleton from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import verifyToken from "../utils/verifyToken.js";
+import bcrypt from "bcrypt";
 
 const connection = dbSingleton.getConnection();
 const router = express.Router();
@@ -28,6 +29,43 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+//  הוספת משתמש חדש למערכת
+router.post("/add", verifyToken, (req, res) => {
+  const sql = `
+    INSERT INTO users 
+    (user_id, first_name, last_name, phone_number, email, role_id, password, last_password_change, notes, is_active) 
+    VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+  `;
+
+  bcrypt.hash(req.body.password, 10, (err, hash) => {
+    if (err) {
+      console.error("Hashing error:", err);
+      return res.json({ Status: false, Error: "Hashing Error" });
+    }
+
+    const values = [
+      req.body.user_id,
+      req.body.first_name,
+      req.body.last_name,
+      req.body.phone_number,
+      req.body.email,
+      req.body.role_id,
+      hash,
+      req.body.notes,
+      1, // קובע את סטטוס המשתמש כברירת מחדל ל"פעיל" שזה 1
+    ];
+
+    connection.query(sql, values, (err, result) => {
+      if (err) {
+        console.error("שגיאה בהוספת משתמש:", err.message);
+        return res.json({ Status: false, Error: "שגיאה בהוספת המשתמש למערכת" });
+      }
+      logAction("הוספת משתמש חדש", req.user?.user_id)(req, res, () => {});
+      return res.json({ Status: true, Result: result });
+    });
+  });
+});
 
 // === שליפת עובדים פעילים (רק למנהל כללי) ===
 router.get("/active", verifyToken, (req, res) => {

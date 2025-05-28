@@ -25,7 +25,7 @@ const AddUser = () => {
 
   const fetchRoles = () => {
     axios
-      .get("http://localhost:8801/active-roles", {
+      .get("http://localhost:8801/roles/active", {
         withCredentials: true,
         params: { t: new Date().getTime() }, // למניעת cache
       })
@@ -62,7 +62,7 @@ const AddUser = () => {
     }
 
     axios
-      .post("http://localhost:8801/add_user", user, { withCredentials: true })
+      .post("http://localhost:8801/users/add", user, { withCredentials: true })
       .then((res) => {
         if (res.data.Status) {
           navigate("/dashboard/add_user/success");
