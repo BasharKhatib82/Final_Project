@@ -1,101 +1,22 @@
 import React from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import Sidebar from "./Sidebar";
 
-import { useUser } from "../../components/Tools/UserContext";
-import {
-  FaHome,
-  FaUserShield,
-  FaUsers,
-  FaClock,
-  FaPhone,
-  FaBook,
-  FaTasks,
-  FaHistory,
-  FaCog,
-  FaSignOutAlt,
-} from "react-icons/fa";
-
-function Dashboard() {
-  const { user, logout } = useUser();
-  const handleLogout = () => {
-    logout();
-  };
-
+const Dashboard = () => {
   return (
-    <div className="container-dashboard">
-      {/* תפריט צד */}
-      <div className="sidebar">
-        <div className="sidebar-header">
-          <span className="title-sidebar">לוח בקרה</span>
-        </div>
-        <ul className="sidebar-menu">
-          <li className="sidebar-item">
-            <Link className="sidebar-link" to="/dashboard">
-              <FaHome className="icon" /> לוח בקרה
-            </Link>
-          </li>
-          <li className="sidebar-item">
-            {user?.role_id === 1 && (
-              <Link className="sidebar-link" to="/dashboard/roles">
-                <FaUserShield className="icon" /> ניהול תפקידים
-              </Link>
-            )}
-          </li>
-          <li className="sidebar-item">
-            <Link className="sidebar-link" to="/dashboard/users">
-              <FaUsers className="icon" /> ניהול עובדים
-            </Link>
-          </li>
-          <li className="sidebar-item">
-            <Link className="sidebar-link" to="/dashboard/attendances">
-              <FaClock className="icon" /> ניהול שעות עבודה
-            </Link>
-          </li>
-          <li className="sidebar-item">
-            <Link className="sidebar-link" to="/dashboard/leads">
-              <FaPhone className="icon" /> ניהול פניות
-            </Link>
-          </li>
-          <li className="sidebar-item">
-            <Link className="sidebar-link" to="/dashboard/courses">
-              <FaBook className="icon" /> ניהול קורסים
-            </Link>
-          </li>
-          <li className="sidebar-item">
-            <Link className="sidebar-link" to="/dashboard/tasks">
-              <FaTasks className="icon" /> ניהול משימות
-            </Link>
-          </li>
-          <li className="sidebar-item">
-            <Link className="sidebar-link" to="/dashboard/logs">
-              <FaHistory className="icon" /> לוג פעילות
-            </Link>
-          </li>
-          <li className="sidebar-item">
-            <Link className="sidebar-link" to="/dashboard/profile">
-              <FaCog className="icon" /> הגדרות חשבון
-            </Link>
-          </li>
-          <li className="sidebar-item">
-            <Link
-              className="sidebar-link"
-              onClick={handleLogout}
-              to="/userlogin"
-            >
-              <FaSignOutAlt className="icon" /> יציאה
-            </Link>
-          </li>
-        </ul>
-      </div>
-
-      {/* תוכן ראשי */}
-      <div className="main-dashboard">
-        <h1 className="title-dashboard fontXL">מכללת Links להכשרה מקצועית</h1>
-
+    <div className="flex min-h-[calc(100vh-124px)]">
+      {" "}
+      {/* נניח שההדר גובהו 80px */}
+      {/* Sidebar בצד */}
+      <aside className=" bg-gray-800 text-white min-h-full">
+        <Sidebar />
+      </aside>
+      {/* אזור התוכן */}
+      <main className="flex-grow bg-white/80 p-4">
         <Outlet />
-      </div>
+      </main>
     </div>
   );
-}
+};
 
 export default Dashboard;

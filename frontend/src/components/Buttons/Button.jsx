@@ -9,9 +9,12 @@ const Button = ({ linkTo, label, icon = null }) => {
   };
 
   return (
-    <button className="btn-add-dash fontBtnDash" onClick={handleClick}>
-      {icon && <span className="btn-icon">{icon}</span>}
-      {label}
+    <button
+      onClick={handleClick}
+      className="font-rubik flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white text-base rounded shadow hover:bg-blue-700 hover:scale-95 transition duration-300"
+    >
+      {icon && <span className="text-lg">{icon}</span>}
+      <span>{label}</span>
     </button>
   );
 };

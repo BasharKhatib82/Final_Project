@@ -1,3 +1,5 @@
+// רכיב Users.jsx מעוצב בהתאם לעיצוב של Roles.jsx
+
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -83,16 +85,13 @@ const Users = () => {
 
   const getRoleName = (roleId) => {
     const role = roles.find((r) => r.role_id === roleId);
-    if (!role) {
-      return <span className="role-name role-unknown">לא ידוע</span>;
-    }
-
+    if (!role) return <span className="text-gray-500">לא ידוע</span>;
     return (
-      <span className="role-name">
+      <span>
         {role.role_name}
         {!role.active && (
           <Tooltip message="תפקיד זה לא פעיל יותר – נא לעדכן תפקיד">
-            <span className="color-yellow">⚠</span>
+            <span className="text-yellow-500"> ⚠ </span>
           </Tooltip>
         )}
       </span>
@@ -103,98 +102,116 @@ const Users = () => {
     const term = searchTerm.toLowerCase();
     const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
     const statusText = user.is_active ? "פעיל" : "לא פעיל";
-
     const statusCheck =
       statusFilter === "all"
         ? true
         : statusFilter === "active"
         ? user.is_active
         : !user.is_active;
-
     return (
       statusCheck && (fullName.includes(term) || statusText.includes(term))
     );
   });
 
   return (
-    <div className="main-dash mt2rem">
-      <h2 className="text-center font-blue fontXL mp2rem">רשימת משתמשים</h2>
-      <div className="filters-container">
+    <div className="p-6 text-right">
+      <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
+        רשימת משתמשים
+      </h2>
+
+      <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-2">
         <Button linkTo="/dashboard/add_user" label="הוספת משתמש חדש" />
+
         <select
-          className="status-select"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
+          className="font-rubik border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
         >
-          <option value="active">הצג משתמשים פעילים בלבד</option>
-          <option value="inactive">הצג משתמשים לא פעילים בלבד</option>
-          <option value="all">הצג את כל המשתמשים</option>
+          <option value="active">משתמשים פעילים</option>
+          <option value="inactive">משתמשים לא פעילים</option>
+          <option value="all">הכל</option>
         </select>
 
-        <div className="search-wrapper">
+        <div className="relative">
           <input
             type="text"
-            className="search-input"
-            placeholder="🔍  חיפוש משתמש לפי שם ..."
+            placeholder="🔍 חיפוש לפי שם..."
+            className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           {searchTerm && (
             <button
-              className="clear-search"
               onClick={() => setSearchTerm("")}
-              aria-label="נקה חיפוש"
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 text-red-500"
             >
-              ❌
+              ✖
             </button>
           )}
         </div>
       </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>תעודת זהות</th>
-            <th>שם פרטי</th>
-            <th>שם משפחה</th>
-            <th>תפקיד</th>
-            <th>אימייל</th>
-            <th>סטטוס</th>
-            <th>פעולה</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredUsers.length === 0 ? (
-            <tr>
-              <td colSpan="7" className="text-center fontSM font-red">
-                אין עובדים להצגה
-              </td>
+      <div className="overflow-auto rounded-lg shadow-lg bg-white/85">
+        <table className="w-full table-auto border-collapse text-sm text-center">
+          <thead>
+            <tr className="text-center bg-slate-100 text-gray-800">
+              <th className="p-2 border">ת.ז</th>
+              <th className="p-2 border">שם פרטי</th>
+              <th className="p-2 border">שם משפחה</th>
+              <th className="p-2 border">תפקיד</th>
+              <th className="p-2 border">אימייל</th>
+              <th className="p-2 border">סטטוס</th>
+              <th className="p-2 border">פעולות</th>
             </tr>
-          ) : (
-            filteredUsers.map((user) => (
-              <tr
-                key={user.user_id}
-                className={!user.is_active ? "f-c-b-gray" : ""}
-              >
-                <td>{user.user_id}</td>
-                <td>{user.first_name}</td>
-                <td>{user.last_name}</td>
-                <td>{getRoleName(user.role_id)}</td>
-                <td>{user.email}</td>
-                <td className={user.is_active ? "status-yes" : "status-no"}>
-                  {user.is_active ? "פעיל" : "לא פעיל"}
-                </td>
-                <td className="action-buttons">
-                  <button className="btn-edit fontBtnDash">עריכה</button>
-                  {user.is_active && (
-                    <button className="btn-delete fontBtnDash">מחיקה</button>
-                  )}
+          </thead>
+          <tbody>
+            {filteredUsers.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="text-center text-red-500 p-4">
+                  אין משתמשים להצגה
                 </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+            ) : (
+              filteredUsers.map((user) => (
+                <tr
+                  key={user.user_id}
+                  className={`transition duration-200 hover:bg-blue-50 cursor-pointer ${
+                    !user.is_active ? "bg-gray-100" : ""
+                  }`}
+                >
+                  <td className="border p-2 text-center">{user.user_id}</td>
+                  <td className="border p-2">{user.first_name}</td>
+                  <td className="border p-2">{user.last_name}</td>
+                  <td className="border p-2">{getRoleName(user.role_id)}</td>
+                  <td className="border p-2">{user.email}</td>
+                  <td
+                    className={`border p-2 text-center font-semibold ${
+                      user.is_active ? "text-green-600" : "text-red-500"
+                    }`}
+                  >
+                    {user.is_active ? "פעיל" : "לא פעיל"}
+                  </td>
+                  <td className="border p-2 text-center">
+                    <button
+                      onClick={() =>
+                        navigate(`/dashboard/users/edit/${user.user_id}`)
+                      }
+                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+                    >
+                      עריכה
+                    </button>
+                    {user.is_active && (
+                      <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                        מחיקה
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

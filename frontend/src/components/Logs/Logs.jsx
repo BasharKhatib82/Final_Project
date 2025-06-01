@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { saveAs } from "file-saver";
-import "../../assets/styles/Logs.css";
 
 const Logs = () => {
   const [logs, setLogs] = useState([]);
@@ -27,7 +26,6 @@ const Logs = () => {
         setShowExportMenu(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -35,12 +33,7 @@ const Logs = () => {
   const fetchLogs = () => {
     axios
       .get("http://localhost:8801/logs", {
-        params: {
-          page,
-          search: searchTerm,
-          from: startDate,
-          to: endDate,
-        },
+        params: { page, search: searchTerm, from: startDate, to: endDate },
         withCredentials: true,
       })
       .then((res) => {
@@ -153,13 +146,13 @@ const Logs = () => {
   };
 
   return (
-    <div className="main-dash mt2rem">
-      <h2 className="text-center font-blue fontXL mp2rem">
+    <div className="flex flex-col  min-h-full font-rubik">
+      <h2 className="text-center text-2xl font-semibold text-blue-700 my-1.5">
         יומן פעולות - תיעוד מערכת
       </h2>
 
-      {/* 🔍 חיפוש וסינון + Dropdown */}
-      <div className="filters df-fdr-gap">
+      {/* 🔍 חיפוש, סינון וייצוא */}
+      <div className="flex flex-wrap gap-5 items-center justify-center mb-3">
         <input
           type="text"
           placeholder="חפש לפי מזהה, שם או פעולה"
@@ -168,6 +161,7 @@ const Logs = () => {
             setPage(1);
             setSearchTerm(e.target.value);
           }}
+          className="text-center border border-gray-300 rounded px-2 py-1 w-60"
         />
         <input
           type="date"
@@ -177,6 +171,7 @@ const Logs = () => {
             setStartDate(e.target.value);
           }}
           max={today}
+          className="text-xs border border-gray-300 rounded px-2 py-2"
         />
         <input
           type="date"
@@ -186,54 +181,77 @@ const Logs = () => {
             setEndDate(e.target.value);
           }}
           max={today}
+          className="text-xs border border-gray-300 rounded px-2 py-2"
         />
 
-        {/* 🔽 Dropdown ייצוא */}
-        <div className="export-dropdown" ref={exportRef}>
-          <button onClick={() => setShowExportMenu(!showExportMenu)}>
+        {/* 🔽 תפריט ייצוא */}
+        <div className="relative" ref={exportRef}>
+          <button
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-1.5 px-4 rounded"
+          >
             📤 ייצוא
           </button>
           {showExportMenu && (
-            <div className="export-menu">
-              <button onClick={() => exportLogs("excel")}>📥 Excel</button>
-              <button onClick={() => exportLogs("pdf")}>📄 PDF</button>
-              <button onClick={printFilteredLogs}>🖨️ הדפסה</button>
+            <div className="absolute z-10 bg-white border border-gray-300 rounded shadow mt-2 w-40 right-0 text-right">
+              <button
+                onClick={() => exportLogs("excel")}
+                className="block w-full px-4 py-1.5 hover:bg-gray-100"
+              >
+                📥 Excel
+              </button>
+              <button
+                onClick={() => exportLogs("pdf")}
+                className="block w-full px-4 py-1.5 hover:bg-gray-100"
+              >
+                📄 PDF
+              </button>
+              <button
+                onClick={printFilteredLogs}
+                className="block w-full px-4 py-1.5 hover:bg-gray-100"
+              >
+                🖨️ הדפסה
+              </button>
             </div>
           )}
         </div>
-        {/* 📧 שליחת מייל */}
-        <div
-          className="df-fdr-gap send-mail-section"
-          style={{ margin: "1rem 0" }}
-        >
-          <input
-            type="email"
-            placeholder="שלח למייל..."
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <button onClick={sendLogsByEmail}>📤 שלח</button>
-        </div>
       </div>
 
-      {/* 🧾 טבלה */}
-      <div className="log-table-container">
-        <table className="log-table">
-          <thead>
+      {/* 📧 שליחת לוגים למייל */}
+      <div className="flex items-center gap-3 justify-center mb-4 px-4">
+        <input
+          type="email"
+          placeholder="שלח למייל..."
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="border border-gray-300 rounded px-3 py-1.5 w-64"
+        />
+        <button
+          onClick={sendLogsByEmail}
+          className="bg-green-600 hover:bg-green-700 text-white font-normal py-1.5 px-4 rounded"
+        >
+          📤 שלח
+        </button>
+      </div>
+
+      {/* 🧾 טבלת לוגים */}
+      <div className="flex-grow overflow-auto px-4 text-center flex justify-center">
+        <table className="w-3/4 text-sm  bg-white border border-gray-200 shadow-md rounded">
+          <thead className="bg-gray-100">
             <tr>
-              <th>מזהה</th>
-              <th>שם עובד</th>
-              <th>פעולה</th>
-              <th>תאריך ושעה</th>
+              <th className="p-2 border-b">מזהה</th>
+              <th className="p-2 border-b">שם עובד</th>
+              <th className="p-2 border-b">פעולה</th>
+              <th className="p-2 border-b">תאריך ושעה</th>
             </tr>
           </thead>
           <tbody>
             {logs.map((log) => (
-              <tr key={log.log_id}>
-                <td>{log.log_id}</td>
-                <td>{log.user_name}</td>
-                <td>{log.action}</td>
-                <td>
+              <tr key={log.log_id} className="hover:bg-gray-50">
+                <td className="p-2 border-b">{log.log_id}</td>
+                <td className="p-2 border-b">{log.user_name}</td>
+                <td className="p-2 border-b">{log.action}</td>
+                <td className="p-2 border-b">
                   {new Date(log.timestamp).toLocaleString("he-IL", {
                     day: "2-digit",
                     month: "2-digit",
@@ -249,14 +267,22 @@ const Logs = () => {
       </div>
 
       {/* 🔁 פאגינציה */}
-      <div className="pagination fontS">
-        <button onClick={() => setPage(page - 1)} disabled={page === 1}>
+      <div className="flex justify-center items-center gap-4 my-3 text-sm">
+        <button
+          onClick={() => setPage(page - 1)}
+          disabled={page === 1}
+          className="bg-sky-600 text-white px-3 py-1 rounded disabled:opacity-50"
+        >
           → הקודם
         </button>
-        <span style={{ margin: "0 1rem" }}>
+        <span>
           עמוד <strong>{page}</strong> מתוך <strong>{totalPages}</strong>
         </span>
-        <button onClick={() => setPage(page + 1)} disabled={page >= totalPages}>
+        <button
+          onClick={() => setPage(page + 1)}
+          disabled={page >= totalPages}
+          className="bg-sky-600 text-white px-3 py-1 rounded disabled:opacity-40"
+        >
           הבא ←
         </button>
       </div>

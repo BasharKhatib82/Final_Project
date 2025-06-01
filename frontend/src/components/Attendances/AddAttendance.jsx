@@ -1,111 +1,169 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const AddAttendance = () => {
-  const [formData, setFormData] = useState({
+  const navigate = useNavigate();
+
+  const [users, setUsers] = useState([]);
+  const [form, setForm] = useState({
     user_id: "",
-    date: 0,
-    check_in: 0,
-    check_out: 0,
-    status: 0,
-    notes: 0,
+    date: "",
+    check_in: "",
+    check_out: "",
+    status: "נוכח",
   });
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = () => {
+    axios
+      .get("http://localhost:8801/users/active", { withCredentials: true })
+      .then((res) => {
+        if (res.data.Status) {
+          setUsers(res.data.Result);
+        } else {
+          alert("שגיאה בטעינת עובדים");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("שגיאה בעת טעינת העובדים");
+      });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // בדיקת שדות חובה
+    const requiredFields = [
+      "user_id",
+      "date",
+      "check_in",
+      "check_out",
+      "status",
+    ];
+    for (let field of requiredFields) {
+      if (!form[field]) {
+        return alert(`שדה חובה חסר: ${field}`);
+      }
+    }
+
     axios
-      .post("http://localhost:8801/attendances/add", formData, {
+      .post("http://localhost:8801/attendances/add", form, {
         withCredentials: true,
       })
-      .then(() => {
-        alert(" רישום נוסף בהצלחה!");
-        navigate("/dashboard/attendances");
+      .then((res) => {
+        if (res.data.Status) {
+          navigate("/dashboard/attendances");
+        } else {
+          alert("שגיאה: " + res.data.Error);
+        }
       })
       .catch((err) => {
         console.error(err);
-        alert("אירעה שגיאה בהוספת התפקיד");
+        alert("אירעה שגיאה בשמירה");
       });
   };
 
   return (
-    <form className="update-role-form" onSubmit={handleSubmit}>
-      <h2 className="title text-center fontL">הוספת רישום חדש</h2>
+    <div className="max-w-xl mx-auto bg-white p-6 rounded-2xl shadow-md mt-8">
+      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+        הוספת רישום נוכחות
+      </h2>
 
-      <label>בחירת עובד</label>
-      <input
-        type="text"
-        name="role_name"
-        value={formData.role_name}
-        onChange={handleChange}
-        required
-      />
-      <label>תאריך</label>
-      <select
-        name="can_manage_users"
-        value={formData.can_manage_users}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-right text-sm font-medium text-gray-700 mb-1">
+            בחר עובד:
+          </label>
+          <select
+            name="user_id"
+            value={form.user_id}
+            onChange={handleChange}
+            className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="">-- בחר עובד --</option>
+            {users.map((user) => (
+              <option key={user.user_id} value={user.user_id}>
+                {user.first_name} {user.last_name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      <label>כניסה</label>
-      <select
-        name="can_view_reports"
-        value={formData.can_view_reports}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
+        <div>
+          <label className="block text-right text-sm font-medium text-gray-700 mb-1">
+            תאריך:
+          </label>
+          <input
+            type="date"
+            name="date"
+            value={form.date}
+            onChange={handleChange}
+            max={new Date().toISOString().split("T")[0]}
+            className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
 
-      <label>יציאה</label>
-      <select
-        name="can_assign_leads"
-        value={formData.can_assign_leads}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
+        <div>
+          <label className="block text-right text-sm font-medium text-gray-700 mb-1">
+            שעת כניסה:
+          </label>
+          <input
+            type="time"
+            name="check_in"
+            value={form.check_in}
+            onChange={handleChange}
+            className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
 
-      <label>סטטוס</label>
-      <select
-        name="can_edit_courses"
-        value={formData.can_edit_courses}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
+        <div>
+          <label className="block text-right text-sm font-medium text-gray-700 mb-1">
+            שעת יציאה:
+          </label>
+          <input
+            type="time"
+            name="check_out"
+            value={form.check_out}
+            onChange={handleChange}
+            className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
 
-      <label>הערות</label>
-      <select
-        name="can_manage_tasks"
-        value={formData.can_manage_tasks}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
-      <button className="btn-update " type="submit">
-        שמור
-      </button>
-      <button className="btn-update " type="submit">
-        ביטול
-      </button>
-    </form>
+        <div>
+          <label className="block text-right text-sm font-medium text-gray-700 mb-1">
+            סטטוס:
+          </label>
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            className="w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="נוכח">נוכח</option>
+            <option value="חופשה">חופשה</option>
+            <option value="מחלה">מחלה</option>
+            <option value="היעדרות">היעדרות</option>
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md transition duration-200"
+        >
+          שמור רישום
+        </button>
+      </form>
+    </div>
   );
 };
 

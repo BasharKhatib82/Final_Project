@@ -11,7 +11,6 @@ const AddRole = () => {
     can_edit_courses: 0,
     can_manage_tasks: 0,
     can_access_all_data: 0,
-    active: 0,
   });
 
   const navigate = useNavigate();
@@ -41,82 +40,61 @@ const AddRole = () => {
   };
 
   return (
-    <form className="update-role-form" onSubmit={handleSubmit}>
-      <h2 className="title text-center fontL">הוספת תפקיד חדש</h2>
-
-      <label>שם תפקיד</label>
-      <input
-        type="text"
-        name="role_name"
-        value={formData.role_name}
-        onChange={handleChange}
-        required
-      />
-
-      <label>ניהול משתמשים</label>
-      <select
-        name="can_manage_users"
-        value={formData.can_manage_users}
-        onChange={handleChange}
+    <div className="flex justify-center items-center pt-10">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2"
       >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
+        <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
+          הוספת תפקיד חדש
+        </h2>
 
-      <label>צפייה בדוחות</label>
-      <select
-        name="can_view_reports"
-        value={formData.can_view_reports}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">
+            שם תפקיד
+          </label>
+          <input
+            type="text"
+            name="role_name"
+            value={formData.role_name}
+            onChange={handleChange}
+            required
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+        </div>
 
-      <label>שייך פניות</label>
-      <select
-        name="can_assign_leads"
-        value={formData.can_assign_leads}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
+        {[
+          { name: "can_manage_users", label: "ניהול משתמשים" },
+          { name: "can_view_reports", label: "צפייה בדוחות" },
+          { name: "can_assign_leads", label: "שייך פניות" },
+          { name: "can_edit_courses", label: "עריכת קורסים" },
+          { name: "can_manage_tasks", label: "ניהול משימות" },
+          { name: "can_access_all_data", label: "גישה לכל הנתונים" },
+        ].map((field) => (
+          <div key={field.name}>
+            <label className="font-rubik block mb-0.5 font-medium">
+              {field.label}
+            </label>
+            <select
+              name={field.name}
+              value={formData[field.name]}
+              onChange={handleChange}
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            >
+              <option value="1">✓ כן</option>
+              <option value="0">✗ לא</option>
+            </select>
+          </div>
+        ))}
 
-      <label>עריכת קורסים</label>
-      <select
-        name="can_edit_courses"
-        value={formData.can_edit_courses}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
-
-      <label>ניהול משימות</label>
-      <select
-        name="can_manage_tasks"
-        value={formData.can_manage_tasks}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
-
-      <label>גישה לכל הנתונים</label>
-      <select
-        name="can_access_all_data"
-        value={formData.can_access_all_data}
-        onChange={handleChange}
-      >
-        <option value="1">✓ כן</option>
-        <option value="0">✗ לא</option>
-      </select>
-
-      <button className="btn-update " type="submit">
-        הוסף תפקיד
-      </button>
-    </form>
+        <button
+          type="submit"
+          className="font-rubik w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200 font-medium"
+        >
+          הוסף תפקיד
+        </button>
+      </form>
+    </div>
   );
 };
 

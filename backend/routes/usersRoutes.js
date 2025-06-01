@@ -93,6 +93,57 @@ router.get("/inactive", verifyToken, (req, res) => {
   });
 });
 
+// עדכון משתמש לפי מזהה
+router.put("/edit/:id", (req, res) => {
+  const userId = req.params.id;
+  const {
+    first_name,
+    last_name,
+    phone_number,
+    email,
+    role_id,
+    notes,
+    is_active,
+  } = req.body;
+
+  if (!first_name || !last_name || !email || !role_id) {
+    return res
+      .status(400)
+      .json({ Status: false, Error: "Missing required fields" });
+  }
+
+  const updateQuery = `
+    UPDATE users SET
+    first_name = ?,
+    last_name = ?,
+    phone_number = ?,
+    email = ?,
+    role_id = ?,
+    notes = ?,
+    is_active = ?
+    WHERE user_id = ?
+  `;
+
+  const values = [
+    first_name,
+    last_name,
+    phone_number || null,
+    email,
+    role_id,
+    notes || null,
+    is_active,
+    userId,
+  ];
+
+  connection.query(updateQuery, values, (err, result) => {
+    if (err)
+      return res.status(500).json({ Status: false, Error: "Database Error" });
+    return res
+      .status(200)
+      .json({ Status: true, Message: "User updated successfully" });
+  });
+});
+
 // === שליפת פרטי עסק ===
 router.get("/business", verifyToken, (req, res) => {
   try {

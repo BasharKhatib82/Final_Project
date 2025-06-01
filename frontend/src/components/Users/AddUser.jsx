@@ -27,7 +27,7 @@ const AddUser = () => {
     axios
       .get("http://localhost:8801/roles/active", {
         withCredentials: true,
-        params: { t: new Date().getTime() }, // למניעת cache
+        params: { t: new Date().getTime() },
       })
       .then((res) => {
         if (res.data.Status && Array.isArray(res.data.Roles)) {
@@ -76,115 +76,131 @@ const AddUser = () => {
       });
   };
 
+  const handleUserIdChange = (e) => {
+    const numericValue = e.target.value.replace(/[^0-9]/g, "");
+    setUser({ ...user, user_id: numericValue });
+  };
+
   return (
-    <div className="update-role-form">
-      <div className="main">
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <h2 className="title text-center fontL">הוספת עובד חדש</h2>
+    <div className="flex justify-center items-center pt-10">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2"
+      >
+        <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
+          הוספת עובד חדש
+        </h2>
 
-            <label>
-              <strong>תעודת זהות:</strong>
-            </label>
-            <input
-              type="number"
-              name="user_id"
-              placeholder="הקלד תעודת זהות"
-              onChange={(e) => setUser({ ...user, user_id: e.target.value })}
-              className="form-add"
-            />
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">
+            תעודת זהות
+          </label>
+          <input
+            type="text"
+            inputMode="numeric"
+            name="user_id"
+            maxLength={9}
+            placeholder="הקלד תעודת זהות"
+            onChange={handleUserIdChange}
+            value={user.user_id}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+        </div>
 
-            <label>
-              <strong>שם פרטי:</strong>
-            </label>
-            <input
-              type="text"
-              name="first_name"
-              placeholder="הקלד שם פרטי"
-              onChange={(e) => setUser({ ...user, first_name: e.target.value })}
-              className="form-add"
-            />
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">שם פרטי</label>
+          <input
+            type="text"
+            name="first_name"
+            placeholder="הקלד שם פרטי"
+            onChange={(e) => setUser({ ...user, first_name: e.target.value })}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+        </div>
 
-            <label>
-              <strong>שם משפחה:</strong>
-            </label>
-            <input
-              type="text"
-              name="last_name"
-              placeholder="הקלד שם משפחה"
-              onChange={(e) => setUser({ ...user, last_name: e.target.value })}
-              className="form-add"
-            />
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">
+            שם משפחה
+          </label>
+          <input
+            type="text"
+            name="last_name"
+            placeholder="הקלד שם משפחה"
+            onChange={(e) => setUser({ ...user, last_name: e.target.value })}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+        </div>
 
-            <label>
-              <strong>מספר טלפון:</strong>
-            </label>
-            <input
-              type="text"
-              name="phone_number"
-              placeholder="הקלד מספר טלפון"
-              onChange={(e) =>
-                setUser({ ...user, phone_number: e.target.value })
-              }
-              className="form-add"
-            />
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">
+            מספר טלפון
+          </label>
+          <input
+            type="text"
+            name="phone_number"
+            placeholder="הקלד מספר טלפון"
+            onChange={(e) => setUser({ ...user, phone_number: e.target.value })}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+        </div>
 
-            <label>
-              <strong>אימייל:</strong>
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="הקלד דואר אלקטרוני"
-              onChange={(e) => setUser({ ...user, email: e.target.value })}
-              className="form-add"
-            />
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">אימייל</label>
+          <input
+            type="email"
+            name="email"
+            placeholder="הקלד דואר אלקטרוני"
+            onChange={(e) => setUser({ ...user, email: e.target.value })}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+        </div>
 
-            <label>
-              <strong>תפקיד:</strong>
-            </label>
-            <select
-              name="role_id"
-              className="form-add"
-              value={user.role_id}
-              onChange={(e) => setUser({ ...user, role_id: e.target.value })}
-            >
-              <option value="">בחר תפקיד</option>
-              {roles.map((role) => (
-                <option key={role.role_id} value={role.role_id}>
-                  {role.role_name}
-                </option>
-              ))}
-            </select>
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">תפקיד</label>
+          <select
+            name="role_id"
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            value={user.role_id}
+            onChange={(e) => setUser({ ...user, role_id: e.target.value })}
+          >
+            <option value="">בחר תפקיד</option>
+            {roles.map((role) => (
+              <option key={role.role_id} value={role.role_id}>
+                {role.role_name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-            <label>
-              <strong>סיסמה:</strong>
-            </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="הקלד סיסמה"
-              onChange={(e) => setUser({ ...user, password: e.target.value })}
-              className="form-add"
-            />
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">סיסמה</label>
+          <input
+            type="password"
+            name="password"
+            placeholder="הקלד סיסמה"
+            onChange={(e) => setUser({ ...user, password: e.target.value })}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+          />
+        </div>
 
-            <label>
-              <strong>הערות:</strong>
-            </label>
-            <textarea
-              name="notes"
-              placeholder="הוספת הערות..."
-              onChange={(e) => setUser({ ...user, notes: e.target.value })}
-              className="form-add w100 rad7px"
-              rows="2"
-            ></textarea>
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">הערות</label>
+          <textarea
+            name="notes"
+            placeholder="הוספת הערות..."
+            onChange={(e) => setUser({ ...user, notes: e.target.value })}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            rows="2"
+          ></textarea>
+        </div>
 
-            <button type="submit" className="btn-update">
-              הוסף עובד
-            </button>
-          </div>
-        </form>
-      </div>
+        <button
+          type="submit"
+          className="font-rubik w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200 font-medium"
+        >
+          הוסף עובד
+        </button>
+      </form>
     </div>
   );
 };
