@@ -161,7 +161,7 @@ const Logs = () => {
             setPage(1);
             setSearchTerm(e.target.value);
           }}
-          className="text-center border border-gray-300 rounded px-2 py-1 w-60"
+          className="text-sm text-center border border-gray-300 rounded px-2 py-1.5 w-60 focus:border-blue-400 focus:ring-slate focus:ring-blue-200 outline-none"
         />
         <input
           type="date"
@@ -171,7 +171,7 @@ const Logs = () => {
             setStartDate(e.target.value);
           }}
           max={today}
-          className="text-xs border border-gray-300 rounded px-2 py-2"
+          className="text-xs border border-gray-300 rounded px-2 py-2 focus:border-blue-400 focus:ring-slate focus:ring-blue-200 outline-none"
         />
         <input
           type="date"
@@ -181,7 +181,7 @@ const Logs = () => {
             setEndDate(e.target.value);
           }}
           max={today}
-          className="text-xs border border-gray-300 rounded px-2 py-2"
+          className="text-xs border border-gray-300 rounded px-2 py-2 focus:border-blue-400 focus:ring-slate focus:ring-blue-200 outline-none"
         />
 
         {/* 🔽 תפריט ייצוא */}
@@ -224,7 +224,7 @@ const Logs = () => {
           placeholder="שלח למייל..."
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-1.5 w-64"
+          className="border border-gray-300 rounded px-3 py-1.5 w-64 focus:border-blue-400 focus:ring-slate focus:ring-blue-200 outline-none"
         />
         <button
           onClick={sendLogsByEmail}

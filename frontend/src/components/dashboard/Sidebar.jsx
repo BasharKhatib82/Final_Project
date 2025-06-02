@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import Tooltip from "../Tools/Tooltip";
 import { useUser } from "../../components/Tools/UserContext";
 import { IoCloseSharp } from "react-icons/io5";
 import {
@@ -38,7 +39,7 @@ const Sidebar = () => {
     { label: "ניהול עובדים", to: "/dashboard/users", icon: <FaUsers /> },
     {
       label: "ניהול שעות עבודה",
-      to: "/dashboard/attendances",
+      to: "/dashboard/attendance",
       icon: <FaClock />,
     },
     { label: "ניהול פניות", to: "/dashboard/leads", icon: <FaPhone /> },
@@ -55,79 +56,67 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="overflow-hidden">
-      <div
-        className={` bg-gray-800 text-white transition-all duration-300 
-  ${isCollapsed ? "w-16" : "w-60"} overflow-y-auto overflow-hidden`}
-      >
-        {/* כותרת וכפתורי שליטה */}
-        <div className="flex justify-between items-center p-4">
-          <h2
-            className={`font-rubik text-xl font-medium transition-all duration-200 ${
-              isCollapsed ? "hidden" : "block"
-            }`}
-          >
-            לוח בקרה
-          </h2>
+    <div
+      className={`bg-gray-800 text-white transition-all duration-300
+        ${isCollapsed ? "w-16" : "w-60"} `}
+    >
+      {/* כותרת וכפתורי שליטה */}
+      <div className="flex justify-between items-center p-4 ">
+        <h2
+          className={`font-rubik text-xl font-medium transition-all duration-200  ${
+            isCollapsed ? "hidden" : "block"
+          }`}
+        >
+          לוח בקרה
+        </h2>
 
-          {/* כפתור כיווץ/פתיחה בדסקטופ */}
-          <button
-            className="hidden md:block text-white hover:bg-gray-700 p-2 rounded"
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            title={isCollapsed ? "פתח תפריט" : "כווץ תפריט"}
-          >
-            {isCollapsed ? <FaAngleDoubleLeft /> : <FaAngleDoubleRight />}
-          </button>
+        {/* כפתור כיווץ/פתיחה בדסקטופ */}
+        <button
+          className="hidden md:block text-white hover:bg-gray-700 p-2 rounded"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          title={isCollapsed ? "פתח תפריט" : "כווץ תפריט"}
+        >
+          {isCollapsed ? <FaAngleDoubleLeft /> : <FaAngleDoubleRight />}
+        </button>
 
-          {/* כפתור ☰ למובייל */}
-          <button
-            className="block md:hidden text-white"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <IoCloseSharp size={24} /> : <FaBars size={24} />}
-          </button>
-        </div>
-
-        {/* תפריט */}
-        <nav className="mt-4">
-          <ul className="space-y-1">
-            {navItems.map(
-              ({ label, to, icon, onClick, adminOnly }, index) =>
-                (!adminOnly || user?.role_id === 1) && (
-                  <li
-                    key={index}
-                    className="p-2 hover:bg-gray-700 cursor-pointer"
-                  >
-                    <Link
-                      to={to}
-                      onClick={onClick}
-                      className={`relative flex items-center gap-3 p-2 rounded-md group
-                        ${isOpen || !isCollapsed ? "flex" : "hidden"} md:flex`}
-                    >
-                      <span className="text-lg">{icon}</span>
-                      {!isCollapsed && <span className="text-sm">{label}</span>}
-
-                      {/* Tooltip כשמקווץ */}
-                      {isCollapsed && (
-                        <span
-                          className="absolute right-full top-1/2 -translate-y-1/2 mr-2
-                          bg-gray-700 text-white text-xs rounded-md py-1 px-3 shadow-lg
-                          opacity-0 group-hover:opacity-100 transition-opacity duration-200
-                          z-10 whitespace-nowrap
-                          after:content-[''] after:absolute after:top-1/2 after:left-full after:-translate-y-1/2
-                          after:border-8 after:border-transparent after:border-l-gray-900
-                        "
-                        >
-                          {label}
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                )
-            )}
-          </ul>
-        </nav>
+        {/* כפתור ☰ למובייל */}
+        <button
+          className="block md:hidden text-white "
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <IoCloseSharp size={24} /> : <FaBars size={24} />}
+        </button>
       </div>
+
+      {/* תפריט */}
+      <nav className="mt-4 ">
+        <ul className="space-y-1 ">
+          {navItems.map(
+            ({ label, to, icon, onClick, adminOnly }, index) =>
+              (!adminOnly || user?.role_id === 1) && (
+                <li key={index} className="p-2 cursor-pointer">
+                  <Link
+                    to={to}
+                    onClick={onClick}
+                    className="relative flex items-center justify-center md:justify-start gap-3 p-2 rounded-md group transition-all duration-200 "
+                  >
+                    {/* אייקון */}
+                    {isCollapsed ? (
+                      <Tooltip message={label}>
+                        <span className="text-lg">{icon}</span>
+                      </Tooltip>
+                    ) : (
+                      <>
+                        <span className="text-lg ">{icon}</span>
+                        <span className="text-sm  z-50">{label}</span>
+                      </>
+                    )}
+                  </Link>
+                </li>
+              )
+          )}
+        </ul>
+      </nav>
     </div>
   );
 };

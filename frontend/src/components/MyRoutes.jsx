@@ -17,9 +17,9 @@ import EditUser from "./Users/EditUser";
 
 import SuccessMessage from "./SuccessMessage";
 
-import Attendances from "./Attendances/Attendances";
-import AddAttendance from "./Attendances/AddAttendance";
-import EditAttendance from "./Attendances/EditAttendance";
+import Attendance from "./Attendance/Attendance";
+import AddAttendance from "./Attendance/AddAttendance";
+import EditAttendance from "./Attendance/EditAttendance";
 
 import Leads from "./Leads/Leads";
 import AddLead from "./Leads/AddLead";
@@ -38,7 +38,7 @@ import Footer from "./Pages/Footer";
 
 function MyRoutes() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col ">
       {/* Header - גובה קבוע, לא תופס מקום נוסף */}
       <header className="shrink-0">
         <Header />
@@ -60,9 +60,9 @@ function MyRoutes() {
             <Route path="add_user" element={<AddUser />} />
             <Route path="users/edit/:id" element={<EditUser />} />
             <Route path="add_user/success" element={<SuccessMessage />} />
-            <Route path="attendances" element={<Attendances />} />
-            <Route path="add_attendances" element={<AddAttendance />} />
-            <Route path="edit_attendances" element={<EditAttendance />} />
+            <Route path="attendance" element={<Attendance />} />
+            <Route path="add_attendance" element={<AddAttendance />} />
+            <Route path="edit_attendance/:id" element={<EditAttendance />} />
             <Route path="leads" element={<Leads />} />
             <Route path="add_lead" element={<AddLead />} />
             <Route path="courses" element={<Courses />} />

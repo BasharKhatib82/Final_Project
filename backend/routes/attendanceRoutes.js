@@ -1,84 +1,188 @@
 import express from "express";
 import dbSingleton from "../utils/dbSingleton.js";
-import logAction from "../utils/logAction.js";
 import verifyToken from "../utils/verifyToken.js";
 
+const router = express.Router();
+const connection = dbSingleton.getConnection();
 
-// ✅ הוספת תפקיד חדש
+// ✅ הוספת נוכחות
 router.post("/add", verifyToken, (req, res) => {
-  const {
-    role_name,
-    can_manage_users = 0,
-    can_view_reports = 0,
-    can_assign_leads = 0,
-    can_edit_courses = 0,
-    can_manage_tasks = 0,
-    can_access_all_data = 0,
-  } = req.body;
+  const { user_id, date, check_in, check_out, status, notes } = req.body;
 
-  if (!role_name || typeof role_name !== "string" || role_name.trim() === "") {
-    return res
-      .status(400)
-      .json({ Status: false, Error: "שם תפקיד חסר או לא תקין" });
+  if (!user_id || !date || !status) {
+    return res.json({ Status: false, Error: "נא למלא את כל שדות החובה" });
   }
 
-  connection.query(
-    "SELECT * FROM roles_permissions WHERE role_name = ?",
-    [role_name],
-    (checkErr, checkResult) => {
-      if (checkErr) {
-        return res
-          .status(500)
-          .json({ Status: false, Error: "שגיאה בבדיקת כפילות" });
-      }
+  const specialStatuses = ["חופשה", "מחלה", "היעדרות"];
+  const isSpecialStatus = specialStatuses.includes(status);
 
-      if (checkResult.length > 0) {
-        return res
-          .status(409)
-          .json({ Status: false, Error: "שם תפקיד כבר קיים" });
-      }
+  if (!isSpecialStatus && (!check_in || !check_out)) {
+    return res.json({ Status: false, Error: "יש להזין שעת כניסה ויציאה" });
+  }
 
-      const insertQuery = `
-        INSERT INTO roles_permissions (
-          role_name, can_manage_users, can_view_reports,
-          can_assign_leads, can_edit_courses, can_manage_tasks,
-          can_access_all_data
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+  const finalCheckIn = isSpecialStatus ? null : check_in;
+  const finalCheckOut = isSpecialStatus ? null : check_out;
 
-      connection.query(
-        insertQuery,
-        [
-          role_name,
-          can_manage_users,
-          can_view_reports,
-          can_assign_leads,
-          can_edit_courses,
-          can_manage_tasks,
-          can_access_all_data,
-        ],
-        (insertErr, result) => {
-          if (insertErr) {
-            console.error("שגיאת יצירת תפקיד:", insertErr);
-            return res
-              .status(500)
-              .json({ Status: false, Error: "שגיאת שרת ביצירת תפקיד" });
-          }
+  const checkSql = `SELECT * FROM attendance WHERE user_id = ? AND date = ?`;
 
-          // ✅
-          logAction("הוספת תפקיד חדש")(req, res, () => {});
-          res.status(201).json({ Status: true, Result: result });
+  connection.query(checkSql, [user_id, date], (err, result) => {
+    if (err) {
+      console.error("שגיאה בבדיקת נוכחות קיימת:", err);
+      return res.json({ Status: false, Error: "שגיאה בבדיקת נתונים" });
+    }
+
+    if (result.length > 0) {
+      return res.json({
+        Status: false,
+        Error: "כבר קיימת רשומת נוכחות לעובד זה בתאריך זה.",
+      });
+    }
+
+    const insertSql = `
+      INSERT INTO attendance (user_id, date, check_in, check_out, status, notes)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    connection.query(
+      insertSql,
+      [user_id, date, finalCheckIn, finalCheckOut, status, notes || null],
+      (err2) => {
+        if (err2) {
+          console.error("שגיאה בהוספת נוכחות:", err2);
+          return res.json({
+            Status: false,
+            Error: "שגיאה בשמירה למסד הנתונים",
+          });
         }
-      );
+
+        res.json({ Status: true, Message: "הנוכחות נוספה בהצלחה" });
+      }
+    );
+  });
+});
+
+// ✅ הצגת כל הנוכחויות
+router.get("/", verifyToken, (req, res) => {
+  const sql = `SELECT * FROM attendance ORDER BY date DESC`;
+  connection.query(sql, (err, result) => {
+    if (err) {
+      console.error("שגיאה בשליפת נוכחויות:", err);
+      return res.json({ Status: false, Error: "שגיאה בטעינת הנתונים" });
+    }
+    res.json({ Status: true, Result: result });
+  });
+});
+
+// ✅ שליפה לפי מזהה
+router.get("/:id", verifyToken, (req, res) => {
+  const { id } = req.params;
+
+  const sql = `SELECT * FROM attendance WHERE attendance_id = ?`;
+  connection.query(sql, [id], (err, result) => {
+    if (err) {
+      console.error("שגיאה בשליפת נוכחות לפי ID:", err);
+      return res.json({ Status: false, Error: "שגיאה בטעינת הנתונים" });
+    }
+
+    if (result.length === 0) {
+      return res.json({
+        Status: false,
+        Error: "לא נמצאה רשומת נוכחות עם מזהה זה",
+      });
+    }
+
+    res.json({ Status: true, Result: result[0] });
+  });
+});
+
+// ✅ עדכון לפי מזהה
+router.put("/edit/:id", verifyToken, (req, res) => {
+  const { id } = req.params;
+  const { user_id, date, check_in, check_out, status, notes } = req.body;
+
+  if (!id || !user_id || !date || !status) {
+    return res.json({ Status: false, Error: "נא למלא את כל שדות החובה" });
+  }
+
+  const specialStatuses = ["חופשה", "מחלה", "היעדרות"];
+  const isSpecialStatus = specialStatuses.includes(status);
+
+  const finalCheckIn = isSpecialStatus ? null : check_in;
+  const finalCheckOut = isSpecialStatus ? null : check_out;
+
+  if (!isSpecialStatus && (!check_in || !check_out)) {
+    return res.json({
+      Status: false,
+      Error: "יש להזין שעת כניסה ויציאה",
+    });
+  }
+
+  const sql = `
+    UPDATE attendance
+    SET user_id = ?, date = ?, check_in = ?, check_out = ?, status = ?, notes = ?
+    WHERE attendance_id = ?
+  `;
+
+  connection.query(
+    sql,
+    [user_id, date, finalCheckIn, finalCheckOut, status, notes || null, id],
+    (err, result) => {
+      if (err) {
+        console.error("שגיאה בעדכון נוכחות:", err);
+        return res.json({
+          Status: false,
+          Error: "שגיאה בעדכון הנתונים במסד",
+        });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.json({
+          Status: false,
+          Error: "רשומת נוכחות לא נמצאה לעדכון",
+        });
+      }
+
+      res.json({ Status: true, Message: "הרשומה עודכנה בהצלחה" });
     }
   );
 });
 
+// ✅ דוח היעדרויות אוטומטי (ל-cron)
+router.get("/generate-absence-report", (req, res) => {
+  const today = new Date().toISOString().split("T")[0];
 
+  const sql = `
+    SELECT u.user_id, u.first_name, u.last_name
+    FROM users u
+    LEFT JOIN attendance a
+      ON u.user_id = a.user_id AND a.date = ?
+    WHERE a.attendance_id IS NULL AND u.is_active = 1;
+  `;
 
+  connection.query(sql, [today], (err, result) => {
+    if (err) {
+      console.error("שגיאה בדוח חוסרי נוכחות:", err);
+      return res.status(500).json({ Status: false, Error: "שגיאת שרת" });
+    }
 
+    if (result.length === 0) {
+      return res.json({
+        Status: true,
+        Message: "כל העובדים רשמו נוכחות היום.",
+      });
+    }
 
+    console.log("📋 עובדים ללא נוכחות ב-" + today + ":");
+    result.forEach((row) => {
+      console.log(`- ${row.first_name} ${row.last_name} (ID: ${row.user_id})`);
+    });
 
-
-
+    res.json({
+      Status: true,
+      Missing: result,
+      Message: `${result.length} עובדים ללא נוכחות בתאריך ${today}`,
+    });
+  });
+});
 
 export default router;

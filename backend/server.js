@@ -2,12 +2,14 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
-import adminRouter from "./routes/adminRoutes.js";
-import authRouter from "./routes/authRoutes.js";
-import leadsRouter from "./routes/leadsRoutes.js";
+import "./utils/cronTasks.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import leadsRoutes from "./routes/leadsRoutes.js";
 import rolesRoutes from "./routes/rolesRoutes.js";
-import tasksRouter from "./routes/tasksRoutes.js";
+import tasksRoutes from "./routes/tasksRoutes.js";
 import usersRoutes from "./routes/usersRoutes.js";
+import attendanceRoutes from "./routes/attendanceRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import logsRoutes from "./routes/logsRoutes.js";
 
@@ -21,13 +23,13 @@ app.use(cookieParser());
 const port = process.env.PORT || 8801;
 
 // ✅ ראוטים עם נתיבים ברורים
-app.use("/admin", adminRouter);
-app.use("/auth", authRouter);
-app.use("/leads", leadsRouter);
+app.use("/admin", adminRoutes);
+app.use("/auth", authRoutes);
+app.use("/leads", leadsRoutes);
 app.use("/roles", rolesRoutes);
-app.use("/tasks", tasksRouter);
+app.use("/tasks", tasksRoutes);
 app.use("/users", usersRoutes);
-app.use("/attendances", usersRoutes);
+app.use("/attendance", attendanceRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/logs", logsRoutes);
 

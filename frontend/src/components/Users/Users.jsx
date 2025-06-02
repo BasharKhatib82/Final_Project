@@ -1,7 +1,7 @@
 // רכיב Users.jsx מעוצב בהתאם לעיצוב של Roles.jsx
 
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import Button from "../Buttons/Button";

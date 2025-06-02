@@ -29,11 +29,12 @@ const Home = () => {
   return (
     <div className="flex-col flex-grow p-6 font-rubik text-right">
       {/* כרטיסי סטטיסטיקות */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-5">
         {/* עובדים */}
         <div className="bg-white/85 rounded-lg shadow-md p-6 transition-transform duration-200 hover:-translate-y-1">
           <div className="text-center text-3xl mb-2">👥</div>
           <h4 className="text-center text-xl font-semibold mb-2">עובדים</h4>
+          <rt></rt>
           <ul className="space-y-1 text-gray-700">
             <li>
               פעילים: <strong>{stats.employees.active}</strong>
@@ -46,7 +47,22 @@ const Home = () => {
             </li>
           </ul>
         </div>
-
+        {/* עובדים מחוברים */}
+        <div className="bg-white/85 rounded-lg shadow-md p-6">
+          <div className="text-center text-3xl mb-2">🟢</div>
+          <h4 className="text-center text-xl font-semibold mb-2">
+             מחוברים כעת
+          </h4>
+        
+          <ul className="mb-10 space-y-1 text-gray-800">
+            {stats.employees.online_list.map((user, i) => (
+              <li key={i} className="flex items-center gap-2">
+                {user.name} - {user.role}{" "}
+                <span className="text-green-500 text-sm">●</span>
+              </li>
+            ))}
+          </ul>
+        </div>
         {/* תפקידים */}
         <div className="bg-white/85 rounded-lg shadow-md p-6 transition-transform duration-200 hover:-translate-y-1">
           <div className="text-center text-3xl mb-2">🛡️</div>
@@ -99,20 +115,6 @@ const Home = () => {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
-        {/* עובדים מחוברים */}
-        <div className="bg-white/85 rounded-lg shadow-md p-6">
-          <h3 className="text-center text-2xl font-bold mb-3 ">
-            🟢 עובדים מחוברים כעת
-          </h3>
-          <ul className="mb-10 space-y-1 text-gray-800">
-            {stats.employees.online_list.map((user, i) => (
-              <li key={i} className="flex items-center gap-2">
-                {user.name} - {user.role}{" "}
-                <span className="text-green-500 text-sm">●</span>
-              </li>
-            ))}
-          </ul>
-        </div>
         {/* חתימות לפי עובד */}
         <div className="bg-white/85 rounded-lg shadow-md p-6">
           <h3 className="text-center text-2xl font-bold mb-3">

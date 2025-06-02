@@ -8,11 +8,11 @@ const Dashboard = () => {
       {" "}
       {/* נניח שההדר גובהו 80px */}
       {/* Sidebar בצד */}
-      <aside className=" bg-gray-800 text-white min-h-full">
+      <aside className=" bg-gray-800 text-white">
         <Sidebar />
       </aside>
       {/* אזור התוכן */}
-      <main className="flex-grow bg-white/80 p-4">
+      <main className="flex-grow bg-white/80 p-4 ">
         <Outlet />
       </main>
     </div>
