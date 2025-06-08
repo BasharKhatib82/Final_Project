@@ -1,5 +1,6 @@
+// ✅ קובץ Attendance.jsx עם תיקון סינון לפי עובד (parseInt)
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "../Buttons/Button";
 
@@ -8,6 +9,7 @@ const Attendance = () => {
   const [users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [employeeFilter, setEmployeeFilter] = useState("all");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,7 +23,8 @@ const Attendance = () => {
       const res = await axios.get("http://localhost:8801/auth/check", {
         withCredentials: true,
       });
-      if (!res.data.loggedIn || res.data.user.role_id !== 1) {
+      const allowedRoles = [1];
+      if (!res.data.loggedIn || !allowedRoles.includes(res.data.user.role_id)) {
         navigate("/unauthorized");
       }
     } catch (err) {
@@ -57,22 +60,38 @@ const Attendance = () => {
     return user ? `${user.first_name} ${user.last_name}` : "לא ידוע";
   };
 
+  const formatTime = (timeStr) => (timeStr ? timeStr.slice(0, 5) : "-");
+
+  const toLocalDate = (dateStr) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    return local.toISOString().split("T")[0];
+  };
+
   const filteredData = attendance.filter((record) => {
     const name = getUserName(record.user_id).toLowerCase();
     const statusText = record.status.toLowerCase();
-    const dateText = record.date?.slice(0, 10);
-    const statusCheck =
-      statusFilter === "all" ? true : record.status === statusFilter;
+    const dateText = toLocalDate(record.date);
 
-    return (
-      statusCheck &&
-      (name.includes(searchTerm.toLowerCase()) ||
-        statusText.includes(searchTerm.toLowerCase()) ||
-        dateText.includes(searchTerm.toLowerCase()))
-    );
+    const search = searchTerm.toLowerCase();
+
+    const matchesSearch =
+      search === "" ||
+      name.includes(search) ||
+      statusText.includes(search) ||
+      dateText.includes(search);
+
+    const matchesStatus =
+      statusFilter === "all" || record.status === statusFilter;
+
+    const matchesEmployee =
+      employeeFilter === "all" ||
+      record.user_id.toString() === employeeFilter.toString();
+    // ✅ תיקון השוואה למספר
+
+    return matchesSearch && matchesStatus && matchesEmployee;
   });
-
-  const formatTime = (timeStr) => (timeStr ? timeStr.slice(0, 5) : "-");
 
   return (
     <div className="p-6 text-right">
@@ -95,6 +114,19 @@ const Attendance = () => {
           <option value="היעדרות">היעדרות</option>
         </select>
 
+        <select
+          value={employeeFilter}
+          onChange={(e) => setEmployeeFilter(e.target.value)}
+          className="font-rubik border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
+        >
+          <option value="all">כל העובדים</option>
+          {users.map((user) => (
+            <option key={user.user_id} value={user.user_id}>
+              {user.first_name} {user.last_name}
+            </option>
+          ))}
+        </select>
+
         <div className="relative">
           <input
             type="text"
@@ -106,7 +138,7 @@ const Attendance = () => {
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 text-red-500"
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 text-red-500 cursor-pointer"
             >
               ✖
             </button>
@@ -140,7 +172,7 @@ const Attendance = () => {
                   key={record.attendance_id}
                   className="hover:bg-blue-50 transition"
                 >
-                  <td className="border p-2">{record.date?.slice(0, 10)}</td>
+                  <td className="border p-2">{toLocalDate(record.date)}</td>
                   <td className="border p-2">{getUserName(record.user_id)}</td>
                   <td className="border p-2">{formatTime(record.check_in)}</td>
                   <td className="border p-2">{formatTime(record.check_out)}</td>

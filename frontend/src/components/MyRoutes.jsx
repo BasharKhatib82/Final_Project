@@ -24,11 +24,12 @@ import EditAttendance from "./Attendance/EditAttendance";
 import Leads from "./Leads/Leads";
 import AddLead from "./Leads/AddLead";
 
-import Courses from "./Courses/Courses";
-import AddCourse from "./Courses/AddCourse";
+import Projects from "./Projects/Projects";
+import AddProject from "./Projects/AddProject";
 
 import Tasks from "./Tasks/Tasks";
 import AddTask from "./Tasks/AddTask";
+import EditProject from "./Projects/EditProject";
 
 import Logs from "./Logs/Logs";
 
@@ -65,8 +66,9 @@ function MyRoutes() {
             <Route path="edit_attendance/:id" element={<EditAttendance />} />
             <Route path="leads" element={<Leads />} />
             <Route path="add_lead" element={<AddLead />} />
-            <Route path="courses" element={<Courses />} />
-            <Route path="add_course" element={<AddCourse />} />
+            <Route path="projects" element={<Projects />} />
+            <Route path="add_project" element={<AddProject />} />
+            <Route path="edit_project/:id" element={<EditProject />} />
             <Route path="tasks" element={<Tasks />} />
             <Route path="add_task" element={<AddTask />} />
             <Route path="logs" element={<Logs />} />

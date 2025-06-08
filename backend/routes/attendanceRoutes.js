@@ -6,6 +6,7 @@ const router = express.Router();
 const connection = dbSingleton.getConnection();
 
 // ✅ הוספת נוכחות
+// ✅ הוספת נוכחות
 router.post("/add", verifyToken, (req, res) => {
   const { user_id, date, check_in, check_out, status, notes } = req.body;
 
@@ -23,6 +24,7 @@ router.post("/add", verifyToken, (req, res) => {
   const finalCheckIn = isSpecialStatus ? null : check_in;
   const finalCheckOut = isSpecialStatus ? null : check_out;
 
+  // בדיקה אם קיימת רשומה לאותו עובד בתאריך הזה
   const checkSql = `SELECT * FROM attendance WHERE user_id = ? AND date = ?`;
 
   connection.query(checkSql, [user_id, date], (err, result) => {
@@ -31,6 +33,23 @@ router.post("/add", verifyToken, (req, res) => {
       return res.json({ Status: false, Error: "שגיאה בבדיקת נתונים" });
     }
 
+    // ✅ כבר קיימת רשומה עם אותו סטטוס מיוחד
+    if (isSpecialStatus && result.some((r) => r.status === status)) {
+      return res.json({
+        Status: false,
+        Error: `כבר קיימת רשומת נוכחות עם סטטוס "${status}" לאותו עובד בתאריך זה.`,
+      });
+    }
+
+    // ✅ כבר קיימת רשומה עם שעת כניסה/יציאה
+    if (!isSpecialStatus && result.some((r) => r.check_in || r.check_out)) {
+      return res.json({
+        Status: false,
+        Error: "כבר קיימת נוכחות עם שעות לאותו עובד בתאריך זה.",
+      });
+    }
+
+    // ✅ קיימת רשומה אחרת (כללית) - מניעת כפילויות מיותרות
     if (result.length > 0) {
       return res.json({
         Status: false,
@@ -38,6 +57,7 @@ router.post("/add", verifyToken, (req, res) => {
       });
     }
 
+    // אם הכל תקין - הוספת נוכחות
     const insertSql = `
       INSERT INTO attendance (user_id, date, check_in, check_out, status, notes)
       VALUES (?, ?, ?, ?, ?, ?)

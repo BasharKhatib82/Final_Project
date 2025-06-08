@@ -43,7 +43,7 @@ const Sidebar = () => {
       icon: <FaClock />,
     },
     { label: "ניהול פניות", to: "/dashboard/leads", icon: <FaPhone /> },
-    { label: "ניהול קורסים", to: "/dashboard/courses", icon: <FaBook /> },
+    { label: "ניהול פרויקטים", to: "/dashboard/projects", icon: <FaBook /> },
     { label: "ניהול משימות", to: "/dashboard/tasks", icon: <FaTasks /> },
     { label: "לוג פעילות", to: "/dashboard/logs", icon: <FaHistory /> },
     { label: "הגדרות חשבון", to: "/dashboard/profile", icon: <FaCog /> },

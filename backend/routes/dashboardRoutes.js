@@ -12,6 +12,7 @@ router.get("/", verifyToken, (req, res) => {
     roles: {},
     leads: {},
     tasks: {},
+    projects: {}, 
     attendance: [],
     logs_by_day: [],
   };
@@ -38,6 +39,13 @@ router.get("/", verifyToken, (req, res) => {
       "SELECT COUNT(*) AS count FROM tasks WHERE status = 'בתהליך'",
     tasks_completed:
       "SELECT COUNT(*) AS count FROM tasks WHERE status = 'הושלם'",
+
+    // ✅ שאילתות לפרויקטים
+    projects_total: "SELECT COUNT(*) AS count FROM projects",
+    projects_active:
+      "SELECT COUNT(*) AS count FROM projects WHERE is_active = 1",
+    projects_inactive:
+      "SELECT COUNT(*) AS count FROM projects WHERE is_active = 0",
 
     logs_by_day: `
       SELECT DATE(time_date) AS date, COUNT(*) AS total_logs
@@ -77,12 +85,15 @@ router.get("/", verifyToken, (req, res) => {
       }
 
       switch (key) {
+        // ✅ ניתוח תוצאות עבור עובדים
         case "employees_active":
           summary.employees.active = results[0].count;
           break;
         case "employees_inactive":
           summary.employees.inactive = results[0].count;
           break;
+
+        // ✅ ניתוח תוצאות עבור תפקידים
         case "roles_total":
           summary.roles.total = results[0].count;
           break;
@@ -92,6 +103,8 @@ router.get("/", verifyToken, (req, res) => {
         case "roles_inactive":
           summary.roles.inactive = results[0].count;
           break;
+
+        // ✅ ניתוח תוצאות עבור פניות
         case "leads_new":
           summary.leads.new = results[0].count;
           break;
@@ -101,6 +114,8 @@ router.get("/", verifyToken, (req, res) => {
         case "leads_completed":
           summary.leads.completed = results[0].count;
           break;
+
+        // ✅ ניתוח תוצאות עבור משימות
         case "tasks_new":
           summary.tasks.new = results[0].count;
           break;
@@ -110,6 +125,18 @@ router.get("/", verifyToken, (req, res) => {
         case "tasks_completed":
           summary.tasks.completed = results[0].count;
           break;
+
+        // ✅ ניתוח תוצאות עבור פרויקטים
+        case "projects_total":
+          summary.projects.total = results[0].count;
+          break;
+        case "projects_active":
+          summary.projects.active = results[0].count;
+          break;
+        case "projects_inactive":
+          summary.projects.inactive = results[0].count;
+          break;
+
         case "logs_by_day":
           summary.logs_by_day = results.map((row) => ({
             date: row.date,

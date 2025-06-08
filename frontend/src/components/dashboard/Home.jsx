@@ -51,14 +51,14 @@ const Home = () => {
         <div className="bg-white/85 rounded-lg shadow-md p-6">
           <div className="text-center text-3xl mb-2">🟢</div>
           <h4 className="text-center text-xl font-semibold mb-2">
-             מחוברים כעת
+            מחוברים כעת
           </h4>
-        
+
           <ul className="mb-10 space-y-1 text-gray-800">
             {stats.employees.online_list.map((user, i) => (
               <li key={i} className="flex items-center gap-2">
-                {user.name} - {user.role}{" "}
                 <span className="text-green-500 text-sm">●</span>
+                {user.name} - {user.role}{" "}
               </li>
             ))}
           </ul>
@@ -79,7 +79,22 @@ const Home = () => {
             </li>
           </ul>
         </div>
-
+        {/* פרויקטים */}
+        <div className="bg-white/85 rounded-lg shadow-md p-6 transition-transform duration-200 hover:-translate-y-1">
+          <div className="text-center text-3xl mb-2">💼</div>
+          <h4 className="text-center text-xl font-semibold mb-2">פרויקטים</h4>
+          <ul className="space-y-1 text-gray-700">
+            <li>
+              סה"כ: <strong>{stats.projects.total}</strong>
+            </li>
+            <li>
+              פעילים: <strong>{stats.projects.active}</strong>
+            </li>
+            <li>
+              לא פעילים: <strong>{stats.projects.inactive}</strong>
+            </li>
+          </ul>
+        </div>
         {/* פניות */}
         <div className="bg-white/85 rounded-lg opacity-85 shadow-md p-6 transition-transform duration-200 hover:-translate-y-1">
           <div className="text-center text-3xl mb-2">📩</div>
@@ -117,15 +132,15 @@ const Home = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
         {/* חתימות לפי עובד */}
         <div className="bg-white/85 rounded-lg shadow-md p-6">
-          <h3 className="text-center text-2xl font-bold mb-3">
-            ⏱️ סה"כ חתימות נוכחות לפי עובד
+          <h3 className="text-center text-xl font-bold mb-3">
+            ⏱️ סה"כ החתמות נוכחות לעובד (החודש)
           </h3>
           <div className="overflow-x-auto mb-10">
             <table className="w-full border border-gray-300 text-right text-sm bg-white rounded-md overflow-hidden">
               <thead className="bg-gray-100">
                 <tr>
                   <th className="p-2 border-b">שם עובד</th>
-                  <th className="p-2 border-b">סה"כ שעות</th>
+                  <th className="p-2 border-b">סה"כ החתמות</th>
                 </tr>
               </thead>
               <tbody>
@@ -142,8 +157,8 @@ const Home = () => {
 
         {/* לוגים לפי יום */}
         <div className="bg-white/85 rounded-lg shadow-md p-6">
-          <h3 className="text-center text-2xl font-bold mb-3">
-            📋 תיעודים לפי יום (7 ימים אחרונים)
+          <h3 className="text-center text-xl font-bold mb-3">
+            📋 תיעודים ליום (7 ימים אחרונים)
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full border border-gray-300 text-right text-sm bg-white rounded-md overflow-hidden">
