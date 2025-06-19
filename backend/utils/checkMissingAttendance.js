@@ -42,7 +42,7 @@ const checkMissingAttendance = () => {
             connection.query(insertQuery, [user_id, today], (err) => {
               if (err) console.error("❌ שגיאה בהכנסת נוכחות חסרה:", err);
               else
-                console.log(`⏺️ נרשמה העדרות ללא שעות עבור משתמש ${user_id}`);
+                console.log(`⏺️ נרשמה היעדרות ללא שעות עבור משתמש ${user_id}`);
             });
           }
         }

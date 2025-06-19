@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Button from "../Buttons/Button";
+import NavigationButton from "../Buttons/NavigationButton";
 
 const Attendance = () => {
   const [attendance, setAttendance] = useState([]);
@@ -100,7 +100,10 @@ const Attendance = () => {
       </h2>
 
       <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-2">
-        <Button linkTo="/dashboard/add_attendance" label="הוספת נוכחות חדשה" />
+        <NavigationButton
+          linkTo="/dashboard/add_attendance"
+          label="הוספת נוכחות חדשה"
+        />
 
         <select
           value={statusFilter}

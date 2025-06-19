@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import Button from "../Buttons/Button";
+import Button from "../Buttons/AddSaveButton";
 
 const EditLead = () => {
   const { id } = useParams();

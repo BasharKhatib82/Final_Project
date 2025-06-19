@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../Tools/UserContext";
-
+import ExitButton from "../Buttons/ExitButton";
+import AddButton from "../Buttons/AddSaveButton";
 const AddLead = () => {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -226,20 +227,8 @@ const AddLead = () => {
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
         <div className="text-center flex justify-center gap-4">
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
-          >
-            שמור פנייה
-          </button>
-
-          <button
-            type="button"
-            className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600"
-            onClick={() => navigate("/dashboard/leads")}
-          >
-            ביטול
-          </button>
+          <AddButton label="שמור פנייה" type="submit" />
+          <ExitButton label="ביטול" linkTo="/dashboard/leads" />
         </div>
       </form>
     </div>

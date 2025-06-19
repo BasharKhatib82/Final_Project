@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ExitButton from "../Buttons/ExitButton";
+import AddSaveButton from "../Buttons/AddSaveButton";
+import Popup from "../Tools/Popup";
 
 const AddRole = () => {
   const [formData, setFormData] = useState({
@@ -12,6 +15,10 @@ const AddRole = () => {
     can_manage_tasks: 0,
     can_access_all_data: 0,
   });
+
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showConfirmAddPopup, setShowConfirmAddPopup] = useState(false);
+  const [showCancelPopup, setShowCancelPopup] = useState(false);
 
   const navigate = useNavigate();
 
@@ -25,18 +32,33 @@ const AddRole = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setShowConfirmAddPopup(true);
+  };
+
+  const handleConfirmAdd = () => {
+    setShowConfirmAddPopup(false);
+
     axios
       .post("http://localhost:8801/roles/add", formData, {
         withCredentials: true,
       })
       .then(() => {
-        alert("🎉 תפקיד נוסף בהצלחה!");
-        navigate("/dashboard/roles");
+        setShowSuccessPopup(true);
       })
       .catch((err) => {
         console.error(err);
         alert("אירעה שגיאה בהוספת התפקיד");
       });
+  };
+
+  const handleSuccessClose = () => {
+    setShowSuccessPopup(false);
+    navigate("/dashboard/roles");
+  };
+
+  const handleExitChanges = () => {
+    setShowCancelPopup(true);
+    navigate("/dashboard/roles");
   };
 
   return (
@@ -86,14 +108,36 @@ const AddRole = () => {
             </select>
           </div>
         ))}
-
-        <button
-          type="submit"
-          className="font-rubik w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200 font-medium"
-        >
-          הוסף תפקיד
-        </button>
+        <div className="flex justify-around pt-4">
+          <AddSaveButton label="הוסף תפקיד" type="submit" />
+          <ExitButton label="ביטול" onClick={handleExitChanges} />
+        </div>
       </form>
+
+      {/* פופאפ אישור הוספה */}
+      {showConfirmAddPopup && (
+        <Popup
+          message="האם אתה בטוח שברצונך ליצור תפקיד חדש ?"
+          mode="confirm"
+          onConfirm={handleConfirmAdd}
+          onClose={() => showConfirmAddPopup(false)}
+        />
+      )}
+
+      {/* פופאפ הצלחה */}
+      {showSuccessPopup && (
+        <Popup message="התפקיד נוסף בהצלחה !" onClose={handleSuccessClose} />
+      )}
+
+      {/* פופאפ ביטול */}
+      {showCancelPopup && (
+        <Popup
+          message="האם אתה בטוח שברצונך לבטל את הוספת התפקיד ?"
+          mode="confirm"
+          onClose={() => setShowCancelPopup(false)}
+          onConfirm={() => navigate("/dashboard/roles")}
+        />
+      )}
     </div>
   );
 };

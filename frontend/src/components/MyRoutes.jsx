@@ -23,6 +23,8 @@ import EditAttendance from "./Attendance/EditAttendance";
 
 import Leads from "./Leads/Leads";
 import AddLead from "./Leads/AddLead";
+import EditLead from "./Leads/EditLead";
+import LeadDetails from "./Leads/LeadDetails";
 
 import Projects from "./Projects/Projects";
 import AddProject from "./Projects/AddProject";
@@ -66,6 +68,9 @@ function MyRoutes() {
             <Route path="edit_attendance/:id" element={<EditAttendance />} />
             <Route path="leads" element={<Leads />} />
             <Route path="add_lead" element={<AddLead />} />
+            <Route path="edit_lead/:id" element={<EditLead />} />
+            <Route path="details_lead/:id" element={<LeadDetails />} />
+
             <Route path="projects" element={<Projects />} />
             <Route path="add_project" element={<AddProject />} />
             <Route path="edit_project/:id" element={<EditProject />} />

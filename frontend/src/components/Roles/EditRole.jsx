@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import ExitButton from "../Buttons/ExitButton";
+import AddSaveButton from "../Buttons/AddSaveButton";
 
 const UpdateRoleForm = () => {
   const { id } = useParams();
@@ -40,8 +42,8 @@ const UpdateRoleForm = () => {
         withCredentials: true,
       })
       .then(() => {
-        alert("התפקיד עודכן בהצלחה");
         navigate("/dashboard/roles");
+        alert("התפקיד עודכן בהצלחה");
       })
       .catch((err) => {
         alert("שגיאת עדכון");
@@ -110,13 +112,10 @@ const UpdateRoleForm = () => {
             <option value="0">לא פעיל</option>
           </select>
         </div>
-
-        <button
-          type="submit"
-          className="font-rubik w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200 font-medium"
-        >
-          עדכון תפקיד
-        </button>
+        <div className="flex justify-around pt-4">
+          <AddSaveButton label="שמור שינויים" />
+          <ExitButton label="ביטול" linkTo="/dashboard/roles" />
+        </div>
       </form>
     </div>
   );

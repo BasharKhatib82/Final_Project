@@ -1,8 +1,8 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Popup from "../Popup";
-import Button from "../Buttons/Button";
+import Popup from "../Tools/Popup";
+import NavigationButton from "../Buttons/NavigationButton";
 
 const Roles = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -127,7 +127,10 @@ const Roles = () => {
 
       {/* סינון + חיפוש */}
       <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-2">
-        <Button linkTo="/dashboard/add_role" label="הוספת תפקיד חדש" />
+        <NavigationButton
+          linkTo="/dashboard/add_role"
+          label="הוספת תפקיד חדש"
+        />
 
         <select
           value={statusFilter}

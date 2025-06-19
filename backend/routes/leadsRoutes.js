@@ -6,13 +6,22 @@ import logAction from "../utils/logAction.js";
 const router = express.Router();
 const connection = dbSingleton.getConnection();
 
-// ✅ שליפת כל הפניות (כולל פרויקט ולקוח)
+// ✅ שליפת כל הפניות (כולל פרויקט, לקוח ונציג מטפל)
 router.get("/", verifyToken, (req, res) => {
   const sql = `
-    SELECT l.*, c.first_name, c.last_name, c.email, c.city, p.project_name
+    SELECT 
+      l.*,
+      c.first_name, 
+      c.last_name, 
+      c.email, 
+      c.city, 
+      p.project_name,
+      u.first_name AS rep_first_name,
+      u.last_name AS rep_last_name
     FROM leads l
     JOIN clients c ON l.phone_number = c.phone_number
     JOIN projects p ON l.project_id = p.project_id
+    LEFT JOIN users u ON l.user_id = u.user_id
     ORDER BY l.lead_id DESC
   `;
   connection.query(sql, (err, result) => {
@@ -25,10 +34,16 @@ router.get("/", verifyToken, (req, res) => {
 router.get("/:id", verifyToken, (req, res) => {
   const { id } = req.params;
   const sql = `
-    SELECT l.*, c.first_name, c.last_name, c.email, c.city, p.project_name
+    SELECT 
+      l.*, 
+      c.first_name, c.last_name, c.email, c.city, 
+      p.project_name,
+      u.first_name AS rep_first_name,
+      u.last_name AS rep_last_name
     FROM leads l
     JOIN clients c ON l.phone_number = c.phone_number
     JOIN projects p ON l.project_id = p.project_id
+    LEFT JOIN users u ON l.user_id = u.user_id
     WHERE l.lead_id = ?
   `;
   connection.query(sql, [id], (err, result) => {
@@ -68,7 +83,7 @@ router.post("/add", verifyToken, (req, res) => {
       connection.query(
         insertLeadSQL,
         [phone_number, project_id, status, req.user.user_id],
-        (err, result) => {
+        (err) => {
           if (err) return res.json({ Status: false, Error: err });
           logAction("הוספת פנייה חדשה")(req, res, () => {});
           res.json({ Status: true, Message: "הפנייה נשמרה בהצלחה" });
@@ -178,6 +193,28 @@ router.put("/edit/:id", verifyToken, (req, res) => {
   });
 });
 
+// ✅ עדכון נציג מטפל לפנייה
+router.put("/update-rep/:id", verifyToken, (req, res) => {
+  const { id } = req.params;
+  const { user_id } = req.body;
+
+  const sql = `
+    UPDATE leads
+    SET user_id = ?
+    WHERE lead_id = ?
+  `;
+
+  connection.query(sql, [user_id || null, id], (err) => {
+    if (err) {
+      console.error("שגיאה בעדכון נציג:", err);
+      return res.json({ Status: false, Error: "שגיאה בעדכון נציג" });
+    }
+
+    logAction(`עדכון נציג לפנייה #${id}`)(req, res, () => {});
+    res.json({ Status: true, Message: "נציג עודכן בהצלחה" });
+  });
+});
+
 // ✅ שליפת לקוח לפי טלפון (לטופס AddLead)
 router.get("/client/by-phone/:phone", verifyToken, (req, res) => {
   const { phone } = req.params;
@@ -200,7 +237,7 @@ router.delete("/delete/:id", verifyToken, (req, res) => {
     WHERE lead_id = ?
   `;
 
-  connection.query(sql, [id], (err, result) => {
+  connection.query(sql, [id], (err) => {
     if (err) {
       console.error("שגיאה במחיקת פנייה:", err);
       return res.json({ Status: false, Error: "שגיאה במחיקה" });
@@ -208,6 +245,56 @@ router.delete("/delete/:id", verifyToken, (req, res) => {
 
     logAction(`מחיקת פנייה (לוגית) #${id}`)(req, res, () => {});
     res.json({ Status: true, Message: "הפנייה סומנה כמבוטלת" });
+  });
+});
+
+// ✅ עדכון סטטוס פנייה בלבד
+router.put("/update-status/:id", verifyToken, (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const sql = `
+    UPDATE leads
+    SET status = ?
+    WHERE lead_id = ?
+  `;
+
+  connection.query(sql, [status, id], (err) => {
+    if (err) {
+      console.error("שגיאה בעדכון סטטוס:", err);
+      return res.json({ Status: false, Error: "שגיאה בעדכון סטטוס" });
+    }
+
+    logAction(`עדכון סטטוס לפנייה #${id}`)(req, res, () => {});
+    res.json({ Status: true, Message: "סטטוס עודכן בהצלחה" });
+  });
+});
+
+router.put("/bulk-assign", verifyToken, (req, res) => {
+  const { leadIds, user_id } = req.body;
+
+  if (!leadIds || leadIds.length === 0) {
+    return res.json({ Status: false, Error: "לא נבחרו פניות" });
+  }
+
+  const sql = `
+    UPDATE leads
+    SET user_id = ?
+    WHERE lead_id IN (?)
+  `;
+
+  connection.query(sql, [user_id || null, leadIds], (err) => {
+    if (err) {
+      console.error("שגיאה בשיוך פניות:", err);
+      return res.json({ Status: false, Error: "שגיאה בשיוך פניות" });
+    }
+
+    logAction(`שיוך ${leadIds.length} פניות לנציג ${user_id}`)(
+      req,
+      res,
+      () => {}
+    );
+    res.json({ Status: true, Message: "השיוך בוצע בהצלחה" });
   });
 });
 

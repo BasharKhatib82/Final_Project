@@ -4,7 +4,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
-import Button from "../Buttons/Button";
+import NavigationButton from "../Buttons/NavigationButton";
 
 const Users = () => {
   const [allUsers, setAllUsers] = useState([]);
@@ -120,7 +120,10 @@ const Users = () => {
       </h2>
 
       <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-2">
-        <Button linkTo="/dashboard/add_user" label="הוספת משתמש חדש" />
+        <NavigationButton
+          linkTo="/dashboard/add_user"
+          label="הוספת משתמש חדש"
+        />
 
         <select
           value={statusFilter}

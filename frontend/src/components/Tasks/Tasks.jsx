@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Button from "../Buttons/Button";
+import NavigationButton from "../Buttons/NavigationButton";
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -26,7 +26,10 @@ const Tasks = () => {
       <div className="main">
         <h2 className="text-center font-blue fontXL mp2rem">רשימת משימות</h2>
         <div className="filters-container">
-          <Button linkTo="/dashboard/add_task" label="הוספת משימה חדשה" />
+          <NavigationButton
+            linkTo="/dashboard/add_task"
+            label="הוספת משימה חדשה"
+          />
         </div>
         <table>
           <thead>

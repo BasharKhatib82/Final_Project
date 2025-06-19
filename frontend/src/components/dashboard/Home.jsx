@@ -48,7 +48,7 @@ const Home = () => {
           </ul>
         </div>
         {/* עובדים מחוברים */}
-        <div className="bg-white/85 rounded-lg shadow-md p-6">
+        <div className="bg-white/85 rounded-lg shadow-md p-6 transition-transform duration-200 hover:-translate-y-1">
           <div className="text-center text-3xl mb-2">🟢</div>
           <h4 className="text-center text-xl font-semibold mb-2">
             מחוברים כעת

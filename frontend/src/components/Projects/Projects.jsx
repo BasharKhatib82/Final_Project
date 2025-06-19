@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Button from "../Buttons/Button";
+import NavigationButton from "../Buttons/NavigationButton";
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -59,7 +59,10 @@ const Projects = () => {
       </h2>
 
       <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-2">
-        <Button linkTo="/dashboard/add_project" label="הוספת פרויקט חדש" />
+        <NavigationButton
+          linkTo="/dashboard/add_project"
+          label="הוספת פרויקט חדש"
+        />
 
         <select
           value={statusFilter}
