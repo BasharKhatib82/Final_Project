@@ -14,7 +14,20 @@ router.post("/login", async (req, res) => {
 
   try {
     connection.query(
-      "SELECT * FROM users WHERE user_id = ?",
+      `
+      SELECT u.*, 
+             r.role_name,
+             r.role_management,
+             r.can_manage_users, 
+             r.can_view_reports, 
+             r.can_assign_leads, 
+             r.can_edit_courses, 
+             r.can_manage_tasks, 
+             r.can_access_all_data
+      FROM users u
+      JOIN roles_permissions r ON u.role_id = r.role_id
+      WHERE u.user_id = ?
+    `,
       [user_id],
       async (err, results) => {
         if (err)
@@ -37,12 +50,19 @@ router.post("/login", async (req, res) => {
             .json({ success: false, message: "סיסמה שגויה" });
         }
 
-        // יצירת טוקן
+        // יצירת טוקן — כולל ההרשאות !
         const token = jwt.sign(
           {
             user_id: user.user_id,
             role_id: user.role_id,
             full_name: `${user.first_name} ${user.last_name}`,
+            role_management: user.role_management,
+            can_manage_users: user.can_manage_users,
+            can_view_reports: user.can_view_reports,
+            can_assign_leads: user.can_assign_leads,
+            can_edit_courses: user.can_edit_courses,
+            can_manage_tasks: user.can_manage_tasks,
+            can_access_all_data: user.can_access_all_data,
           },
           process.env.JWT_SECRET,
           { expiresIn: "1h" }
@@ -82,9 +102,18 @@ router.post("/login", async (req, res) => {
                 res.json({
                   success: true,
                   user: {
+                    user_id: user.user_id,
                     role_id: user.role_id,
                     first_name: user.first_name,
                     last_name: user.last_name,
+                    role_name: user.role_name,
+                    role_management: user.role_management,
+                    can_manage_users: user.can_manage_users,
+                    can_view_reports: user.can_view_reports,
+                    can_assign_leads: user.can_assign_leads,
+                    can_edit_courses: user.can_edit_courses,
+                    can_manage_tasks: user.can_manage_tasks,
+                    can_access_all_data: user.can_access_all_data,
                   },
                 });
               }

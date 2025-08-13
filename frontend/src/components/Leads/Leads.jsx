@@ -2,19 +2,32 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import NavigationButton from "../Buttons/NavigationButton";
+import DeleteButton from "../Buttons/DeleteButton";
+import Popup from "../Tools/Popup";
 
 const Leads = () => {
   const [leads, setLeads] = useState([]);
   const [users, setUsers] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [repFilter, setRepFilter] = useState("all");
+  const [projectFilter, setProjectFilter] = useState("all");
   const [selectedLeads, setSelectedLeads] = useState([]);
   const [bulkUserId, setBulkUserId] = useState("");
+  const [popupData, setPopupData] = useState(null);
+  const [leadToDelete, setLeadToDelete] = useState(null);
+  const [repToSave, setRepToSave] = useState(null);
+  const [newRepId, setNewRepId] = useState(null);
+  const [statusToSave, setStatusToSave] = useState(null);
+  const [newStatusValue, setNewStatusValue] = useState(null);
+  const [bulkAssignConfirm, setBulkAssignConfirm] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchLeads();
     fetchUsers();
+    fetchProjects();
   }, []);
 
   const fetchUsers = async () => {
@@ -30,6 +43,19 @@ const Leads = () => {
     }
   };
 
+  const fetchProjects = async () => {
+    try {
+      const res = await axios.get("http://localhost:8801/projects", {
+        withCredentials: true,
+      });
+      if (res.data.Status) {
+        setProjects(res.data.Result);
+      }
+    } catch (err) {
+      console.error("שגיאה בטעינת פרויקטים:", err);
+    }
+  };
+
   const fetchLeads = async () => {
     try {
       const res = await axios.get("http://localhost:8801/leads", {
@@ -39,9 +65,7 @@ const Leads = () => {
         const updatedLeads = res.data.Result.map((lead) => ({
           ...lead,
           selectedRepId: lead.user_id || "",
-          isRepChanged: false,
           selectedStatus: lead.status,
-          isStatusChanged: false,
         }));
         setLeads(updatedLeads);
       }
@@ -51,17 +75,8 @@ const Leads = () => {
   };
 
   const handleRepSelect = (leadId, newUserId) => {
-    setLeads((prevLeads) =>
-      prevLeads.map((lead) =>
-        lead.lead_id === leadId
-          ? {
-              ...lead,
-              selectedRepId: newUserId,
-              isRepChanged: newUserId !== (lead.user_id || ""),
-            }
-          : lead
-      )
-    );
+    setRepToSave(leadId);
+    setNewRepId(newUserId);
   };
 
   const handleRepSave = async (leadId, selectedRepId) => {
@@ -79,32 +94,38 @@ const Leads = () => {
               ? {
                   ...lead,
                   user_id: selectedRepId,
-                  isRepChanged: false,
+                  selectedRepId: selectedRepId,
                 }
               : lead
           )
         );
-        alert("הנציג עודכן בהצלחה");
+        setPopupData({
+          title: "הצלחה",
+          message: "הנציג עודכן בהצלחה",
+          mode: "success",
+        });
       } else {
-        console.error("שגיאה בעדכון נציג:", res.data.Error);
+        setPopupData({
+          title: "שגיאה",
+          message: res.data?.Error || res.data?.Message || "שגיאה בעדכון נציג",
+          mode: "error",
+        });
       }
     } catch (err) {
-      console.error("שגיאה בעדכון נציג:", err);
+      setPopupData({
+        title: "שגיאה",
+        message: "שגיאה בעדכון נציג",
+        mode: "error",
+      });
+    } finally {
+      setRepToSave(null);
+      setNewRepId(null);
     }
   };
 
   const handleStatusSelect = (leadId, newStatus) => {
-    setLeads((prevLeads) =>
-      prevLeads.map((lead) =>
-        lead.lead_id === leadId
-          ? {
-              ...lead,
-              selectedStatus: newStatus,
-              isStatusChanged: newStatus !== lead.status,
-            }
-          : lead
-      )
-    );
+    setStatusToSave(leadId);
+    setNewStatusValue(newStatus);
   };
 
   const handleStatusSave = async (leadId, selectedStatus) => {
@@ -122,34 +143,76 @@ const Leads = () => {
               ? {
                   ...lead,
                   status: selectedStatus,
-                  isStatusChanged: false,
+                  selectedStatus: selectedStatus,
                 }
               : lead
           )
         );
-        alert("הסטטוס עודכן בהצלחה");
+        setPopupData({
+          title: "הצלחה",
+          message: "הסטטוס עודכן בהצלחה",
+          mode: "success",
+        });
+
+        // סגור את popup אוטומטית אחרי 1.5 שניות
+        setTimeout(() => setPopupData(null), 1500);
       } else {
-        console.error("שגיאה בעדכון סטטוס:", res.data.Error);
+        setPopupData({
+          title: "שגיאה",
+          message: res.data?.Error || res.data?.Message || "שגיאה בעדכון סטטוס",
+          mode: "error",
+        });
       }
     } catch (err) {
-      console.error("שגיאה בעדכון סטטוס:", err);
+      setPopupData({
+        title: "שגיאה",
+        message: "שגיאה בעדכון סטטוס",
+        mode: "error",
+      });
+    } finally {
+      setStatusToSave(null);
+      setNewStatusValue(null);
     }
   };
 
-  const handleDelete = async (leadId) => {
-    if (!window.confirm("האם אתה בטוח שברצונך למחוק פנייה זו?")) return;
+  const handleDelete = async () => {
+    if (!leadToDelete) return;
+
     try {
       const res = await axios.delete(
-        `http://localhost:8801/leads/delete/${leadId}`,
+        `http://localhost:8801/leads/delete/${leadToDelete}`,
         {
           withCredentials: true,
         }
       );
       if (res.data.Status) {
-        setLeads((prev) => prev.filter((l) => l.lead_id !== leadId));
+        setLeads((prevLeads) =>
+          prevLeads.map((lead) =>
+            lead.lead_id === leadToDelete
+              ? { ...lead, status: "בוטלה", selectedStatus: "בוטלה" }
+              : lead
+          )
+        );
+        setPopupData({
+          title: "הצלחה",
+          message: "הפנייה בוטלה בהצלחה",
+          mode: "success",
+        });
+      } else {
+        setPopupData({
+          title: "שגיאה",
+          message: res.data?.Error || res.data?.Message || "שגיאה בביטול פנייה",
+          mode: "error",
+        });
       }
     } catch (err) {
-      console.error("שגיאה במחיקת פנייה:", err);
+      setPopupData({
+        title: "שגיאה",
+        message: "שגיאה בביטול פנייה",
+        mode: "error",
+      });
+    } finally {
+      setLeadToDelete(null);
     }
   };
 
@@ -161,20 +224,33 @@ const Leads = () => {
     );
   };
 
-  const handleBulkAssign = async () => {
+  const handleBulkAssignConfirm = () => {
     if (selectedLeads.length === 0) {
-      alert("יש לבחור פניות");
+      setPopupData({
+        title: "שגיאה",
+        message: "יש לבחור פניות",
+        mode: "error",
+      });
       return;
     }
+    if (!bulkUserId) {
+      setPopupData({
+        title: "שגיאה",
+        message: "יש לבחור נציג לשיוך",
+        mode: "error",
+      });
+      return;
+    }
+    setBulkAssignConfirm(true);
+  };
 
-    const userIdToAssign = bulkUserId === "null" ? null : bulkUserId;
-
+  const handleBulkAssign = async () => {
     try {
       const res = await axios.put(
         `http://localhost:8801/leads/bulk-assign`,
         {
           leadIds: selectedLeads,
-          user_id: userIdToAssign,
+          user_id: bulkUserId === "null" ? null : bulkUserId,
         },
         { withCredentials: true }
       );
@@ -183,11 +259,31 @@ const Leads = () => {
         fetchLeads();
         setSelectedLeads([]);
         setBulkUserId("");
-        alert("השיוך בוצע בהצלחה");
+        setPopupData({
+          title: "הצלחה",
+          message: "השיוך בוצע בהצלחה",
+          mode: "success",
+        });
+      } else {
+        setPopupData({
+          title: "שגיאה",
+          message: res.data?.Error || res.data?.Message || "שגיאה בשיוך פניות",
+          mode: "error",
+        });
       }
     } catch (err) {
-      console.error("שגיאה בשיוך פניות:", err);
+      setPopupData({
+        title: "שגיאה",
+        message: "שגיאה בשיוך פניות",
+        mode: "error",
+      });
+    } finally {
+      setBulkAssignConfirm(false);
     }
+  };
+
+  const handleClosePopup = () => {
+    setPopupData(null);
   };
 
   const filteredLeads = leads.filter((lead) => {
@@ -198,60 +294,61 @@ const Leads = () => {
       lead.phone_number.includes(search) ||
       name.includes(search);
     const matchesStatus =
-      statusFilter === "all" || lead.status === statusFilter;
+      statusFilter === "all"
+        ? lead.status !== "בוטלה"
+        : lead.status === statusFilter;
+    const matchesProject =
+      projectFilter === "all" || lead.project_name === projectFilter;
+    const matchesRep =
+      repFilter === "all" || String(lead.user_id) === repFilter;
 
-    return matchesSearch && matchesStatus;
+    return matchesSearch && matchesStatus && matchesProject && matchesRep;
   });
-
   return (
-    <div className="p-6 text-right">
-      <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
-        רשימת פניות
-      </h2>
+    <>
+      <div className="p-4 text-right">
+        <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
+          רשימת פניות
+        </h2>
 
-      <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-4">
-        <NavigationButton
-          linkTo="/dashboard/add_lead"
-          label="הוספת פנייה חדשה"
-        />
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="font-rubik border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
-        >
-          <option value="all">הכל</option>
-          <option value="חדש">חדש</option>
-          <option value="בטיפול">בטיפול</option>
-          <option value="טופל">טופל</option>
-        </select>
-
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="🔍 חיפוש לפי טלפון או שם לקוח..."
-            className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+        <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-4">
+          <NavigationButton
+            linkTo="/dashboard/add_lead"
+            label="הוספת פנייה חדשה"
           />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 text-red-500 cursor-pointer"
-            >
-              ✖
-            </button>
-          )}
-        </div>
 
-        <div className="flex items-center gap-2 ml-auto">
           <select
-            value={bulkUserId}
-            onChange={(e) => setBulkUserId(e.target.value)}
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
             className="border border-gray-300 rounded px-3 py-1 text-sm"
           >
-            <option value="">בחר נציג לשיוך</option>
-            <option value="null">ללא</option> {/* ← הוספנו אפשרות ללא */}
+            <option value="all">כל הפניות</option>
+            <option value="חדש">חדש</option>
+            <option value="בטיפול">בטיפול</option>
+            <option value="טופל">טופל</option>
+            <option value="בוטלה">בוטלה</option>
+          </select>
+
+          <select
+            value={projectFilter}
+            onChange={(e) => setProjectFilter(e.target.value)}
+            className="border border-gray-300 rounded px-3 py-1 text-sm"
+          >
+            <option value="all">כל הפרויקטים</option>
+            {projects.map((proj) => (
+              <option key={proj.project_id} value={proj.project_name}>
+                {proj.project_name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={repFilter}
+            onChange={(e) => setRepFilter(e.target.value)}
+            className="border border-gray-300 rounded px-3 py-1 text-sm"
+          >
+            <option value="all">כל הנציגים</option>
+            <option value="null">ללא</option>
             {users.map((user) => (
               <option key={user.user_id} value={user.user_id}>
                 {user.first_name} {user.last_name}
@@ -259,138 +356,222 @@ const Leads = () => {
             ))}
           </select>
 
-          <button
-            onClick={handleBulkAssign}
-            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-          >
-            שייך את הנבחרות ({selectedLeads.length})
-          </button>
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="🔍 חיפוש לפי טלפון או שם לקוח..."
+              className="border border-gray-300 rounded px-3 py-1 text-sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm("")}
+                className="absolute left-2 top-1/2 transform -translate-y-1/2 text-red-500 cursor-pointer"
+              >
+                ✖
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 ml-auto">
+            <select
+              value={bulkUserId}
+              onChange={(e) => setBulkUserId(e.target.value)}
+              className="border border-gray-300 rounded px-3 py-1 text-sm"
+            >
+              <option value="">בחר נציג לשיוך</option>
+              <option value="null">ללא</option>
+              {users.map((user) => (
+                <option key={user.user_id} value={user.user_id}>
+                  {user.first_name} {user.last_name}
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={handleBulkAssignConfirm}
+              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+            >
+              שייך את הנבחרות ({selectedLeads.length})
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* כאן תמשיך את הטבלה בדיוק כמו שהבאתי לך קודם → אין שינוי במבנה */}
-
-      <div className="overflow-auto rounded-lg shadow-lg bg-white/85">
-        <table className="w-full table-auto border-collapse text-sm text-center">
-          <thead>
-            <tr className="bg-slate-100 text-gray-800">
-              <th className="p-2 border">✔️</th>
-              <th className="p-2 border">מס׳ פנייה</th>
-              <th className="p-2 border">טלפון</th>
-              <th className="p-2 border">שם לקוח</th>
-              <th className="p-2 border">פרויקט</th>
-              <th className="p-2 border">נציג מטפל</th>
-              <th className="p-2 border">סטטוס</th>
-              <th className="p-2 border">פעולות</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredLeads.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="text-center text-red-500 p-4">
-                  אין פניות להצגה
-                </td>
+        <div className="overflow-auto rounded-lg shadow-lg bg-white/85 mt-4">
+          <table className="w-full table-auto border-collapse text-sm text-center">
+            <thead>
+              <tr className="bg-slate-100 text-gray-800">
+                <th className="p-2 border">✔️</th>
+                <th className="p-2 border">מס׳ פנייה</th>
+                <th className="p-2 border">תאריך יצירה</th>
+                <th className="p-2 border">טלפון</th>
+                <th className="p-2 border">שם לקוח</th>
+                <th className="p-2 border">פרויקט</th>
+                <th className="p-2 border">נציג מטפל</th>
+                <th className="p-2 border">סטטוס</th>
+                <th className="p-2 border">פעולות</th>
               </tr>
-            ) : (
-              filteredLeads.map((lead) => (
-                <tr key={lead.lead_id} className="hover:bg-blue-50 transition">
-                  <td className="border p-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedLeads.includes(lead.lead_id)}
-                      onChange={() => handleSelectLead(lead.lead_id)}
-                    />
-                  </td>
-                  <td className="border p-2">{lead.lead_id}</td>
-                  <td className="border p-2">{lead.phone_number}</td>
-                  <td className="border p-2">
-                    {lead.first_name} {lead.last_name}
-                  </td>
-                  <td className="border p-2">{lead.project_name}</td>
-                  <td className="border p-2">
-                    <select
-                      value={lead.selectedRepId}
-                      onChange={(e) =>
-                        handleRepSelect(lead.lead_id, e.target.value)
-                      }
-                      className="border border-gray-300 rounded px-2 py-1 text-sm"
-                    >
-                      <option value="">ללא</option>
-                      {users.map((user) => (
-                        <option key={user.user_id} value={user.user_id}>
-                          {user.first_name} {user.last_name}
-                        </option>
-                      ))}
-                    </select>
-
-                    {lead.isRepChanged && (
-                      <button
-                        onClick={() =>
-                          handleRepSave(lead.lead_id, lead.selectedRepId)
-                        }
-                        className="ml-2 bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 text-xs"
-                      >
-                        שמור
-                      </button>
-                    )}
-                  </td>
-                  <td className="border p-2">
-                    <select
-                      value={lead.selectedStatus}
-                      onChange={(e) =>
-                        handleStatusSelect(lead.lead_id, e.target.value)
-                      }
-                      className="border border-gray-300 rounded px-2 py-1 text-sm"
-                    >
-                      <option value="חדש">חדש</option>
-                      <option value="בטיפול">בטיפול</option>
-                      <option value="טופל">טופל</option>
-                    </select>
-
-                    {lead.isStatusChanged && (
-                      <button
-                        onClick={() =>
-                          handleStatusSave(lead.lead_id, lead.selectedStatus)
-                        }
-                        className="ml-2 bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 text-xs"
-                      >
-                        שמור
-                      </button>
-                    )}
-                  </td>
-                  <td className="border p-2 text-center">
-                    <button
-                      onClick={() =>
-                        navigate(`/dashboard/details_lead/${lead.lead_id}`)
-                      }
-                      className="bg-blue-500 text-white mx-1 px-2 py-1 rounded hover:bg-blue-600"
-                    >
-                      הצג פנייה
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        navigate(`/dashboard/edit_lead/${lead.lead_id}`)
-                      }
-                      className="bg-yellow-500 text-white mx-1 px-2 py-1 rounded hover:bg-yellow-600"
-                    >
-                      עריכה
-                    </button>
-
-                    <button
-                      onClick={() => handleDelete(lead.lead_id)}
-                      className="bg-red-500 text-white mx-1 px-2 py-1 rounded hover:bg-red-600"
-                    >
-                      מחיקה
-                    </button>
+            </thead>
+            <tbody>
+              {filteredLeads.length === 0 ? (
+                <tr>
+                  <td colSpan="8" className="text-center text-red-500 p-4">
+                    אין פניות להצגה
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                filteredLeads.map((lead) => (
+                  <tr
+                    key={lead.lead_id}
+                    className="hover:bg-blue-50 transition"
+                  >
+                    <td className="border p-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedLeads.includes(lead.lead_id)}
+                        onChange={() => handleSelectLead(lead.lead_id)}
+                      />
+                    </td>
+                    <td className="border p-2">{lead.lead_id}</td>
+                    <td className="border p-2">
+                      {new Date(lead.created_at).toLocaleDateString("he-IL", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "numeric",
+                      })}{" "}
+                      -{" "}
+                      {new Date(lead.created_at).toLocaleTimeString("he-IL", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </td>
+                    <td className="border p-2">{lead.phone_number}</td>
+                    <td className="border p-2">
+                      {lead.first_name} {lead.last_name}
+                    </td>
+                    <td className="border p-2">{lead.project_name}</td>
+                    <td className="border p-2">
+                      <select
+                        value={lead.selectedRepId}
+                        onChange={(e) =>
+                          handleRepSelect(lead.lead_id, e.target.value)
+                        }
+                        className="border border-gray-300 rounded px-2 py-1 text-sm"
+                      >
+                        <option value="">ללא</option>
+                        {users.map((user) => (
+                          <option key={user.user_id} value={user.user_id}>
+                            {user.first_name} {user.last_name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="border p-2">
+                      <select
+                        value={lead.selectedStatus}
+                        onChange={(e) =>
+                          handleStatusSelect(lead.lead_id, e.target.value)
+                        }
+                        className="border border-gray-300 rounded px-2 py-1 text-sm"
+                      >
+                        <option value="חדש">חדש</option>
+                        <option value="בטיפול">בטיפול</option>
+                        <option value="טופל">טופל</option>
+                        <option value="בוטלה">בוטלה</option>
+                      </select>
+                    </td>
+                    <td className="border p-2 text-center">
+                      <button
+                        onClick={() =>
+                          navigate(`/dashboard/details_lead/${lead.lead_id}`)
+                        }
+                        className="bg-blue-500 text-white mx-1 px-2 py-1 rounded hover:bg-blue-600"
+                      >
+                        הצג פנייה
+                      </button>
+                      <button
+                        onClick={() =>
+                          navigate(`/dashboard/edit_lead/${lead.lead_id}`)
+                        }
+                        className="bg-yellow-500 text-white mx-1 px-2 py-1 rounded hover:bg-yellow-600"
+                      >
+                        עריכה
+                      </button>
+                      {lead.status !== "בוטלה" && (
+                        <DeleteButton
+                          onClick={() => setLeadToDelete(lead.lead_id)}
+                        />
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* פופאפ שינוי נציג */}
+        {repToSave && (
+          <Popup
+            title="אישור שינוי נציג"
+            message="האם אתה בטוח שברצונך לשנות את הנציג המטפל?"
+            mode="confirm"
+            onConfirm={() => handleRepSave(repToSave, newRepId)}
+            onClose={() => {
+              setRepToSave(null);
+              setNewRepId(null);
+            }}
+          />
+        )}
+
+        {/* פופאפ שינוי סטטוס */}
+        {statusToSave && (
+          <Popup
+            title="אישור שינוי סטטוס"
+            message="האם אתה בטוח שברצונך לעדכן את סטטוס הפנייה?"
+            mode="confirm"
+            onConfirm={() => handleStatusSave(statusToSave, newStatusValue)}
+            onClose={() => {
+              setStatusToSave(null);
+              setNewStatusValue(null);
+            }}
+          />
+        )}
+
+        {/* פופאפ מחיקה */}
+        {leadToDelete && (
+          <Popup
+            title="אישור מחיקה"
+            message="האם אתה בטוח שברצונך למחוק פנייה זו?"
+            mode="confirm"
+            onConfirm={handleDelete}
+            onClose={() => setLeadToDelete(null)}
+          />
+        )}
+
+        {/* פופאפ אישור Bulk */}
+        {bulkAssignConfirm && (
+          <Popup
+            title="אישור שיוך מרובה"
+            message={`האם אתה בטוח שברצונך לשייך ${selectedLeads.length} פניות?`}
+            mode="confirm"
+            onConfirm={handleBulkAssign}
+            onClose={() => setBulkAssignConfirm(false)}
+          />
+        )}
+
+        {/* פופאפ רגיל */}
+        {popupData && (
+          <Popup
+            title={popupData.title}
+            message={popupData.message}
+            mode={popupData.mode}
+            onClose={handleClosePopup}
+          />
+        )}
       </div>
-    </div>
+    </>
   );
 };
 

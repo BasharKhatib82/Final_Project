@@ -28,37 +28,69 @@ const Sidebar = () => {
     logout();
   };
 
-  const navItems = [
-    { label: "לוח בקרה", to: "/dashboard", icon: <FaHome /> },
-    {
-      label: "ניהול תפקידים",
-      to: "/dashboard/roles",
-      icon: <FaUserShield />,
-      adminOnly: true,
-    },
-    { label: "ניהול עובדים", to: "/dashboard/users", icon: <FaUsers /> },
-    {
-      label: "ניהול שעות עבודה",
-      to: "/dashboard/attendance",
-      icon: <FaClock />,
-    },
-    { label: "ניהול פניות", to: "/dashboard/leads", icon: <FaPhone /> },
-    { label: "ניהול פרויקטים", to: "/dashboard/projects", icon: <FaBook /> },
-    { label: "ניהול משימות", to: "/dashboard/tasks", icon: <FaTasks /> },
-    { label: "לוג פעילות", to: "/dashboard/logs", icon: <FaHistory /> },
-    { label: "הגדרות חשבון", to: "/dashboard/profile", icon: <FaCog /> },
-    {
-      label: "יציאה",
-      to: "/userlogin",
-      icon: <FaSignOutAlt />,
-      onClick: handleLogout,
-    },
-  ];
+  const getNavItems = () => {
+    if (!user) return [];
+
+    return [
+      { label: "לוח בקרה", to: "/dashboard", icon: <FaHome /> },
+
+      user.role_management === 1 && {
+        label: "ניהול תפקידים",
+        to: "/dashboard/roles",
+        icon: <FaUserShield />,
+      },
+
+      user.can_manage_users === 1 && {
+        label: "ניהול עובדים",
+        to: "/dashboard/users",
+        icon: <FaUsers />,
+      },
+
+      user.can_view_reports === 1 && {
+        label: "ניהול שעות עבודה",
+        to: "/dashboard/attendance",
+        icon: <FaClock />,
+      },
+
+      user.can_assign_leads === 1 && {
+        label: "ניהול פניות",
+        to: "/dashboard/leads",
+        icon: <FaPhone />,
+      },
+
+      { label: "ניהול פרויקטים", to: "/dashboard/projects", icon: <FaBook /> },
+
+      user.can_manage_tasks === 1 && {
+        label: "ניהול משימות",
+        to: "/dashboard/tasks",
+        icon: <FaTasks />,
+      },
+
+      user.can_access_all_data === 1 && {
+        label: "לוג פעילות",
+        to: "/dashboard/logs",
+        icon: <FaHistory />,
+      },
+
+      { label: "הגדרות חשבון", to: "/dashboard/profile", icon: <FaCog /> },
+
+      {
+        label: "יציאה",
+        to: "/userlogin",
+        icon: <FaSignOutAlt />,
+        onClick: handleLogout,
+      },
+    ].filter(Boolean);
+  };
+
+  const navItems = getNavItems();
 
   return (
     <div
       className={`bg-gray-800 text-white transition-all duration-300
-        ${isCollapsed ? "w-16" : "w-60"} `}
+        ${isCollapsed ? "w-16" : "w-60"} 
+        ${isOpen ? "block" : "hidden md:block"}
+      `}
     >
       {/* כותרת וכפתורי שליטה */}
       <div className="flex justify-between items-center p-4 ">
@@ -91,30 +123,27 @@ const Sidebar = () => {
       {/* תפריט */}
       <nav className="mt-4 ">
         <ul className="space-y-1 ">
-          {navItems.map(
-            ({ label, to, icon, onClick, adminOnly }, index) =>
-              (!adminOnly || user?.role_id === 1) && (
-                <li key={index} className="p-2 cursor-pointer">
-                  <Link
-                    to={to}
-                    onClick={onClick}
-                    className="relative flex items-center justify-center md:justify-start gap-3 p-2 rounded-md group transition-all duration-200 "
-                  >
-                    {/* אייקון */}
-                    {isCollapsed ? (
-                      <Tooltip message={label}>
-                        <span className="text-lg">{icon}</span>
-                      </Tooltip>
-                    ) : (
-                      <>
-                        <span className="text-lg ">{icon}</span>
-                        <span className="text-sm  z-50">{label}</span>
-                      </>
-                    )}
-                  </Link>
-                </li>
-              )
-          )}
+          {navItems.map(({ label, to, icon, onClick }, index) => (
+            <li key={index} className="p-2 cursor-pointer">
+              <Link
+                to={to}
+                onClick={onClick}
+                className="relative flex items-center justify-center md:justify-start gap-3 p-2 rounded-md group transition-all duration-200 "
+              >
+                {/* אייקון */}
+                {isCollapsed ? (
+                  <Tooltip message={label}>
+                    <span className="text-lg">{icon}</span>
+                  </Tooltip>
+                ) : (
+                  <>
+                    <span className="text-lg ">{icon}</span>
+                    <span className="text-sm  z-50">{label}</span>
+                  </>
+                )}
+              </Link>
+            </li>
+          ))}
         </ul>
       </nav>
     </div>

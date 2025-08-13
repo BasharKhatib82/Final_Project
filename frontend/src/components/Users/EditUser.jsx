@@ -1,7 +1,9 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import Tooltip from "../Tools/Tooltip";
+import ExitButton from "../Buttons/ExitButton";
+import AddSaveButton from "../Buttons/AddSaveButton";
+import Popup from "../Tools/Popup";
 
 const EditUser = () => {
   const { id } = useParams();
@@ -9,47 +11,59 @@ const EditUser = () => {
 
   const [user, setUser] = useState(null);
   const [roles, setRoles] = useState([]);
+  const [popupData, setPopupData] = useState({
+    show: false,
+    title: "",
+    message: "",
+    mode: "info",
+  });
 
   useEffect(() => {
-    fetchUser();
-    fetchRoles();
+    fetchUserAndRoles();
   }, []);
 
-  const fetchUser = async () => {
+  const fetchUserAndRoles = async () => {
     try {
       const res = await axios.get(`http://localhost:8801/users/${id}`, {
         withCredentials: true,
       });
-      setUser(res.data.User);
-    } catch (err) {
-      console.error("שגיאה בטעינת משתמש:", err);
-      alert("אירעה שגיאה בטעינת פרטי המשתמש");
-    }
-  };
+      const currentUser = res.data.User;
+      setUser(currentUser);
 
-  const fetchRoles = () => {
-    Promise.all([
-      axios.get("http://localhost:8801/roles/active", {
+      const rolesRes = await axios.get("http://localhost:8801/roles/active", {
         withCredentials: true,
-      }),
-      axios.get("http://localhost:8801/roles/inactive", {
-        withCredentials: true,
-      }),
-    ])
-      .then(([activeRes, inactiveRes]) => {
-        const active = activeRes.data.Roles.map((role) => ({
-          ...role,
-          active: true,
-        }));
-        const inactive = inactiveRes.data.Roles.map((role) => ({
-          ...role,
-          active: false,
-        }));
-        setRoles([...active, ...inactive]);
-      })
-      .catch((err) => {
-        console.error("שגיאה בטעינת תפקידים:", err);
       });
+      let activeRoles = rolesRes.data.Roles.map((role) => ({
+        ...role,
+        active: true,
+      }));
+
+      const roleExists = activeRoles.some(
+        (role) => role.role_id === currentUser.role_id
+      );
+
+      if (!roleExists) {
+        const roleRes = await axios.get(
+          `http://localhost:8801/roles/${currentUser.role_id}`,
+          { withCredentials: true }
+        );
+
+        if (roleRes.data.Role) {
+          const roleNotActive = { ...roleRes.data.Role, active: false };
+          activeRoles.push(roleNotActive);
+        }
+      }
+
+      setRoles(activeRoles);
+    } catch (err) {
+      console.error("שגיאה בטעינת משתמש או תפקידים:", err);
+      setPopupData({
+        show: true,
+        title: "שגיאה",
+        message: "אירעה שגיאה בטעינת הנתונים",
+        mode: "error",
+      });
+    }
   };
 
   const handleChange = (e) => {
@@ -63,32 +77,62 @@ const EditUser = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    setPopupData({
+      show: true,
+      title: "אישור עדכון",
+      message: "⚠️ האם אתה בטוח שברצונך לעדכן את פרטי המשתמש?",
+      mode: "confirm",
+    });
+  };
+
+  const confirmUpdate = () => {
     axios
       .put(`http://localhost:8801/users/${id}`, user, { withCredentials: true })
       .then((res) => {
         if (res.data.Status) {
-          alert("המשתמש עודכן בהצלחה");
-          navigate("/dashboard/users");
+          setPopupData({
+            show: true,
+            title: "הצלחה",
+            message: "המשתמש עודכן בהצלחה",
+            mode: "success",
+          });
         } else {
-          alert("שגיאה: " + res.data.Error);
+          setPopupData({
+            show: true,
+            title: "שגיאה",
+            message: res.data.Error || "אירעה שגיאה בעדכון המשתמש",
+            mode: "error",
+          });
         }
       })
       .catch((err) => {
-        console.error("שגיאה בשמירת משתמש:", err);
-        alert("אירעה שגיאה בעדכון הנתונים");
+        console.error("שגיאה בעדכון משתמש:", err);
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "אירעה שגיאה בעדכון הנתונים",
+          mode: "error",
+        });
       });
   };
 
-  if (!user) return <div className="text-center p-4">...טוען נתוני משתמש</div>;
+  if (!user) {
+    return (
+      <div className="text-center text-blue-600 font-rubik text-lg p-6">
+        ...טוען נתוני משתמש
+      </div>
+    );
+  }
 
   return (
-    <div className=" justify-center items-center pt-10">
+    <div className="flex justify-center items-center pt-10">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2"
+        className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2 text-right"
       >
         <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
-          עריכת עובד
+          עדכון פרטי משתמש
         </h2>
 
         <div>
@@ -98,6 +142,7 @@ const EditUser = () => {
             name="first_name"
             value={user.first_name}
             onChange={handleChange}
+            required
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
         </div>
@@ -111,6 +156,7 @@ const EditUser = () => {
             name="last_name"
             value={user.last_name}
             onChange={handleChange}
+            required
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
         </div>
@@ -133,6 +179,7 @@ const EditUser = () => {
             name="email"
             value={user.email}
             onChange={handleChange}
+            required
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
           />
         </div>
@@ -143,36 +190,24 @@ const EditUser = () => {
             name="role_id"
             value={user.role_id}
             onChange={handleChange}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
           >
             {roles.map((role) => (
               <option key={role.role_id} value={role.role_id}>
-                {role.role_name}
+                {role.role_name} {!role.active ? " 🚫 תפקיד לא פעיל" : ""}
               </option>
             ))}
           </select>
         </div>
-
-        {(() => {
-          const currentRole = roles.find((r) => r.role_id === user.role_id);
-          return (
-            currentRole &&
-            !currentRole.active && (
-              <Tooltip message="תפקיד זה לא פעיל – נא לעדכן תפקיד">
-                <div className="text-yellow-600 mt-2">⚠ תפקיד לא פעיל</div>
-              </Tooltip>
-            )
-          );
-        })()}
 
         <div>
           <label className="font-rubik block mb-0.5 font-medium">הערות</label>
           <textarea
             name="notes"
             rows="2"
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
             value={user.notes || ""}
             onChange={handleChange}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
           ></textarea>
         </div>
 
@@ -182,20 +217,39 @@ const EditUser = () => {
             name="is_active"
             value={user.is_active}
             onChange={handleChange}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
           >
             <option value={1}>פעיל</option>
             <option value={0}>לא פעיל</option>
           </select>
         </div>
 
-        <button
-          type="submit"
-          className="font-rubik w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200 font-medium"
-        >
-          שמור שינויים
-        </button>
+        <div className="flex justify-around pt-4">
+          <AddSaveButton label="שמור שינויים" />
+          <ExitButton label="ביטול" linkTo="/dashboard/users" />
+        </div>
       </form>
+
+      {/* Popup */}
+      {popupData.show && (
+        <Popup
+          title={popupData.title}
+          message={popupData.message}
+          mode={popupData.mode}
+          onClose={() => {
+            setPopupData({
+              show: false,
+              title: "",
+              message: "",
+              mode: "info",
+            });
+            if (popupData.mode === "success") {
+              navigate("/dashboard/users");
+            }
+          }}
+          onConfirm={popupData.mode === "confirm" ? confirmUpdate : undefined}
+        />
+      )}
     </div>
   );
 };

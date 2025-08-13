@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../Tools/UserContext";
 import ExitButton from "../Buttons/ExitButton";
 import AddButton from "../Buttons/AddSaveButton";
+import Popup from "../Tools/Popup";
+
 const AddLead = () => {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -23,6 +25,8 @@ const AddLead = () => {
 
   const [clientExists, setClientExists] = useState(false);
   const [error, setError] = useState("");
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  const [successPopup, setSuccessPopup] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -76,14 +80,16 @@ const AddLead = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleConfirm = (e) => {
     e.preventDefault();
-
     if (!form.phone_number || !form.project_id || !form.status) {
       setError("נא למלא את כל השדות החובה");
       return;
     }
+    setShowConfirmPopup(true);
+  };
 
+  const handleSubmit = async () => {
     const leadData = {
       ...form,
       user_id: user.role_id === 3 ? user.user_id : form.user_id || null,
@@ -98,13 +104,16 @@ const AddLead = () => {
         }
       );
       if (res.data.Status) {
-        navigate("/dashboard/leads");
+        setShowConfirmPopup(false);
+        setSuccessPopup(true);
       } else {
         setError(res.data.Error || "שגיאה בשמירת פנייה");
+        setShowConfirmPopup(false);
       }
     } catch (err) {
       console.error("Error submitting lead:", err);
       setError("שגיאה בשמירת פנייה");
+      setShowConfirmPopup(false);
     }
   };
 
@@ -115,7 +124,7 @@ const AddLead = () => {
       </h2>
 
       <form
-        onSubmit={handleSubmit}
+        onSubmit={handleConfirm}
         className="bg-white/85 p-6 rounded-lg shadow-lg space-y-4"
       >
         <div>
@@ -231,6 +240,28 @@ const AddLead = () => {
           <ExitButton label="ביטול" linkTo="/dashboard/leads" />
         </div>
       </form>
+
+      {showConfirmPopup && (
+        <Popup
+          title="אישור שמירה"
+          message="האם אתה בטוח שברצונך לשמור את הפנייה?"
+          mode="confirm"
+          onConfirm={handleSubmit}
+          onClose={() => setShowConfirmPopup(false)}
+        />
+      )}
+
+      {successPopup && (
+        <Popup
+          title="הצלחה"
+          message="הפנייה נשמרה בהצלחה!"
+          mode="success"
+          onClose={() => {
+            setSuccessPopup(false);
+            navigate("/dashboard/leads");
+          }}
+        />
+      )}
     </div>
   );
 };

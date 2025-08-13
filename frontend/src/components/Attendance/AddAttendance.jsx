@@ -1,6 +1,9 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import ExitButton from "../Buttons/ExitButton";
+import AddSaveButton from "../Buttons/AddSaveButton";
+import Popup from "../Tools/Popup";
 
 const AddAttendance = () => {
   const navigate = useNavigate();
@@ -12,7 +15,14 @@ const AddAttendance = () => {
     check_in: "",
     check_out: "",
     status: "נוכח",
-    notes: "", // ✅ הוספת הערות
+    notes: "",
+  });
+
+  const [popupData, setPopupData] = useState({
+    show: false,
+    title: "",
+    message: "",
+    mode: "info",
   });
 
   const specialStatuses = ["חופשה", "מחלה", "היעדרות"];
@@ -23,9 +33,22 @@ const AddAttendance = () => {
       .get("http://localhost:8801/users/active", { withCredentials: true })
       .then((res) => {
         if (res.data.Status) setUsers(res.data.Result);
-        else alert("שגיאה בטעינת עובדים");
+        else
+          setPopupData({
+            show: true,
+            title: "שגיאה",
+            message: "שגיאה בטעינת עובדים",
+            mode: "error",
+          });
       })
-      .catch(() => alert("שגיאה בעת טעינת העובדים"));
+      .catch(() =>
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "שגיאה בעת טעינת העובדים",
+          mode: "error",
+        })
+      );
   }, []);
 
   const handleChange = (e) => {
@@ -44,22 +67,65 @@ const AddAttendance = () => {
 
     const requiredFields = ["user_id", "date", "status"];
     for (let field of requiredFields) {
-      if (!form[field]) return alert(`שדה חובה חסר: ${field}`);
+      if (!form[field]) {
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: `שדה חובה חסר: ${field}`,
+          mode: "error",
+        });
+        return;
+      }
     }
 
     if (!isSpecialStatus && (!form.check_in || !form.check_out)) {
-      return alert("יש להזין שעת כניסה ויציאה");
+      return setPopupData({
+        show: true,
+        title: "שגיאה",
+        message: "יש להזין שעת כניסה ויציאה",
+        mode: "error",
+      });
     }
 
+    // פופאפ אישור לפני שמירה
+    setPopupData({
+      show: true,
+      title: "אישור הוספת נוכחות",
+      message: "האם אתה בטוח שברצונך להוסיף רישום נוכחות?",
+      mode: "confirm",
+    });
+  };
+
+  const confirmAdd = () => {
     axios
       .post("http://localhost:8801/attendance/add", form, {
         withCredentials: true,
       })
       .then((res) => {
-        if (res.data.Status) navigate("/dashboard/attendance");
-        else alert("שגיאה: " + res.data.Error);
+        if (res.data.Status) {
+          setPopupData({
+            show: true,
+            title: "הצלחה",
+            message: "הנוכחות נוספה בהצלחה",
+            mode: "success",
+          });
+        } else {
+          setPopupData({
+            show: true,
+            title: "שגיאה",
+            message: res.data.Error || "שגיאה בשמירה",
+            mode: "error",
+          });
+        }
       })
-      .catch(() => alert("אירעה שגיאה בשמירה"));
+      .catch(() =>
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "אירעה שגיאה בשמירה",
+          mode: "error",
+        })
+      );
   };
 
   return (
@@ -72,7 +138,6 @@ const AddAttendance = () => {
           הוספת רישום נוכחות
         </h2>
 
-        {/* עובד */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">
             בחר עובד
@@ -92,7 +157,6 @@ const AddAttendance = () => {
           </select>
         </div>
 
-        {/* תאריך */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">תאריך</label>
           <input
@@ -105,7 +169,6 @@ const AddAttendance = () => {
           />
         </div>
 
-        {/* סטטוס */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">סטטוס</label>
           <select
@@ -121,7 +184,6 @@ const AddAttendance = () => {
           </select>
         </div>
 
-        {/* שעות כניסה/יציאה */}
         {!isSpecialStatus && (
           <>
             <div>
@@ -152,7 +214,6 @@ const AddAttendance = () => {
           </>
         )}
 
-        {/* ✅ הערות */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">הערות</label>
           <textarea
@@ -165,13 +226,31 @@ const AddAttendance = () => {
           />
         </div>
 
-        <button
-          type="submit"
-          className="font-rubik w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200 font-medium"
-        >
-          שמור רישום
-        </button>
+        <div className="flex justify-around pt-4">
+          <AddSaveButton label="שמור רישום" />
+          <ExitButton label="ביטול" linkTo="/dashboard/attendance" />
+        </div>
       </form>
+
+      {popupData.show && (
+        <Popup
+          title={popupData.title}
+          message={popupData.message}
+          mode={popupData.mode}
+          onClose={() => {
+            setPopupData({
+              show: false,
+              title: "",
+              message: "",
+              mode: "info",
+            });
+            if (popupData.mode === "success") {
+              navigate("/dashboard/attendance");
+            }
+          }}
+          onConfirm={popupData.mode === "confirm" ? confirmAdd : undefined}
+        />
+      )}
     </div>
   );
 };

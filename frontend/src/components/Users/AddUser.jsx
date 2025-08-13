@@ -1,6 +1,8 @@
 import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import ExitButton from "../Buttons/ExitButton";
+import AddSaveButton from "../Buttons/AddSaveButton";
 
 const AddUser = () => {
   const navigate = useNavigate();
@@ -97,6 +99,7 @@ const AddUser = () => {
           </label>
           <input
             type="text"
+            required
             inputMode="numeric"
             name="user_id"
             maxLength={9}
@@ -111,6 +114,7 @@ const AddUser = () => {
           <label className="font-rubik block mb-0.5 font-medium">שם פרטי</label>
           <input
             type="text"
+            required
             name="first_name"
             placeholder="הקלד שם פרטי"
             onChange={(e) => setUser({ ...user, first_name: e.target.value })}
@@ -125,6 +129,7 @@ const AddUser = () => {
           <input
             type="text"
             name="last_name"
+            required
             placeholder="הקלד שם משפחה"
             onChange={(e) => setUser({ ...user, last_name: e.target.value })}
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -138,6 +143,7 @@ const AddUser = () => {
           <input
             type="text"
             name="phone_number"
+            required
             placeholder="הקלד מספר טלפון"
             onChange={(e) => setUser({ ...user, phone_number: e.target.value })}
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -149,6 +155,7 @@ const AddUser = () => {
           <input
             type="email"
             name="email"
+            required
             placeholder="הקלד דואר אלקטרוני"
             onChange={(e) => setUser({ ...user, email: e.target.value })}
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -177,6 +184,7 @@ const AddUser = () => {
           <input
             type="password"
             name="password"
+            required
             placeholder="הקלד סיסמה"
             onChange={(e) => setUser({ ...user, password: e.target.value })}
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -194,12 +202,10 @@ const AddUser = () => {
           ></textarea>
         </div>
 
-        <button
-          type="submit"
-          className="font-rubik w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition duration-200 font-medium"
-        >
-          הוסף עובד
-        </button>
+        <div className="flex justify-around pt-4">
+          <AddSaveButton label="הוסף עובד" type="submit" />
+          <ExitButton label="ביטול" linkTo="/dashboard/roles" />
+        </div>
       </form>
     </div>
   );

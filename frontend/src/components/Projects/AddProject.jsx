@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Popup from "../Tools/Popup";
+import AddButton from "../Buttons/AddSaveButton";
+import ExitButton from "../Buttons/ExitButton";
 
 const AddProject = () => {
   const [form, setForm] = useState({
@@ -10,6 +13,8 @@ const AddProject = () => {
   });
 
   const [error, setError] = useState("");
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  const [successPopup, setSuccessPopup] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -20,34 +25,38 @@ const AddProject = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleConfirm = (e) => {
     e.preventDefault();
-
     if (!form.project_name.trim()) {
       setError("יש להזין שם פרויקט");
       return;
     }
+    setShowConfirmPopup(true);
+  };
 
-    axios
-      .post("http://localhost:8801/projects/add", form, {
+  const handleSubmit = async () => {
+    try {
+      const res = await axios.post("http://localhost:8801/projects/add", form, {
         withCredentials: true,
-      })
-      .then((res) => {
-        if (res.data.Status) {
-          navigate("/dashboard/projects");
-        } else {
-          setError(res.data.Error || "שגיאה בהוספת הפרויקט");
-        }
-      })
-      .catch((err) => {
-        console.error("שגיאה:", err);
-        setError("שגיאה בהתחברות לשרת");
       });
+
+      if (res.data.Status) {
+        setShowConfirmPopup(false);
+        setSuccessPopup(true);
+      } else {
+        setError(res.data.Error || "שגיאה בהוספת הפרויקט");
+        setShowConfirmPopup(false);
+      }
+    } catch (err) {
+      console.error("שגיאה:", err);
+      setError("שגיאה בהתחברות לשרת");
+      setShowConfirmPopup(false);
+    }
   };
 
   return (
-    <div className="max-w-xl mx-auto bg-white/90 p-6 mt-8 rounded-lg shadow-md text-right">
-      <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
+    <div className="max-w-xl mx-auto bg-white/90 p-6 mt-8 rounded-lg shadow-md text-right font-rubik">
+      <h2 className="text-2xl font-semibold text-blue-700 mb-6 text-center">
         הוספת פרויקט חדש
       </h2>
 
@@ -57,7 +66,7 @@ const AddProject = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4 font-rubik">
+      <form onSubmit={handleConfirm} className="space-y-4">
         <div>
           <label className="block mb-1 font-medium">שם פרויקט *</label>
           <input
@@ -92,15 +101,33 @@ const AddProject = () => {
           <label className="text-sm">הפרויקט פעיל</label>
         </div>
 
-        <div className="text-center">
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-          >
-            שמור פרויקט
-          </button>
+        <div className="flex justify-center gap-4 mt-6">
+          <AddButton label="שמור פרויקט" type="submit" />
+          <ExitButton label="ביטול" linkTo="/dashboard/projects" />
         </div>
       </form>
+
+      {showConfirmPopup && (
+        <Popup
+          title="אישור שמירה"
+          message="האם אתה בטוח שברצונך לשמור את הפרויקט?"
+          mode="confirm"
+          onConfirm={handleSubmit}
+          onClose={() => setShowConfirmPopup(false)}
+        />
+      )}
+
+      {successPopup && (
+        <Popup
+          title="הצלחה"
+          message="הפרויקט נשמר בהצלחה!"
+          mode="success"
+          onClose={() => {
+            setSuccessPopup(false);
+            navigate("/dashboard/projects");
+          }}
+        />
+      )}
     </div>
   );
 };

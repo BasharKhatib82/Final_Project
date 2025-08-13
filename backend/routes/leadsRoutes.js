@@ -121,6 +121,7 @@ router.put("/edit/:id", verifyToken, (req, res) => {
     city,
     status,
     project_id,
+    user_id,
   } = req.body;
 
   if (!phone_number || !first_name || !last_name || !status || !project_id) {
@@ -138,12 +139,12 @@ router.put("/edit/:id", verifyToken, (req, res) => {
     const proceedToUpdate = () => {
       const updateLeadSQL = `
         UPDATE leads
-        SET status = ?, project_id = ?, phone_number = ?
+        SET status = ?, project_id = ?, phone_number = ?, user_id = ?
         WHERE lead_id = ?
       `;
       connection.query(
         updateLeadSQL,
-        [status, project_id, phone_number, id],
+        [status, project_id, phone_number, user_id || null, id],
         (err2) => {
           if (err2) {
             console.error("שגיאה בעדכון פנייה:", err2);

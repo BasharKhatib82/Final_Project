@@ -16,9 +16,12 @@ const AddRole = () => {
     can_access_all_data: 0,
   });
 
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [showConfirmAddPopup, setShowConfirmAddPopup] = useState(false);
-  const [showCancelPopup, setShowCancelPopup] = useState(false);
+  const [popupData, setPopupData] = useState({
+    show: false,
+    title: "",
+    message: "",
+    mode: "info",
+  });
 
   const navigate = useNavigate();
 
@@ -32,34 +35,40 @@ const AddRole = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setShowConfirmAddPopup(true);
+
+    // נפתח קודם popup אישור
+    setPopupData({
+      show: true,
+      title: "אישור הוספה",
+      message: "⚠️ האם אתה בטוח שברצונך להוסיף תפקיד חדש?",
+      mode: "confirm",
+    });
   };
 
-  const handleConfirmAdd = () => {
-    setShowConfirmAddPopup(false);
-
+  const confirmAdd = () => {
     axios
       .post("http://localhost:8801/roles/add", formData, {
         withCredentials: true,
       })
       .then(() => {
-        setShowSuccessPopup(true);
+        setPopupData({
+          show: true,
+          title: "הצלחה",
+          message: "התפקיד נוסף בהצלחה!",
+          mode: "success",
+        });
       })
       .catch((err) => {
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "אירעה שגיאה בהוספת התפקיד",
+          mode: "error",
+        });
         console.error(err);
-        alert("אירעה שגיאה בהוספת התפקיד");
       });
   };
 
-  const handleSuccessClose = () => {
-    setShowSuccessPopup(false);
-    navigate("/dashboard/roles");
-  };
-
-  const handleExitChanges = () => {
-    setShowCancelPopup(true);
-    navigate("/dashboard/roles");
-  };
 
   return (
     <div className="flex justify-center items-center pt-10">
@@ -108,34 +117,37 @@ const AddRole = () => {
             </select>
           </div>
         ))}
+
         <div className="flex justify-around pt-4">
           <AddSaveButton label="הוסף תפקיד" type="submit" />
-          <ExitButton label="ביטול" onClick={handleExitChanges} />
+          <ExitButton label="ביטול" linkTo="/dashboard/roles" />
         </div>
       </form>
 
-      {/* פופאפ אישור הוספה */}
-      {showConfirmAddPopup && (
+      {/* Popup */}
+      {popupData.show && (
         <Popup
-          message="האם אתה בטוח שברצונך ליצור תפקיד חדש ?"
-          mode="confirm"
-          onConfirm={handleConfirmAdd}
-          onClose={() => showConfirmAddPopup(false)}
-        />
-      )}
-
-      {/* פופאפ הצלחה */}
-      {showSuccessPopup && (
-        <Popup message="התפקיד נוסף בהצלחה !" onClose={handleSuccessClose} />
-      )}
-
-      {/* פופאפ ביטול */}
-      {showCancelPopup && (
-        <Popup
-          message="האם אתה בטוח שברצונך לבטל את הוספת התפקיד ?"
-          mode="confirm"
-          onClose={() => setShowCancelPopup(false)}
-          onConfirm={() => navigate("/dashboard/roles")}
+          title={popupData.title}
+          message={popupData.message}
+          mode={popupData.mode}
+          onClose={() => {
+            setPopupData({
+              show: false,
+              title: "",
+              message: "",
+              mode: "info",
+            });
+            if (popupData.mode === "success") {
+              navigate("/dashboard/roles");
+            }
+          }}
+          onConfirm={
+            popupData.mode === "confirm"
+              ? popupData.title === "אישור הוספה"
+                ? confirmAdd
+                : () => navigate("/dashboard/roles")
+              : undefined
+          }
         />
       )}
     </div>

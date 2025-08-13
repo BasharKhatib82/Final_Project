@@ -28,17 +28,22 @@ function Login() {
         const authRes = await axios.get("http://localhost:8801/auth/check", {
           withCredentials: true,
         });
-
+        const userData = loginRes.data.user;
+        // מוסיפים full_name
+        userData.full_name = `${userData.first_name} ${userData.last_name}`;
         if (authRes.data.loggedIn) {
-          setUser(authRes.data.user);
+          // כאן שמים את כל פרטי המשתמש — כולל ההרשאות
+          setUser(loginRes.data.user);
           navigate("/dashboard");
+        } else {
+          setError("שגיאה באימות ההתחברות");
         }
       } else {
         setError(loginRes.data.message);
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError("אירעה שגיאה בשרת");
+      setError("שם המשתמש או הסיסמה אינם נכונים");
     }
   };
 

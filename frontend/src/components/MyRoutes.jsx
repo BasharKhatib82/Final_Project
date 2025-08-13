@@ -38,6 +38,8 @@ import Logs from "./Logs/Logs";
 import Profile from "./Profile";
 import Unauthorized from "./Pages/Unauthorized";
 import Footer from "./Pages/Footer";
+import EditTask from "./Tasks/EditTask";
+import TaskDetails from "./Tasks/TaskDetails";
 
 function MyRoutes() {
   return (
@@ -74,8 +76,12 @@ function MyRoutes() {
             <Route path="projects" element={<Projects />} />
             <Route path="add_project" element={<AddProject />} />
             <Route path="edit_project/:id" element={<EditProject />} />
+
             <Route path="tasks" element={<Tasks />} />
             <Route path="add_task" element={<AddTask />} />
+            <Route path="edit_task/:id" element={<EditTask />} />
+            <Route path="details_task/:id" element={<TaskDetails />} />
+
             <Route path="logs" element={<Logs />} />
             <Route path="profile" element={<Profile />} />
           </Route>

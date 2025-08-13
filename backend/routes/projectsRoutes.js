@@ -1,6 +1,7 @@
 import express from "express";
 import dbSingleton from "../utils/dbSingleton.js";
 import verifyToken from "../utils/verifyToken.js";
+import logAction from "../utils/logAction.js";
 
 const router = express.Router();
 const connection = dbSingleton.getConnection();
@@ -9,8 +10,11 @@ const connection = dbSingleton.getConnection();
 router.get("/", verifyToken, (req, res) => {
   const sql = "SELECT * FROM projects ORDER BY project_id DESC";
   connection.query(sql, (err, result) => {
-    if (err) return res.json({ Status: false, Error: err });
-    return res.json({ Status: true, Result: result });
+    if (err) {
+      console.error("שגיאה בשליפת פרויקטים:", err);
+      return res.json({ Status: false, Error: err });
+    }
+    res.json({ Status: true, Result: result });
   });
 });
 
@@ -18,20 +22,26 @@ router.get("/", verifyToken, (req, res) => {
 router.post("/add", verifyToken, (req, res) => {
   const { project_name, project_description, is_active } = req.body;
 
-  if (!project_name || !project_description) {
-    return res.json({ Status: false, Error: "נא למלא את כל השדות" });
+  if (!project_name || project_name.trim() === "") {
+    return res.json({ Status: false, Error: "יש להזין שם פרויקט" });
   }
 
   const sql = `
     INSERT INTO projects (project_name, project_description, is_active)
     VALUES (?, ?, ?)
   `;
+
   connection.query(
     sql,
     [project_name, project_description, is_active ?? 1],
-    (err, result) => {
-      if (err) return res.json({ Status: false, Error: err });
-      return res.json({ Status: true, Message: "הפרויקט נוסף בהצלחה" });
+    (err) => {
+      if (err) {
+        console.error("שגיאה בהוספת פרויקט:", err);
+        return res.json({ Status: false, Error: err });
+      }
+
+      logAction(`הוספת פרויקט חדש: ${project_name}`)(req, res, () => {});
+      res.json({ Status: true, Message: "הפרויקט נוסף בהצלחה" });
     }
   );
 });
@@ -41,18 +51,27 @@ router.put("/edit/:id", verifyToken, (req, res) => {
   const { id } = req.params;
   const { project_name, project_description, is_active } = req.body;
 
+  if (!project_name || project_name.trim() === "") {
+    return res.json({ Status: false, Error: "יש להזין שם פרויקט" });
+  }
+
   const sql = `
-    UPDATE projects 
+    UPDATE projects
     SET project_name = ?, project_description = ?, is_active = ?
     WHERE project_id = ?
   `;
 
   connection.query(
     sql,
-    [project_name, project_description, is_active, id],
-    (err, result) => {
-      if (err) return res.json({ Status: false, Error: err });
-      return res.json({ Status: true, Message: "הפרויקט עודכן בהצלחה" });
+    [project_name, project_description, is_active ?? 1, id],
+    (err) => {
+      if (err) {
+        console.error("שגיאה בעדכון פרויקט:", err);
+        return res.json({ Status: false, Error: err });
+      }
+
+      logAction(`עדכון פרויקט #${id}`)(req, res, () => {});
+      res.json({ Status: true, Message: "הפרויקט עודכן בהצלחה" });
     }
   );
 });
@@ -60,14 +79,21 @@ router.put("/edit/:id", verifyToken, (req, res) => {
 // ✅ מחיקה לוגית של פרויקט
 router.delete("/delete/:id", verifyToken, (req, res) => {
   const { id } = req.params;
+
   const sql = `
     UPDATE projects
     SET is_active = 0
     WHERE project_id = ?
   `;
-  connection.query(sql, [id], (err, result) => {
-    if (err) return res.json({ Status: false, Error: err });
-    return res.json({
+
+  connection.query(sql, [id], (err) => {
+    if (err) {
+      console.error("שגיאה במחיקת פרויקט:", err);
+      return res.json({ Status: false, Error: err });
+    }
+
+    logAction(`מחיקת פרויקט #${id} (לוגית)`)(req, res, () => {});
+    res.json({
       Status: true,
       Message: "הפרויקט הועבר לארכיון (מחיקה לוגית)",
     });
@@ -78,8 +104,11 @@ router.delete("/delete/:id", verifyToken, (req, res) => {
 router.get("/active", verifyToken, (req, res) => {
   const sql = "SELECT * FROM projects WHERE is_active = 1";
   connection.query(sql, (err, result) => {
-    if (err) return res.json({ Status: false, Error: err });
-    return res.json({ Status: true, Result: result });
+    if (err) {
+      console.error("שגיאה בשליפת פרויקטים פעילים:", err);
+      return res.json({ Status: false, Error: err });
+    }
+    res.json({ Status: true, Result: result });
   });
 });
 
@@ -87,11 +116,13 @@ router.get("/active", verifyToken, (req, res) => {
 router.get("/inactive", verifyToken, (req, res) => {
   const sql = "SELECT * FROM projects WHERE is_active = 0";
   connection.query(sql, (err, result) => {
-    if (err) return res.json({ Status: false, Error: err });
-    return res.json({ Status: true, Result: result });
+    if (err) {
+      console.error("שגיאה בשליפת פרויקטים לא פעילים:", err);
+      return res.json({ Status: false, Error: err });
+    }
+    res.json({ Status: true, Result: result });
   });
 });
-
 
 // ✅ שליפת פרויקט לפי ID
 router.get("/:id", verifyToken, (req, res) => {
@@ -99,13 +130,16 @@ router.get("/:id", verifyToken, (req, res) => {
 
   const sql = "SELECT * FROM projects WHERE project_id = ?";
   connection.query(sql, [id], (err, result) => {
-    if (err) return res.json({ Status: false, Error: err });
+    if (err) {
+      console.error("שגיאה בשליפת פרויקט לפי ID:", err);
+      return res.json({ Status: false, Error: err });
+    }
 
     if (result.length === 0) {
       return res.json({ Status: false, Error: "הפרויקט לא נמצא" });
     }
 
-    return res.json({ Status: true, Result: result[0] });
+    res.json({ Status: true, Result: result[0] });
   });
 });
 

@@ -1,7 +1,8 @@
-// ✅ קובץ Attendance.jsx עם תיקון סינון לפי עובד (parseInt)
+// ✅ קובץ Attendance.jsx מתוקן — כולל טיפול בעובדים לא פעילים
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Tooltip from "../Tools/Tooltip";
 import NavigationButton from "../Buttons/NavigationButton";
 
 const Attendance = () => {
@@ -45,10 +46,26 @@ const Attendance = () => {
   };
 
   const fetchUsers = () => {
-    axios
-      .get("http://localhost:8801/users/active", { withCredentials: true })
-      .then((res) => {
-        setUsers(res.data.Result || []);
+    Promise.all([
+      axios.get("http://localhost:8801/users/active", {
+        withCredentials: true,
+      }),
+      axios.get("http://localhost:8801/users/inactive", {
+        withCredentials: true,
+      }),
+    ])
+      .then(([activeRes, inactiveRes]) => {
+        const active = activeRes.data.Result.map((user) => ({
+          ...user,
+          active: true,
+        }));
+
+        const inactive = inactiveRes.data.Result.map((user) => ({
+          ...user,
+          active: false,
+        }));
+
+        setUsers([...active, ...inactive]);
       })
       .catch((err) => {
         console.error("שגיאה בטעינת משתמשים:", err);
@@ -57,7 +74,18 @@ const Attendance = () => {
 
   const getUserName = (userId) => {
     const user = users.find((u) => u.user_id === userId);
-    return user ? `${user.first_name} ${user.last_name}` : "לא ידוע";
+    if (!user) return "לא ידוע";
+
+    return (
+      <>
+        {user.first_name} {user.last_name}
+        {!user.active ? (
+          <Tooltip message="עובד זה לא פעיל יותר">
+            <span className="text-yellow-500"> ⚠ </span>
+          </Tooltip>
+        ) : null}
+      </>
+    );
   };
 
   const formatTime = (timeStr) => (timeStr ? timeStr.slice(0, 5) : "-");
@@ -70,7 +98,7 @@ const Attendance = () => {
   };
 
   const filteredData = attendance.filter((record) => {
-    const name = getUserName(record.user_id).toLowerCase();
+    const name = `${getUserName(record.user_id)}`.toLowerCase();
     const statusText = record.status.toLowerCase();
     const dateText = toLocalDate(record.date);
 
@@ -88,7 +116,6 @@ const Attendance = () => {
     const matchesEmployee =
       employeeFilter === "all" ||
       record.user_id.toString() === employeeFilter.toString();
-    // ✅ תיקון השוואה למספר
 
     return matchesSearch && matchesStatus && matchesEmployee;
   });
@@ -126,6 +153,7 @@ const Attendance = () => {
           {users.map((user) => (
             <option key={user.user_id} value={user.user_id}>
               {user.first_name} {user.last_name}
+              {!user.active ? " ⚠ לא פעיל" : ""}
             </option>
           ))}
         </select>

@@ -10,8 +10,9 @@ const Roles = () => {
   const [allRoles, setAllRoles] = useState([]);
   const [popup, setPopup] = useState({
     show: false,
+    title: "",
     message: "",
-    type: "",
+    mode: "",
     role_id: null,
   });
   const [loading, setLoading] = useState(true);
@@ -57,19 +58,22 @@ const Roles = () => {
       .catch(() => {
         setPopup({
           show: true,
+          title: "שגיאה",
           message: "שגיאה בטעינת התפקידים",
-          type: "error",
+          mode: "error",
         });
       })
       .finally(() => setLoading(false));
   };
 
   const handleEdit = (role_id) => navigate(`/dashboard/edit_role/${role_id}`);
+
   const handleDelete = (role_id) =>
     setPopup({
       show: true,
+      title: "אישור מחיקה",
       message: "⚠️ האם אתה בטוח שברצונך למחוק את התפקיד?",
-      type: "confirm",
+      mode: "confirm",
       role_id,
     });
 
@@ -81,16 +85,18 @@ const Roles = () => {
       .then(() => {
         setPopup({
           show: true,
+          title: "הצלחה",
           message: "✅ התפקיד נמחק בהצלחה",
-          type: "success",
+          mode: "success",
         });
         fetchRoles();
       })
       .catch(() => {
         setPopup({
           show: true,
+          title: "שגיאה",
           message: "אירעה שגיאה במחיקה",
-          type: "error",
+          mode: "error",
         });
       });
   };
@@ -110,7 +116,6 @@ const Roles = () => {
     return statusCheck && (nameMatch || statusMatch);
   });
 
-  // ✅ סימון ✓ או ✗ בצבע מתאים
   const renderCheck = (value) => (
     <span
       className={value ? "text-green-600 font-bold" : "text-red-500 font-bold"}
@@ -135,7 +140,7 @@ const Roles = () => {
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className=" font-rubik border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
+          className="font-rubik border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
         >
           <option value="active">תפקידים פעילים</option>
           <option value="inactive">תפקידים לא פעילים</option>
@@ -165,10 +170,10 @@ const Roles = () => {
       {loading ? (
         <div className="text-center text-gray-600">טוען נתונים...</div>
       ) : (
-        <div className="overflow-auto rounded-lg shadow-lg  bg-white/85">
+        <div className="overflow-auto rounded-lg shadow-lg bg-white/85">
           <table className="w-full table-auto border-collapse text-sm text-center">
             <thead>
-              <tr className=" bg-slate-100 text-gray-800">
+              <tr className="bg-slate-100 text-gray-800">
                 <th className="p-2 border">מזהה</th>
                 <th className="p-2 border">שם תפקיד</th>
                 <th className="p-2 border">ניהול משתמשים</th>
@@ -248,23 +253,25 @@ const Roles = () => {
       )}
 
       {/* Popup */}
-      {popup.show && popup.type !== "confirm" && (
+      {popup.show && (
         <Popup
+          title={popup.title}
           message={popup.message}
-          type={popup.type}
+          mode={popup.mode}
           onClose={() =>
-            setPopup({ show: false, message: "", type: "", role_id: null })
+            setPopup({
+              show: false,
+              title: "",
+              message: "",
+              mode: "",
+              role_id: null,
+            })
           }
-        />
-      )}
-      {popup.show && popup.type === "confirm" && (
-        <Popup
-          message={popup.message}
-          type="confirm"
-          onClose={() =>
-            setPopup({ show: false, message: "", type: "", role_id: null })
+          onConfirm={
+            popup.mode === "confirm"
+              ? () => confirmDelete(popup.role_id)
+              : undefined
           }
-          onConfirm={() => confirmDelete(popup.role_id)}
         />
       )}
     </div>

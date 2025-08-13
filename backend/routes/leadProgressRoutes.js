@@ -28,7 +28,7 @@ router.get("/:lead_id", verifyToken, (req, res) => {
   });
 });
 
-// ✅ הוספת תיעוד חדש להתקדמות פנייה
+// ✅ הוספת תיעוד חדש + עדכון סטטוס פנייה
 router.post("/add", verifyToken, (req, res) => {
   const { lead_id, lead_note, status } = req.body;
   const user_id = req.user.user_id;
@@ -37,24 +37,37 @@ router.post("/add", verifyToken, (req, res) => {
     return res.json({ Status: false, Error: "נא למלא את כל השדות" });
   }
 
-  const sql = `
+  const sql1 = `
     INSERT INTO lead_progress (lead_id, user_id, lead_note, status, update_time)
     VALUES (?, ?, ?, ?, NOW())
   `;
 
-  connection.query(
-    sql,
-    [lead_id, user_id, lead_note, status],
-    (err, result) => {
-      if (err) {
-        console.error("שגיאה בהוספת תיעוד:", err);
-        return res.json({ Status: false, Error: err });
+  const sql2 = `
+    UPDATE leads
+    SET status = ?
+    WHERE lead_id = ?
+  `;
+
+  connection.query(sql1, [lead_id, user_id, lead_note, status], (err1) => {
+    if (err1) {
+      console.error("שגיאה בהוספת תיעוד:", err1);
+      return res.json({ Status: false, Error: err1 });
+    }
+
+    connection.query(sql2, [status, lead_id], (err2) => {
+      if (err2) {
+        console.error("שגיאה בעדכון סטטוס פנייה:", err2);
+        return res.json({ Status: false, Error: err2 });
       }
 
-      logAction(`הוספת תיעוד לפנייה #${lead_id}`)(req, res, () => {});
-      res.json({ Status: true, Message: "תיעוד נשמר בהצלחה" });
-    }
-  );
+      logAction(`הוספת תיעוד + עדכון סטטוס לפנייה #${lead_id}`)(
+        req,
+        res,
+        () => {}
+      );
+      res.json({ Status: true, Message: "התיעוד והסטטוס נשמרו בהצלחה" });
+    });
+  });
 });
 
 export default router;

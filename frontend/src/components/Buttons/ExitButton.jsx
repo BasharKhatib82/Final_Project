@@ -1,11 +1,17 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
-const ExitButton = ({ label, onClick }) => {
+const ExitButton = ({ label, onClick, linkTo }) => {
+  const navigate = useNavigate();
+
   const handleClick = (e) => {
     if (onClick) {
       onClick(e);
+    } else if (linkTo) {
+      navigate(linkTo);
     }
   };
+
   return (
     <button
       onClick={handleClick}

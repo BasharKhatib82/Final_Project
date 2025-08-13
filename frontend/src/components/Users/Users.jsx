@@ -1,16 +1,23 @@
-// רכיב Users.jsx מעוצב בהתאם לעיצוב של Roles.jsx
-
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import NavigationButton from "../Buttons/NavigationButton";
+import Popup from "../Tools/Popup";
 
 const Users = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
+  const [popupData, setPopupData] = useState({
+    show: false,
+    title: "",
+    message: "",
+    mode: "info",
+    user_id: null,
+  });
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,7 +61,13 @@ const Users = () => {
         setAllUsers([...active, ...inactive]);
       })
       .catch((err) => {
-        console.error("שגיאה בטעינת העובדים:", err);
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "שגיאה בטעינת העובדים",
+          mode: "error",
+        });
+        console.error(err);
       });
   };
 
@@ -79,7 +92,13 @@ const Users = () => {
         setRoles([...active, ...inactive]);
       })
       .catch((err) => {
-        console.error("שגיאה בטעינת תפקידים:", err);
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "שגיאה בטעינת תפקידים",
+          mode: "error",
+        });
+        console.error(err);
       });
   };
 
@@ -112,6 +131,52 @@ const Users = () => {
       statusCheck && (fullName.includes(term) || statusText.includes(term))
     );
   });
+
+  const handleDeactivate = (userId) => {
+    setPopupData({
+      show: true,
+      title: "אישור מחיקת משתמש",
+      message: "⚠️ האם אתה בטוח שברצונך להפוך משתמש זה ללא פעיל?",
+      mode: "confirm",
+      user_id: userId,
+    });
+  };
+
+  const confirmDeactivate = (userId) => {
+    axios
+      .put(
+        `http://localhost:8801/users/delete/${userId}`,
+        { is_active: 0 },
+        { withCredentials: true }
+      )
+      .then((res) => {
+        if (res.data.Status) {
+          setPopupData({
+            show: true,
+            title: "הצלחה",
+            message: "המשתמש סומן כלא פעיל",
+            mode: "success",
+          });
+          fetchUsers();
+        } else {
+          setPopupData({
+            show: true,
+            title: "שגיאה",
+            message: res.data.Error || "שגיאה בעדכון סטטוס משתמש",
+            mode: "error",
+          });
+        }
+      })
+      .catch((err) => {
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "אירעה שגיאה בעדכון סטטוס משתמש",
+          mode: "error",
+        });
+        console.error(err);
+      });
+  };
 
   return (
     <div className="p-6 text-right">
@@ -204,7 +269,10 @@ const Users = () => {
                       עריכה
                     </button>
                     {user.is_active && (
-                      <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                      <button
+                        onClick={() => handleDeactivate(user.user_id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
                         מחיקה
                       </button>
                     )}
@@ -215,6 +283,29 @@ const Users = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Popup */}
+      {popupData.show && (
+        <Popup
+          title={popupData.title}
+          message={popupData.message}
+          mode={popupData.mode}
+          onClose={() =>
+            setPopupData({
+              show: false,
+              title: "",
+              message: "",
+              mode: "info",
+              user_id: null,
+            })
+          }
+          onConfirm={
+            popupData.mode === "confirm"
+              ? () => confirmDeactivate(popupData.user_id)
+              : undefined
+          }
+        />
+      )}
     </div>
   );
 };

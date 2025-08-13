@@ -10,11 +10,9 @@ import bcrypt from "bcrypt";
 const connection = dbSingleton.getConnection();
 const router = express.Router();
 
-// === קבועים לשימוש חוזר ===
 const LOGO_UPLOAD_DIR = "./uploads/logos";
 const BUSINESS_JSON = "./data/business.json";
 
-// === אחסון לוגו עם Multer ===
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     if (!fs.existsSync(LOGO_UPLOAD_DIR)) {
@@ -30,7 +28,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-//  הוספת משתמש חדש למערכת
+// === הוספת משתמש חדש ===
 router.post("/add", verifyToken, (req, res) => {
   const sql = `
     INSERT INTO users 
@@ -53,7 +51,7 @@ router.post("/add", verifyToken, (req, res) => {
       req.body.role_id,
       hash,
       req.body.notes,
-      1, // קובע את סטטוס המשתמש כברירת מחדל ל"פעיל" שזה 1
+      1,
     ];
 
     connection.query(sql, values, (err, result) => {
@@ -67,34 +65,8 @@ router.post("/add", verifyToken, (req, res) => {
   });
 });
 
-// === שליפת עובדים פעילים (רק למנהל כללי) ===
-router.get("/active", verifyToken, (req, res) => {
-  // if (req.user.role_id !== 1)
-  //   return res.status(403).json({ message: "אין הרשאות לצפייה" });
-
-  const query = "SELECT * FROM users WHERE is_active = 1";
-  connection.query(query, (err, results) => {
-    if (err)
-      return res.status(500).json({ Status: false, Error: "שגיאה במסד" });
-    res.status(200).json({ Status: true, Result: results });
-  });
-});
-
-// === שליפת עובדים לא פעילים (רק למנהל כללי) ===
-router.get("/inactive", verifyToken, (req, res) => {
-  // if (req.user.role_id !== 1)
-  //   return res.status(403).json({ message: "אין הרשאות לצפייה" });
-
-  const query = "SELECT * FROM users WHERE is_active = 0";
-  connection.query(query, (err, results) => {
-    if (err)
-      return res.status(500).json({ Status: false, Error: "שגיאה במסד" });
-    res.status(200).json({ Status: true, Result: results });
-  });
-});
-
-// עדכון משתמש לפי מזהה
-router.put("/edit/:id", (req, res) => {
+// === עדכון משתמש לפי מזהה ===
+router.put("/:id", verifyToken, (req, res) => {
   const userId = req.params.id;
   const {
     first_name,
@@ -138,9 +110,47 @@ router.put("/edit/:id", (req, res) => {
   connection.query(updateQuery, values, (err, result) => {
     if (err)
       return res.status(500).json({ Status: false, Error: "Database Error" });
+
     return res
       .status(200)
-      .json({ Status: true, Message: "User updated successfully" });
+      .json({ Status: true, Message: "המשתמש עודכן בהצלחה" });
+  });
+});
+
+// === שליפת עובדים פעילים ===
+router.get("/active", verifyToken, (req, res) => {
+  const query = "SELECT * FROM users WHERE is_active = 1";
+  connection.query(query, (err, results) => {
+    if (err)
+      return res.status(500).json({ Status: false, Error: "שגיאה במסד" });
+    res.status(200).json({ Status: true, Result: results });
+  });
+});
+
+// === שליפת עובדים לא פעילים ===
+router.get("/inactive", verifyToken, (req, res) => {
+  const query = "SELECT * FROM users WHERE is_active = 0";
+  connection.query(query, (err, results) => {
+    if (err)
+      return res.status(500).json({ Status: false, Error: "שגיאה במסד" });
+    res.status(200).json({ Status: true, Result: results });
+  });
+});
+
+// === שליפת משתמש בודד לפי מזהה ===
+router.get("/:id", verifyToken, (req, res) => {
+  const userId = req.params.id;
+
+  const query = "SELECT * FROM users WHERE user_id = ?";
+  connection.query(query, [userId], (err, results) => {
+    if (err)
+      return res.status(500).json({ Status: false, Error: "Database Error" });
+
+    if (results.length === 0) {
+      return res.status(404).json({ Status: false, Error: "המשתמש לא נמצא" });
+    }
+
+    res.status(200).json({ Status: true, User: results[0] });
   });
 });
 
@@ -154,7 +164,7 @@ router.get("/business", verifyToken, (req, res) => {
   }
 });
 
-// === עדכון פרטי עסק כולל העלאת לוגו ===
+// === עדכון פרטי עסק כולל לוגו ===
 router.put("/business", verifyToken, upload.single("logo"), (req, res) => {
   try {
     let data = JSON.parse(fs.readFileSync(BUSINESS_JSON));
@@ -163,13 +173,11 @@ router.put("/business", verifyToken, upload.single("logo"), (req, res) => {
     data.phone = req.body.phone;
 
     if (req.file) {
-      // מחיקת לוגו קודם אם קיים
       if (data.logo && data.logo !== "/uploads/logos/default.png") {
         const oldPath = "." + data.logo;
         if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
       }
 
-      // הגדרת נתיב חדש
       data.logo = "/uploads/logos/" + req.file.filename;
     }
 
@@ -179,6 +187,27 @@ router.put("/business", verifyToken, upload.single("logo"), (req, res) => {
     console.error("שגיאה בעדכון פרטי עסק:", err);
     res.status(500).json({ error: "שגיאה בעדכון נתונים" });
   }
+});
+
+// === מחיקה לוגית של משתמש (השבתה) ===
+router.put("/delete/:id", verifyToken, (req, res) => {
+  const userId = req.params.id;
+
+  const query = `
+    UPDATE users SET is_active = 0
+    WHERE user_id = ?
+  `;
+
+  connection.query(query, [userId], (err, result) => {
+    if (err) {
+      console.error("שגיאה בהשבתת משתמש:", err);
+      return res.status(500).json({ Status: false, Error: "Database Error" });
+    }
+
+    logAction("השבתת משתמש", req.user?.user_id)(req, res, () => {});
+
+    res.status(200).json({ Status: true, Message: "המשתמש הושבת בהצלחה" });
+  });
 });
 
 export default router;

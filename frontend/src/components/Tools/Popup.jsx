@@ -1,32 +1,75 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
-const Popup = ({ message, mode = "info", onClose, onConfirm }) => {
+const Popup = ({
+  title,
+  message,
+  mode, // info / success / error / warning / confirm
+  onClose,
+  onConfirm,
+  redirectOnConfirm, // אופציונלי: קישור לעבור אליו אחרי אישור
+  redirectOnClose, // אופציונלי: קישור לעבור אליו אחרי סגירה/ביטול
+}) => {
+  const navigate = useNavigate();
+
+  const handleClose = () => {
+    if (onClose) onClose();
+    if (redirectOnClose) navigate(redirectOnClose);
+  };
+
+  const handleConfirm = () => {
+    if (onConfirm) onConfirm();
+    if (redirectOnConfirm) navigate(redirectOnConfirm);
+  };
+
+  const getColor = () => {
+    switch (mode) {
+      case "success":
+        return "bg-green-600 hover:bg-green-700";
+      case "error":
+        return "bg-red-600 hover:bg-red-700";
+      case "warning":
+        return "bg-yellow-500 hover:bg-yellow-600";
+      case "info":
+        return "bg-blue-600 hover:bg-blue-700";
+      case "confirm":
+        return "bg-green-600 hover:bg-green-700";
+      default:
+        return "bg-blue-600 hover:bg-blue-700";
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4">
       <div className="bg-white w-full max-w-md rounded-lg border shadow-md p-6 text-center space-y-4">
-        <p className="text-base text-gray-800 font-medium leading-relaxed">
-          {message}
-        </p>
+        {/* כותרת */}
+        <h2 className="font-rubik text-xl font-semibold text-gray-800">
+          {title}
+        </h2>
 
+        {/* הודעה */}
+        <p className="text-base text-gray-700 leading-relaxed">{message}</p>
+
+        {/* כפתורים */}
         {mode === "confirm" ? (
-          <div className="flex justify-center gap-4">
+          <div className="flex justify-center gap-4 pt-2">
             <button
-              onClick={onConfirm}
-              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
+              onClick={handleConfirm}
+              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
             >
               אישור
             </button>
             <button
-              onClick={onClose}
-              className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+              onClick={handleClose}
+              className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 transition"
             >
               ביטול
             </button>
           </div>
         ) : (
           <button
-            onClick={onClose}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            onClick={handleClose}
+            className={`text-white px-6 py-2 rounded transition ${getColor()}`}
           >
             סגור
           </button>

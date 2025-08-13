@@ -3,10 +3,19 @@ import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
+import Popup from "../Tools/Popup";
 
-const UpdateRoleForm = () => {
+const EditRole = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const [popupData, setPopupData] = useState({
+    show: false,
+    title: "",
+    message: "",
+    mode: "info",
+  });
+
   const [formData, setFormData] = useState({
     role_name: "",
     can_manage_users: 0,
@@ -25,7 +34,12 @@ const UpdateRoleForm = () => {
         setFormData(res.data.Role);
       })
       .catch((err) => {
-        alert("שגיאה בטעינת פרטי התפקיד");
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "שגיאה בטעינת פרטי התפקיד",
+          mode: "error",
+        });
         console.error(err);
       });
   }, [id]);
@@ -37,16 +51,36 @@ const UpdateRoleForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // נפתח קודם אישור
+    setPopupData({
+      show: true,
+      title: "אישור עדכון",
+      message: "⚠️ האם אתה בטוח שברצונך לעדכן את פרטי התפקיד?",
+      mode: "confirm",
+    });
+  };
+
+  const confirmUpdate = () => {
     axios
       .put(`http://localhost:8801/roles/${id}`, formData, {
         withCredentials: true,
       })
       .then(() => {
-        navigate("/dashboard/roles");
-        alert("התפקיד עודכן בהצלחה");
+        setPopupData({
+          show: true,
+          title: "הצלחה",
+          message: "התפקיד עודכן בהצלחה!",
+          mode: "success",
+        });
       })
       .catch((err) => {
-        alert("שגיאת עדכון");
+        setPopupData({
+          show: true,
+          title: "שגיאת עדכון",
+          message: "אירעה שגיאה במהלך עדכון התפקיד",
+          mode: "error",
+        });
         console.error(err);
       });
   };
@@ -112,13 +146,36 @@ const UpdateRoleForm = () => {
             <option value="0">לא פעיל</option>
           </select>
         </div>
+
         <div className="flex justify-around pt-4">
           <AddSaveButton label="שמור שינויים" />
           <ExitButton label="ביטול" linkTo="/dashboard/roles" />
         </div>
       </form>
+
+      {/* Popup */}
+      {popupData.show && (
+        <Popup
+          title={popupData.title}
+          message={popupData.message}
+          mode={popupData.mode}
+          onClose={() => {
+            setPopupData({
+              show: false,
+              title: "",
+              message: "",
+              mode: "info",
+            });
+            // אם זו הצלחה — נחזור לרשימת תפקידים
+            if (popupData.mode === "success") {
+              navigate("/dashboard/roles");
+            }
+          }}
+          onConfirm={popupData.mode === "confirm" ? confirmUpdate : undefined}
+        />
+      )}
     </div>
   );
 };
 
-export default UpdateRoleForm;
+export default EditRole;

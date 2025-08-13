@@ -1,17 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import NavigationButton from "../Buttons/NavigationButton";
 import AddButton from "../Buttons/AddSaveButton";
-import { useUser } from "../Tools/UserContext";
+import NavigationButton from "../Buttons/NavigationButton";
 import Popup from "../Tools/Popup";
 
-const LeadDetails = () => {
+const TaskDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useUser();
 
-  const [lead, setLead] = useState(null);
+  const [task, setTask] = useState(null);
   const [progress, setProgress] = useState([]);
   const [newNote, setNewNote] = useState("");
   const [newStatus, setNewStatus] = useState("חדש");
@@ -20,31 +18,33 @@ const LeadDetails = () => {
   const [confirmPopup, setConfirmPopup] = useState(false);
 
   useEffect(() => {
-    fetchLead();
+    fetchTask();
     fetchProgress();
   }, []);
 
-  const fetchLead = async () => {
+  const fetchTask = async () => {
     try {
-      const res = await axios.get(`http://localhost:8801/leads/${id}`, {
+      const res = await axios.get(`http://localhost:8801/tasks/${id}`, {
         withCredentials: true,
       });
       if (res.data.Status) {
-        setLead(res.data.Result);
-        setNewStatus(res.data.Result.status); // ✅ נעדכן גם את סטטוס הפנייה
+        setTask(res.data.Result);
+        setNewStatus(res.data.Result.status);
       } else {
-        console.error("שגיאה בטעינת הפנייה:", res.data.Error);
+        console.error("שגיאה בטעינת משימה:", res.data.Error);
       }
     } catch (err) {
-      console.error("שגיאה בטעינת הפנייה:", err);
+      console.error("שגיאה בטעינת משימה:", err);
     }
   };
 
   const fetchProgress = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8801/leads/progress/${id}`,
-        { withCredentials: true }
+        `http://localhost:8801/tasks/progress/${id}`,
+        {
+          withCredentials: true,
+        }
       );
       if (res.data.Status) {
         setProgress(res.data.Result);
@@ -69,20 +69,19 @@ const LeadDetails = () => {
     setSaving(true);
     try {
       const res = await axios.post(
-        "http://localhost:8801/leads/progress/add",
+        "http://localhost:8801/tasks/progress/add",
         {
-          lead_id: id,
-          lead_note: newNote.trim(),
+          task_id: id,
+          progress_note: newNote.trim(),
           status: newStatus,
-          user_id: user.user_id,
         },
         { withCredentials: true }
       );
 
       if (res.data.Status) {
         setNewNote("");
-        await fetchProgress(); // ✅ נטען מחדש את התיעודים
-        await fetchLead(); // ✅ נטען מחדש את הפנייה (סטטוס למעלה)
+        fetchProgress();
+        fetchTask();
         setPopupData({
           title: "הצלחה",
           message: "התיעוד נשמר בהצלחה!",
@@ -108,71 +107,57 @@ const LeadDetails = () => {
     }
   };
 
-  if (!lead) {
-    return <div className="p-6 text-center">טוען פנייה...</div>;
+  if (!task) {
+    return <div className="p-6 text-center">טוען משימה...</div>;
   }
 
   return (
     <div className="p-6 max-w-4xl mx-auto font-rubik">
-      <div className="flex justify-center mb-2 ">
-        <NavigationButton label="חזרה לרשימת פניות" linkTo="/dashboard/leads" />
+      <div className="flex justify-center mb-2">
+        <NavigationButton
+          label="חזרה לרשימת משימות"
+          linkTo="/dashboard/tasks"
+        />
       </div>
-
       <div className="bg-white rounded shadow p-6 text-gray-700 mb-6 space-y-4 text-right">
         <div className="text-xl font-semibold text-blue-700 mb-4 text-center">
-          פרטי פנייה #{lead.lead_id}
+          פרטי משימה #{task.task_id}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <strong>שם לקוח:</strong> {lead.first_name} {lead.last_name}
+            <strong>נושא:</strong> {task.task_title}
           </div>
           <div>
-            <strong>טלפון:</strong> {lead.phone_number}
-          </div>
-          <div>
-            <strong>מייל:</strong> {lead.email}
-          </div>
-          <div>
-            <strong>עיר:</strong> {lead.city}
-          </div>
-          <div>
-            <strong>פרויקט:</strong> {lead.project_name}
-          </div>
-          <div>
-            <strong>נציג מטפל:</strong>{" "}
-            {lead.rep_first_name
-              ? `${lead.rep_first_name} ${lead.rep_last_name}`
-              : "ללא"}
+            <strong>תיאור:</strong> {task.description || "-"}
           </div>
           <div>
             <strong>סטטוס:</strong>{" "}
             <span
-              className={
-                lead.status === "חדש"
-                  ? "text-green-600 font-semibold"
-                  : lead.status === "בטיפול"
-                  ? "text-blue-600 font-semibold"
-                  : lead.status === "טופל"
-                  ? "text-gray-600 font-semibold"
-                  : "text-red-600 font-semibold"
-              }
+              className={`font-semibold ${
+                task.status === "חדש"
+                  ? "text-green-600"
+                  : task.status === "בתהליך"
+                  ? "text-blue-600"
+                  : task.status === "הושלם"
+                  ? "text-gray-600"
+                  : "text-red-600"
+              }`}
             >
-              {lead.status}
+              {task.status}
             </span>
           </div>
           <div>
-            <strong>תאריך יצירה:</strong>{" "}
-            {new Date(lead.created_at).toLocaleDateString("he-IL", {
-              day: "2-digit",
-              month: "2-digit",
+            <strong>תאריך יעד:</strong>{" "}
+            {new Date(task.due_date).toLocaleDateString("he-IL", {
               year: "numeric",
-            })}{" "}
-            - שעה:{" "}
-            {new Date(lead.created_at).toLocaleTimeString("he-IL", {
-              hour: "2-digit",
-              minute: "2-digit",
+              month: "2-digit",
+              day: "2-digit",
             })}
+          </div>
+          <div>
+            <strong>נציג מטפל:</strong>{" "}
+            {task.assigned_to_name ? task.assigned_to_name : "ללא"}
           </div>
         </div>
       </div>
@@ -186,14 +171,14 @@ const LeadDetails = () => {
       ) : (
         <div className="bg-white rounded shadow p-4 space-y-2 text-right text-gray-700 mb-4">
           {progress.map((p) => (
-            <div key={p.lead_progress_id} className="border-b py-2 space-y-1">
+            <div key={p.task_progress_id} className="border-b py-2 space-y-1">
               <div>
                 <strong>סטטוס:</strong>{" "}
                 <span className="font-semibold">{p.status}</span>
               </div>
               <div>
                 <strong>תיעוד:</strong>{" "}
-                <span className="font-semibold">{p.lead_note}</span>
+                <span className="font-semibold">{p.progress_note}</span>
               </div>
               <div className="text-sm text-gray-600 flex justify-between">
                 <div>
@@ -203,11 +188,11 @@ const LeadDetails = () => {
                 <div>
                   <strong>תאריך:</strong>{" "}
                   {new Date(p.update_time).toLocaleDateString("he-IL", {
-                    day: "2-digit",
-                    month: "2-digit",
                     year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
                   })}{" "}
-                  - שעה:{" "}
+                  -{" "}
                   {new Date(p.update_time).toLocaleTimeString("he-IL", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -232,15 +217,15 @@ const LeadDetails = () => {
         />
 
         <div>
-          <label className="block mb-1 font-semibold">סטטוס:</label>
+          <label className="block mb-1 font-semibold">סטטוס משימה:</label>
           <select
-            className="w-full border border-gray-300 rounded px-3 py-2"
             value={newStatus}
             onChange={(e) => setNewStatus(e.target.value)}
+            className="w-full border border-gray-300 rounded px-3 py-2"
           >
             <option value="חדש">חדש</option>
-            <option value="בטיפול">בטיפול</option>
-            <option value="טופל">טופל</option>
+            <option value="בתהליך">בתהליך</option>
+            <option value="הושלם">הושלם</option>
             <option value="בוטלה">בוטלה</option>
           </select>
         </div>
@@ -276,4 +261,4 @@ const LeadDetails = () => {
   );
 };
 
-export default LeadDetails;
+export default TaskDetails;

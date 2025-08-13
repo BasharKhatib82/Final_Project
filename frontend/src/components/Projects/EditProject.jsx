@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
+import Popup from "../Tools/Popup";
+import ExitButton from "../Buttons/ExitButton";
 
 const EditProject = () => {
   const [form, setForm] = useState({
@@ -9,6 +11,8 @@ const EditProject = () => {
     is_active: 1,
   });
   const [error, setError] = useState("");
+  const [popupData, setPopupData] = useState(null);
+  const [confirmPopup, setConfirmPopup] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -40,9 +44,7 @@ const EditProject = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
+  const handleSubmit = () => {
     if (!form.project_name.trim()) {
       setError("יש להזין שם פרויקט");
       return;
@@ -54,7 +56,11 @@ const EditProject = () => {
       })
       .then((res) => {
         if (res.data.Status) {
-          navigate("/dashboard/projects");
+          setPopupData({
+            title: "הצלחה",
+            message: "הפרויקט עודכן בהצלחה!",
+            mode: "success",
+          });
         } else {
           setError(res.data.Error || "שגיאה בעדכון הפרויקט");
         }
@@ -63,6 +69,12 @@ const EditProject = () => {
         console.error("שגיאה:", err);
         setError("שגיאה בהתחברות לשרת");
       });
+  };
+
+  const handleConfirm = (e) => {
+    e.preventDefault();
+    setError("");
+    setConfirmPopup(true);
   };
 
   return (
@@ -77,7 +89,7 @@ const EditProject = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4 font-rubik">
+      <form onSubmit={handleConfirm} className="space-y-4 font-rubik">
         <div>
           <label className="block mb-1 font-medium">שם פרויקט *</label>
           <input
@@ -112,15 +124,40 @@ const EditProject = () => {
           <label className="text-sm">הפרויקט פעיל</label>
         </div>
 
-        <div className="text-center">
+        <div className="flex justify-center gap-4 mt-6">
           <button
             type="submit"
             className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
           >
             עדכן פרויקט
           </button>
+          <ExitButton label="ביטול" linkTo="/dashboard/projects" />
         </div>
       </form>
+
+      {/* פופאפ אישור */}
+      {confirmPopup && (
+        <Popup
+          title="אישור עדכון"
+          message="האם אתה בטוח שברצונך לעדכן את הפרויקט?"
+          mode="confirm"
+          onConfirm={handleSubmit}
+          onClose={() => setConfirmPopup(false)}
+        />
+      )}
+
+      {/* פופאפ הצלחה */}
+      {popupData && (
+        <Popup
+          title={popupData.title}
+          message={popupData.message}
+          mode={popupData.mode}
+          onClose={() => {
+            setPopupData(null);
+            navigate("/dashboard/projects");
+          }}
+        />
+      )}
     </div>
   );
 };
