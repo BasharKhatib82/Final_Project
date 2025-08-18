@@ -1,45 +1,45 @@
 import { Routes, Route } from "react-router-dom";
-import HomePage from "./Pages/HomePage";
-import About from "./Pages/About";
-import Contact from "./Pages/Contact";
-import Header from "./Pages/Header";
-import Login from "./Pages/Login";
+import HomePage from "./Pages/HomePage.jsx";
+import About from "./Pages/About.jsx";
+import Contact from "./Pages/Contact.jsx";
+import Header from "./Pages/Header.jsx";
+import Login from "./Pages/Login.jsx";
 import Dashboard from "./Dashboard/Dashboard.jsx";
-import Home from "./Dashboard/Home";
+import Home from "./Dashboard/Home.jsx";
 
-import Roles from "./Roles/Roles";
-import AddRole from "./Roles/AddRole";
-import EditRole from "./Roles/EditRole";
+import Roles from "./Roles/Roles.jsx";
+import AddRole from "./Roles/AddRole.jsx";
+import EditRole from "./Roles/EditRole.jsx";
 
-import Users from "./Users/Users";
-import AddUser from "./Users/AddUser";
-import EditUser from "./Users/EditUser";
+import Users from "./Users/Users.jsx";
+import AddUser from "./Users/AddUser.jsx";
+import EditUser from "./Users/EditUser.jsx";
 
-import SuccessMessage from "./SuccessMessage";
+import SuccessMessage from "./SuccessMessage.jsx";
 
-import Attendance from "./Attendance/Attendance";
-import AddAttendance from "./Attendance/AddAttendance";
-import EditAttendance from "./Attendance/EditAttendance";
+import Attendance from "./Attendance/Attendance.jsx";
+import AddAttendance from "./Attendance/AddAttendance.jsx";
+import EditAttendance from "./Attendance/EditAttendance.jsx";
 
-import Leads from "./Leads/Leads";
-import AddLead from "./Leads/AddLead";
-import EditLead from "./Leads/EditLead";
-import LeadDetails from "./Leads/LeadDetails";
+import Leads from "./Leads/Leads.jsx";
+import AddLead from "./Leads/AddLead.jsx";
+import EditLead from "./Leads/EditLead.jsx";
+import LeadDetails from "./Leads/LeadDetails.jsx";
 
-import Projects from "./Projects/Projects";
-import AddProject from "./Projects/AddProject";
+import Projects from "./Projects/Projects.jsx";
+import AddProject from "./Projects/AddProject.jsx";
 
-import Tasks from "./Tasks/Tasks";
-import AddTask from "./Tasks/AddTask";
-import EditProject from "./Projects/EditProject";
+import Tasks from "./Tasks/Tasks.jsx";
+import AddTask from "./Tasks/AddTask.jsx";
+import EditProject from "./Projects/EditProject.jsx";
 
-import Logs from "./Logs/Logs";
+import Logs from "./Logs/Logs.jsx";
 
-import Profile from "./Profile";
-import Unauthorized from "./Pages/Unauthorized";
-import Footer from "./Pages/Footer";
-import EditTask from "./Tasks/EditTask";
-import TaskDetails from "./Tasks/TaskDetails";
+import Profile from "./Profile.jsx";
+import Unauthorized from "./Pages/Unauthorized.jsx";
+import Footer from "./Pages/Footer.jsx";
+import EditTask from "./Tasks/EditTask.jsx";
+import TaskDetails from "./Tasks/TaskDetails.jsx";
 
 function MyRoutes() {
   return (
