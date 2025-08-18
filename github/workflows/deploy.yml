@@ -1,0 +1,44 @@
+name: Deploy Respondify CRM
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # === FRONTEND ===
+      - name: Install & Build Frontend
+        working-directory: frontend
+        run: |
+          npm install
+          npm run build
+
+      - name: Deploy Frontend via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER_FRONTEND }}
+          username: ${{ secrets.FTP_USER_FRONTEND }}
+          password: ${{ secrets.FTP_PASS_FRONTEND }}
+          local-dir: frontend/build
+          server-dir: /home/linecard/public_html/respondify-crm.co.il/
+
+      # === BACKEND ===
+      - name: Deploy Backend via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER_BACKEND }}
+          username: ${{ secrets.FTP_USER_BACKEND }}
+          password: ${{ secrets.FTP_PASS_BACKEND }}
+          local-dir: backend
+          server-dir: /home/linecard/RespondifyCrmAPI/
+          exclude: |
+            **/node_modules/**
+            **/.git/**
+            **/.github/**
