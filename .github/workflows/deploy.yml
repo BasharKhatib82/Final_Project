@@ -17,8 +17,8 @@ jobs:
       - name: Install & Build Frontend
         working-directory: frontend
         run: |
-          CI=false npm run build
           npm install
+          CI=false npm run build
           npm run build
 
       - name: Deploy Frontend via FTP
