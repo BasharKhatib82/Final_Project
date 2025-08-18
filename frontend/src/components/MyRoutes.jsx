@@ -4,7 +4,7 @@ import About from "./Pages/About";
 import Contact from "./Pages/Contact";
 import Header from "./Pages/Header";
 import Login from "./Pages/Login";
-import Dashboard from "./Dashboard/Dashboard";
+import Dashboard from "./Dashboard/Dashboard.jsx";
 import Home from "./Dashboard/Home";
 
 import Roles from "./Roles/Roles";
