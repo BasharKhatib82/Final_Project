@@ -15,7 +15,7 @@ jobs:
 
       # === FRONTEND ===
       - name: Install & Build Frontend
-        working-directory: frontend
+        working-directory: ./public_html/respondify-crm.co.il
         run: |
           npm install
           npm run build
