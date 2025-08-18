@@ -5,7 +5,7 @@ function HomePage() {
     <div className="max-w-4xl mx-auto px-4 py-12 text-center font-alef">
       <div className="bg-white/90 shadow-md rounded-2xl p-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          ברוכים הבאים למערכת ניהול פניות
+          " ברוכים הבאים למערכת " ניהול פניות
         </h1>
 
         <p className="text-lg text-gray-600 mb-6 leading-relaxed">
