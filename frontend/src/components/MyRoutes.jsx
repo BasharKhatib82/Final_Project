@@ -33,9 +33,9 @@ import Tasks from "./Tasks/Tasks";
 import AddTask from "./Tasks/AddTask";
 import EditProject from "./Projects/EditProject";
 
-import Logs from "./Logs/Logs.jsx";
+import Logs from "./Logs/Logs";
 
-import Profile from "./Profile.jsx";
+import Profile from "./Profile";
 import Unauthorized from "./Pages/Unauthorized";
 import Footer from "./Pages/Footer";
 import EditTask from "./Tasks/EditTask";
