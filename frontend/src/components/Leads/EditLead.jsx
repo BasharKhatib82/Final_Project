@@ -5,6 +5,8 @@ import AddButton from "../Buttons/AddSaveButton";
 import ExitButton from "../Buttons/ExitButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const EditLead = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -33,7 +35,7 @@ const EditLead = () => {
 
   const fetchLead = async () => {
     try {
-      const res = await axios.get(`http://localhost:8801/leads/${id}`, {
+      const res = await axios.get(`${api}/leads/${id}`, {
         withCredentials: true,
       });
       if (res.data.Status) {
@@ -48,7 +50,7 @@ const EditLead = () => {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/projects/active", {
+      const res = await axios.get(`${api}/projects/active`, {
         withCredentials: true,
       });
       setProjects(res.data.Result);
@@ -59,7 +61,7 @@ const EditLead = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/users/active", {
+      const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
       setUsers(res.data.Result);
@@ -84,11 +86,9 @@ const EditLead = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.put(
-        `http://localhost:8801/leads/edit/${id}`,
-        form,
-        { withCredentials: true }
-      );
+      const res = await axios.put(`${api}/leads/edit/${id}`, form, {
+        withCredentials: true,
+      });
       if (res.data.Status) {
         setShowConfirmPopup(false);
         setSuccessPopup(true);

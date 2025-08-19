@@ -5,6 +5,8 @@ import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const AddAttendance = () => {
   const navigate = useNavigate();
 
@@ -30,7 +32,7 @@ const AddAttendance = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8801/users/active", { withCredentials: true })
+      .get(`${api}/users/active`, { withCredentials: true })
       .then((res) => {
         if (res.data.Status) setUsers(res.data.Result);
         else
@@ -98,7 +100,7 @@ const AddAttendance = () => {
 
   const confirmAdd = () => {
     axios
-      .post("http://localhost:8801/attendance/add", form, {
+      .post(`${api}/attendance/add`, form, {
         withCredentials: true,
       })
       .then((res) => {

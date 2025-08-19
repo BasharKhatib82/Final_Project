@@ -4,6 +4,8 @@ import axios from "axios";
 import Popup from "../Tools/Popup";
 import ExitButton from "../Buttons/ExitButton";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const EditProject = () => {
   const [form, setForm] = useState({
     project_name: "",
@@ -22,7 +24,7 @@ const EditProject = () => {
 
   const fetchProject = () => {
     axios
-      .get(`http://localhost:8801/projects/${id}`, { withCredentials: true })
+      .get(`${api}/projects/${id}`, { withCredentials: true })
       .then((res) => {
         if (res.data.Status && res.data.Result) {
           setForm(res.data.Result);
@@ -51,7 +53,7 @@ const EditProject = () => {
     }
 
     axios
-      .put(`http://localhost:8801/projects/edit/${id}`, form, {
+      .put(`${api}/projects/edit/${id}`, form, {
         withCredentials: true,
       })
       .then((res) => {

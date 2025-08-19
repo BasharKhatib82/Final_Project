@@ -5,6 +5,8 @@ import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const EditUser = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -24,13 +26,13 @@ const EditUser = () => {
 
   const fetchUserAndRoles = async () => {
     try {
-      const res = await axios.get(`http://localhost:8801/users/${id}`, {
+      const res = await axios.get(`${api}/users/${id}`, {
         withCredentials: true,
       });
       const currentUser = res.data.User;
       setUser(currentUser);
 
-      const rolesRes = await axios.get("http://localhost:8801/roles/active", {
+      const rolesRes = await axios.get(`${api}/roles/active`, {
         withCredentials: true,
       });
       let activeRoles = rolesRes.data.Roles.map((role) => ({
@@ -43,10 +45,9 @@ const EditUser = () => {
       );
 
       if (!roleExists) {
-        const roleRes = await axios.get(
-          `http://localhost:8801/roles/${currentUser.role_id}`,
-          { withCredentials: true }
-        );
+        const roleRes = await axios.get(`${api}/roles/${currentUser.role_id}`, {
+          withCredentials: true,
+        });
 
         if (roleRes.data.Role) {
           const roleNotActive = { ...roleRes.data.Role, active: false };
@@ -88,7 +89,7 @@ const EditUser = () => {
 
   const confirmUpdate = () => {
     axios
-      .put(`http://localhost:8801/users/${id}`, user, { withCredentials: true })
+      .put(`${api}/users/${id}`, user, { withCredentials: true })
       .then((res) => {
         if (res.data.Status) {
           setPopupData({

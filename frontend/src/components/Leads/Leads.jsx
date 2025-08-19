@@ -5,6 +5,8 @@ import NavigationButton from "../Buttons/NavigationButton";
 import DeleteButton from "../Buttons/DeleteButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const Leads = () => {
   const [leads, setLeads] = useState([]);
   const [users, setUsers] = useState([]);
@@ -32,7 +34,7 @@ const Leads = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/users/active", {
+      const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
       if (res.data.Status) {
@@ -45,7 +47,7 @@ const Leads = () => {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/projects", {
+      const res = await axios.get(`${api}/projects`, {
         withCredentials: true,
       });
       if (res.data.Status) {
@@ -58,7 +60,7 @@ const Leads = () => {
 
   const fetchLeads = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/leads", {
+      const res = await axios.get(`${api}/leads`, {
         withCredentials: true,
       });
       if (res.data.Status) {
@@ -82,7 +84,7 @@ const Leads = () => {
   const handleRepSave = async (leadId, selectedRepId) => {
     try {
       const res = await axios.put(
-        `http://localhost:8801/leads/update-rep/${leadId}`,
+        `${api}/leads/update-rep/${leadId}`,
         { user_id: selectedRepId },
         { withCredentials: true }
       );
@@ -131,7 +133,7 @@ const Leads = () => {
   const handleStatusSave = async (leadId, selectedStatus) => {
     try {
       const res = await axios.put(
-        `http://localhost:8801/leads/update-status/${leadId}`,
+        `${api}/leads/update-status/${leadId}`,
         { status: selectedStatus },
         { withCredentials: true }
       );
@@ -179,12 +181,9 @@ const Leads = () => {
     if (!leadToDelete) return;
 
     try {
-      const res = await axios.delete(
-        `http://localhost:8801/leads/delete/${leadToDelete}`,
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await axios.delete(`${api}/leads/delete/${leadToDelete}`, {
+        withCredentials: true,
+      });
       if (res.data.Status) {
         setLeads((prevLeads) =>
           prevLeads.map((lead) =>
@@ -247,7 +246,7 @@ const Leads = () => {
   const handleBulkAssign = async () => {
     try {
       const res = await axios.put(
-        `http://localhost:8801/leads/bulk-assign`,
+        `${api}/leads/bulk-assign`,
         {
           leadIds: selectedLeads,
           user_id: bulkUserId === "null" ? null : bulkUserId,

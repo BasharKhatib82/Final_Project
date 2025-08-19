@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const Home = () => {
   const navigate = useNavigate();
   const [stats, setStats] = useState(null);
@@ -12,7 +14,7 @@ const Home = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/dashboard", {
+      const res = await axios.get(`${api}/dashboard`, {
         withCredentials: true,
       });
       setStats(res.data.summary);

@@ -21,6 +21,7 @@ const Tasks = () => {
   const [statusToSave, setStatusToSave] = useState(null);
   const [newStatusValue, setNewStatusValue] = useState(null);
 
+  const api = process.env.REACT_APP_BACKEND;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,7 +31,7 @@ const Tasks = () => {
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/tasks", {
+      const res = await axios.get(`${api}/tasks`, {
         withCredentials: true,
       });
       if (res.data.Status) {
@@ -48,7 +49,7 @@ const Tasks = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/users/active", {
+      const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
       if (res.data.Status) {
@@ -63,10 +64,9 @@ const Tasks = () => {
     if (!taskToDelete) return;
 
     try {
-      const res = await axios.delete(
-        `http://localhost:8801/tasks/delete/${taskToDelete}`,
-        { withCredentials: true }
-      );
+      const res = await axios.delete(`${api}/tasks/delete/${taskToDelete}`, {
+        withCredentials: true,
+      });
 
       if (res.data.Status) {
         setTasks((prev) =>
@@ -131,7 +131,7 @@ const Tasks = () => {
   const handleBulkAssign = async () => {
     try {
       const res = await axios.put(
-        `http://localhost:8801/tasks/bulk-assign`,
+        `${api}/tasks/bulk-assign`,
         {
           taskIds: selectedTasks,
           user_id: bulkUserId === "null" ? null : bulkUserId,
@@ -174,7 +174,7 @@ const Tasks = () => {
   const handleRepSave = async (taskId, selectedRepId) => {
     try {
       const res = await axios.put(
-        `http://localhost:8801/tasks/update-rep/${taskId}`,
+        `${api}/tasks/update-rep/${taskId}`,
         { user_id: selectedRepId },
         { withCredentials: true }
       );
@@ -223,7 +223,7 @@ const Tasks = () => {
   const handleStatusSave = async (taskId, selectedStatus) => {
     try {
       const res = await axios.put(
-        `http://localhost:8801/tasks/update-status/${taskId}`,
+        `${api}/tasks/update-status/${taskId}`,
         { status: selectedStatus },
         { withCredentials: true }
       );

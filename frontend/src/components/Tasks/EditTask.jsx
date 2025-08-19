@@ -5,6 +5,8 @@ import AddButton from "../Buttons/AddSaveButton";
 import ExitButton from "../Buttons/ExitButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const EditTask = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,7 +30,7 @@ const EditTask = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/users/active", {
+      const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
       if (res.data.Status) {
@@ -41,7 +43,7 @@ const EditTask = () => {
 
   const fetchTask = async () => {
     try {
-      const res = await axios.get(`http://localhost:8801/tasks/${id}`, {
+      const res = await axios.get(`${api}/tasks/${id}`, {
         withCredentials: true,
       });
       if (res.data.Status && res.data.Result) {
@@ -94,11 +96,9 @@ const EditTask = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.put(
-        `http://localhost:8801/tasks/edit/${id}`,
-        form,
-        { withCredentials: true }
-      );
+      const res = await axios.put(`${api}/tasks/edit/${id}`, form, {
+        withCredentials: true,
+      });
 
       if (res.data.Status) {
         setConfirmPopup(false);

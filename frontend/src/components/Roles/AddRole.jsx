@@ -5,6 +5,8 @@ import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const AddRole = () => {
   const [formData, setFormData] = useState({
     role_name: "",
@@ -47,7 +49,7 @@ const AddRole = () => {
 
   const confirmAdd = () => {
     axios
-      .post("http://localhost:8801/roles/add", formData, {
+      .post(`${api}/roles/add`, formData, {
         withCredentials: true,
       })
       .then(() => {
@@ -68,7 +70,6 @@ const AddRole = () => {
         console.error(err);
       });
   };
-
 
   return (
     <div className="flex justify-center items-center pt-10">

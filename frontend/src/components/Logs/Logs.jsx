@@ -2,6 +2,8 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { saveAs } from "file-saver";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const Logs = () => {
   const [logs, setLogs] = useState([]);
   const [page, setPage] = useState(1);
@@ -32,7 +34,7 @@ const Logs = () => {
 
   const fetchLogs = () => {
     axios
-      .get("http://localhost:8801/logs", {
+      .get(`${api}/logs`, {
         params: { page, search: searchTerm, from: startDate, to: endDate },
         withCredentials: true,
       })
@@ -45,7 +47,7 @@ const Logs = () => {
 
   const exportLogs = (type) => {
     axios
-      .get(`http://localhost:8801/logs/export/${type}`, {
+      .get(`${api}/logs/export/${type}`, {
         params: { search: searchTerm, from: startDate, to: endDate },
         responseType: "blob",
         withCredentials: true,
@@ -64,7 +66,7 @@ const Logs = () => {
 
   const sendLogsByEmail = () => {
     axios
-      .get("http://localhost:8801/logs/export/pdf", {
+      .get(`${api}/logs/export/pdf`, {
         responseType: "blob",
         withCredentials: true,
       })
@@ -73,7 +75,7 @@ const Logs = () => {
         formData.append("email", email);
         formData.append("attachment", new Blob([res.data]), "logs.pdf");
 
-        return axios.post("http://localhost:8801/logs/send-mail", formData, {
+        return axios.post(`${api}/logs/send-mail`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
           withCredentials: true,
         });
@@ -84,7 +86,7 @@ const Logs = () => {
 
   const printFilteredLogs = () => {
     axios
-      .get("http://localhost:8801/logs/all", {
+      .get(`${api}/logs/all`, {
         params: { search: searchTerm, from: startDate, to: endDate },
         withCredentials: true,
       })

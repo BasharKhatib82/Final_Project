@@ -5,6 +5,8 @@ import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const EditRole = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,7 +31,7 @@ const EditRole = () => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:8801/roles/${id}`, { withCredentials: true })
+      .get(`${api}/roles/${id}`, { withCredentials: true })
       .then((res) => {
         setFormData(res.data.Role);
       })
@@ -63,7 +65,7 @@ const EditRole = () => {
 
   const confirmUpdate = () => {
     axios
-      .put(`http://localhost:8801/roles/${id}`, formData, {
+      .put(`${api}/roles/${id}`, formData, {
         withCredentials: true,
       })
       .then(() => {

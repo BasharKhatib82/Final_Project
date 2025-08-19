@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Popup from "./Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const Profile = () => {
   const [formData, setFormData] = useState({
     business_name: "",
@@ -21,7 +23,7 @@ const Profile = () => {
 
   const fetchBusinessInfo = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/users/business/");
+      const res = await axios.get(`${api}/users/business/`);
       setFormData(res.data.Business);
     } catch (err) {
       console.error("שגיאה בשליפת פרטי עסק:", err);
@@ -43,7 +45,7 @@ const Profile = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put("http://localhost:8801/business/1", formData);
+      await axios.put(`${api}/business/1`, formData);
       setPopupData({
         title: "הצלחה",
         message: "🎉 פרטי העסק עודכנו בהצלחה",

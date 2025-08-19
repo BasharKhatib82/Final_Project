@@ -6,6 +6,8 @@ import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const EditAttendance = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -38,10 +40,10 @@ const EditAttendance = () => {
 
   const fetchUsers = () => {
     Promise.all([
-      axios.get("http://localhost:8801/users/active", {
+      axios.get(`${api}/users/active`, {
         withCredentials: true,
       }),
-      axios.get("http://localhost:8801/users/inactive", {
+      axios.get(`${api}/users/inactive`, {
         withCredentials: true,
       }),
     ])
@@ -68,7 +70,7 @@ const EditAttendance = () => {
 
   const fetchAttendance = () => {
     axios
-      .get(`http://localhost:8801/attendance/${id}`, { withCredentials: true })
+      .get(`${api}/attendance/${id}`, { withCredentials: true })
       .then((res) => {
         if (res.data.Status) {
           const data = res.data.Result;
@@ -138,7 +140,7 @@ const EditAttendance = () => {
     };
 
     axios
-      .put(`http://localhost:8801/attendance/edit/${id}`, payload, {
+      .put(`${api}/attendance/edit/${id}`, payload, {
         withCredentials: true,
       })
       .then(() => {

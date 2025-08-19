@@ -5,6 +5,8 @@ import AddButton from "../Buttons/AddSaveButton";
 import ExitButton from "../Buttons/ExitButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const AddTask = () => {
   const [form, setForm] = useState({
     task_title: "",
@@ -25,7 +27,7 @@ const AddTask = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/users/active", {
+      const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
       if (res.data.Status) {
@@ -67,7 +69,7 @@ const AddTask = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post("http://localhost:8801/tasks/add", form, {
+      const res = await axios.post(`${api}/tasks/add`, form, {
         withCredentials: true,
       });
 

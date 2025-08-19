@@ -3,6 +3,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../components/Tools/UserContext";
 
+const api = process.env.REACT_APP_BACKEND;
+
 function Login() {
   const [values, setValues] = useState({ user_id: "", password: "" });
   const [error, setError] = useState(null);
@@ -18,14 +20,12 @@ function Login() {
     }
 
     try {
-      const loginRes = await axios.post(
-        "http://localhost:8801/auth/login",
-        values,
-        { withCredentials: true }
-      );
+      const loginRes = await axios.post(`${api}/auth/login`, values, {
+        withCredentials: true,
+      });
 
       if (loginRes.data.success) {
-        const authRes = await axios.get("http://localhost:8801/auth/check", {
+        const authRes = await axios.get(`${api}/auth/check`, {
           withCredentials: true,
         });
         const userData = loginRes.data.user;

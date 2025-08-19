@@ -6,6 +6,8 @@ import ExitButton from "../Buttons/ExitButton";
 import AddButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const AddLead = () => {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -35,7 +37,7 @@ const AddLead = () => {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/projects/active", {
+      const res = await axios.get(`${api}/projects/active`, {
         withCredentials: true,
       });
       setProjects(res.data.Result);
@@ -46,7 +48,7 @@ const AddLead = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/users/active", {
+      const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
       setUsers(res.data.Result);
@@ -58,7 +60,7 @@ const AddLead = () => {
   const handlePhoneBlur = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:8801/clients/by-phone/${form.phone_number}`,
+        `${api}/clients/by-phone/${form.phone_number}`,
         { withCredentials: true }
       );
       if (res.data.Status) {
@@ -96,13 +98,9 @@ const AddLead = () => {
     };
 
     try {
-      const res = await axios.post(
-        "http://localhost:8801/leads/add",
-        leadData,
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await axios.post(`${api}/leads/add`, leadData, {
+        withCredentials: true,
+      });
       if (res.data.Status) {
         setShowConfirmPopup(false);
         setSuccessPopup(true);

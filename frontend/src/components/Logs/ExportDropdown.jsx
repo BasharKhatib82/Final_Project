@@ -9,9 +9,11 @@ import { Button } from "@/components/ui/button";
 import { FileText, FileSpreadsheet, Printer, Mail } from "lucide-react";
 import axios from "axios";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const ExportDropdown = () => {
   const handleExport = (type) => {
-    const url = `http://localhost:8801/logs/export/${type}`;
+    const url = `${api}/logs/export/${type}`;
     window.open(url, "_blank");
   };
 
@@ -20,7 +22,7 @@ const ExportDropdown = () => {
     if (!email) return;
 
     try {
-      await axios.post("http://localhost:8801/logs/send-email", {
+      await axios.post(`${api}/logs/send-email`, {
         to: email,
         subject: "יומן מערכת",
         body: "מצורף קובץ Excel עם תיעוד הפעולות",

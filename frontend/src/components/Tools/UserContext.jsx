@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
 const UserContext = createContext();
+const api = process.env.REACT_APP_BACKEND;
 
 export const useUser = () => useContext(UserContext);
 
@@ -11,7 +12,7 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8801/auth/check", { withCredentials: true })
+      .get(`${api}/auth/check`, { withCredentials: true })
       .then((res) => {
         if (res.data.loggedIn) {
           setUser(res.data.user);
@@ -30,7 +31,7 @@ export const UserProvider = ({ children }) => {
 
   const logout = () => {
     axios
-      .post("http://localhost:8801/auth/logout", null, {
+      .post(`${api}/auth/logout`, null, {
         withCredentials: true,
       })
       .then(() => setUser(null))

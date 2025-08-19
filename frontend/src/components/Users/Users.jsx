@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import NavigationButton from "../Buttons/NavigationButton";
 import Popup from "../Tools/Popup";
+const api = process.env.REACT_APP_BACKEND;
 
 const Users = () => {
   const [allUsers, setAllUsers] = useState([]);
@@ -28,7 +29,7 @@ const Users = () => {
 
   const checkPermissions = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/auth/check", {
+      const res = await axios.get(`${api}/auth/check`, {
         withCredentials: true,
       });
       if (!res.data.loggedIn || res.data.user.role_id !== 1) {
@@ -42,10 +43,10 @@ const Users = () => {
 
   const fetchUsers = () => {
     Promise.all([
-      axios.get("http://localhost:8801/users/active", {
+      axios.get(`${api}/users/active`, {
         withCredentials: true,
       }),
-      axios.get("http://localhost:8801/users/inactive", {
+      axios.get(`${api}/users/inactive`, {
         withCredentials: true,
       }),
     ])
@@ -73,10 +74,10 @@ const Users = () => {
 
   const fetchRoles = () => {
     Promise.all([
-      axios.get("http://localhost:8801/roles/active", {
+      axios.get(`${api}/roles/active`, {
         withCredentials: true,
       }),
-      axios.get("http://localhost:8801/roles/inactive", {
+      axios.get(`${api}/roles/inactive`, {
         withCredentials: true,
       }),
     ])
@@ -145,7 +146,7 @@ const Users = () => {
   const confirmDeactivate = (userId) => {
     axios
       .put(
-        `http://localhost:8801/users/delete/${userId}`,
+        `${api}/users/delete/${userId}`,
         { is_active: 0 },
         { withCredentials: true }
       )

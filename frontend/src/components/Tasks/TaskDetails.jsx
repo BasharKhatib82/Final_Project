@@ -5,6 +5,7 @@ import AddButton from "../Buttons/AddSaveButton";
 import NavigationButton from "../Buttons/NavigationButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
 const TaskDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const TaskDetails = () => {
 
   const fetchTask = async () => {
     try {
-      const res = await axios.get(`http://localhost:8801/tasks/${id}`, {
+      const res = await axios.get(`${api}/tasks/${id}`, {
         withCredentials: true,
       });
       if (res.data.Status) {
@@ -40,12 +41,9 @@ const TaskDetails = () => {
 
   const fetchProgress = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8801/tasks/progress/${id}`,
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await axios.get(`${api}/tasks/progress/${id}`, {
+        withCredentials: true,
+      });
       if (res.data.Status) {
         setProgress(res.data.Result);
       } else {
@@ -69,7 +67,7 @@ const TaskDetails = () => {
     setSaving(true);
     try {
       const res = await axios.post(
-        "http://localhost:8801/tasks/progress/add",
+        `${api}/tasks/progress/add`,
         {
           task_id: id,
           progress_note: newNote.trim(),

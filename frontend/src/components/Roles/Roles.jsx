@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const Roles = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
@@ -20,7 +22,7 @@ const Roles = () => {
 
   useEffect(() => {
     axios
-      .get("http://localhost:8801/auth/check", { withCredentials: true })
+      .get(`${api}/auth/check`, { withCredentials: true })
       .then((res) => {
         if (res.data.loggedIn && res.data.user.role_id === 1) {
           fetchRoles();
@@ -37,10 +39,10 @@ const Roles = () => {
   const fetchRoles = () => {
     setLoading(true);
     Promise.all([
-      axios.get("http://localhost:8801/roles/active", {
+      axios.get(`${api}/roles/active`, {
         withCredentials: true,
       }),
-      axios.get("http://localhost:8801/roles/inactive", {
+      axios.get(`${api}/roles/inactive`, {
         withCredentials: true,
       }),
     ])
@@ -79,7 +81,7 @@ const Roles = () => {
 
   const confirmDelete = (role_id) => {
     axios
-      .put(`http://localhost:8801/roles/delete/${role_id}`, null, {
+      .put(`${api}/roles/delete/${role_id}`, null, {
         withCredentials: true,
       })
       .then(() => {

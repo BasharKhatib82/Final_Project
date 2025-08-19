@@ -6,6 +6,8 @@ import AddButton from "../Buttons/AddSaveButton";
 import { useUser } from "../Tools/UserContext";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const LeadDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ const LeadDetails = () => {
 
   const fetchLead = async () => {
     try {
-      const res = await axios.get(`http://localhost:8801/leads/${id}`, {
+      const res = await axios.get(`${api}/leads/${id}`, {
         withCredentials: true,
       });
       if (res.data.Status) {
@@ -42,10 +44,9 @@ const LeadDetails = () => {
 
   const fetchProgress = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8801/leads/progress/${id}`,
-        { withCredentials: true }
-      );
+      const res = await axios.get(`${api}/leads/progress/${id}`, {
+        withCredentials: true,
+      });
       if (res.data.Status) {
         setProgress(res.data.Result);
       } else {
@@ -69,7 +70,7 @@ const LeadDetails = () => {
     setSaving(true);
     try {
       const res = await axios.post(
-        "http://localhost:8801/leads/progress/add",
+        `${api}/leads/progress/add`,
         {
           lead_id: id,
           lead_note: newNote.trim(),

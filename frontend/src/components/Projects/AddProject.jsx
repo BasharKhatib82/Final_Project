@@ -5,6 +5,8 @@ import Popup from "../Tools/Popup";
 import AddButton from "../Buttons/AddSaveButton";
 import ExitButton from "../Buttons/ExitButton";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const AddProject = () => {
   const [form, setForm] = useState({
     project_name: "",
@@ -36,7 +38,7 @@ const AddProject = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post("http://localhost:8801/projects/add", form, {
+      const res = await axios.post(`${api}/projects/add`, form, {
         withCredentials: true,
       });
 

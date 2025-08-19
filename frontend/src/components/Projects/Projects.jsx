@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import NavigationButton from "../Buttons/NavigationButton";
 import Popup from "../Tools/Popup";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const Projects = () => {
   const [projects, setProjects] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,7 +21,7 @@ const Projects = () => {
 
   const checkPermissions = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/auth/check", {
+      const res = await axios.get(`${api}/auth/check`, {
         withCredentials: true,
       });
       if (!res.data.loggedIn || res.data.user.role_id !== 1) {
@@ -33,7 +35,7 @@ const Projects = () => {
 
   const fetchProjects = () => {
     axios
-      .get("http://localhost:8801/projects", { withCredentials: true })
+      .get(`${api}/projects`, { withCredentials: true })
       .then((res) => {
         setProjects(res.data.Result || []);
       })
@@ -47,7 +49,7 @@ const Projects = () => {
 
     try {
       const res = await axios.delete(
-        `http://localhost:8801/projects/delete/${projectToDelete}`,
+        `${api}/projects/delete/${projectToDelete}`,
         { withCredentials: true }
       );
 

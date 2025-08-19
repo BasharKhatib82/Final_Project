@@ -5,6 +5,8 @@ import { useNavigate } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import NavigationButton from "../Buttons/NavigationButton";
 
+const api = process.env.REACT_APP_BACKEND;
+
 const Attendance = () => {
   const [attendance, setAttendance] = useState([]);
   const [users, setUsers] = useState([]);
@@ -21,7 +23,7 @@ const Attendance = () => {
 
   const checkPermissions = async () => {
     try {
-      const res = await axios.get("http://localhost:8801/auth/check", {
+      const res = await axios.get(`${api}/auth/check`, {
         withCredentials: true,
       });
       const allowedRoles = [1];
@@ -36,7 +38,7 @@ const Attendance = () => {
 
   const fetchAttendance = () => {
     axios
-      .get("http://localhost:8801/attendance", { withCredentials: true })
+      .get(`${api}/attendance`, { withCredentials: true })
       .then((res) => {
         setAttendance(res.data.Result || []);
       })
@@ -47,10 +49,10 @@ const Attendance = () => {
 
   const fetchUsers = () => {
     Promise.all([
-      axios.get("http://localhost:8801/users/active", {
+      axios.get(`${api}/users/active`, {
         withCredentials: true,
       }),
-      axios.get("http://localhost:8801/users/inactive", {
+      axios.get(`${api}/users/inactive`, {
         withCredentials: true,
       }),
     ])

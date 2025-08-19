@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
-
+const api = process.env.REACT_APP_BACKEND;
 const AddUser = () => {
   const navigate = useNavigate();
 
@@ -27,7 +27,7 @@ const AddUser = () => {
 
   const fetchRoles = () => {
     axios
-      .get("http://localhost:8801/roles/active", {
+      .get(`${api}/roles/active`, {
         withCredentials: true,
         params: { t: new Date().getTime() },
       })
@@ -64,7 +64,7 @@ const AddUser = () => {
     }
 
     axios
-      .post("http://localhost:8801/users/add", user, { withCredentials: true })
+      .post(`${api}/users/add`, user, { withCredentials: true })
       .then((res) => {
         if (res.data.Status) {
           navigate("/dashboard/add_user/success");
