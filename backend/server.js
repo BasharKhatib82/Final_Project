@@ -25,11 +25,29 @@ const app = express();
 
 app.use(express.json());
 
-// ✅ הגדרות CORS - רק לפרודקשן
+// ✅ טיפול ב-CORS
 app.use(
   cors({
-    origin: "https://www.respondify-crm.co.il", // רק הדומיין האמיתי
-    credentials: true, // כדי לאפשר קבצי cookie
+    origin: "https://www.respondify-crm.co.il",
+    credentials: true,
+  })
+);
+
+// ✅ במקרה ש-cPanel מוחק headers – נוסיף ידנית
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "https://www.respondify-crm.co.il");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  next();
+});
+
+// ✅ לא לשכוח preflight (OPTIONS)
+app.options(
+  "*",
+  cors({
+    origin: "https://www.respondify-crm.co.il",
+    credentials: true,
   })
 );
 
