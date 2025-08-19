@@ -15,7 +15,7 @@ function Login() {
     event.preventDefault();
 
     if (!values.user_id || !values.password) {
-      setError("נא למלא את כל השדות");
+      setError(" כל השדות חוב");
       return;
     }
 
