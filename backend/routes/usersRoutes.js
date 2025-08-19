@@ -5,7 +5,7 @@ import multer from "multer";
 import dbSingleton from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import verifyToken from "../utils/verifyToken.js";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const connection = dbSingleton.getConnection();
 const router = express.Router();

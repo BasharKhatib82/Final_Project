@@ -1,6 +1,6 @@
 import express from "express";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import verifyToken from "../utils/verifyToken.js";
 import logAction from "../utils/logAction.js";
 import dbSingleton from "../utils/dbSingleton.js";
