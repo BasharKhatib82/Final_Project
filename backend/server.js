@@ -3,6 +3,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import "./utils/cronTasks.js";
+
+// ✅ ראוטים
 import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import projectsRoutes from "./routes/projectsRoutes.js";
@@ -22,10 +24,12 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
+
+// ✅ הגדרות CORS - רק לפרודקשן
 app.use(
   cors({
-    origin: ["https://www.respondify-crm.co.il"],
-    credentials: true,
+    origin: "https://www.respondify-crm.co.il", // רק הדומיין האמיתי
+    credentials: true, // כדי לאפשר קבצי cookie
   })
 );
 
@@ -33,7 +37,7 @@ app.use(cookieParser());
 
 const port = process.env.PORT || 8801;
 
-// ✅ ראוטים עם נתיבים ברורים
+// ✅ ראוטים
 app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
 app.use("/leads", leadsRoutes);
@@ -49,6 +53,7 @@ app.use("/logs", logsRoutes);
 app.use("/whatsapp", whatsappRoutes);
 app.use("/flows", flowDataRoutes);
 
+// ✅ הפעלת שרת
 app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+  console.log(`🚀 Server is running on port ${port}`);
 });
