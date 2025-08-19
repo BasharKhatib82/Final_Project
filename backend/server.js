@@ -1,5 +1,5 @@
+// server.js
 import express from "express";
-import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import "./utils/cronTasks.js";
@@ -24,36 +24,7 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-
-// ✅ טיפול ב-CORS
-app.use(
-  cors({
-    origin: "https://www.respondify-crm.co.il",
-    credentials: true,
-  })
-);
-
-// ✅ במקרה ש-cPanel מוחק headers – נוסיף ידנית
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://www.respondify-crm.co.il");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
-
-// ✅ לא לשכוח preflight (OPTIONS)
-app.options(
-  "*",
-  cors({
-    origin: "https://www.respondify-crm.co.il",
-    credentials: true,
-  })
-);
-
 app.use(cookieParser());
-
-const port = process.env.PORT || 8801;
 
 // ✅ ראוטים
 app.use("/admin", adminRoutes);
@@ -71,7 +42,5 @@ app.use("/logs", logsRoutes);
 app.use("/whatsapp", whatsappRoutes);
 app.use("/flows", flowDataRoutes);
 
-// ✅ הפעלת שרת
-app.listen(port, () => {
-  console.log(`🚀 Server is running on port ${port}`);
-});
+// 🚀 Passenger דואג ל־listen, אין צורך ב־app.listen כאן
+export default app;
