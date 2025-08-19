@@ -1,13 +1,12 @@
-import express from "express";
-import dbSingleton from "../utils/dbSingleton.js";
+import { Router } from "express";
+import { db } from "../utils/dbSingleton.js";
 import verifyToken from "../utils/verifyToken.js";
 import logAction from "../utils/logAction.js";
 
-const router = express.Router();
-const connection = dbSingleton.getConnection();
+const router = Router();
 
 // ✅ שליפת כל תיעוד ההתקדמות עבור פנייה מסוימת
-router.get("/:lead_id", verifyToken, (req, res) => {
+router.get("/:lead_id", verifyToken, async (req, res) => {
   const { lead_id } = req.params;
 
   const sql = `
@@ -18,18 +17,17 @@ router.get("/:lead_id", verifyToken, (req, res) => {
     ORDER BY lp.update_time DESC
   `;
 
-  connection.query(sql, [lead_id], (err, result) => {
-    if (err) {
-      console.error("שגיאה בשליפת התקדמות:", err);
-      return res.json({ Status: false, Error: err });
-    }
-
+  try {
+    const [result] = await db.query(sql, [lead_id]);
     res.json({ Status: true, Result: result });
-  });
+  } catch (err) {
+    console.error("שגיאה בשליפת התקדמות:", err);
+    res.json({ Status: false, Error: "שגיאה בשרת" });
+  }
 });
 
 // ✅ הוספת תיעוד חדש + עדכון סטטוס פנייה
-router.post("/add", verifyToken, (req, res) => {
+router.post("/add", verifyToken, async (req, res) => {
   const { lead_id, lead_note, status } = req.body;
   const user_id = req.user.user_id;
 
@@ -48,26 +46,24 @@ router.post("/add", verifyToken, (req, res) => {
     WHERE lead_id = ?
   `;
 
-  connection.query(sql1, [lead_id, user_id, lead_note, status], (err1) => {
-    if (err1) {
-      console.error("שגיאה בהוספת תיעוד:", err1);
-      return res.json({ Status: false, Error: err1 });
-    }
+  try {
+    // ✅ שימוש ב-Promise.all לביצוע שתי השאילתות במקביל
+    await Promise.all([
+      db.query(sql1, [lead_id, user_id, lead_note, status]),
+      db.query(sql2, [status, lead_id]),
+    ]);
 
-    connection.query(sql2, [status, lead_id], (err2) => {
-      if (err2) {
-        console.error("שגיאה בעדכון סטטוס פנייה:", err2);
-        return res.json({ Status: false, Error: err2 });
-      }
-
-      logAction(`הוספת תיעוד + עדכון סטטוס לפנייה #${lead_id}`)(
-        req,
-        res,
-        () => {}
-      );
-      res.json({ Status: true, Message: "התיעוד והסטטוס נשמרו בהצלחה" });
-    });
-  });
+    // רישום פעולה ליומן
+    logAction(`הוספת תיעוד + עדכון סטטוס לפנייה #${lead_id}`)(
+      req,
+      res,
+      () => {}
+    );
+    res.json({ Status: true, Message: "התיעוד והסטטוס נשמרו בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה בשמירת הנתונים:", err);
+    res.json({ Status: false, Error: "שגיאה בשמירת הנתונים במסד" });
+  }
 });
 
 export default router;

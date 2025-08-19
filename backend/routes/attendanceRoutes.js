@@ -1,13 +1,12 @@
 import express from "express";
-import dbSingleton from "../utils/dbSingleton.js";
+// ✅ ייבוא הקוד המקצועי של ה-DB
+import { db } from "../utils/dbSingleton.js";
 import verifyToken from "../utils/verifyToken.js";
 
 const router = express.Router();
-const connection = dbSingleton.getConnection();
 
-// ✅ הוספת נוכחות
-// ✅ הוספת נוכחות
-router.post("/add", verifyToken, (req, res) => {
+// ✅ הוספת נוכחות - קוד מתוקן ומקצועי
+router.post("/add", verifyToken, async (req, res) => {
   const { user_id, date, check_in, check_out, status, notes } = req.body;
 
   if (!user_id || !date || !status) {
@@ -24,14 +23,10 @@ router.post("/add", verifyToken, (req, res) => {
   const finalCheckIn = isSpecialStatus ? null : check_in;
   const finalCheckOut = isSpecialStatus ? null : check_out;
 
-  // בדיקה אם קיימת רשומה לאותו עובד בתאריך הזה
-  const checkSql = `SELECT * FROM attendance WHERE user_id = ? AND date = ?`;
-
-  connection.query(checkSql, [user_id, date], (err, result) => {
-    if (err) {
-      console.error("שגיאה בבדיקת נוכחות קיימת:", err);
-      return res.json({ Status: false, Error: "שגיאה בבדיקת נתונים" });
-    }
+  try {
+    // ✅ בדיקה אם קיימת רשומה לאותו עובד בתאריך הזה באמצעות async/await
+    const checkSql = `SELECT * FROM attendance WHERE user_id = ? AND date = ?`;
+    const [result] = await db.query(checkSql, [user_id, date]);
 
     // ✅ כבר קיימת רשומה עם אותו סטטוס מיוחד
     if (isSpecialStatus && result.some((r) => r.status === status)) {
@@ -63,46 +58,45 @@ router.post("/add", verifyToken, (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?)
     `;
 
-    connection.query(
-      insertSql,
-      [user_id, date, finalCheckIn, finalCheckOut, status, notes || null],
-      (err2) => {
-        if (err2) {
-          console.error("שגיאה בהוספת נוכחות:", err2);
-          return res.json({
-            Status: false,
-            Error: "שגיאה בשמירה למסד הנתונים",
-          });
-        }
+    // ✅ ביצוע הוספה באמצעות async/await
+    await db.query(insertSql, [
+      user_id,
+      date,
+      finalCheckIn,
+      finalCheckOut,
+      status,
+      notes || null,
+    ]);
 
-        res.json({ Status: true, Message: "הנוכחות נוספה בהצלחה" });
-      }
-    );
-  });
+    res.json({ Status: true, Message: "הנוכחות נוספה בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה בהוספת נוכחות:", err);
+    res.json({
+      Status: false,
+      Error: "שגיאה בשמירה למסד הנתונים",
+    });
+  }
 });
 
 // ✅ הצגת כל הנוכחויות
-router.get("/", verifyToken, (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
   const sql = `SELECT * FROM attendance ORDER BY date DESC`;
-  connection.query(sql, (err, result) => {
-    if (err) {
-      console.error("שגיאה בשליפת נוכחויות:", err);
-      return res.json({ Status: false, Error: "שגיאה בטעינת הנתונים" });
-    }
+  try {
+    const [result] = await db.query(sql);
     res.json({ Status: true, Result: result });
-  });
+  } catch (err) {
+    console.error("שגיאה בשליפת נוכחויות:", err);
+    res.json({ Status: false, Error: "שגיאה בטעינת הנתונים" });
+  }
 });
 
 // ✅ שליפה לפי מזהה
-router.get("/:id", verifyToken, (req, res) => {
+router.get("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-
   const sql = `SELECT * FROM attendance WHERE attendance_id = ?`;
-  connection.query(sql, [id], (err, result) => {
-    if (err) {
-      console.error("שגיאה בשליפת נוכחות לפי ID:", err);
-      return res.json({ Status: false, Error: "שגיאה בטעינת הנתונים" });
-    }
+
+  try {
+    const [result] = await db.query(sql, [id]);
 
     if (result.length === 0) {
       return res.json({
@@ -110,13 +104,15 @@ router.get("/:id", verifyToken, (req, res) => {
         Error: "לא נמצאה רשומת נוכחות עם מזהה זה",
       });
     }
-
     res.json({ Status: true, Result: result[0] });
-  });
+  } catch (err) {
+    console.error("שגיאה בשליפת נוכחות לפי ID:", err);
+    res.json({ Status: false, Error: "שגיאה בטעינת הנתונים" });
+  }
 });
 
 // ✅ עדכון לפי מזהה
-router.put("/edit/:id", verifyToken, (req, res) => {
+router.put("/edit/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { user_id, date, check_in, check_out, status, notes } = req.body;
 
@@ -143,32 +139,36 @@ router.put("/edit/:id", verifyToken, (req, res) => {
     WHERE attendance_id = ?
   `;
 
-  connection.query(
-    sql,
-    [user_id, date, finalCheckIn, finalCheckOut, status, notes || null, id],
-    (err, result) => {
-      if (err) {
-        console.error("שגיאה בעדכון נוכחות:", err);
-        return res.json({
-          Status: false,
-          Error: "שגיאה בעדכון הנתונים במסד",
-        });
-      }
+  try {
+    const [result] = await db.query(sql, [
+      user_id,
+      date,
+      finalCheckIn,
+      finalCheckOut,
+      status,
+      notes || null,
+      id,
+    ]);
 
-      if (result.affectedRows === 0) {
-        return res.json({
-          Status: false,
-          Error: "רשומת נוכחות לא נמצאה לעדכון",
-        });
-      }
-
-      res.json({ Status: true, Message: "הרשומה עודכנה בהצלחה" });
+    if (result.affectedRows === 0) {
+      return res.json({
+        Status: false,
+        Error: "רשומת נוכחות לא נמצאה לעדכון",
+      });
     }
-  );
+
+    res.json({ Status: true, Message: "הרשומה עודכנה בהצלחה" });
+  } catch (err) {
+    console.error("שגיאה בעדכון נוכחות:", err);
+    res.json({
+      Status: false,
+      Error: "שגיאה בעדכון הנתונים במסד",
+    });
+  }
 });
 
-// ✅ דוח היעדרויות אוטומטי (ל-cron)
-router.get("/generate-absence-report", (req, res) => {
+// ✅ דוח היעדרויות אוטומטי (ל-cron) - קוד מתוקן
+router.get("/generate-absence-report", async (req, res) => {
   const today = new Date().toISOString().split("T")[0];
 
   const sql = `
@@ -179,11 +179,8 @@ router.get("/generate-absence-report", (req, res) => {
     WHERE a.attendance_id IS NULL AND u.is_active = 1;
   `;
 
-  connection.query(sql, [today], (err, result) => {
-    if (err) {
-      console.error("שגיאה בדוח חוסרי נוכחות:", err);
-      return res.status(500).json({ Status: false, Error: "שגיאת שרת" });
-    }
+  try {
+    const [result] = await db.query(sql, [today]);
 
     if (result.length === 0) {
       return res.json({
@@ -202,7 +199,10 @@ router.get("/generate-absence-report", (req, res) => {
       Missing: result,
       Message: `${result.length} עובדים ללא נוכחות בתאריך ${today}`,
     });
-  });
+  } catch (err) {
+    console.error("שגיאה בדוח חוסרי נוכחות:", err);
+    res.status(500).json({ Status: false, Error: "שגיאת שרת" });
+  }
 });
 
 export default router;

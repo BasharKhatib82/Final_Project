@@ -1,18 +1,18 @@
 import express from "express";
-import dbSingleton from "../utils/dbSingleton.js";
+// ✅ ייבוא הקוד המקצועי של ה-DB
+import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import verifyToken from "../utils/verifyToken.js";
 
-const connection = dbSingleton.getConnection();
 const router = express.Router();
 
-router.get("/", verifyToken, (req, res) => {
+router.get("/", verifyToken, async (req, res) => {
   const summary = {
     employees: {},
     roles: {},
     leads: {},
     tasks: {},
-    projects: {}, 
+    projects: {},
     attendance: [],
     logs_by_day: [],
   };
@@ -71,99 +71,89 @@ router.get("/", verifyToken, (req, res) => {
     `,
   };
 
-  const keys = Object.keys(queries);
-  let completed = 0;
-  let hasError = false;
+  try {
+    // ✅ שינוי מרכזי: ביצוע כל השאילתות במקביל באמצעות Promise.all
+    // זה יקצר משמעותית את זמן התגובה של הראוטר
+    const [
+      employees_active,
+      employees_inactive,
+      roles_total,
+      roles_active,
+      roles_inactive,
+      leads_new,
+      leads_in_progress,
+      leads_completed,
+      tasks_new,
+      tasks_in_progress,
+      tasks_completed,
+      projects_total,
+      projects_active,
+      projects_inactive,
+      logs_by_day,
+      attendance_by_user,
+      online_users,
+    ] = await Promise.all([
+      db.query(queries.employees_active),
+      db.query(queries.employees_inactive),
+      db.query(queries.roles_total),
+      db.query(queries.roles_active),
+      db.query(queries.roles_inactive),
+      db.query(queries.leads_new),
+      db.query(queries.leads_in_progress),
+      db.query(queries.leads_completed),
+      db.query(queries.tasks_new),
+      db.query(queries.tasks_in_progress),
+      db.query(queries.tasks_completed),
+      db.query(queries.projects_total),
+      db.query(queries.projects_active),
+      db.query(queries.projects_inactive),
+      db.query(queries.logs_by_day),
+      db.query(queries.attendance_by_user),
+      db.query(queries.online_users),
+    ]);
 
-  keys.forEach((key) => {
-    connection.query(queries[key], (err, results) => {
-      if (hasError) return;
-      if (err) {
-        hasError = true;
-        console.error("שגיאה בשאילתה:", err);
-        return res.status(500).json({ error: "שגיאה בשרת" });
-      }
+    // ✅ השמה של התוצאות מה-Promise.all לאובייקט ה-summary
+    summary.employees.active = employees_active[0][0].count;
+    summary.employees.inactive = employees_inactive[0][0].count;
 
-      switch (key) {
-        // ✅ ניתוח תוצאות עבור עובדים
-        case "employees_active":
-          summary.employees.active = results[0].count;
-          break;
-        case "employees_inactive":
-          summary.employees.inactive = results[0].count;
-          break;
+    summary.roles.total = roles_total[0][0].count;
+    summary.roles.active = roles_active[0][0].count;
+    summary.roles.inactive = roles_inactive[0][0].count;
 
-        // ✅ ניתוח תוצאות עבור תפקידים
-        case "roles_total":
-          summary.roles.total = results[0].count;
-          break;
-        case "roles_active":
-          summary.roles.active = results[0].count;
-          break;
-        case "roles_inactive":
-          summary.roles.inactive = results[0].count;
-          break;
+    summary.leads.new = leads_new[0][0].count;
+    summary.leads.in_progress = leads_in_progress[0][0].count;
+    summary.leads.completed = leads_completed[0][0].count;
 
-        // ✅ ניתוח תוצאות עבור פניות
-        case "leads_new":
-          summary.leads.new = results[0].count;
-          break;
-        case "leads_in_progress":
-          summary.leads.in_progress = results[0].count;
-          break;
-        case "leads_completed":
-          summary.leads.completed = results[0].count;
-          break;
+    summary.tasks.new = tasks_new[0][0].count;
+    summary.tasks.in_progress = tasks_in_progress[0][0].count;
+    summary.tasks.completed = tasks_completed[0][0].count;
 
-        // ✅ ניתוח תוצאות עבור משימות
-        case "tasks_new":
-          summary.tasks.new = results[0].count;
-          break;
-        case "tasks_in_progress":
-          summary.tasks.in_progress = results[0].count;
-          break;
-        case "tasks_completed":
-          summary.tasks.completed = results[0].count;
-          break;
+    summary.projects.total = projects_total[0][0].count;
+    summary.projects.active = projects_active[0][0].count;
+    summary.projects.inactive = projects_inactive[0][0].count;
 
-        // ✅ ניתוח תוצאות עבור פרויקטים
-        case "projects_total":
-          summary.projects.total = results[0].count;
-          break;
-        case "projects_active":
-          summary.projects.active = results[0].count;
-          break;
-        case "projects_inactive":
-          summary.projects.inactive = results[0].count;
-          break;
+    summary.logs_by_day = logs_by_day[0].map((row) => ({
+      date: row.date,
+      total_logs: row.total_logs,
+    }));
 
-        case "logs_by_day":
-          summary.logs_by_day = results.map((row) => ({
-            date: row.date,
-            total_logs: row.total_logs,
-          }));
-          break;
-        case "attendance_by_user":
-          summary.attendance = results.map((row) => ({
-            name: `${row.first_name} ${row.last_name}`,
-            total_hours: row.total_attendance,
-          }));
-          break;
-        case "online_users":
-          summary.employees.online_list = results.map((row) => ({
-            name: `${row.first_name} ${row.last_name}`,
-            role: row.role_name,
-          }));
-          break;
-      }
+    summary.attendance = attendance_by_user[0].map((row) => ({
+      name: `${row.first_name} ${row.last_name}`,
+      total_hours: row.total_attendance,
+    }));
 
-      completed++;
-      if (completed === keys.length) {
-        logAction("צפייה בלוח בקרה")(req, res, () => {});
-        res.json({ summary });
-      }
-    });
-  });
+    summary.employees.online_list = online_users[0].map((row) => ({
+      name: `${row.first_name} ${row.last_name}`,
+      role: row.role_name,
+    }));
+
+    // רישום פעולה ליומן
+    logAction("צפייה בלוח בקרה")(req, res, () => {});
+    res.json({ summary });
+  } catch (err) {
+    console.error("שגיאה בשאילתה:", err);
+    res.status(500).json({ error: "שגיאה בשרת" });
+  }
 });
 
 export default router;

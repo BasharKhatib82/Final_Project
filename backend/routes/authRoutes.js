@@ -1,6 +1,6 @@
 // קובץ: routes/authRoutes.js
 
-// ✅ ייבוא הקוד המקצועי של ה-DB
+// ✅ ייבוא הקוד המקצועי של ה-DB מהקובץ dbSingleton.js
 import { db } from "../utils/dbSingleton.js";
 import express from "express";
 import jwt from "jsonwebtoken";
