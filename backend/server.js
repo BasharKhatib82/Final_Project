@@ -25,7 +25,10 @@ const app = express();
 // זה יטפל גם בבקשות ה-preflight (OPTIONS)
 app.use(
   cors({
-    origin: ["https://www.respondify-crm.co.il"], // הגדרת מקורות מורשים
+    origin: [
+      "https://www.respondify-crm.co.il",
+      "http://www.respondify-crm.co.il",
+    ], // הגדרת מקורות מורשים (כולל HTTP)
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // הגדרת מתודות מורשות
     allowedHeaders: ["Content-Type", "Authorization"], // הגדרת כותרות מורשות
     credentials: true, // חשוב כדי לאפשר שליחת cookies ו-auth headers
