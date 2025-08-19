@@ -5,7 +5,11 @@ import logAction from "../utils/logAction.js";
 
 const router = express.Router();
 
-// ✅ שליפת כל הפניות (כולל פרויקט, לקוח ונציג מטפל)
+/**
+ * @route GET /leads/
+ * @desc שליפת כל הפניות (כולל פרויקט, לקוח ונציג מטפל)
+ * @access Private (דורש Token)
+ */
 router.get("/", verifyToken, async (req, res) => {
   const sql = `
     SELECT 
@@ -18,8 +22,8 @@ router.get("/", verifyToken, async (req, res) => {
       u.first_name AS rep_first_name,
       u.last_name AS rep_last_name
     FROM leads l
-    JOIN clients c ON l.phone_number = c.phone_number
-    JOIN projects p ON l.project_id = p.project_id
+    LEFT JOIN clients c ON l.phone_number = c.phone_number
+    LEFT JOIN projects p ON l.project_id = p.project_id
     LEFT JOIN users u ON l.user_id = u.user_id
     ORDER BY l.lead_id DESC
   `;
@@ -32,222 +36,105 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ שליפת פנייה לפי ID
+/**
+ * @route GET /leads/:id
+ * @desc שליפת פנייה לפי ID
+ * @access Private (דורש Token)
+ */
 router.get("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const sql = `
     SELECT 
       l.*, 
-      c.first_name, c.last_name, c.email, c.city, 
+      c.first_name, 
+      c.last_name, 
+      c.email, 
+      c.city, 
       p.project_name,
       u.first_name AS rep_first_name,
       u.last_name AS rep_last_name
     FROM leads l
-    JOIN clients c ON l.phone_number = c.phone_number
-    JOIN projects p ON l.project_id = p.project_id
+    LEFT JOIN clients c ON l.phone_number = c.phone_number
+    LEFT JOIN projects p ON l.project_id = p.project_id
     LEFT JOIN users u ON l.user_id = u.user_id
     WHERE l.lead_id = ?
   `;
   try {
     const [result] = await db.query(sql, [id]);
-    if (result.length === 0) {
-      return res.status(404).json({ Status: false, Error: "פנייה לא נמצאה" });
-    }
-    res.json({ Status: true, Result: result[0] });
-  } catch (err) {
-    console.error("שגיאה בשליפת פנייה לפי ID:", err);
-    res.status(500).json({ Status: false, Error: "שגיאה בשרת" });
-  }
-});
-
-// ✅ יצירת פנייה חדשה (כולל יצירת לקוח אם לא קיים)
-router.post("/add", verifyToken, async (req, res) => {
-  const {
-    phone_number,
-    project_id,
-    status,
-    first_name,
-    last_name,
-    email,
-    city,
-  } = req.body;
-
-  if (!phone_number || !project_id || !status) {
-    return res
-      .status(400)
-      .json({ Status: false, Error: "נא למלא את כל השדות החובה" });
-  }
-
-  const checkClientSQL = `SELECT * FROM clients WHERE phone_number = ?`;
-  const insertClientSQL = `
-    INSERT INTO clients (phone_number, first_name, last_name, email, city)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-  const insertLeadSQL = `
-    INSERT INTO leads (phone_number, project_id, status, user_id)
-    VALUES (?, ?, ?, ?)
-  `;
-
-  try {
-    const [clients] = await db.query(checkClientSQL, [phone_number]);
-
-    if (clients.length === 0) {
-      await db.query(insertClientSQL, [
-        phone_number,
-        first_name,
-        last_name,
-        email,
-        city,
-      ]);
-    }
-
-    await db.query(insertLeadSQL, [
-      phone_number,
-      project_id,
-      status,
-      req.user.user_id,
-    ]);
-
-    logAction("הוספת פנייה חדשה")(req, res, () => {});
-    res.json({ Status: true, Message: "הפנייה נשמרה בהצלחה" });
-  } catch (err) {
-    console.error("שגיאה ביצירת פנייה חדשה:", err);
-    res.status(500).json({ Status: false, Error: "שגיאה בשרת" });
-  }
-});
-
-// ✅ עדכון פנייה כולל שינוי טלפון ופרטי לקוח
-router.put("/edit/:id", verifyToken, async (req, res) => {
-  const { id } = req.params;
-  const {
-    phone_number,
-    first_name,
-    last_name,
-    email,
-    city,
-    status,
-    project_id,
-    user_id,
-  } = req.body;
-
-  if (!phone_number || !first_name || !last_name || !status || !project_id) {
-    return res
-      .status(400)
-      .json({ Status: false, Error: "נא למלא את כל השדות הנדרשים" });
-  }
-
-  const checkClientSQL = `SELECT * FROM clients WHERE phone_number = ?`;
-  const updateClientSQL = `
-    UPDATE clients
-    SET first_name = ?, last_name = ?, email = ?, city = ?
-    WHERE phone_number = ?
-  `;
-  const insertClientSQL = `
-    INSERT INTO clients (phone_number, first_name, last_name, email, city)
-    VALUES (?, ?, ?, ?, ?)
-  `;
-  const updateLeadSQL = `
-    UPDATE leads
-    SET status = ?, project_id = ?, phone_number = ?, user_id = ?
-    WHERE lead_id = ?
-  `;
-
-  try {
-    const [clientResult] = await db.query(checkClientSQL, [phone_number]);
-
-    if (clientResult.length > 0) {
-      await db.query(updateClientSQL, [
-        first_name,
-        last_name,
-        email,
-        city,
-        phone_number,
-      ]);
+    if (result.length > 0) {
+      res.json({ Status: true, Result: result[0] });
     } else {
-      await db.query(insertClientSQL, [
-        phone_number,
-        first_name,
-        last_name,
-        email,
-        city,
-      ]);
+      res.json({ Status: false, Error: "פנייה לא נמצאה" });
     }
-
-    await db.query(updateLeadSQL, [
-      status,
-      project_id,
-      phone_number,
-      user_id || null,
-      id,
-    ]);
-
-    logAction(`עדכון פנייה #${id}`)(req, res, () => {});
-    res.json({ Status: true, Message: "הפנייה עודכנה בהצלחה" });
   } catch (err) {
-    console.error("שגיאה בעדכון פנייה:", err);
+    console.error("שגיאה בשליפת פנייה:", err);
     res.status(500).json({ Status: false, Error: "שגיאה בשרת" });
   }
 });
 
-// ✅ עדכון נציג מטפל לפנייה
-router.put("/update-rep/:id", verifyToken, async (req, res) => {
-  const { id } = req.params;
-  const { user_id } = req.body;
+/**
+ * @route GET /leads/user/:user_id
+ * @desc שליפת פניות לפי משתמש
+ * @access Private (דורש Token)
+ */
+router.get("/user/:user_id", verifyToken, async (req, res) => {
+  const { user_id } = req.params;
+  const sql = `
+    SELECT 
+      l.*,
+      c.first_name,
+      c.last_name
+    FROM leads l
+    JOIN clients c ON l.phone_number = c.phone_number
+    WHERE l.user_id = ?
+    ORDER BY l.lead_id DESC
+  `;
+  try {
+    const [result] = await db.query(sql, [user_id]);
+    res.json({ Status: true, Result: result });
+  } catch (err) {
+    console.error("שגיאה בשליפת פניות לפי משתמש:", err);
+    res.status(500).json({ Status: false, Error: "שגיאה בשרת" });
+  }
+});
+
+/**
+ * @route POST /leads/add
+ * @desc הוספת פנייה חדשה
+ * @access Private (דורש Token)
+ */
+router.post("/add", verifyToken, async (req, res) => {
+  const { phone_number, project_id, user_id, status } = req.body;
+
+  if (!phone_number || !project_id || !user_id) {
+    return res.json({ Status: false, Error: "נא למלא את כל השדות" });
+  }
 
   const sql = `
-    UPDATE leads
-    SET user_id = ?
-    WHERE lead_id = ?
+    INSERT INTO leads (phone_number, project_id, user_id, status, created_at)
+    VALUES (?, ?, ?, ?, NOW())
   `;
+  const values = [phone_number, project_id, user_id, status];
 
   try {
-    await db.query(sql, [user_id || null, id]);
-
-    logAction(`עדכון נציג לפנייה #${id}`)(req, res, () => {});
-    res.json({ Status: true, Message: "נציג עודכן בהצלחה" });
+    await db.query(sql, values);
+    logAction(`יצירת פנייה חדשה עבור טלפון: ${phone_number}`)(
+      req,
+      res,
+      () => {}
+    );
+    res.json({ Status: true, Message: "הפנייה נוספה בהצלחה" });
   } catch (err) {
-    console.error("שגיאה בעדכון נציג:", err);
+    console.error("שגיאה בהוספת פנייה:", err);
     res.status(500).json({ Status: false, Error: "שגיאה בשרת" });
   }
 });
 
-// ✅ שליפת לקוח לפי טלפון (לטופס AddLead)
-router.get("/client/by-phone/:phone", verifyToken, async (req, res) => {
-  const { phone } = req.params;
-  const sql = `SELECT * FROM clients WHERE phone_number = ?`;
-  try {
-    const [result] = await db.query(sql, [phone]);
-    if (result.length === 0) {
-      return res.status(404).json({ Status: false, Error: "לא נמצא לקוח" });
-    }
-    res.json({ Status: true, Result: result[0] });
-  } catch (err) {
-    console.error("שגיאה בשליפת לקוח לפי טלפון:", err);
-    res.status(500).json({ Status: false, Error: "שגיאה בשרת" });
-  }
-});
-
-// ✅ מחיקה לוגית של פנייה – שינוי סטטוס ל"בוטלה"
-router.delete("/delete/:id", verifyToken, async (req, res) => {
-  const { id } = req.params;
-
-  const sql = `
-    UPDATE leads
-    SET status = 'בוטלה'
-    WHERE lead_id = ?
-  `;
-
-  try {
-    await db.query(sql, [id]);
-    logAction(`מחיקת פנייה (לוגית) #${id}`)(req, res, () => {});
-    res.json({ Status: true, Message: "הפנייה סומנה כמבוטלת" });
-  } catch (err) {
-    console.error("שגיאה במחיקת פנייה:", err);
-    res.status(500).json({ Status: false, Error: "שגיאה במחיקה" });
-  }
-});
-
-// ✅ עדכון סטטוס פנייה בלבד
+/**
+ * @route PUT /leads/update-status/:id
+ * @desc עדכון סטטוס פנייה בלבד
+ * @access Private (דורש Token)
+ */
 router.put("/update-status/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -268,11 +155,16 @@ router.put("/update-status/:id", verifyToken, async (req, res) => {
   }
 });
 
+/**
+ * @route PUT /leads/bulk-assign
+ * @desc שיוך מרובה של פניות לנציג
+ * @access Private (דורש Token)
+ */
 router.put("/bulk-assign", verifyToken, async (req, res) => {
   const { leadIds, user_id } = req.body;
 
   if (!leadIds || leadIds.length === 0) {
-    return res.status(400).json({ Status: false, Error: "לא נבחרו פניות" });
+    return res.status(400).json({ Status: false, Error: "יש לבחור פניות" });
   }
 
   const sql = `
@@ -282,15 +174,38 @@ router.put("/bulk-assign", verifyToken, async (req, res) => {
   `;
 
   try {
+    // השתמש ב-db.query עם מערך עבור IN
     await db.query(sql, [user_id || null, leadIds]);
-    logAction(`שיוך ${leadIds.length} פניות לנציג ${user_id}`)(
-      req,
-      res,
-      () => {}
-    );
-    res.json({ Status: true, Message: "השיוך בוצע בהצלחה" });
+    await logAction(`שיוך מרובה לפניות [${leadIds.join(", ")}]`);
+    res.json({ Status: true, Message: "שיוך מרובה עודכן בהצלחה" });
   } catch (err) {
-    console.error("שגיאה בשיוך פניות:", err);
+    console.error("שגיאה בשיוך מרובה:", err);
+    return res.json({ Status: false, Error: "שגיאה בשיוך מרובה" });
+  }
+});
+
+/**
+ * @route DELETE /leads/delete/:id
+ * @desc מחיקה לוגית של פנייה על ידי עדכון הסטטוס ל-'מבוטל'
+ * @access Private (דורש Token)
+ */
+router.delete("/delete/:id", verifyToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [result] = await db.query(
+      `UPDATE leads SET status = 'מבוטל' WHERE lead_id = ?`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.json({ Status: false, Error: "פנייה לא נמצאה" });
+    }
+
+    logAction(`מחיקה לוגית של פנייה #${id}`)(req, res, () => {});
+    res.json({ Status: true, Message: "הפנייה סומנה כמבוטלת" });
+  } catch (err) {
+    console.error("שגיאה במחיקת פנייה:", err);
     res.status(500).json({ Status: false, Error: "שגיאה בשרת" });
   }
 });
