@@ -28,7 +28,7 @@ jobs:
           username: ${{ secrets.FTP_USER_FRONTEND }}
           password: ${{ secrets.FTP_PASS_FRONTEND }}
           local-dir: frontend/build/
-          server-dir: /home/linecard/public_html/respondify-crm.co.il/
+          server-dir: public_html/respondify-crm.co.il/
 
       # === BACKEND ===
       - name: Deploy Backend via FTP
@@ -38,7 +38,7 @@ jobs:
           username: ${{ secrets.FTP_USER_BACKEND }}
           password: ${{ secrets.FTP_PASS_BACKEND }}
           local-dir: backend/
-          server-dir: /home/linecard/RespondifyCrmAPI/
+          server-dir: RespondifyCrmAPI/
           exclude: |
             **/node_modules/**
             **/.git/**
