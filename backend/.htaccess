@@ -1,17 +1,5 @@
-PassengerEnabled on
-PassengerAppRoot /home/linecard/RespondifyCrmAPI
-PassengerAppType node
-PassengerStartupFile server.js
-
-# ✅ הוספת כותרות CORS תמיד
 <IfModule mod_headers.c>
-    Header always set Access-Control-Allow-Origin "https://www.respondify-crm.co.il"
-    Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
-    Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
-    Header always set Access-Control-Allow-Credentials "true"
+    Header set Access-Control-Allow-Origin "https://www.respondify-crm.co.il"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization"
 </IfModule>
-
-# ✅ טיפול ב־OPTIONS ישירות ב־Apache
-RewriteEngine On
-RewriteCond %{REQUEST_METHOD} OPTIONS
-RewriteRule ^ - [L,R=200]

@@ -1,10 +1,8 @@
-// server.js
 import express from "express";
+import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import "./utils/cronTasks.js";
-
-// ✅ ראוטים
 import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import projectsRoutes from "./routes/projectsRoutes.js";
@@ -24,19 +22,18 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
+
+app.use(
+  cors({
+    origin: "https://www.respondify-crm.co.il",
+  })
+);
+
 app.use(cookieParser());
 
-app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", "https://www.respondify-crm.co.il");
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  res.sendStatus(200);
-});
+const port = process.env.PORT || 8801;
 
-
-
-// ✅ ראוטים
+// ✅ ראוטים עם נתיבים ברורים
 app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
 app.use("/leads", leadsRoutes);
@@ -52,5 +49,6 @@ app.use("/logs", logsRoutes);
 app.use("/whatsapp", whatsappRoutes);
 app.use("/flows", flowDataRoutes);
 
-// 🚀 Passenger דואג ל־listen, אין צורך ב־app.listen כאן
-export default app;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});
