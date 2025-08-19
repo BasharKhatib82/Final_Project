@@ -1,4 +1,4 @@
-import { db } from "../utils/dbSingleton";
+import { db } from "../utils/dbSingleton.js";
 
 /**
  * Performs a daily check - if an employee has no attendance record at all for the current day,

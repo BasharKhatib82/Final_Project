@@ -1,4 +1,4 @@
-import { db } from "../utils/dbSingleton";
+import { db } from "../utils/dbSingleton.js";
 
 /**
  * רישום פעולה ליומן
