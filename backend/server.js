@@ -23,7 +23,16 @@ const app = express();
 
 app.use(express.json());
 
-app.use(cors());
+const corsOptions = {
+  origin: "https://respondify-crm.co.il",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
+// טיפול בכל הבקשות הנכנסות לכל הראוטים.
+app.use(cors(corsOptions));
 
 app.use(cookieParser());
 
