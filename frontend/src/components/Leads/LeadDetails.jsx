@@ -6,7 +6,7 @@ import AddButton from "../Buttons/AddSaveButton";
 import { useUser } from "../Tools/UserContext";
 import Popup from "../Tools/Popup";
 
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 
 const LeadDetails = () => {
   const { id } = useParams();

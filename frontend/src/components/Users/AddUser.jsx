@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 const AddUser = () => {
   const navigate = useNavigate();
 

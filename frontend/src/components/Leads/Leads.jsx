@@ -5,7 +5,7 @@ import NavigationButton from "../Buttons/NavigationButton";
 import DeleteButton from "../Buttons/DeleteButton";
 import Popup from "../Tools/Popup";
 
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 
 const Leads = () => {
   const [leads, setLeads] = useState([]);

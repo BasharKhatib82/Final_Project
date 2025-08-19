@@ -21,7 +21,7 @@ const Tasks = () => {
   const [statusToSave, setStatusToSave] = useState(null);
   const [newStatusValue, setNewStatusValue] = useState(null);
 
-  const api = process.env.REACT_APP_BACKEND;
+  const api = process.env.REACT_APP_API_URL;
   const navigate = useNavigate();
 
   useEffect(() => {

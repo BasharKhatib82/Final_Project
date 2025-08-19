@@ -6,7 +6,7 @@ import ExitButton from "../Buttons/ExitButton";
 import AddButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
 
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 
 const AddLead = () => {
   const navigate = useNavigate();

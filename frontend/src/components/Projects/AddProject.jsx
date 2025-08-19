@@ -5,7 +5,7 @@ import Popup from "../Tools/Popup";
 import AddButton from "../Buttons/AddSaveButton";
 import ExitButton from "../Buttons/ExitButton";
 
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 
 const AddProject = () => {
   const [form, setForm] = useState({

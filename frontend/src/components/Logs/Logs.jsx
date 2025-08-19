@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { saveAs } from "file-saver";
 
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 
 const Logs = () => {
   const [logs, setLogs] = useState([]);

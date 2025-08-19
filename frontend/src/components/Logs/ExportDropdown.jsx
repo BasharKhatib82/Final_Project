@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { FileText, FileSpreadsheet, Printer, Mail } from "lucide-react";
 import axios from "axios";
 
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 
 const ExportDropdown = () => {
   const handleExport = (type) => {

@@ -5,7 +5,7 @@ import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
 
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 
 const EditRole = () => {
   const { id } = useParams();

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import NavigationButton from "../Buttons/NavigationButton";
 import Popup from "../Tools/Popup";
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 
 const Users = () => {
   const [allUsers, setAllUsers] = useState([]);

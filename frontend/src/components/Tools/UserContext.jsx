@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
 const UserContext = createContext();
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 
 export const useUser = () => useContext(UserContext);
 

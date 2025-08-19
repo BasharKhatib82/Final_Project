@@ -4,7 +4,7 @@ import axios from "axios";
 import Popup from "../Tools/Popup";
 import ExitButton from "../Buttons/ExitButton";
 
-const api = process.env.REACT_APP_BACKEND;
+const api = process.env.REACT_APP_API_URL;
 
 const EditProject = () => {
   const [form, setForm] = useState({
