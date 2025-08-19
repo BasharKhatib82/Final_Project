@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
 const UserContext = createContext();
@@ -8,11 +8,23 @@ export const useUser = () => useContext(UserContext);
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [authChecked, setAuthChecked] = useState(false); // לשימוש אפשרי בהמתנה
+  const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
+    const token = localStorage.getItem("token"); // או לקחת מ-cookie
+
+    if (!token) {
+      // אין טוקן בכלל → המשתמש לא מחובר
+      setUser(null);
+      setAuthChecked(true);
+      return;
+    }
+
     axios
-      .get(`${api}/auth/check`, { withCredentials: true })
+      .get(`${api}/auth/check`, {
+        headers: { Authorization: `Bearer ${token}` }, // שולחים טוקן רק אם קיים
+        withCredentials: true,
+      })
       .then((res) => {
         if (res.data.loggedIn) {
           setUser(res.data.user);
@@ -25,16 +37,17 @@ export const UserProvider = ({ children }) => {
         setUser(null);
       })
       .finally(() => {
-        setAuthChecked(true); // אות לסיום בדיקה
+        setAuthChecked(true);
       });
   }, []);
 
   const logout = () => {
     axios
-      .post(`${api}/auth/logout`, null, {
-        withCredentials: true,
+      .post(`${api}/auth/logout`, null, { withCredentials: true })
+      .then(() => {
+        localStorage.removeItem("token");
+        setUser(null);
       })
-      .then(() => setUser(null))
       .catch((err) => console.error("Logout Error:", err));
   };
 
