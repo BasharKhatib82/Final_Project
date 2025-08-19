@@ -7,7 +7,7 @@ PassengerStartupFile server.js
 # הפעלת Rewrite
 RewriteEngine On
 
-# ✅ טיפול בבקשות OPTIONS (Preflight) שיחזרו תמיד 200
+# ✅ טיפול הבקשות OPTIONS (Preflight) שיחזרו תמיד 200
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^(.*)$ $1 [R=200,L]
 
