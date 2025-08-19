@@ -24,11 +24,8 @@ const app = express();
 app.use(express.json());
 
 const corsOptions = {
-  origin: "https://respondify-crm.co.il",
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-  allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
-  optionsSuccessStatus: 200,
+  origin: 'https://www.respondify-crm.co.il',
+  optionsSuccessStatus: 200 
 };
 
 // טיפול בכל הבקשות הנכנסות לכל הראוטים.

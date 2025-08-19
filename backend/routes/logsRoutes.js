@@ -7,7 +7,7 @@ import PDFDocument from "pdfkit";
 import nodemailer from "nodemailer";
 import fs from "fs";
 import path from "path";
-import Bidi from "bidi-js"; // A library for handling bidirectional text
+import Bidi from "bidi-js"; 
 
 const router = express.Router();
 
