@@ -1,6 +1,6 @@
 # ✅ הפעלת Passenger (Node.js)
 PassengerEnabled on
-PassengerAppRoot /home/linecard/RespondifyCrmAPI
+PassengerAppRoot /RespondifyCrmAPI
 PassengerAppType node
 PassengerStartupFile server.js
 
