@@ -3,7 +3,7 @@ PassengerAppRoot /home/linecard/RespondifyCrmAPI
 PassengerAppType node
 PassengerStartupFile server.js
 
-# --- CORS Headers ---
+# ✅ CORS Headers
 <IfModule mod_headers.c>
     Header always set Access-Control-Allow-Origin "https://www.respondify-crm.co.il"
     Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
@@ -11,7 +11,7 @@ PassengerStartupFile server.js
     Header always set Access-Control-Allow-Credentials "true"
 </IfModule>
 
-# --- להעביר OPTIONS ל־Node.js במקום לטפל בהם ב־Apache ---
+# ✅ לטפל ב־OPTIONS ישירות ב־Apache
 RewriteEngine On
 RewriteCond %{REQUEST_METHOD} OPTIONS
-RewriteRule ^(.*)$ - [L]
+RewriteRule ^ - [R=200,L]
