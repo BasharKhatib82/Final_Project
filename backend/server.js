@@ -32,7 +32,7 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Check if the origin is in our allowed list or if it's a same-origin request 
+      // Check if the origin is in our allowed list or if it's a same-origin request (e.g., from Postman)
       if (!origin || allowedOrigins.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
