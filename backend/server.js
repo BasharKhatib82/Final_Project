@@ -19,6 +19,13 @@ import whatsappRoutes from "./routes/whatsappRoutes.js";
 import flowDataRoutes from "./routes/flowDataRoutes.js";
 
 app.use(cors()); // טיפול בכל הבקשות הנכנסות לכל הראוטים.
+
+app.options("https://respondify-crm.co.il/", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Origin", "auth, Content-Type");
+  res.sendStatus(200);
+});
+
 dotenv.config();
 const app = express();
 app.use(express.json());
