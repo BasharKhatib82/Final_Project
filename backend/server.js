@@ -20,20 +20,9 @@ import flowDataRoutes from "./routes/flowDataRoutes.js";
 
 dotenv.config();
 const app = express();
-
 app.use(express.json());
-
-const corsOptions = {
-  origin: 'https://www.respondify-crm.co.il',
-  optionsSuccessStatus: 200 
-};
-
-// טיפול בכל הבקשות הנכנסות לכל הראוטים.
-app.use(cors(corsOptions));
-
+app.use(cors()); // טיפול בכל הבקשות הנכנסות לכל הראוטים.
 app.use(cookieParser());
-
-const port = process.env.PORT || 8801;
 
 // ✅ ראוטים עם נתיבים ברורים
 app.use("/admin", adminRoutes);
@@ -51,6 +40,4 @@ app.use("/logs", logsRoutes);
 app.use("/whatsapp", whatsappRoutes);
 app.use("/flows", flowDataRoutes);
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+app.listen();
