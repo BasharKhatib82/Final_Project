@@ -5,7 +5,18 @@ import logAction from "../utils/logAction.js";
 
 const router = express.Router();
 
-// ✅ שליפת כל תיעוד ההתקדמות עבור משימה מסוימת
+// פונקציה אחידה לתגובות
+const sendResponse = (
+  res,
+  success,
+  data = null,
+  message = null,
+  status = 200
+) => {
+  res.status(status).json({ success, data, message });
+};
+
+// ✅ שליפת כל התיעוד למשימה
 router.get("/:task_id", verifyToken, async (req, res) => {
   const { task_id } = req.params;
 
@@ -18,53 +29,61 @@ router.get("/:task_id", verifyToken, async (req, res) => {
   `;
 
   try {
-    const [result] = await db.query(sql, [task_id]);
-    res.json({ Status: true, Result: result });
+    const [rows] = await db.query(sql, [task_id]);
+    sendResponse(res, true, rows);
   } catch (err) {
-    console.error("שגיאה בשליפת התקדמות משימה:", err);
-    return res.json({ Status: false, Error: "שגיאה בשליפת התקדמות משימה" });
+    console.error("❌ שגיאה בשליפת התקדמות משימה:", err);
+    sendResponse(res, false, null, "שגיאה בשליפת התקדמות משימה", 500);
   }
 });
 
-// ✅ הוספת תיעוד חדש להתקדמות משימה + עדכון סטטוס במשימה
+// ✅ הוספת תיעוד חדש + עדכון סטטוס
 router.post("/add", verifyToken, async (req, res) => {
   const { task_id, progress_note, status } = req.body;
-  const user_id = req.user.user_id;
+  const user_id = req.user?.user_id;
 
   if (!task_id || !progress_note || !status) {
-    return res.json({ Status: false, Error: "נא למלא את כל השדות" });
+    return sendResponse(res, false, null, "נא למלא את כל השדות", 400);
+  }
+
+  // אפשר להוסיף ולידציה לערכים חוקיים של status
+  const allowedStatuses = ["חדש", "בתהליך", "הושלם"];
+  if (!allowedStatuses.includes(status)) {
+    return sendResponse(res, false, null, "סטטוס לא חוקי", 400);
   }
 
   const insertProgressSQL = `
     INSERT INTO task_progress (task_id, user_id, progress_note, status, update_time)
     VALUES (?, ?, ?, ?, NOW())
   `;
+  const updateTaskSQL = `UPDATE tasks SET status=? WHERE task_id=?`;
 
-  const updateTaskSQL = `
-    UPDATE tasks
-    SET status = ?
-    WHERE task_id = ?
-  `;
-
+  const conn = await db.getConnection(); // ⚡ פתיחת חיבור לטרנזקציה
   try {
-    // Start a transaction if needed, for simplicity we'll run two queries in sequence
-    await db.query(insertProgressSQL, [
+    await conn.beginTransaction();
+
+    await conn.query(insertProgressSQL, [
       task_id,
       user_id,
       progress_note,
       status,
     ]);
-    await db.query(updateTaskSQL, [status, task_id]);
+    await conn.query(updateTaskSQL, [status, task_id]);
 
-    await logAction(`הוספת תיעוד למשימה #${task_id} (סטטוס: ${status})`);
+    await conn.commit();
 
-    res.json({ Status: true, Message: "התיעוד נשמר בהצלחה" });
+    logAction(`הוספת תיעוד למשימה #${task_id} (סטטוס: ${status})`)(
+      req,
+      res,
+      () => {}
+    );
+    sendResponse(res, true, null, "התיעוד והסטטוס נשמרו בהצלחה");
   } catch (err) {
-    console.error("שגיאה בהוספת תיעוד למשימה או בעדכון סטטוס:", err);
-    return res.json({
-      Status: false,
-      Error: "שגיאה בשמירת התיעוד או בעדכון המשימה",
-    });
+    await conn.rollback();
+    console.error("❌ שגיאה בהוספת תיעוד למשימה:", err);
+    sendResponse(res, false, null, "שגיאה בשמירת התיעוד או בעדכון המשימה", 500);
+  } finally {
+    conn.release();
   }
 });
 

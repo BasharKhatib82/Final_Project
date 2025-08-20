@@ -1,38 +1,49 @@
+// utils/checkMissingAttendance.js
 import { db } from "../utils/dbSingleton.js";
 
 /**
- * Performs a daily check - if an employee has no attendance record at all for the current day,
- * an attendance record will be created with the status "היעדרות ללא שעות".
+ * ✅ בודק פעם ביום אם יש עובדים פעילים בלי רשומת נוכחות
+ * אם אין — מוסיף להם רשומה עם סטטוס "היעדרות".
  */
 const checkMissingAttendance = async () => {
-  const today = new Date().toISOString().slice(0, 10); // Date in YYYY-MM-DD format
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
 
   try {
-    // Step 1: Retrieve all active employees
-    const getUsersQuery = `SELECT user_id FROM users WHERE is_active = 1`;
-    const [users] = await db.query(getUsersQuery);
+    // שליפת כל המשתמשים הפעילים שאין להם נוכחות להיום
+    const missingQuery = `
+      SELECT u.user_id
+      FROM users u
+      LEFT JOIN attendance a 
+        ON u.user_id = a.user_id AND a.date = ?
+      WHERE u.is_active = 1 AND a.attendance_id IS NULL
+    `;
 
-    // Step 2: Iterate over each employee to check for attendance
-    for (const { user_id } of users) {
-      const checkAttendanceQuery = `
-        SELECT attendance_id FROM attendance
-        WHERE user_id = ? AND date = ?
-      `;
+    const [missingUsers] = await db.query(missingQuery, [today]);
 
-      const [results] = await db.query(checkAttendanceQuery, [user_id, today]);
-
-      if (results.length === 0) {
-        // ❗ No attendance record exists for this day – add a new record with the appropriate status
-        const insertQuery = `
-          INSERT INTO attendance (user_id, date, status)
-          VALUES (?, ?, 'היעדרות')
-        `;
-        await db.query(insertQuery, [user_id, today]);
-        console.log(`⏺️ Missing attendance recorded for user ${user_id}`);
-      }
+    if (missingUsers.length === 0) {
+      console.log(`✅ All users have attendance for ${today}`);
+      return;
     }
+
+    // הוספה במכה אחת (bulk insert)
+    const insertQuery = `
+      INSERT INTO attendance (user_id, date, status)
+      VALUES ?
+    `;
+
+    const values = missingUsers.map(({ user_id }) => [
+      user_id,
+      today,
+      "היעדרות",
+    ]);
+
+    await db.query(insertQuery, [values]);
+
+    console.log(
+      `⏺️ Added missing attendance for ${missingUsers.length} users (${today})`
+    );
   } catch (err) {
-    console.error("❌ An error occurred during the attendance check:", err);
+    console.error("❌ Error during attendance check:", err);
   }
 };
 

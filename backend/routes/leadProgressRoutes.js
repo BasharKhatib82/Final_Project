@@ -9,6 +9,10 @@ const router = Router();
 router.get("/:lead_id", verifyToken, async (req, res) => {
   const { lead_id } = req.params;
 
+  if (!lead_id) {
+    return res.status(400).json({ Status: false, Error: "חסר מזהה פנייה" });
+  }
+
   const sql = `
     SELECT lp.*, CONCAT(u.first_name, ' ', u.last_name) AS user_name
     FROM lead_progress lp
@@ -21,37 +25,46 @@ router.get("/:lead_id", verifyToken, async (req, res) => {
     const [result] = await db.query(sql, [lead_id]);
     res.json({ Status: true, Result: result });
   } catch (err) {
-    console.error("שגיאה בשליפת התקדמות:", err);
-    res.json({ Status: false, Error: "שגיאה בשרת" });
+    console.error("❌ שגיאה בשליפת התקדמות:", err);
+    res.status(500).json({ Status: false, Error: "שגיאת שרת" });
   }
 });
 
-// ✅ הוספת תיעוד חדש + עדכון סטטוס פנייה
+// ✅ הוספת תיעוד חדש + עדכון סטטוס פנייה (בטרנזקציה)
 router.post("/add", verifyToken, async (req, res) => {
   const { lead_id, lead_note, status } = req.body;
-  const user_id = req.user.user_id;
+  const user_id = req.user?.user_id;
 
-  if (!lead_id || !lead_note || !status) {
-    return res.json({ Status: false, Error: "נא למלא את כל השדות" });
+  if (!lead_id || !lead_note?.trim() || !status) {
+    return res
+      .status(400)
+      .json({ Status: false, Error: "נא למלא את כל השדות" });
   }
 
-  const sql1 = `
-    INSERT INTO lead_progress (lead_id, user_id, lead_note, status, update_time)
-    VALUES (?, ?, ?, ?, NOW())
-  `;
-
-  const sql2 = `
-    UPDATE leads
-    SET status = ?
-    WHERE lead_id = ?
-  `;
-
+  const conn = await db.getConnection(); // חיבור ייחודי לטרנזקציה
   try {
-    // ✅ שימוש ב-Promise.all לביצוע שתי השאילתות במקביל
-    await Promise.all([
-      db.query(sql1, [lead_id, user_id, lead_note, status]),
-      db.query(sql2, [status, lead_id]),
-    ]);
+    await conn.beginTransaction();
+
+    // ✅ הוספת תיעוד חדש
+    await conn.query(
+      `
+      INSERT INTO lead_progress (lead_id, user_id, lead_note, status, update_time)
+      VALUES (?, ?, ?, ?, NOW())
+    `,
+      [lead_id, user_id, lead_note.trim(), status]
+    );
+
+    // ✅ עדכון סטטוס בטבלת leads
+    await conn.query(
+      `
+      UPDATE leads
+      SET status = ?
+      WHERE lead_id = ?
+    `,
+      [status, lead_id]
+    );
+
+    await conn.commit();
 
     // רישום פעולה ליומן
     logAction(`הוספת תיעוד + עדכון סטטוס לפנייה #${lead_id}`)(
@@ -59,10 +72,17 @@ router.post("/add", verifyToken, async (req, res) => {
       res,
       () => {}
     );
-    res.json({ Status: true, Message: "התיעוד והסטטוס נשמרו בהצלחה" });
+
+    res.json({
+      Status: true,
+      Message: "התיעוד והסטטוס נשמרו בהצלחה",
+    });
   } catch (err) {
-    console.error("שגיאה בשמירת הנתונים:", err);
-    res.json({ Status: false, Error: "שגיאה בשמירת הנתונים במסד" });
+    await conn.rollback();
+    console.error("❌ שגיאה בשמירת הנתונים:", err);
+    res.status(500).json({ Status: false, Error: "שגיאה בשמירת הנתונים במסד" });
+  } finally {
+    conn.release();
   }
 });
 

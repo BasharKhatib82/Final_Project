@@ -5,142 +5,136 @@ import logAction from "../utils/logAction.js";
 
 const router = express.Router();
 
+// פונקציית עזר לאחידות תגובה
+const sendResponse = (
+  res,
+  success,
+  data = null,
+  message = null,
+  status = 200
+) => {
+  res.status(status).json({ success, data, message });
+};
+
 // ✅ שליפת כל הפרויקטים
 router.get("/", verifyToken, async (req, res) => {
-  const sql = "SELECT * FROM projects ORDER BY project_id DESC";
   try {
-    const [result] = await db.query(sql);
-    res.json({ Status: true, Result: result });
+    const [rows] = await db.query(
+      "SELECT * FROM projects ORDER BY project_id DESC"
+    );
+    sendResponse(res, true, rows);
   } catch (err) {
-    console.error("שגיאה בשליפת פרויקטים:", err);
-    return res.json({ Status: false, Error: "שגיאה בשליפת פרויקטים" });
+    console.error("❌ שגיאה בשליפת פרויקטים:", err);
+    sendResponse(res, false, null, "שגיאה בשליפת פרויקטים", 500);
   }
 });
 
 // ✅ הוספת פרויקט חדש
 router.post("/add", verifyToken, async (req, res) => {
   const { project_name, project_description, is_active } = req.body;
-
-  if (!project_name || project_name.trim() === "") {
-    return res.json({ Status: false, Error: "יש להזין שם פרויקט" });
+  if (!project_name?.trim()) {
+    return sendResponse(res, false, null, "יש להזין שם פרויקט", 400);
   }
 
-  const sql = `
-    INSERT INTO projects (project_name, project_description, is_active)
-    VALUES (?, ?, ?)
-  `;
-
   try {
-    const [result] = await db.query(sql, [
-      project_name,
-      project_description,
-      is_active ?? 1,
-    ]);
-    const projectId = result.insertId;
-    await logAction(`הוספת פרויקט חדש: ${project_name}`);
-    res.json({ Status: true, Message: "הפרויקט נוסף בהצלחה" });
+    const [result] = await db.query(
+      `INSERT INTO projects (project_name, project_description, is_active) VALUES (?, ?, ?)`,
+      [project_name.trim(), project_description || null, is_active ?? 1]
+    );
+
+    logAction(`הוספת פרויקט חדש: ${project_name}`)(req, res, () => {});
+    sendResponse(
+      res,
+      true,
+      { project_id: result.insertId },
+      "הפרויקט נוסף בהצלחה"
+    );
   } catch (err) {
-    console.error("שגיאה בהוספת פרויקט:", err);
-    return res.json({ Status: false, Error: "שגיאה בהוספת פרויקט" });
+    console.error("❌ שגיאה בהוספת פרויקט:", err);
+    sendResponse(res, false, null, "שגיאה בהוספת פרויקט", 500);
   }
 });
 
-// ✅ עריכת פרויקט קיים
+// ✅ עדכון פרויקט קיים
 router.put("/edit/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { project_name, project_description, is_active } = req.body;
 
-  if (!project_name || project_name.trim() === "") {
-    return res.json({ Status: false, Error: "יש להזין שם פרויקט" });
+  if (!project_name?.trim()) {
+    return sendResponse(res, false, null, "יש להזין שם פרויקט", 400);
   }
 
-  const sql = `
-    UPDATE projects
-    SET project_name = ?, project_description = ?, is_active = ?
-    WHERE project_id = ?
-  `;
-
   try {
-    await db.query(sql, [
-      project_name,
-      project_description,
-      is_active ?? 1,
-      id,
-    ]);
-    await logAction(`עדכון פרויקט #${id}`);
-    res.json({ Status: true, Message: "הפרויקט עודכן בהצלחה" });
+    const [result] = await db.query(
+      `UPDATE projects SET project_name=?, project_description=?, is_active=? WHERE project_id=?`,
+      [project_name.trim(), project_description || null, is_active ?? 1, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return sendResponse(res, false, null, "פרויקט לא נמצא", 404);
+    }
+
+    logAction(`עדכון פרויקט #${id}`)(req, res, () => {});
+    sendResponse(res, true, null, "הפרויקט עודכן בהצלחה");
   } catch (err) {
-    console.error("שגיאה בעדכון פרויקט:", err);
-    return res.json({ Status: false, Error: "שגיאה בעדכון פרויקט" });
+    console.error("❌ שגיאה בעדכון פרויקט:", err);
+    sendResponse(res, false, null, "שגיאה בעדכון פרויקט", 500);
   }
 });
 
 // ✅ מחיקה לוגית של פרויקט
 router.delete("/delete/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-
-  const sql = `
-    UPDATE projects
-    SET is_active = 0
-    WHERE project_id = ?
-  `;
-
   try {
-    await db.query(sql, [id]);
-    await logAction(`מחיקת פרויקט #${id} (לוגית)`);
-    res.json({
-      Status: true,
-      Message: "הפרויקט הועבר לארכיון (מחיקה לוגית)",
-    });
+    const [result] = await db.query(
+      `UPDATE projects SET is_active=0 WHERE project_id=?`,
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return sendResponse(res, false, null, "פרויקט לא נמצא", 404);
+    }
+
+    logAction(`מחיקת פרויקט #${id} (לוגית)`)(req, res, () => {});
+    sendResponse(res, true, null, "הפרויקט הועבר לארכיון");
   } catch (err) {
-    console.error("שגיאה במחיקת פרויקט:", err);
-    return res.json({ Status: false, Error: "שגיאה במחיקת פרויקט" });
+    console.error("❌ שגיאה במחיקת פרויקט:", err);
+    sendResponse(res, false, null, "שגיאה במחיקת פרויקט", 500);
   }
 });
 
-// ✅ שליפת פרויקטים פעילים בלבד
-router.get("/active", verifyToken, async (req, res) => {
-  const sql = "SELECT * FROM projects WHERE is_active = 1";
-  try {
-    const [result] = await db.query(sql);
-    res.json({ Status: true, Result: result });
-  } catch (err) {
-    console.error("שגיאה בשליפת פרויקטים פעילים:", err);
-    return res.json({ Status: false, Error: "שגיאה בשליפת פרויקטים פעילים" });
-  }
-});
+// ✅ שליפת פרויקטים לפי סטטוס (פעילים/לא פעילים)
+router.get("/status/:active", verifyToken, async (req, res) => {
+  const { active } = req.params;
+  const isActive = active === "1" ? 1 : 0;
 
-// ✅ שליפת פרויקטים לא פעילים בלבד
-router.get("/inactive", verifyToken, async (req, res) => {
-  const sql = "SELECT * FROM projects WHERE is_active = 0";
   try {
-    const [result] = await db.query(sql);
-    res.json({ Status: true, Result: result });
+    const [rows] = await db.query(`SELECT * FROM projects WHERE is_active=?`, [
+      isActive,
+    ]);
+    sendResponse(res, true, rows);
   } catch (err) {
-    console.error("שגיאה בשליפת פרויקטים לא פעילים:", err);
-    return res.json({
-      Status: false,
-      Error: "שגיאה בשליפת פרויקטים לא פעילים",
-    });
+    console.error("❌ שגיאה בשליפת פרויקטים:", err);
+    sendResponse(res, false, null, "שגיאה בשליפת פרויקטים", 500);
   }
 });
 
 // ✅ שליפת פרויקט לפי ID
 router.get("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-
-  const sql = "SELECT * FROM projects WHERE project_id = ?";
   try {
-    const [result] = await db.query(sql, [id]);
+    const [rows] = await db.query(`SELECT * FROM projects WHERE project_id=?`, [
+      id,
+    ]);
 
-    if (result.length === 0) {
-      return res.json({ Status: false, Error: "הפרויקט לא נמצא" });
+    if (rows.length === 0) {
+      return sendResponse(res, false, null, "הפרויקט לא נמצא", 404);
     }
 
-    res.json({ Status: true, Result: result[0] });
+    sendResponse(res, true, rows[0]);
   } catch (err) {
-    console.error("שגיאה בשליפת פרויקט לפי ID:", err);
-    return res.json({ Status: false, Error: "שגיאה בשליפת פרויקט" });
+    console.error("❌ שגיאה בשליפת פרויקט:", err);
+    sendResponse(res, false, null, "שגיאה בשליפת פרויקט", 500);
   }
 });
 

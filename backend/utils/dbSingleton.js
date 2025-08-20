@@ -1,57 +1,32 @@
-import mysql from "mysql2";
+// utils/dbSingleton.js
+import mysql from "mysql2/promise";
 
-// ✅ שימוש ב-Connection Pooling - הדרך המקצועית והנכונה
-// במקום חיבור יחיד, אנו יוצרים מאגר של חיבורים.
-// האפליקציה תבקש חיבור מהמאגר, תשתמש בו, ותחזיר אותו.
-const pool = mysql.createPool({
+// ✅ יצירת Connection Pool עם Promise API
+const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
-  // ✅ אפשרויות חשובות ל-Pool:
-  waitForConnections: true, // אם כל החיבורים בשימוש, המאגר ימתין לחיבור פנוי
-  connectionLimit: 10, // הגבלת מספר החיבורים במאגר
-  queueLimit: 0, // אין הגבלה על כמות הבקשות הממתינות בתור
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  charset: "utf8mb4_general_ci", // ✅ תמיכה בעברית ואמוג'י
 });
 
-// ✅ פונקציה לבדיקת החיבור למסד הנתונים
-const testDbConnection = () => {
-  return new Promise((resolve, reject) => {
-    pool.getConnection((err, connection) => {
-      if (err) {
-        console.error("❌ Error connecting to database pool:", err);
-        // שגיאות אפשריות: ER_DBACCESS_DENIED_ERROR, PROTOCOL_CONNECTION_LOST, etc.
-        return reject(err);
-      }
-      console.log("✅ Successfully connected to MySQL pool!");
-      connection.release(); // שיחרור החיבור בחזרה למאגר
-      resolve();
-    });
-  });
+// ✅ מאזין לשגיאות מה-Pool
+db.on("error", (err) => {
+  console.error("❌ Unexpected DB error:", err);
+});
+
+// ✅ פונקציה לבדיקת חיבור – להריץ פעם אחת בעת עליית השרת
+export const testDbConnection = async () => {
+  try {
+    const conn = await db.getConnection();
+    console.log("✅ Connected to MySQL (Promise Pool)!");
+    conn.release();
+  } catch (err) {
+    console.error("❌ DB connection failed:", err.message);
+  }
 };
 
-// ✅ יצירת Singleton wrapper לפונקציות הגישה
-// זה מאפשר להשתמש בקוד שלך בפשטות כמו קודם
-const db = {
-  // הפונקציה המקצועית לביצוע שאילתות
-  query: (sql, values) => {
-    return new Promise((resolve, reject) => {
-      pool.query(sql, values, (err, results) => {
-        if (err) {
-          // מדווח על השגיאה ודוחה את ה-Promise
-          console.error("⚠️ Database query error:", err);
-          return reject(err);
-        }
-        resolve(results);
-      });
-    });
-  },
-
-  // פונקציה לביצוע שאילתות אסינכרוניות עם Promises
-  // במקרה הזה, כבר עשינו את זה עם mysql2, אבל זו צורה נפוצה
-  // getAsyncConnection: () => {
-  //   return pool.promise();
-  // }
-};
-
-export { db, testDbConnection };
+export { db };

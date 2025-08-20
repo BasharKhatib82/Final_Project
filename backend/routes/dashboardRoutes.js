@@ -1,5 +1,4 @@
 import express from "express";
-// ✅ ייבוא הקוד המקצועי של ה-DB
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import verifyToken from "../utils/verifyToken.js";
@@ -40,7 +39,6 @@ router.get("/", verifyToken, async (req, res) => {
     tasks_completed:
       "SELECT COUNT(*) AS count FROM tasks WHERE status = 'הושלם'",
 
-    // ✅ שאילתות לפרויקטים
     projects_total: "SELECT COUNT(*) AS count FROM projects",
     projects_active:
       "SELECT COUNT(*) AS count FROM projects WHERE is_active = 1",
@@ -72,8 +70,12 @@ router.get("/", verifyToken, async (req, res) => {
   };
 
   try {
-    // ✅ שינוי מרכזי: ביצוע כל השאילתות במקביל באמצעות Promise.all
-    // זה יקצר משמעותית את זמן התגובה של הראוטר
+    // ✅ מבצע את כל השאילתות במקביל – יעיל ומהיר יותר
+    const results = await Promise.all(
+      Object.values(queries).map((q) => db.query(q))
+    );
+
+    // 👉 קל לקרוא תוצאות בעזרת destructuring
     const [
       employees_active,
       employees_inactive,
@@ -92,45 +94,37 @@ router.get("/", verifyToken, async (req, res) => {
       logs_by_day,
       attendance_by_user,
       online_users,
-    ] = await Promise.all([
-      db.query(queries.employees_active),
-      db.query(queries.employees_inactive),
-      db.query(queries.roles_total),
-      db.query(queries.roles_active),
-      db.query(queries.roles_inactive),
-      db.query(queries.leads_new),
-      db.query(queries.leads_in_progress),
-      db.query(queries.leads_completed),
-      db.query(queries.tasks_new),
-      db.query(queries.tasks_in_progress),
-      db.query(queries.tasks_completed),
-      db.query(queries.projects_total),
-      db.query(queries.projects_active),
-      db.query(queries.projects_inactive),
-      db.query(queries.logs_by_day),
-      db.query(queries.attendance_by_user),
-      db.query(queries.online_users),
-    ]);
+    ] = results;
 
-    // ✅ השמה של התוצאות מה-Promise.all לאובייקט ה-summary
-    summary.employees.active = employees_active[0][0].count;
-    summary.employees.inactive = employees_inactive[0][0].count;
+    // ✅ השמה מסודרת
+    summary.employees = {
+      active: employees_active[0][0].count,
+      inactive: employees_inactive[0][0].count,
+    };
 
-    summary.roles.total = roles_total[0][0].count;
-    summary.roles.active = roles_active[0][0].count;
-    summary.roles.inactive = roles_inactive[0][0].count;
+    summary.roles = {
+      total: roles_total[0][0].count,
+      active: roles_active[0][0].count,
+      inactive: roles_inactive[0][0].count,
+    };
 
-    summary.leads.new = leads_new[0][0].count;
-    summary.leads.in_progress = leads_in_progress[0][0].count;
-    summary.leads.completed = leads_completed[0][0].count;
+    summary.leads = {
+      new: leads_new[0][0].count,
+      in_progress: leads_in_progress[0][0].count,
+      completed: leads_completed[0][0].count,
+    };
 
-    summary.tasks.new = tasks_new[0][0].count;
-    summary.tasks.in_progress = tasks_in_progress[0][0].count;
-    summary.tasks.completed = tasks_completed[0][0].count;
+    summary.tasks = {
+      new: tasks_new[0][0].count,
+      in_progress: tasks_in_progress[0][0].count,
+      completed: tasks_completed[0][0].count,
+    };
 
-    summary.projects.total = projects_total[0][0].count;
-    summary.projects.active = projects_active[0][0].count;
-    summary.projects.inactive = projects_inactive[0][0].count;
+    summary.projects = {
+      total: projects_total[0][0].count,
+      active: projects_active[0][0].count,
+      inactive: projects_inactive[0][0].count,
+    };
 
     summary.logs_by_day = logs_by_day[0].map((row) => ({
       date: row.date,
@@ -139,7 +133,7 @@ router.get("/", verifyToken, async (req, res) => {
 
     summary.attendance = attendance_by_user[0].map((row) => ({
       name: `${row.first_name} ${row.last_name}`,
-      total_hours: row.total_attendance,
+      total_attendance: row.total_attendance,
     }));
 
     summary.employees.online_list = online_users[0].map((row) => ({
@@ -147,12 +141,13 @@ router.get("/", verifyToken, async (req, res) => {
       role: row.role_name,
     }));
 
-    // רישום פעולה ליומן
+    // 📌 רישום ליומן
     logAction("צפייה בלוח בקרה")(req, res, () => {});
-    res.json({ summary });
+
+    res.json({ success: true, summary });
   } catch (err) {
-    console.error("שגיאה בשאילתה:", err);
-    res.status(500).json({ error: "שגיאה בשרת" });
+    console.error("❌ שגיאה בשליפת דשבורד:", err);
+    res.status(500).json({ success: false, error: "שגיאת שרת" });
   }
 });
 

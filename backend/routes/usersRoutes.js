@@ -2,16 +2,17 @@ import express from "express";
 import path from "path";
 import fs from "fs/promises";
 import multer from "multer";
+import bcrypt from "bcryptjs";
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import verifyToken from "../utils/verifyToken.js";
-import bcrypt from "bcryptjs";
 
 const router = express.Router();
 
 const LOGO_UPLOAD_DIR = "./uploads/logos";
 const BUSINESS_JSON = "./data/business.json";
 
+// === Multer config ===
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
     try {
@@ -29,39 +30,120 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-// === הוספת משתמש חדש ===
-router.post("/add", verifyToken, async (req, res) => {
-  const sql = `
-    INSERT INTO users 
-    (user_id, first_name, last_name, phone_number, email, role_id, password, last_password_change, notes, is_active) 
-    VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
-  `;
+/* ============================
+   פרטי עסק (Business Info)
+   ============================ */
 
+// שליפת פרטי עסק
+router.get("/business", verifyToken, async (req, res) => {
   try {
-    const hash = await bcrypt.hash(req.body.password, 10);
-    const values = [
-      req.body.user_id,
-      req.body.first_name,
-      req.body.last_name,
-      req.body.phone_number,
-      req.body.email,
-      req.body.role_id,
-      hash,
-      req.body.notes,
-      1,
-    ];
-    await db.query(sql, values);
-    await logAction("הוספת משתמש חדש", req.user?.user_id);
-    return res.json({ Status: true, Message: "המשתמש נוסף בהצלחה" });
+    const data = await fs.readFile(BUSINESS_JSON, "utf-8");
+    res.json({ success: true, data: JSON.parse(data) });
   } catch (err) {
-    console.error("שגיאה בהוספת משתמש:", err.message);
-    return res.json({ Status: false, Error: "שגיאה בהוספת המשתמש למערכת" });
+    console.error("❌ שגיאה בשליפת נתוני עסק:", err);
+    res.status(500).json({ success: false, message: "שגיאה בשליפת נתוני עסק" });
   }
 });
 
-// === עדכון משתמש לפי מזהה ===
+// עדכון פרטי עסק כולל לוגו
+router.put(
+  "/business",
+  verifyToken,
+  upload.single("logo"),
+  async (req, res) => {
+    try {
+      let data = JSON.parse(await fs.readFile(BUSINESS_JSON, "utf-8"));
+
+      data.business_name = req.body.business_name || data.business_name;
+      data.address = req.body.address || data.address;
+      data.phone = req.body.phone || data.phone;
+
+      if (req.file) {
+        if (data.logo && data.logo !== "/uploads/logos/default.png") {
+          const oldPath = "." + data.logo;
+          if (oldPath.startsWith("./uploads/logos")) {
+            try {
+              await fs.unlink(oldPath);
+            } catch (e) {
+              console.warn("⚠️ לא ניתן למחוק לוגו קודם:", e.message);
+            }
+          }
+        }
+        data.logo = "/uploads/logos/" + req.file.filename;
+      }
+
+      await fs.writeFile(BUSINESS_JSON, JSON.stringify(data, null, 2));
+      logAction("עדכון פרטי עסק")(req, res, () => {});
+      res.json({ success: true, data, message: "עודכן בהצלחה" });
+    } catch (err) {
+      console.error("❌ שגיאה בעדכון עסק:", err);
+      res.status(500).json({ success: false, message: "שגיאה בעדכון נתונים" });
+    }
+  }
+);
+
+/* ============================
+   ניהול משתמשים
+   ============================ */
+
+// הוספת משתמש חדש
+router.post("/add", verifyToken, async (req, res) => {
+  const {
+    user_id,
+    first_name,
+    last_name,
+    phone_number,
+    email,
+    role_id,
+    password,
+    notes,
+  } = req.body;
+
+  if (!first_name || !last_name || !email || !role_id || !password) {
+    return res.status(400).json({ success: false, message: "שדות חובה חסרים" });
+  }
+
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const sql = `
+      INSERT INTO users 
+      (user_id, first_name, last_name, phone_number, email, role_id, password, last_password_change, notes, is_active) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+    `;
+
+    await db.query(sql, [
+      user_id,
+      first_name,
+      last_name,
+      phone_number,
+      email,
+      role_id,
+      hash,
+      notes,
+      1,
+    ]);
+
+    logAction("הוספת משתמש חדש")(req, res, () => {});
+    res.json({ success: true, message: "המשתמש נוסף בהצלחה" });
+  } catch (err) {
+    console.error("❌ שגיאה בהוספת משתמש:", err);
+
+    if (err.code === "ER_DUP_ENTRY") {
+      return res
+        .status(409)
+        .json({
+          success: false,
+          message: "האימייל או הטלפון כבר קיימים במערכת",
+        });
+    }
+
+    res.status(500).json({ success: false, message: "שגיאת שרת" });
+  }
+});
+
+// עדכון משתמש
 router.put("/:id", verifyToken, async (req, res) => {
-  const userId = req.params.id;
+  const { id } = req.params;
   const {
     first_name,
     last_name,
@@ -73,147 +155,101 @@ router.put("/:id", verifyToken, async (req, res) => {
   } = req.body;
 
   if (!first_name || !last_name || !email || !role_id) {
-    return res
-      .status(400)
-      .json({ Status: false, Error: "Missing required fields" });
+    return res.status(400).json({ success: false, message: "שדות חובה חסרים" });
   }
 
-  const updateQuery = `
-    UPDATE users SET
-    first_name = ?,
-    last_name = ?,
-    phone_number = ?,
-    email = ?,
-    role_id = ?,
-    notes = ?,
-    is_active = ?
-    WHERE user_id = ?
-  `;
-
-  const values = [
-    first_name,
-    last_name,
-    phone_number || null,
-    email,
-    role_id,
-    notes || null,
-    is_active,
-    userId,
-  ];
-
   try {
-    await db.query(updateQuery, values);
-    return res
-      .status(200)
-      .json({ Status: true, Message: "המשתמש עודכן בהצלחה" });
-  } catch (err) {
-    console.error("שגיאה בעדכון משתמש:", err);
-    return res.status(500).json({ Status: false, Error: "Database Error" });
-  }
-});
+    const sql = `
+      UPDATE users SET
+        first_name = ?, last_name = ?, phone_number = ?, email = ?,
+        role_id = ?, notes = ?, is_active = ?
+      WHERE user_id = ?
+    `;
 
-// === שליפת עובדים פעילים ===
-router.get("/active", verifyToken, async (req, res) => {
-  const query = "SELECT * FROM users WHERE is_active = 1";
-  try {
-    const [results] = await db.query(query);
-    res.status(200).json({ Status: true, Result: results });
-  } catch (err) {
-    console.error("שגיאה בשליפת עובדים פעילים:", err);
-    return res.status(500).json({ Status: false, Error: "שגיאה במסד" });
-  }
-});
+    const [result] = await db.query(sql, [
+      first_name,
+      last_name,
+      phone_number || null,
+      email,
+      role_id,
+      notes || null,
+      is_active,
+      id,
+    ]);
 
-// === שליפת עובדים לא פעילים ===
-router.get("/inactive", verifyToken, async (req, res) => {
-  const query = "SELECT * FROM users WHERE is_active = 0";
-  try {
-    const [results] = await db.query(query);
-    res.status(200).json({ Status: true, Result: results });
-  } catch (err) {
-    console.error("שגיאה בשליפת עובדים לא פעילים:", err);
-    return res.status(500).json({ Status: false, Error: "שגיאה במסד" });
-  }
-});
-
-// === שליפת משתמש בודד לפי מזהה ===
-router.get("/:id", verifyToken, async (req, res) => {
-  const userId = req.params.id;
-
-  const query = "SELECT * FROM users WHERE user_id = ?";
-  try {
-    const [results] = await db.query(query, [userId]);
-    if (results.length === 0) {
-      return res.status(404).json({ Status: false, Error: "המשתמש לא נמצא" });
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "משתמש לא נמצא" });
     }
-    res.status(200).json({ Status: true, User: results[0] });
+
+    logAction(`עדכון משתמש #${id}`)(req, res, () => {});
+    res.json({ success: true, message: "המשתמש עודכן בהצלחה" });
   } catch (err) {
-    console.error("שגיאה בשליפת משתמש בודד:", err);
-    return res.status(500).json({ Status: false, Error: "Database Error" });
+    console.error("❌ שגיאה בעדכון משתמש:", err);
+    res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
 
-// === שליפת פרטי עסק ===
-router.get("/business", verifyToken, async (req, res) => {
-  try {
-    const data = await fs.readFile(BUSINESS_JSON, "utf-8");
-    const businessData = JSON.parse(data);
-    res.json({ Business: businessData });
-  } catch (err) {
-    console.error("שגיאה בשליפת נתוני עסק:", err);
-    res.status(500).json({ error: "שגיאה בשליפת נתוני עסק" });
-  }
-});
-
-// === עדכון פרטי עסק כולל לוגו ===
-router.put(
-  "/business",
-  verifyToken,
-  upload.single("logo"),
-  async (req, res) => {
-    try {
-      let data = JSON.parse(await fs.readFile(BUSINESS_JSON, "utf-8"));
-      data.business_name = req.body.business_name;
-      data.address = req.body.address;
-      data.phone = req.body.phone;
-
-      if (req.file) {
-        if (data.logo && data.logo !== "/uploads/logos/default.png") {
-          const oldPath = "." + data.logo;
-          try {
-            await fs.unlink(oldPath);
-          } catch (unlinkErr) {
-            console.warn("Could not delete old logo file:", unlinkErr);
-          }
-        }
-        data.logo = "/uploads/logos/" + req.file.filename;
-      }
-
-      await fs.writeFile(BUSINESS_JSON, JSON.stringify(data, null, 2));
-      res.json({ message: "עודכן בהצלחה", logo: data.logo });
-    } catch (err) {
-      console.error("שגיאה בעדכון פרטי עסק:", err);
-      res.status(500).json({ error: "שגיאה בעדכון נתונים" });
-    }
-  }
-);
-
-// === מחיקה לוגית של משתמש (השבתה) ===
+// מחיקה לוגית (השבתה)
 router.put("/delete/:id", verifyToken, async (req, res) => {
-  const userId = req.params.id;
-
-  const query = `
-    UPDATE users SET is_active = 0
-    WHERE user_id = ?
-  `;
+  const { id } = req.params;
 
   try {
-    await db.query(query, [userId]);
-    await logAction("השבתת משתמש", req.user?.user_id);
-    res.status(200).json({ Status: true, Message: "המשתמש הושבת בהצלחה" });
+    const [result] = await db.query(
+      "UPDATE users SET is_active = 0 WHERE user_id = ?",
+      [id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ success: false, message: "משתמש לא נמצא" });
+    }
+
+    logAction(`השבתת משתמש #${id}`)(req, res, () => {});
+    res.json({ success: true, message: "המשתמש הושבת בהצלחה" });
   } catch (err) {
-    console.error("שגיאה בהשבתת משתמש:", err);
-    return res.status(500).json({ Status: false, Error: "Database Error" });
+    console.error("❌ שגיאה בהשבתת משתמש:", err);
+    res.status(500).json({ success: false, message: "שגיאת שרת" });
+  }
+});
+
+// שליפת משתמשים פעילים
+router.get("/active", verifyToken, async (req, res) => {
+  try {
+    const [results] = await db.query("SELECT * FROM users WHERE is_active = 1");
+    res.json({ success: true, data: results });
+  } catch (err) {
+    console.error("❌ שגיאה בשליפת משתמשים פעילים:", err);
+    res.status(500).json({ success: false, message: "שגיאת שרת" });
+  }
+});
+
+// שליפת משתמשים לא פעילים
+router.get("/inactive", verifyToken, async (req, res) => {
+  try {
+    const [results] = await db.query("SELECT * FROM users WHERE is_active = 0");
+    res.json({ success: true, data: results });
+  } catch (err) {
+    console.error("❌ שגיאה בשליפת משתמשים לא פעילים:", err);
+    res.status(500).json({ success: false, message: "שגיאת שרת" });
+  }
+});
+
+// שליפת משתמש בודד לפי מזהה
+router.get("/:id", verifyToken, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [results] = await db.query("SELECT * FROM users WHERE user_id = ?", [
+      id,
+    ]);
+
+    if (results.length === 0) {
+      return res.status(404).json({ success: false, message: "משתמש לא נמצא" });
+    }
+
+    res.json({ success: true, data: results[0] });
+  } catch (err) {
+    console.error("❌ שגיאה בשליפת משתמש:", err);
+    res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
 
