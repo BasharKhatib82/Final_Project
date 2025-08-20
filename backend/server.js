@@ -21,12 +21,17 @@ import flowDataRoutes from "./routes/flowDataRoutes.js";
 dotenv.config();
 const app = express();
 
-// ✅ סדר מומלץ: הגדרת CORS לפני כל Middleware אחר
-app.use(cors());
+app.use(express.json());
 
-// ✅ הגדרת middlewares מרכזיים
-app.use(express.json()); // מאפשר ניתוח בקשות JSON
-app.use(cookieParser()); // מאפשר ניתוח עוגיות
+const corsOptions = {
+  origin: 'https://www.respondify-crm.co.il',
+  optionsSuccessStatus: 200 
+};
+
+// טיפול בכל הבקשות הנכנסות לכל הראוטים.
+app.use(cors(corsOptions));
+
+app.use(cookieParser());
 
 const port = process.env.PORT || 8801;
 
