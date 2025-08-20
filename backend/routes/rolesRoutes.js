@@ -5,10 +5,10 @@ import verifyToken from "../utils/verifyToken.js";
 
 const router = express.Router();
 
-// פונקציה עזר להמרת ערכים בוליאניים ל-0/1
-const toBit = (val) => (val ? 1 : 0);
+/** Normalize any bit-like value (0/1, "0"/"1", boolean) to 0/1 */
+const toBit = (v) => (v === true || v === 1 || v === "1" ? 1 : 0);
 
-// פונקציה אחידה לתגובה
+/** Unified JSON response helper */
 const sendResponse = (
   res,
   success,
@@ -19,51 +19,56 @@ const sendResponse = (
   res.status(status).json({ success, data, message });
 };
 
-// ✅ הוספת תפקיד חדש
+// ✅ Create role
 router.post("/add", verifyToken, async (req, res) => {
   const {
     role_name,
+    role_management = 0,
     can_manage_users = 0,
     can_view_reports = 0,
     can_assign_leads = 0,
     can_edit_courses = 0,
     can_manage_tasks = 0,
     can_access_all_data = 0,
+    active = 1,
   } = req.body;
 
-  if (!role_name?.trim()) {
+  if (!role_name || typeof role_name !== "string" || role_name.trim() === "") {
     return sendResponse(res, false, null, "שם תפקיד חסר או לא תקין", 400);
   }
 
   try {
+    // Unique name check
     const [exists] = await db.query(
       "SELECT 1 FROM roles_permissions WHERE role_name = ?",
       [role_name.trim()]
     );
-
     if (exists.length > 0) {
       return sendResponse(res, false, null, "שם תפקיד כבר קיים", 409);
     }
 
+    // Insert with ALL columns that exist in the screenshot schema
     const [result] = await db.query(
       `INSERT INTO roles_permissions (
-        role_name, can_manage_users, can_view_reports,
+        role_name, role_management, can_manage_users, can_view_reports,
         can_assign_leads, can_edit_courses, can_manage_tasks,
-        can_access_all_data
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        can_access_all_data, active
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         role_name.trim(),
+        toBit(role_management),
         toBit(can_manage_users),
         toBit(can_view_reports),
         toBit(can_assign_leads),
         toBit(can_edit_courses),
         toBit(can_manage_tasks),
         toBit(can_access_all_data),
+        toBit(active),
       ]
     );
 
     logAction(`הוספת תפקיד חדש: ${role_name}`)(req, res, () => {});
-    sendResponse(
+    return sendResponse(
       res,
       true,
       { role_id: result.insertId },
@@ -72,11 +77,11 @@ router.post("/add", verifyToken, async (req, res) => {
     );
   } catch (err) {
     console.error("❌ שגיאת יצירת תפקיד:", err);
-    sendResponse(res, false, null, "שגיאת שרת ביצירת תפקיד", 500);
+    return sendResponse(res, false, null, "שגיאת שרת ביצירת תפקיד", 500);
   }
 });
 
-// ✅ שליפת תפקידים (עם פילטר אופציונלי active)
+// ✅ List roles (optional ?active=0/1)
 router.get("/", verifyToken, async (req, res) => {
   const { active } = req.query;
   let sql = "SELECT * FROM roles_permissions";
@@ -90,40 +95,38 @@ router.get("/", verifyToken, async (req, res) => {
   try {
     const [rows] = await db.query(sql, params);
     logAction("צפייה ברשימת תפקידים")(req, res, () => {});
-    sendResponse(res, true, rows);
+    return sendResponse(res, true, rows);
   } catch (err) {
     console.error("❌ שגיאת שליפת תפקידים:", err);
-    sendResponse(res, false, null, "שגיאה בשליפת תפקידים", 500);
+    return sendResponse(res, false, null, "שגיאה בשליפת תפקידים", 500);
   }
 });
 
-// ✅ שליפת תפקיד לפי מזהה
+// ✅ Get role by id
 router.get("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-
   try {
     const [rows] = await db.query(
       "SELECT * FROM roles_permissions WHERE role_id = ?",
       [id]
     );
-
     if (rows.length === 0) {
       return sendResponse(res, false, null, "תפקיד לא נמצא", 404);
     }
-
     logAction(`צפייה בפרטי תפקיד #${id}`)(req, res, () => {});
-    sendResponse(res, true, rows[0]);
+    return sendResponse(res, true, rows[0]);
   } catch (err) {
     console.error("❌ שגיאת שליפת תפקיד:", err);
-    sendResponse(res, false, null, "שגיאת שליפה מהשרת", 500);
+    return sendResponse(res, false, null, "שגיאת שליפה מהשרת", 500);
   }
 });
 
-// ✅ עדכון תפקיד לפי מזהה
+// ✅ Update role by id
 router.put("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const {
     role_name,
+    role_management,
     can_manage_users,
     can_view_reports,
     can_assign_leads,
@@ -133,19 +136,35 @@ router.put("/:id", verifyToken, async (req, res) => {
     active,
   } = req.body;
 
-  if (!role_name?.trim()) {
+  if (!role_name || typeof role_name !== "string" || role_name.trim() === "") {
     return sendResponse(res, false, null, "שם תפקיד לא תקין", 400);
   }
 
   try {
+    // Unique name check for updates (ignore self)
+    const [dup] = await db.query(
+      "SELECT 1 FROM roles_permissions WHERE role_name = ? AND role_id <> ?",
+      [role_name.trim(), id]
+    );
+    if (dup.length > 0) {
+      return sendResponse(res, false, null, "שם תפקיד כבר קיים", 409);
+    }
+
     const [result] = await db.query(
       `UPDATE roles_permissions SET
-        role_name=?, can_manage_users=?, can_view_reports=?,
-        can_assign_leads=?, can_edit_courses=?, can_manage_tasks=?,
-        can_access_all_data=?, active=?
+        role_name=?,
+        role_management=?,
+        can_manage_users=?,
+        can_view_reports=?,
+        can_assign_leads=?,
+        can_edit_courses=?,
+        can_manage_tasks=?,
+        can_access_all_data=?,
+        active=?
       WHERE role_id=?`,
       [
         role_name.trim(),
+        toBit(role_management),
         toBit(can_manage_users),
         toBit(can_view_reports),
         toBit(can_assign_leads),
@@ -162,32 +181,29 @@ router.put("/:id", verifyToken, async (req, res) => {
     }
 
     logAction(`עדכון תפקיד #${id}`)(req, res, () => {});
-    sendResponse(res, true, null, "התפקיד עודכן בהצלחה");
+    return sendResponse(res, true, null, "התפקיד עודכן בהצלחה");
   } catch (err) {
     console.error("❌ שגיאת עדכון תפקיד:", err);
-    sendResponse(res, false, null, "שגיאה בעדכון תפקיד", 500);
+    return sendResponse(res, false, null, "שגיאה בעדכון תפקיד", 500);
   }
 });
 
-// ✅ מחיקה לוגית של תפקיד
+// ✅ Soft delete (active=0)
 router.delete("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-
   try {
     const [result] = await db.query(
       "UPDATE roles_permissions SET active=0 WHERE role_id=?",
       [id]
     );
-
     if (result.affectedRows === 0) {
       return sendResponse(res, false, null, "תפקיד לא נמצא למחיקה", 404);
     }
-
     logAction(`מחיקת תפקיד #${id}`)(req, res, () => {});
-    sendResponse(res, true, null, "התפקיד הוסר בהצלחה (מחיקה לוגית)");
+    return sendResponse(res, true, null, "התפקיד הוסר בהצלחה (מחיקה לוגית)");
   } catch (err) {
     console.error("❌ שגיאת מחיקה:", err);
-    sendResponse(res, false, null, "שגיאת מחיקה מהשרת", 500);
+    return sendResponse(res, false, null, "שגיאת מחיקה מהשרת", 500);
   }
 });
 
