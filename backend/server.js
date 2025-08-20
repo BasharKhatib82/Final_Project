@@ -18,10 +18,11 @@ import logsRoutes from "./routes/logsRoutes.js";
 import whatsappRoutes from "./routes/whatsappRoutes.js";
 import flowDataRoutes from "./routes/flowDataRoutes.js";
 
+app.use(cors()); // טיפול בכל הבקשות הנכנסות לכל הראוטים.
 dotenv.config();
 const app = express();
 app.use(express.json());
-app.use(cors()); // טיפול בכל הבקשות הנכנסות לכל הראוטים.
+
 app.use(cookieParser());
 
 // ✅ ראוטים עם נתיבים ברורים
