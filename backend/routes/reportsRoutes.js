@@ -1,21 +1,19 @@
 import express from "express";
 import { ENTITIES } from "../utils/reports.schema.js";
 import { fetchRows } from "../utils/reports.service.js";
-import { renderHTML } from "../utils/reports.template.js";
-import { htmlToPdfBuffer } from "../utils/pdf.generator.js";
-import { simpleTablePdfBuffer } from "../utils/pdf.fallback.js";
-import { toExcelBuffer } from "../utils/excel.generator.js";
+import { buildPdfBuffer } from "../utils/pdfmake.generator.js";
+import { buildExcelBuffer } from "../utils/excel.generator.js";
 
 const router = express.Router();
 
+// TODO: חבר ל-RBAC אמיתי בהמשך
 router.use("/:entity", (req, res, next) => {
   const def = ENTITIES[req.params.entity];
   if (!def) return res.status(404).json({ error: "Unknown entity" });
-  // TODO: חבר ל-RBAC אמיתי
-  // if (!req.user?.permissions?.can_view_reports) return res.status(403).json({ error: "FORBIDDEN" });
   next();
 });
 
+// Preview JSON
 router.get("/:entity/preview", (req, res) => {
   fetchRows(
     req.app.get("db"),
@@ -33,22 +31,15 @@ router.get("/:entity/preview", (req, res) => {
   );
 });
 
+// Excel
 router.get("/:entity/export/excel", (req, res) => {
   fetchRows(
     req.app.get("db"),
     req.params.entity,
     req.query,
     (err, { rows, def }) => {
-      if (err) {
-        console.error("[Reports][Excel] DB_ERROR:", err);
-        return res.status(500).json({ error: "DB_ERROR" });
-      }
-      const table = rows.map((r) => def.table.columns.map((fn) => fn(r)));
-      toExcelBuffer({
-        title: def.title,
-        headers: def.table.headers,
-        rows: table,
-      })
+      if (err) return res.status(500).json({ error: "DB_ERROR" });
+      buildExcelBuffer(def, rows)
         .then((buf) => {
           res.setHeader(
             "Content-Type",
@@ -68,36 +59,29 @@ router.get("/:entity/export/excel", (req, res) => {
   );
 });
 
+// PDF (pdfmake)
 router.get("/:entity/export/pdf", (req, res) => {
   fetchRows(
     req.app.get("db"),
     req.params.entity,
     req.query,
     (err, { rows, def }) => {
-      if (err) {
-        /* ... */
-      }
-
-      const html = renderHTML({ def, rows, filters: req.query });
-
-      htmlToPdfBuffer(html)
+      if (err) return res.status(500).json({ error: "DB_ERROR" });
+      buildPdfBuffer(def, rows, {
+        filters: req.query,
+        meta: { brand: "Respondify CRM" },
+      })
         .then((buf) => {
-          /* success */
-        })
-        .catch(async (e) => {
-          console.warn("[Reports][PDF] falling back to pdfmake:", e?.message);
-          const table = rows.map((r) => def.table.columns.map((fn) => fn(r)));
-          const buf = await simpleTablePdfBuffer({
-            title: def.title,
-            headers: def.table.headers,
-            rows: table,
-          });
           res.setHeader("Content-Type", "application/pdf");
           res.setHeader(
             "Content-Disposition",
             `attachment; filename="${req.params.entity}-report.pdf"`
           );
           res.end(buf);
+        })
+        .catch((e) => {
+          console.error("[Reports][PDF] PDFMAKE_ERROR:", e);
+          res.status(500).json({ error: "PDF_ERROR" });
         });
     }
   );
