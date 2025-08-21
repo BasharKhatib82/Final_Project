@@ -6,16 +6,13 @@ import NavigationButton from "../Buttons/NavigationButton";
 import ReportView from "../Reports/ReportView";
 
 const api = process.env.REACT_APP_API_URL;
-
-// 0/1/"0"/"1"/boolean → true/false
 const asBool = (v) => v === true || v === 1 || v === "1";
 
-// מיפוי רשומה מה-API לאובייקט מוכן לרינדור
 const mapRole = (r, isActive) => ({
   ...r,
   is_active: isActive,
-  status: isActive ? "active" : "inactive", // לשדה פילטר/חיפוש
-  role_management: asBool(r.role_management), // נשאר באובייקט, לא מוצג
+  status: isActive ? "active" : "inactive",
+  role_management: asBool(r.role_management),
   can_manage_users: asBool(r.can_manage_users),
   can_view_reports: asBool(r.can_view_reports),
   can_assign_leads: asBool(r.can_assign_leads),
@@ -40,7 +37,6 @@ export default function Roles() {
     mode: "",
     role_id: null,
   });
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -50,10 +46,7 @@ export default function Roles() {
         if (res?.data?.loggedIn && res?.data?.user?.role_id === 1) fetchRoles();
         else navigate("/unauthorized");
       })
-      .catch((err) => {
-        console.error("שגיאה בבדיקת התחברות:", err);
-        navigate("/unauthorized");
-      });
+      .catch(() => navigate("/unauthorized"));
   }, [navigate]);
 
   const fetchRoles = () => {
@@ -71,11 +64,7 @@ export default function Roles() {
         );
         setAllRoles([...active, ...inactive]);
       })
-      .catch((err) => {
-        console.error(
-          "שגיאה בטעינת התפקידים:",
-          err?.response?.data || err?.message
-        );
+      .catch(() => {
         setPopup({
           show: true,
           title: "שגיאה",
@@ -87,16 +76,6 @@ export default function Roles() {
   };
 
   const handleEdit = (role_id) => navigate(`/dashboard/edit_role/${role_id}`);
-
-  const handleDelete = (role_id) =>
-    setPopup({
-      show: true,
-      title: "אישור מחיקה",
-      message: "⚠️ האם אתה בטוח שברצונך למחוק את התפקיד?",
-      mode: "confirm",
-      role_id,
-    });
-
   const confirmDelete = (role_id) => {
     axios
       .put(`${api}/roles/delete/${role_id}`, null, { withCredentials: true })
@@ -109,18 +88,16 @@ export default function Roles() {
         });
         fetchRoles();
       })
-      .catch((err) => {
-        console.error("מחיקה נכשלה:", err?.response?.data || err?.message);
+      .catch(() =>
         setPopup({
           show: true,
           title: "שגיאה",
           message: "אירעה שגיאה במחיקה",
           mode: "error",
-        });
-      });
+        })
+      );
   };
 
-  // עמודות להצגה (ללא "ניהול תפקידים")
   const columns = [
     { key: "role_id", label: "מזהה", width: 12 },
     { key: "role_name", label: "שם תפקיד", width: 24 },
@@ -172,7 +149,15 @@ export default function Roles() {
           </button>
           {r.is_active && (
             <button
-              onClick={() => handleDelete(r.role_id)}
+              onClick={() =>
+                setPopup({
+                  show: true,
+                  title: "אישור מחיקה",
+                  message: "⚠️ למחוק את התפקיד?",
+                  mode: "confirm",
+                  role_id: r.role_id,
+                })
+              }
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
             >
               מחיקה
@@ -183,22 +168,20 @@ export default function Roles() {
     },
   ];
 
-  // פילטר לפי : סטטוס
   const filtersDef = [
     {
       name: "status",
       label: "סטטוס",
       type: "select",
       options: [
-        { value: "", label: "כל הסטטוסים" },
-        { value: "active", label: "פעיל" },
+        { value: "active", label: "פעיל" }, // 👈 ברירת מחדל למעלה
         { value: "inactive", label: "לא פעיל" },
+        { value: "", label: "כל הסטטוסים" },
       ],
     },
   ];
 
-  // ברירת מחדל : מציג רק תפקידים פעילים
-  const defaultFilters = { status: "active" };
+  const defaultFilters = { status: "active" }; // 👈 מציג רק פעילים כברירת מחדל
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
@@ -223,7 +206,6 @@ export default function Roles() {
         />
       )}
 
-      {/* Popup */}
       {popup.show && (
         <Popup
           title={popup.title}

@@ -3,13 +3,6 @@ import React, { createContext, useContext, useMemo, useState } from "react";
 const ReportCtx = createContext(null);
 export const useReport = () => useContext(ReportCtx);
 
-/**
- * props:
- * - title, columns, rows
- * - filtersDef: [{ name, label, type: 'text'|'select'|'date'|'daterange', options? }]
- * - searchableKeys?: string[]
- * - pageSize?: number
- */
 export function ReportProvider({
   title = "דוח",
   columns = [],
@@ -21,7 +14,7 @@ export function ReportProvider({
   defaultFilters = {},
 }) {
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState({ defaultFilters });
+  const [filters, setFilters] = useState(defaultFilters);
   const [page, setPage] = useState(1);
 
   const setFilter = (name, value) => {
@@ -32,7 +25,6 @@ export function ReportProvider({
   const filteredRows = useMemo(() => {
     let data = [...rows];
 
-    // סינון לפי filtersDef
     for (const f of filtersDef) {
       const v = filters[f.name];
       if (v == null || v === "" || (Array.isArray(v) && !v[0] && !v[1]))
@@ -45,7 +37,7 @@ export function ReportProvider({
       } else if (f.type === "daterange" && Array.isArray(v)) {
         const [from, to] = v;
         data = data.filter((r) => {
-          const d = formatDateOnly(r[f.name]); // "YYYY-MM-DD"
+          const d = formatDateOnly(r[f.name]);
           const ge = from ? d >= from : true;
           const le = to ? d <= to : true;
           return ge && le;
@@ -55,7 +47,6 @@ export function ReportProvider({
       }
     }
 
-    // חיפוש חופשי
     const term = (search || "").toLowerCase().trim();
     if (term) {
       const keys = searchableKeys.length
@@ -98,7 +89,6 @@ export function ReportProvider({
   return <ReportCtx.Provider value={value}>{children}</ReportCtx.Provider>;
 }
 
-/* helpers */
 function formatDateOnly(val) {
   try {
     const d = new Date(val);

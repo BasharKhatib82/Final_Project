@@ -2,57 +2,85 @@ import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import axios from "axios";
 
-/** דוגמה: שולח ל-API שלך את השורות המסוננות */
-export default function ReportEmail({ apiBase }) {
+/**
+ * אם compact=true: מוצג רק "מייל לשליחה" + כפתורים.
+ * בלחיצה אם אין נמען, נבקש דרך prompt().
+ */
+export default function ReportEmail({ apiBase, compact = false }) {
   const { title, columns, filteredRows } = useReport();
   const [to, setTo] = useState("");
-  const [status, setStatus] = useState("");
+
+  const ensureRecipient = async () => {
+    if (to) return to;
+    const v = window.prompt('הכנס כתובת דוא"ל ליעד:');
+    return v || "";
+  };
 
   const send = async (format = "xlsx") => {
     try {
-      setStatus("שולח...");
+      const recipient = compact ? await ensureRecipient() : to;
+      if (!recipient) return;
+
       await axios.post(
         `${apiBase}/reports/send-email`,
         {
           title,
           columns,
           rows: filteredRows,
-          to,
-          format, // "xlsx" | "pdf"
+          to: recipient,
+          format,
         },
         { withCredentials: true }
       );
-      setStatus("נשלח!");
+
+      alert("נשלח!");
     } catch (e) {
-      setStatus("שגיאה בשליחה");
       console.error(e);
-    } finally {
-      setTimeout(() => setStatus(""), 3000);
+      alert("שגיאה בשליחה");
     }
   };
 
+  if (compact) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-slate-700">מייל לשליחה</span>
+        <button
+          className="px-3 py-1 rounded bg-sky-600 text-white hover:bg-sky-700"
+          onClick={() => send("xlsx")}
+        >
+          Excel
+        </button>
+        <button
+          className="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700"
+          onClick={() => send("pdf")}
+        >
+          PDF
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center gap-2" dir="rtl">
+      <span className="text-sm text-slate-700">מייל לשליחה</span>
       <input
         className="border rounded px-2 py-1 text-sm"
         placeholder='דוא"ל נמען'
         value={to}
         onChange={(e) => setTo(e.target.value)}
       />
-
       <button
         className="px-3 py-1 rounded bg-sky-600 text-white hover:bg-sky-700"
         onClick={() => send("xlsx")}
       >
-        שלח במייל (Excel)
+        Excel
       </button>
       <button
         className="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700"
         onClick={() => send("pdf")}
       >
-        שלח במייל (PDF)
+        PDF
       </button>
-      {status && <span className="text-sm text-gray-600">{status}</span>}
     </div>
   );
 }

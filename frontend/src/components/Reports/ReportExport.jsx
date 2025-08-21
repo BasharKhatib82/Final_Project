@@ -3,14 +3,12 @@ import { useReport } from "./ReportContext";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 
-/** ייצוא תמיד עובד על filteredRows (אחרי סינון/חיפוש) */
 export default function ReportExport({ printTargetRef }) {
   const { title, columns, filteredRows } = useReport();
 
   const exportExcel = async () => {
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("Report");
-
     const headers = columns.map((c) => c.label);
     ws.addRow([title]).font = { size: 14, bold: true };
     ws.addRow([]);
@@ -26,7 +24,6 @@ export default function ReportExport({ printTargetRef }) {
     });
 
     columns.forEach((c, i) => (ws.getColumn(i + 1).width = c.width || 22));
-
     const buf = await wb.xlsx.writeBuffer();
     saveAs(new Blob([buf]), `${sanitize(title)}.xlsx`);
   };
@@ -43,18 +40,13 @@ export default function ReportExport({ printTargetRef }) {
         <title>${escapeHtml(title)}</title>
         <style>
           body { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans Hebrew", sans-serif; padding: 24px; }
-          h1 { margin: 0 0 12px; font-size: 20px; }
-          .meta { color:#666; margin-bottom:16px; font-size:12px; }
           table { width:100%; border-collapse:collapse; font-size:12px; }
           th, td { border:1px solid #ddd; padding:6px 8px; text-align:center; }
           thead th { background:#f0f2f5; }
           tr:nth-child(even) td { background:#fafafa; }
           @page { size: A4; margin: 15mm; }
-          @media print { .no-print { display:none; } }
         </style>
       </head><body>
-        <h1>${escapeHtml(title)}</h1>
-        <div class="meta">${new Date().toLocaleString("he-IL")}</div>
         ${node.innerHTML}
         <script>window.onload = () => { window.print(); setTimeout(()=>window.close(), 200); };</script>
       </body></html>
@@ -63,18 +55,19 @@ export default function ReportExport({ printTargetRef }) {
   };
 
   return (
-    <div className="flex gap-2">
+    <div className="flex items-center gap-2">
+      <span className="text-sm text-slate-700">יצוא</span>
       <button
         onClick={exportExcel}
         className="px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700"
       >
-        ייצוא Excel
+        Excel
       </button>
       <button
         onClick={exportPdf}
         className="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700"
       >
-        ייצוא PDF
+        PDF
       </button>
     </div>
   );
