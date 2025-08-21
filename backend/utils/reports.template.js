@@ -1,11 +1,14 @@
 import Handlebars from "handlebars";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
-const tpl = fs.readFileSync(
-  path.resolve("backend/templates/report.hbs"),
-  "utf8"
-);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// נטען תמיד יחסית לתיקיה utils -> ../templates/report.hbs
+const tplPath = path.resolve(__dirname, "../templates/report.hbs");
+const tpl = fs.readFileSync(tplPath, "utf8");
 const compile = Handlebars.compile(tpl);
 
 export function renderHTML({ def, rows, filters }) {

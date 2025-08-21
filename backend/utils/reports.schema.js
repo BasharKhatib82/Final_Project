@@ -1,11 +1,10 @@
-// ESM
 export const ENTITIES = {
   logs: {
     title: 'דו"ח יומן מערכת',
     baseQuery: `
       SELECT 
         l.log_id,
-        u.name AS user_name,
+        COALESCE(NULLIF(CONCAT_WS(' ', u.first_name, u.last_name), ' '), u.name, u.email) AS user_name,
         l.action,
         DATE_FORMAT(l.timestamp, '%d/%m/%Y %H:%i') AS ts_fmt,
         l.subject
@@ -13,13 +12,12 @@ export const ENTITIES = {
       LEFT JOIN users u ON u.user_id = l.user_id
       WHERE 1=1
     `,
-    // מיפוי מסננים מותרים בלבד
     filters: {
       from: { sql: "AND DATE(l.timestamp) >= ?", map: (v) => v },
       to: { sql: "AND DATE(l.timestamp) <= ?", map: (v) => v },
       q: {
-        sql: "AND (l.action LIKE ? OR u.name LIKE ?)",
-        map: (v) => [`%${v}%`, `%${v}%`],
+        sql: "AND (l.action LIKE ? OR COALESCE(u.first_name,'') LIKE ? OR COALESCE(u.last_name,'') LIKE ?)",
+        map: (v) => [`%${v}%`, `%${v}%`, `%${v}%`],
       },
       subject: { sql: "AND l.subject = ?", map: (v) => v },
     },
