@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
+import ReportView from "../Reports/ReportView";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -13,7 +14,8 @@ const asBool = (v) => v === true || v === 1 || v === "1";
 const mapRole = (r, isActive) => ({
   ...r,
   is_active: isActive,
-  role_management: asBool(r.role_management), // נשאר באובייקט (גם אם לא מוצג)
+  status: isActive ? "active" : "inactive", // לצורך פילטר "סטטוס"
+  role_management: asBool(r.role_management), // נשאר באובייקט (לא מוצג)
   can_manage_users: asBool(r.can_manage_users),
   can_view_reports: asBool(r.can_view_reports),
   can_assign_leads: asBool(r.can_assign_leads),
@@ -22,10 +24,15 @@ const mapRole = (r, isActive) => ({
   can_access_all_data: asBool(r.can_access_all_data),
 });
 
+const renderCheck = (v) => (
+  <span className={v ? "text-green-600 font-bold" : "text-red-500 font-bold"}>
+    {v ? "✓" : "✗"}
+  </span>
+);
+
 const Roles = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("active");
   const [allRoles, setAllRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [popup, setPopup] = useState({
     show: false,
     title: "",
@@ -33,23 +40,8 @@ const Roles = () => {
     mode: "",
     role_id: null,
   });
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
-  // הכותרות של הטבלה (ללא "ניהול תפקידים")
-  const headers = [
-    "מזהה",
-    "שם תפקיד",
-    "ניהול משתמשים",
-    "צפייה בדוחות",
-    "שייך פניות",
-    "עריכת קורסים",
-    "ניהול משימות",
-    "גישה לנתונים",
-    "סטטוס",
-    "פעולות",
-  ];
-  const colCount = headers.length;
+  const navigate = useNavigate();
 
   useEffect(() => {
     axios
@@ -128,152 +120,106 @@ const Roles = () => {
       });
   };
 
-  const filteredRoles = allRoles.filter((role) => {
-    const term = (searchTerm || "").toLowerCase();
-    const nameMatch = (role?.role_name || "").toLowerCase().includes(term);
-    const statusText = role.is_active ? "פעיל" : "לא פעיל";
-    const statusMatch = statusText.includes(term);
-    const statusCheck =
-      statusFilter === "all"
-        ? true
-        : statusFilter === "active"
-        ? role.is_active
-        : !role.is_active;
-    return statusCheck && (nameMatch || statusMatch);
-  });
+  // עמודות להצגה (ללא "ניהול תפקידים")
+  const columns = [
+    { key: "role_id", label: "מזהה", width: 12 },
+    { key: "role_name", label: "שם תפקיד", width: 24 },
+    {
+      key: "can_manage_users",
+      label: "ניהול משתמשים",
+      render: (r) => renderCheck(r.can_manage_users),
+    },
+    {
+      key: "can_view_reports",
+      label: "צפייה בדוחות",
+      render: (r) => renderCheck(r.can_view_reports),
+    },
+    {
+      key: "can_assign_leads",
+      label: "שייך פניות",
+      render: (r) => renderCheck(r.can_assign_leads),
+    },
+    {
+      key: "can_edit_courses",
+      label: "עריכת קורסים",
+      render: (r) => renderCheck(r.can_edit_courses),
+    },
+    {
+      key: "can_manage_tasks",
+      label: "ניהול משימות",
+      render: (r) => renderCheck(r.can_manage_tasks),
+    },
+    {
+      key: "can_access_all_data",
+      label: "גישה לנתונים",
+      render: (r) => renderCheck(r.can_access_all_data),
+    },
+    {
+      key: "status",
+      label: "סטטוס",
+      render: (r) => (r.is_active ? "פעיל" : "לא פעיל"),
+    },
+    {
+      key: "actions",
+      label: "פעולות",
+      render: (r) => (
+        <div className="text-center">
+          <button
+            onClick={() => handleEdit(r.role_id)}
+            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+          >
+            עריכה
+          </button>
+          {r.is_active && (
+            <button
+              onClick={() => handleDelete(r.role_id)}
+              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+            >
+              מחיקה
+            </button>
+          )}
+        </div>
+      ),
+    },
+  ];
 
-  const renderCheck = (value) => (
-    <span
-      className={value ? "text-green-600 font-bold" : "text-red-500 font-bold"}
-    >
-      {value ? "✓" : "✗"}
-    </span>
-  );
+  // פילטרים כלליים (סטטוס + חיפוש כללי ברירת מחדל מגיע מ-ReportSearch)
+  const filtersDef = [
+    {
+      name: "status",
+      label: "סטטוס",
+      type: "select",
+      options: [
+        { value: "", label: "כל הסטטוסים" },
+        { value: "active", label: "פעיל" },
+        { value: "inactive", label: "לא פעיל" },
+      ],
+    },
+  ];
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
-      <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
-        רשימת תפקידים
-      </h2>
-
-      {/* סינון + חיפוש */}
-      <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-2">
+      {/* פעולת הוספת תפקיד (נשארת כמות שהיא) */}
+      <div className="mb-3">
         <NavigationButton
           linkTo="/dashboard/add_role"
           label="הוספת תפקיד חדש"
         />
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="font-rubik border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
-        >
-          <option value="active">תפקידים פעילים</option>
-          <option value="inactive">תפקידים לא פעילים</option>
-          <option value="all">הכל</option>
-        </select>
-
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="🔍 חיפוש תפקיד..."
-            className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 text-red-500"
-            >
-              ✖
-            </button>
-          )}
-        </div>
       </div>
 
-      {/* טבלה */}
+      {/* טבלה גנרית + חיפוש/סינון/ייצוא/מייל מסונכרנים */}
       {loading ? (
         <div className="text-center text-gray-600">טוען נתונים...</div>
       ) : (
-        <div className="overflow-auto rounded-lg shadow-lg bg-white/85">
-          <table className="w-full table-auto border-collapse text-sm text-center">
-            <thead>
-              <tr className="bg-slate-100 text-gray-800">
-                {headers.map((h, i) => (
-                  <th key={i} className="p-2 border">
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRoles.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={colCount}
-                    className="text-center text-red-500 p-4"
-                  >
-                    אין תפקידים להצגה
-                  </td>
-                </tr>
-              ) : (
-                filteredRoles.map((role) => (
-                  <tr
-                    key={role.role_id}
-                    className={`transition duration-200 hover:bg-blue-50 cursor-pointer ${
-                      role.is_active ? "" : "bg-gray-100"
-                    }`}
-                  >
-                    <td className="border p-2 text-center">{role.role_id}</td>
-                    <td className="border p-2">{role.role_name}</td>
-                    <td className="border p-2 text-center">
-                      {renderCheck(role.can_manage_users)}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {renderCheck(role.can_view_reports)}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {renderCheck(role.can_assign_leads)}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {renderCheck(role.can_edit_courses)}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {renderCheck(role.can_manage_tasks)}
-                    </td>
-                    <td className="border p-2 text-center">
-                      {renderCheck(role.can_access_all_data)}
-                    </td>
-                    <td
-                      className={`border p-2 text-center font-semibold ${
-                        role.is_active ? "text-green-600" : "text-red-500"
-                      }`}
-                    >
-                      {role.is_active ? "פעיל" : "לא פעיל"}
-                    </td>
-                    <td className="border p-2 text-center">
-                      <button
-                        onClick={() => handleEdit(role.role_id)}
-                        className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
-                      >
-                        עריכה
-                      </button>
-                      {role.is_active && (
-                        <button
-                          onClick={() => handleDelete(role.role_id)}
-                          className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                        >
-                          מחיקה
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <ReportView
+          title="רשימת תפקידים"
+          columns={columns}
+          rows={allRoles}
+          filtersDef={filtersDef}
+          searchableKeys={["role_name", "status"]}
+          pageSize={25}
+          emailApiBase={api} // אם אין לך API לשליחה—הסר prop זה
+        />
       )}
 
       {/* Popup */}
