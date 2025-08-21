@@ -2,7 +2,6 @@ import express from "express";
 import { db } from "../utils/dbSingleton.js";
 import verifyToken from "../utils/verifyToken.js";
 import ExcelJS from "exceljs";
-import PDFDocument from "pdfkit";
 import nodemailer from "nodemailer";
 import fs from "fs";
 import path from "path";
