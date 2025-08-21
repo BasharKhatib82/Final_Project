@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
-import ReportView from "../reports/ReportView";
+import ReportView from "../Reports/ReportView";
 
 const api = process.env.REACT_APP_API_URL;
 
