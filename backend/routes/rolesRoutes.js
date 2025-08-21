@@ -72,7 +72,7 @@ router.post("/add", verifyToken, async (req, res) => {
 router.get(
   "/active",
   verifyToken,
-  logAction("צפייה בתפקידים פעילים"),
+  
   async (req, res) => {
     try {
       const [results] = await db.query(
@@ -90,7 +90,7 @@ router.get(
 router.get(
   "/inactive",
   verifyToken,
-  logAction("צפייה בתפקידים לא פעילים"),
+
   async (req, res) => {
     try {
       const [results] = await db.query(
@@ -110,7 +110,7 @@ router.get("/", verifyToken, async (req, res) => {
     const [results] = await db.query(
       "SELECT * FROM roles_permissions ORDER BY role_id ASC"
     );
-    await logAction("צפייה ברשימת תפקידים");
+    
     return res.status(200).json({ Status: true, Roles: results });
   } catch (err) {
     console.error("שגיאת שליפת תפקידים:", err);
@@ -129,7 +129,7 @@ router.get("/:id", verifyToken, async (req, res) => {
     if (results.length === 0) {
       return res.status(404).json({ Status: false, Error: "תפקיד לא נמצא" });
     }
-    await logAction("צפייה בפרטי תפקיד");
+   
     return res.status(200).json({ Status: true, Role: results[0] });
   } catch (err) {
     console.error("שגיאת שליפת תפקיד לפי מזהה:", err);

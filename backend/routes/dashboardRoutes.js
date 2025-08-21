@@ -141,9 +141,6 @@ router.get("/", verifyToken, async (req, res) => {
       role: row.role_name,
     }));
 
-    // 📌 רישום ליומן
-    logAction("צפייה בלוח בקרה")(req, res, () => {});
-
     res.json({ success: true, summary });
   } catch (err) {
     console.error("❌ שגיאה בשליפת דשבורד:", err);
