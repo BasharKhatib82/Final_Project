@@ -6,6 +6,22 @@ import NavigationButton from "../Buttons/NavigationButton";
 
 const api = process.env.REACT_APP_API_URL;
 
+// 0/1/"0"/"1"/boolean → true/false
+const asBool = (v) => v === true || v === 1 || v === "1";
+
+// מיפוי רשומה מה-API לאובייקט מוכן לרינדור
+const mapRole = (r, isActive) => ({
+  ...r,
+  is_active: isActive,
+  role_management: asBool(r.role_management),
+  can_manage_users: asBool(r.can_manage_users),
+  can_view_reports: asBool(r.can_view_reports),
+  can_assign_leads: asBool(r.can_assign_leads),
+  can_edit_courses: asBool(r.can_edit_courses),
+  can_manage_tasks: asBool(r.can_manage_tasks),
+  can_access_all_data: asBool(r.can_access_all_data),
+});
+
 const Roles = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
@@ -24,11 +40,8 @@ const Roles = () => {
     axios
       .get(`${api}/auth/check`, { withCredentials: true })
       .then((res) => {
-        if (res.data.loggedIn && res.data.user.role_id === 1) {
-          fetchRoles();
-        } else {
-          navigate("/unauthorized");
-        }
+        if (res?.data?.loggedIn && res?.data?.user?.role_id === 1) fetchRoles();
+        else navigate("/unauthorized");
       })
       .catch((err) => {
         console.error("שגיאה בבדיקת התחברות:", err);
@@ -39,25 +52,23 @@ const Roles = () => {
   const fetchRoles = () => {
     setLoading(true);
     Promise.all([
-      axios.get(`${api}/roles/active`, {
-        withCredentials: true,
-      }),
-      axios.get(`${api}/roles/inactive`, {
-        withCredentials: true,
-      }),
+      axios.get(`${api}/roles/active`, { withCredentials: true }),
+      axios.get(`${api}/roles/inactive`, { withCredentials: true }),
     ])
       .then(([activeRes, inactiveRes]) => {
-        const active = activeRes.data.Roles.map((r) => ({
-          ...r,
-          is_active: true,
-        }));
-        const inactive = inactiveRes.data.Roles.map((r) => ({
-          ...r,
-          is_active: false,
-        }));
+        const active = (activeRes?.data?.Roles || []).map((r) =>
+          mapRole(r, true)
+        );
+        const inactive = (inactiveRes?.data?.Roles || []).map((r) =>
+          mapRole(r, false)
+        );
         setAllRoles([...active, ...inactive]);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error(
+          "שגיאה בטעינת התפקידים:",
+          err?.response?.data || err?.message
+        );
         setPopup({
           show: true,
           title: "שגיאה",
@@ -81,9 +92,7 @@ const Roles = () => {
 
   const confirmDelete = (role_id) => {
     axios
-      .put(`${api}/roles/delete/${role_id}`, null, {
-        withCredentials: true,
-      })
+      .put(`${api}/roles/delete/${role_id}`, null, { withCredentials: true })
       .then(() => {
         setPopup({
           show: true,
@@ -93,7 +102,8 @@ const Roles = () => {
         });
         fetchRoles();
       })
-      .catch(() => {
+      .catch((err) => {
+        console.error("מחיקה נכשלה:", err?.response?.data || err?.message);
         setPopup({
           show: true,
           title: "שגיאה",
@@ -104,8 +114,8 @@ const Roles = () => {
   };
 
   const filteredRoles = allRoles.filter((role) => {
-    const term = searchTerm.toLowerCase();
-    const nameMatch = role.role_name.toLowerCase().includes(term);
+    const term = (searchTerm || "").toLowerCase();
+    const nameMatch = (role?.role_name || "").toLowerCase().includes(term);
     const statusText = role.is_active ? "פעיל" : "לא פעיל";
     const statusMatch = statusText.includes(term);
     const statusCheck =
@@ -114,7 +124,6 @@ const Roles = () => {
         : statusFilter === "active"
         ? role.is_active
         : !role.is_active;
-
     return statusCheck && (nameMatch || statusMatch);
   });
 
@@ -178,6 +187,8 @@ const Roles = () => {
               <tr className="bg-slate-100 text-gray-800">
                 <th className="p-2 border">מזהה</th>
                 <th className="p-2 border">שם תפקיד</th>
+                <th className="p-2 border">ניהול תפקידים</th>{" "}
+                {/* role_management */}
                 <th className="p-2 border">ניהול משתמשים</th>
                 <th className="p-2 border">צפייה בדוחות</th>
                 <th className="p-2 border">שייך פניות</th>
@@ -191,7 +202,7 @@ const Roles = () => {
             <tbody>
               {filteredRoles.length === 0 ? (
                 <tr>
-                  <td colSpan="10" className="text-center text-red-500 p-4">
+                  <td colSpan="11" className="text-center text-red-500 p-4">
                     אין תפקידים להצגה
                   </td>
                 </tr>
@@ -205,6 +216,9 @@ const Roles = () => {
                   >
                     <td className="border p-2 text-center">{role.role_id}</td>
                     <td className="border p-2">{role.role_name}</td>
+                    <td className="border p-2 text-center">
+                      {renderCheck(role.role_management)}
+                    </td>
                     <td className="border p-2 text-center">
                       {renderCheck(role.can_manage_users)}
                     </td>
