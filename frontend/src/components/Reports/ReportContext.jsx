@@ -18,9 +18,10 @@ export function ReportProvider({
   searchableKeys = [],
   pageSize = 20,
   children,
+  defaultFilters = {},
 }) {
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({ defaultFilters });
   const [page, setPage] = useState(1);
 
   const setFilter = (name, value) => {
