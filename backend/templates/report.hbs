@@ -1,0 +1,54 @@
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <title>{{title}}</title>
+    <style>
+      body { font-family: Arial, "Rubik", sans-serif; direction: rtl; margin:
+      24px; } header { display:flex; align-items:center;
+      justify-content:space-between; margin-bottom:16px; } h1 { font-size:20px;
+      margin:0; } .meta { color:#666; font-size:12px; } .filters {
+      background:#f6f7fb; padding:8px 12px; margin:12px 0; font-size:12px; }
+      table { width:100%; border-collapse:collapse; font-size:12px; } th, td {
+      border:1px solid #ddd; padding:8px; text-align:center; } thead th {
+      background:#eee; font-weight:700; } tbody tr:nth-child(odd) td {
+      background:#fafafa; } footer { position:fixed; bottom:16px; left:24px;
+      right:24px; color:#666; font-size:11px; } @media print { button {
+      display:none } }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>{{title}}</h1>
+        <div class="meta">נוצר ב־: {{generatedAt}}</div>
+      </div>
+      {{#if meta.brand}}
+        <div class="meta">{{meta.brand}}</div>
+      {{/if}}
+    </header>
+
+    <div class="filters">
+      {{#if filters.from}}מ־תאריך: {{filters.from}} · {{/if}}
+      {{#if filters.to}}עד תאריך: {{filters.to}} · {{/if}}
+      {{#if filters.q}}חיפוש: {{filters.q}} · {{/if}}
+      {{#if filters.subject}}נושא: {{filters.subject}}{{/if}}
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          {{#each headers}}<th>{{this}}</th>{{/each}}
+        </tr>
+      </thead>
+      <tbody>
+        {{#each rows}}
+          <tr>
+            {{#each this}}<td>{{this}}</td>{{/each}}
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <footer>מסמך אוטומטי – Respondify CRM</footer>
+  </body>
+</html>
