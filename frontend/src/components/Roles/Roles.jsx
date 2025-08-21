@@ -13,7 +13,7 @@ const asBool = (v) => v === true || v === 1 || v === "1";
 const mapRole = (r, isActive) => ({
   ...r,
   is_active: isActive,
-  role_management: asBool(r.role_management),
+  role_management: asBool(r.role_management), // נשאר באובייקט (גם אם לא מוצג)
   can_manage_users: asBool(r.can_manage_users),
   can_view_reports: asBool(r.can_view_reports),
   can_assign_leads: asBool(r.can_assign_leads),
@@ -35,6 +35,21 @@ const Roles = () => {
   });
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // הכותרות של הטבלה (ללא "ניהול תפקידים")
+  const headers = [
+    "מזהה",
+    "שם תפקיד",
+    "ניהול משתמשים",
+    "צפייה בדוחות",
+    "שייך פניות",
+    "עריכת קורסים",
+    "ניהול משימות",
+    "גישה לנתונים",
+    "סטטוס",
+    "פעולות",
+  ];
+  const colCount = headers.length;
 
   useEffect(() => {
     axios
@@ -185,24 +200,20 @@ const Roles = () => {
           <table className="w-full table-auto border-collapse text-sm text-center">
             <thead>
               <tr className="bg-slate-100 text-gray-800">
-                <th className="p-2 border">מזהה</th>
-                <th className="p-2 border">שם תפקיד</th>
-                <th className="p-2 border">ניהול תפקידים</th>{" "}
-                {/* role_management */}
-                <th className="p-2 border">ניהול משתמשים</th>
-                <th className="p-2 border">צפייה בדוחות</th>
-                <th className="p-2 border">שייך פניות</th>
-                <th className="p-2 border">עריכת קורסים</th>
-                <th className="p-2 border">ניהול משימות</th>
-                <th className="p-2 border">גישה לנתונים</th>
-                <th className="p-2 border">סטטוס</th>
-                <th className="p-2 border">פעולות</th>
+                {headers.map((h, i) => (
+                  <th key={i} className="p-2 border">
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
               {filteredRoles.length === 0 ? (
                 <tr>
-                  <td colSpan="11" className="text-center text-red-500 p-4">
+                  <td
+                    colSpan={colCount}
+                    className="text-center text-red-500 p-4"
+                  >
                     אין תפקידים להצגה
                   </td>
                 </tr>
@@ -216,9 +227,6 @@ const Roles = () => {
                   >
                     <td className="border p-2 text-center">{role.role_id}</td>
                     <td className="border p-2">{role.role_name}</td>
-                    <td className="border p-2 text-center">
-                      {renderCheck(role.role_management)}
-                    </td>
                     <td className="border p-2 text-center">
                       {renderCheck(role.can_manage_users)}
                     </td>
