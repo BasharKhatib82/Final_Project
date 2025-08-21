@@ -65,8 +65,13 @@ router.get("/:entity/export/pdf", (req, res) => {
     req.app.get("db"),
     req.params.entity,
     req.query,
-    (err, { rows, def }) => {
-      if (err) return res.status(500).json({ error: "DB_ERROR" });
+    (err, { rows, def } = {}) => {
+      if (err) {
+        console.error("[Reports][PDF] DB_ERROR:", err);
+        return res
+          .status(500)
+          .json({ error: "DB_ERROR", details: err.code || String(err) });
+      }
       buildPdfBuffer(def, rows, {
         filters: req.query,
         meta: { brand: "Respondify CRM" },
@@ -80,8 +85,10 @@ router.get("/:entity/export/pdf", (req, res) => {
           res.end(buf);
         })
         .catch((e) => {
-          console.error("[Reports][PDF] PDFMAKE_ERROR:", e);
-          res.status(500).json({ error: "PDF_ERROR" });
+          console.error("[Reports][PDF] PDFMAKE_ERROR:", e?.message || e);
+          res
+            .status(500)
+            .json({ error: "PDF_ERROR", details: e?.message || String(e) });
         });
     }
   );

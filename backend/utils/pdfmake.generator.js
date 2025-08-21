@@ -1,4 +1,5 @@
 import PdfPrinter from "pdfmake";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import dayjs from "dayjs";
@@ -6,14 +7,40 @@ import dayjs from "dayjs";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const fonts = {
-  Rubik: {
-    normal: path.resolve(__dirname, "../fonts/NotoSansHebrew-Regular.ttf"),
-    bold: path.resolve(__dirname, "../fonts/NotoSansHebrew-Bold.ttf"),
-    italics: path.resolve(__dirname, "../fonts/NotoSansHebrew-Regular.ttf"),
-    bolditalics: path.resolve(__dirname, "../fonts/NotoSansHebrew-Bold.ttf"),
-  },
-};
+// --- Use Noto Sans Hebrew (preferred), fallback to core fonts if missing ---
+const notoRegular = path.resolve(
+  __dirname,
+  "../fonts/NotoSansHebrew-Regular.ttf"
+);
+const notoBold = path.resolve(__dirname, "../fonts/NotoSansHebrew-Bold.ttf");
+
+let fonts;
+if (fs.existsSync(notoRegular) && fs.existsSync(notoBold)) {
+  fonts = {
+    NotoSansHebrew: {
+      normal: notoRegular,
+      bold: notoBold,
+      italics: notoRegular,
+      bolditalics: notoBold,
+    },
+  };
+  console.log("[pdfmake] Using Noto Sans Hebrew fonts:", notoRegular, notoBold);
+} else {
+  fonts = {
+    Core: {
+      normal: "Helvetica",
+      bold: "Helvetica-Bold",
+      italics: "Helvetica-Oblique",
+      bolditalics: "Helvetica-BoldOblique",
+    },
+  };
+  console.warn(
+    "[pdfmake] NotoSansHebrew *.ttf not found, falling back to core Helvetica.",
+    {
+      expected: { notoRegular, notoBold },
+    }
+  );
+}
 
 const printer = new PdfPrinter(fonts);
 const rtl = (s) => "\u202B" + String(s ?? "");
@@ -29,7 +56,11 @@ export function buildPdfBuffer(def, rows, { filters = {}, meta = {} } = {}) {
   const docDefinition = {
     pageSize: "A4",
     pageMargins: [40, 100, 40, 50],
-    defaultStyle: { font: "Rubik", fontSize: 10, alignment: "right" },
+    defaultStyle: {
+      font: fonts.NotoSansHebrew ? "NotoSansHebrew" : "Core",
+      fontSize: 10,
+      alignment: "right",
+    },
     header: [
       {
         columns: [
@@ -113,11 +144,16 @@ export function buildPdfBuffer(def, rows, { filters = {}, meta = {} } = {}) {
   };
 
   return new Promise((resolve, reject) => {
-    const doc = printer.createPdfKitDocument(docDefinition);
-    const chunks = [];
-    doc.on("data", (d) => chunks.push(d));
-    doc.on("end", () => resolve(Buffer.concat(chunks)));
-    doc.on("error", reject);
-    doc.end();
+    try {
+      const doc = printer.createPdfKitDocument(docDefinition);
+      const chunks = [];
+      doc.on("data", (d) => chunks.push(d));
+      doc.on("end", () => resolve(Buffer.concat(chunks)));
+      doc.on("error", reject);
+      doc.end();
+    } catch (e) {
+      console.error("[pdfmake] build error:", e);
+      reject(e);
+    }
   });
 }
