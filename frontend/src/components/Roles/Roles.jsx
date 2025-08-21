@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
-import ReportView from "../Reports/ReportView";
+import ReportView from "../reports/ReportView";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -14,8 +14,8 @@ const asBool = (v) => v === true || v === 1 || v === "1";
 const mapRole = (r, isActive) => ({
   ...r,
   is_active: isActive,
-  status: isActive ? "active" : "inactive", // לצורך פילטר "סטטוס"
-  role_management: asBool(r.role_management), // נשאר באובייקט (לא מוצג)
+  status: isActive ? "active" : "inactive", // לשדה פילטר/חיפוש
+  role_management: asBool(r.role_management), // נשאר באובייקט, לא מוצג
   can_manage_users: asBool(r.can_manage_users),
   can_view_reports: asBool(r.can_view_reports),
   can_assign_leads: asBool(r.can_assign_leads),
@@ -30,7 +30,7 @@ const renderCheck = (v) => (
   </span>
 );
 
-const Roles = () => {
+export default function Roles() {
   const [allRoles, setAllRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [popup, setPopup] = useState({
@@ -183,7 +183,7 @@ const Roles = () => {
     },
   ];
 
-  // פילטרים כלליים (סטטוס + חיפוש כללי ברירת מחדל מגיע מ-ReportSearch)
+  // פילטר לפי : סטטוס
   const filtersDef = [
     {
       name: "status",
@@ -197,17 +197,11 @@ const Roles = () => {
     },
   ];
 
+  // ברירת מחדל : מציג רק תפקידים פעילים
+  const defaultFilters = { status: "active" };
+
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
-      {/* פעולת הוספת תפקיד (נשארת כמות שהיא) */}
-      <div className="mb-3">
-        <NavigationButton
-          linkTo="/dashboard/add_role"
-          label="הוספת תפקיד חדש"
-        />
-      </div>
-
-      {/* טבלה גנרית + חיפוש/סינון/ייצוא/מייל מסונכרנים */}
       {loading ? (
         <div className="text-center text-gray-600">טוען נתונים...</div>
       ) : (
@@ -218,7 +212,14 @@ const Roles = () => {
           filtersDef={filtersDef}
           searchableKeys={["role_name", "status"]}
           pageSize={25}
-          emailApiBase={api} // אם אין לך API לשליחה—הסר prop זה
+          emailApiBase={api}
+          addButton={
+            <NavigationButton
+              linkTo="/dashboard/add_role"
+              label="הוספת תפקיד חדש"
+            />
+          }
+          defaultFilters={defaultFilters}
         />
       )}
 
@@ -246,6 +247,4 @@ const Roles = () => {
       )}
     </div>
   );
-};
-
-export default Roles;
+}
