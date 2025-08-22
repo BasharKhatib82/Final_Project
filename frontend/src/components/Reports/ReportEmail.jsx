@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import axios from "axios";
+import { Mail, FileSpreadsheet, FileText } from "lucide-react";
 
 export default function ReportEmail({ apiBase }) {
   const { title, columns, filteredRows } = useReport();
@@ -32,7 +33,9 @@ export default function ReportEmail({ apiBase }) {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-slate-700">מייל לשליחה</span>
+      <span className="text-sm text-slate-700 inline-flex items-center gap-1">
+        <Mail size={16} /> שליחה למייל
+      </span>
       <input
         className="border rounded px-2 py-1 text-sm"
         placeholder='דוא"ל נמען'
@@ -40,16 +43,16 @@ export default function ReportEmail({ apiBase }) {
         onChange={(e) => setTo(e.target.value)}
       />
       <button
-        className="px-3 py-1 rounded bg-sky-600 text-white hover:bg-sky-700"
+        className="px-3 py-1 rounded bg-sky-600 text-white hover:bg-sky-700 inline-flex items-center gap-1"
         onClick={() => send("xlsx")}
       >
-        Excel
+        <FileSpreadsheet size={16} /> Excel
       </button>
       <button
-        className="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700"
+        className="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700 inline-flex items-center gap-1"
         onClick={() => send("pdf")}
       >
-        PDF
+        <FileText size={16} /> PDF
       </button>
     </div>
   );

@@ -2,6 +2,7 @@ import React from "react";
 import { useReport } from "./ReportContext";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
+import { FileSpreadsheet, FileText } from "lucide-react";
 
 export default function ReportExport({ printTargetRef }) {
   const { title, columns, filteredRows } = useReport();
@@ -57,18 +58,18 @@ export default function ReportExport({ printTargetRef }) {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-slate-700">יצאו קבוץ</span>
+      <span className="text-sm text-slate-700">יצוא לקובץ</span>
       <button
         onClick={exportExcel}
-        className="px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700"
+        className="px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1"
       >
-        Excel
+        <FileSpreadsheet size={16} /> Excel
       </button>
       <button
         onClick={exportPdf}
-        className="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700"
+        className="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 inline-flex items-center gap-1"
       >
-        PDF
+        <FileText size={16} /> PDF
       </button>
     </div>
   );

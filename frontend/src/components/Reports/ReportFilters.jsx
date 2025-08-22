@@ -1,5 +1,6 @@
 import React from "react";
 import { useReport } from "./ReportContext";
+import { Filter as FilterIcon } from "lucide-react";
 
 export default function ReportFilters({
   variant = "block",
@@ -41,7 +42,10 @@ function Filter({ def, value, onChange, inline, labelPrefix }) {
     return (
       <div className="flex items-center gap-2">
         {inline && (
-          <span className="text-sm text-slate-700">{labelPrefix}</span>
+          <span className="text-sm text-slate-700 inline-flex items-center gap-1">
+            <FilterIcon size={16} className="text-slate-500" />
+            {labelPrefix}
+          </span>
         )}
         <select
           className="border rounded px-2 py-1 text-sm"
@@ -57,7 +61,6 @@ function Filter({ def, value, onChange, inline, labelPrefix }) {
       </div>
     );
   }
-  // לשאר הסוגים ב־inline לא נשתמש כאן; נשאיר ברירת מחדל:
   return (
     <input
       className="border rounded px-2 py-1 text-sm"

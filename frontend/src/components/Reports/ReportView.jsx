@@ -7,13 +7,6 @@ import ReportEmail from "./ReportEmail";
 import ReportTable from "./ReportTable";
 import ReportPagination from "./ReportPagination";
 
-/**
- * props:
- * - addButton?: ReactNode
- * - defaultFilters?: object
- * - emailApiBase?: string
- * - searchPlaceholder?: string   // 👈 חדש – placeholder דינמי לחיפוש
- */
 export default function ReportView({
   title,
   columns,
@@ -41,46 +34,31 @@ export default function ReportView({
       <div className="flex flex-col gap-4" dir="rtl">
         {/* כותרת ממורכזת */}
         <header className="flex items-center justify-center">
-          <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
-            {title}
-          </h2>
+          <h2 className="text-2xl font-semibold text-blue-700">{title}</h2>
         </header>
 
-        {/* כפתור הוספה בראש (אם יש) */}
         {addButton && (
           <div className="flex justify-start">
             <div className="inline-flex">{addButton}</div>
           </div>
         )}
 
-        {/* סרגל פרוס לרוחב עם מפרידים: סטטוס | חיפוש | יצאו קבוץ | מייל לשליחה */}
-        <section className="rounded-xl border border-slate-200 bg-white/95 p-0 shadow-sm overflow-hidden">
-          <div className="flex flex-wrap items-center divide-x divide-slate-200 divide-x-reverse">
-            {/* אזור 1: סטטוס */}
-            <div className="flex-1 min-w-[220px] p-3">
-              <ReportFilters
-                variant="inline"
-                showTotal={false}
-                labelPrefix="סטטוס :"
-              />
-            </div>
-
-            {/* אזור 2: חיפוש */}
-            <div className="flex-1 min-w-[240px] p-3">
-              <ReportSearch label="חיפוש :" placeholder={searchPlaceholder} />
-            </div>
-
-            {/* אזור 3: יצוא */}
-            <div className="flex-1 min-w-[220px] p-3">
+        {/* סרגל אחד פרוס */}
+        <section className="rounded-xl border border-slate-200 bg-white/95 p-3 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            {/* סטטוס עם אייקון */}
+            <ReportFilters
+              variant="inline"
+              showTotal={false}
+              labelPrefix="סטטוס :"
+            />
+            {/* חיפוש עם אייקון */}
+            <ReportSearch label="חיפוש :" placeholder={searchPlaceholder} />
+            {/* יצוא + שליחה למייל עם אייקונים */}
+            <div className="flex items-center gap-4">
               <ReportExport printTargetRef={printRef} />
+              {emailApiBase && <ReportEmail apiBase={emailApiBase} />}
             </div>
-
-            {/* אזור 4: שליחה במייל */}
-            {emailApiBase && (
-              <div className="flex-1 min-w-[280px] p-3">
-                <ReportEmail apiBase={emailApiBase} />
-              </div>
-            )}
           </div>
         </section>
 
