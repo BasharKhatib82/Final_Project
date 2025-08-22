@@ -1,4 +1,3 @@
-// reports/ReportExport.jsx
 import React from "react";
 import { useReport } from "./ReportContext";
 import ExcelJS from "exceljs";
@@ -8,24 +7,32 @@ import { FileSpreadsheet, FileText } from "lucide-react";
 export default function ReportExport({ printTargetRef }) {
   const { title, columns, filteredRows } = useReport();
 
-  // מכין ערכי יצוא לכל עמודה מראש, ומחליט אילו עמודות באמת נייצא
-  const prepareExport = () => {
-    // 1) לחשב ערכי יצוא לכל עמודה ולכל שורה
-    const prepared = columns.map((c) => {
+  const nowStamp = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    const hh = String(d.getHours()).padStart(2, "0");
+    const mm = String(d.getMinutes()).padStart(2, "0");
+    return `${y}-${m}-${day}_${hh}-${mm}`;
+  };
+
+  const prepare = () => {
+    return columns.map((c) => {
       const values = filteredRows.map((row) => {
         if (typeof c.export === "function") return c.export(row);
-        if (typeof c.render === "function") {
-          // אם יש render אבל לא export – נעדיף ערך טקסטואלי מהמפתח (כדי לא לקבל ReactNode)
-          return row[c.key] ?? "";
-        }
+        if (typeof c.export === "string" && c.export.toLowerCase() === "skip")
+          return null;
+        if (c.export === false || c.export === null) return null;
+        if (typeof c.render === "function") return row[c.key] ?? "";
         return row[c.key] ?? "";
       });
       return { col: c, values };
     });
+  };
 
-    // 2) לקבוע אילו עמודות נכנסות לקובץ:
-    //    - עמודות עם export === false/null/"skip" → לא נכללות
-    //    - עמודות שהערכים שלהן כולם null/undefined → לא נכללות (למשל actions עם export: () => null)
+  const exportExcel = async () => {
+    const prepared = prepare();
     const exportable = prepared.filter(({ col, values }) => {
       if (col.export === false || col.export === null || col.export === "skip")
         return false;
@@ -33,45 +40,52 @@ export default function ReportExport({ printTargetRef }) {
       return !allEmpty;
     });
 
-    return exportable;
-  };
-
-  const exportExcel = async () => {
-    const exportable = prepareExport();
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("Report");
 
-    // כותרת
-    ws.addRow([title]).font = { size: 14, bold: true };
+    const titleRow = ws.addRow([title]);
+    titleRow.font = { size: 14, bold: true };
+    titleRow.alignment = { horizontal: "center", vertical: "middle" };
     ws.addRow([]);
 
-    // כותרות עמודות (רק לעמודות שנכנסות)
     const headers = exportable.map(({ col }) => col.label);
-    ws.addRow(headers).font = { bold: true };
+    const headerRow = ws.addRow(headers);
+    headerRow.font = { bold: true };
+    headerRow.alignment = { horizontal: "center", vertical: "middle" };
 
-    // שורות נתונים
-    filteredRows.forEach((_row, idx) => {
-      const dataRow = exportable.map(({ values }) => {
-        const v = values[idx];
-        // המרה קלה לייצוא (למניעת undefined)
-        return v == null ? "" : v;
-      });
-      ws.addRow(dataRow);
+    filteredRows.forEach((_r, idx) => {
+      const dataRow = exportable.map(({ values }) =>
+        values[idx] == null ? "" : values[idx]
+      );
+      const row = ws.addRow(dataRow);
+      row.alignment = { horizontal: "center", vertical: "middle" };
     });
 
-    // רוחב עמודות
     exportable.forEach(({ col }, i) => {
-      ws.getColumn(i + 1).width = col.width || 22;
+      const column = ws.getColumn(i + 1);
+      column.width = col.width || 22;
+      column.alignment = { horizontal: "center", vertical: "middle" };
     });
 
     const buf = await wb.xlsx.writeBuffer();
-    saveAs(new Blob([buf]), `${sanitize(title)}.xlsx`);
+    const filename = `${sanitize(title)}_${nowStamp()}.xlsx`;
+    saveAs(new Blob([buf]), filename);
   };
 
   const exportPdf = () => {
-    // ל-PDF דרך הדפסה – נשתמש בתצוגה הקיימת (כולל הסתרת עמודת פעולות אם תרצה גם ויזואלית)
     const node = printTargetRef?.current;
     if (!node) return;
+
+    const actionsIndex = columns.findIndex((c) => c.key === "actions");
+    const hideActionsCss =
+      actionsIndex >= 0
+        ? `
+        thead th:nth-child(${actionsIndex + 1}),
+        tbody td:nth-child(${actionsIndex + 1}) { display: none !important; }`
+        : "";
+
+    const filename = `${sanitize(title)}_${nowStamp()}.pdf`;
+
     const win = window.open("", "_blank", "width=1200,height=800");
     if (!win) return;
     win.document.open();
@@ -86,12 +100,14 @@ export default function ReportExport({ printTargetRef }) {
           thead th { background:#f0f2f5; }
           tr:nth-child(even) td { background:#fafafa; }
           @page { size: A4; margin: 15mm; }
-          /* אם תרצה להסתיר ויזואלית את עמודת הפעולות גם ב-PDF:
-             th:last-child, td:last-child { display: none; } */
+          ${hideActionsCss}
         </style>
       </head><body>
         ${node.innerHTML}
-        <script>window.onload = () => { window.print(); setTimeout(()=>window.close(), 200); };</script>
+        <script>
+          document.title = "${filename}";
+          window.onload = () => { window.print(); setTimeout(()=>window.close(), 200); };
+        </script>
       </body></html>
     `);
     win.document.close();
