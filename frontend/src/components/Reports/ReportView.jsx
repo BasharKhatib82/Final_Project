@@ -34,7 +34,9 @@ export default function ReportView({
       <div className="flex flex-col gap-4" dir="rtl">
         {/* כותרת ממורכזת */}
         <header className="flex items-center justify-center">
-          <h2 className="text-2xl font-semibold text-blue-700">{title}</h2>
+          <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-4 text-center">
+            {title}
+          </h2>
         </header>
 
         {addButton && (
@@ -54,6 +56,8 @@ export default function ReportView({
             />
             {/* חיפוש עם אייקון */}
             <ReportSearch label="חיפוש :" placeholder={searchPlaceholder} />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3">
             {/* יצוא + שליחה למייל עם אייקונים */}
             <div className="flex items-center gap-4">
               <ReportExport printTargetRef={printRef} />
