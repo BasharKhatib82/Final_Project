@@ -47,7 +47,7 @@ export default function ReportView({
 
         {/* סרגל אחד פרוס */}
         <section className="rounded-xl border border-slate-200 bg-white/95 p-3 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-4 ">
             {/* סטטוס עם אייקון */}
             <ReportFilters
               variant="inline"
@@ -57,12 +57,11 @@ export default function ReportView({
             {/* חיפוש עם אייקון */}
             <ReportSearch label="חיפוש :" placeholder={searchPlaceholder} />
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            {/* יצוא + שליחה למייל עם אייקונים */}
-            <div className="flex items-center gap-4">
-              <ReportExport printTargetRef={printRef} />
-              {emailApiBase && <ReportEmail apiBase={emailApiBase} />}
-            </div>
+
+          {/* יצוא + שליחה למייל עם אייקונים */}
+          <div className="flex items-center gap-4">
+            <ReportExport printTargetRef={printRef} />
+            {emailApiBase && <ReportEmail apiBase={emailApiBase} />}
           </div>
         </section>
 
