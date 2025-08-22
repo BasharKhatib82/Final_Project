@@ -33,8 +33,8 @@ export default function ReportView({
     >
       <div className="flex flex-col gap-4" dir="rtl">
         {/* כותרת ממורכזת */}
-        <header className="flex items-center justify-center">
-          <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-4 text-center">
+        <header className="flex items-center justify-center py-0 my-0">
+          <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-2 text-center">
             {title}
           </h2>
         </header>
@@ -45,23 +45,23 @@ export default function ReportView({
           </div>
         )}
 
-        {/* סרגל אחד פרוס */}
         <section className="rounded-xl border border-slate-200 bg-white/95 p-3 shadow-sm">
-          <div className="flex items-center gap-4 ">
-            {/* סטטוס עם אייקון */}
-            <ReportFilters
-              variant="inline"
-              showTotal={false}
-              labelPrefix="סטטוס :"
-            />
-            {/* חיפוש עם אייקון */}
-            <ReportSearch label="חיפוש :" placeholder={searchPlaceholder} />
-          </div>
+          <div className="flex flex-col space-y-3">
+            {/* שורה ראשונה: סטטוס + חיפוש */}
+            <div className="flex items-center gap-4">
+              <ReportFilters
+                variant="inline"
+                showTotal={false}
+                labelPrefix="סטטוס :"
+              />
+              <ReportSearch label="חיפוש :" placeholder={searchPlaceholder} />
+            </div>
 
-          {/* יצוא + שליחה למייל עם אייקונים */}
-          <div className="flex items-center gap-4">
-            <ReportExport printTargetRef={printRef} />
-            {emailApiBase && <ReportEmail apiBase={emailApiBase} />}
+            {/* שורה שנייה: יצוא + שליחה למייל */}
+            <div className="flex items-center gap-4">
+              <ReportExport printTargetRef={printRef} />
+              {emailApiBase && <ReportEmail apiBase={emailApiBase} />}
+            </div>
           </div>
         </section>
 
