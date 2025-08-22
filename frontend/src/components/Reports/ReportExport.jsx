@@ -10,6 +10,7 @@ export default function ReportExport({ printTargetRef }) {
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("Report");
     const headers = columns.map((c) => c.label);
+
     ws.addRow([title]).font = { size: 14, bold: true };
     ws.addRow([]);
     ws.addRow(headers).font = { bold: true };
@@ -56,7 +57,7 @@ export default function ReportExport({ printTargetRef }) {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-slate-700">יצוא</span>
+      <span className="text-sm text-slate-700">יצאו קבוץ</span>
       <button
         onClick={exportExcel}
         className="px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700"

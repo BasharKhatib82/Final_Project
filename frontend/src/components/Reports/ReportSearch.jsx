@@ -3,7 +3,7 @@ import { useReport } from "./ReportContext";
 
 export default function ReportSearch({
   label = "חיפוש :",
-  placeholder = "שם תפקיד...",
+  placeholder = "חיפוש...",
 }) {
   const { search, setSearch, setPage } = useReport();
   return (

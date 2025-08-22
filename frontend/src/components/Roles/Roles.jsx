@@ -174,14 +174,14 @@ export default function Roles() {
       label: "סטטוס",
       type: "select",
       options: [
-        { value: "active", label: "פעיל" }, // 👈 ברירת מחדל למעלה
+        { value: "active", label: "פעיל" }, // ברירת־מחדל – “פעיל”
         { value: "inactive", label: "לא פעיל" },
         { value: "", label: "כל הסטטוסים" },
       ],
     },
   ];
 
-  const defaultFilters = { status: "active" }; // 👈 מציג רק פעילים כברירת מחדל
+  const defaultFilters = { status: "active" };
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
@@ -203,6 +203,7 @@ export default function Roles() {
             />
           }
           defaultFilters={defaultFilters}
+          searchPlaceholder="שם תפקיד..."
         />
       )}
 
