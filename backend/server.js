@@ -20,6 +20,7 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import logsRoutes from "./routes/logsRoutes.js";
 import whatsappRoutes from "./routes/whatsappRoutes.js";
 import flowDataRoutes from "./routes/flowDataRoutes.js";
+import reportsRouter from "./routes/reportsRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -46,6 +47,7 @@ app.use("/dashboard", dashboardRoutes);
 app.use("/logs", logsRoutes);
 app.use("/whatsapp", whatsappRoutes);
 app.use("/flows", flowDataRoutes);
+app.use("/reports", reportsRouter);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

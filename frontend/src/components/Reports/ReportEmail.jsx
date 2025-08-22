@@ -3,7 +3,10 @@ import { useReport } from "./ReportContext";
 import axios from "axios";
 import { Mail, FileSpreadsheet, FileText } from "lucide-react";
 
-export default function ReportEmail({ apiBase }) {
+// בסיס מה-ENV, בלי סלאשים מיותרים בסוף
+const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
+
+export default function ReportEmail({ apiBase = ENV_API_BASE }) {
   const { title, columns, filteredRows } = useReport();
   const [to, setTo] = useState("");
 
@@ -15,18 +18,12 @@ export default function ReportEmail({ apiBase }) {
     try {
       await axios.post(
         `${apiBase}/reports/send-email`,
-        {
-          title,
-          columns,
-          rows: filteredRows,
-          to,
-          format,
-        },
+        { title, columns, rows: filteredRows, to, format },
         { withCredentials: true }
       );
       alert("נשלח!");
     } catch (e) {
-      console.error(e);
+      console.error("Email send failed:", e?.response?.data || e.message);
       alert("שגיאה בשליחה");
     }
   };
