@@ -1,3 +1,4 @@
+// reports/ReportExport.jsx
 import React from "react";
 import { useReport } from "./ReportContext";
 import ExcelJS from "exceljs";
@@ -7,30 +8,68 @@ import { FileSpreadsheet, FileText } from "lucide-react";
 export default function ReportExport({ printTargetRef }) {
   const { title, columns, filteredRows } = useReport();
 
-  const exportExcel = async () => {
-    const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet("Report");
-    const headers = columns.map((c) => c.label);
-
-    ws.addRow([title]).font = { size: 14, bold: true };
-    ws.addRow([]);
-    ws.addRow(headers).font = { bold: true };
-
-    filteredRows.forEach((row) => {
-      const data = columns.map((c) => {
+  // מכין ערכי יצוא לכל עמודה מראש, ומחליט אילו עמודות באמת נייצא
+  const prepareExport = () => {
+    // 1) לחשב ערכי יצוא לכל עמודה ולכל שורה
+    const prepared = columns.map((c) => {
+      const values = filteredRows.map((row) => {
         if (typeof c.export === "function") return c.export(row);
-        if (typeof c.render === "function") return row[c.key] ?? "";
+        if (typeof c.render === "function") {
+          // אם יש render אבל לא export – נעדיף ערך טקסטואלי מהמפתח (כדי לא לקבל ReactNode)
+          return row[c.key] ?? "";
+        }
         return row[c.key] ?? "";
       });
-      ws.addRow(data);
+      return { col: c, values };
     });
 
-    columns.forEach((c, i) => (ws.getColumn(i + 1).width = c.width || 22));
+    // 2) לקבוע אילו עמודות נכנסות לקובץ:
+    //    - עמודות עם export === false/null/"skip" → לא נכללות
+    //    - עמודות שהערכים שלהן כולם null/undefined → לא נכללות (למשל actions עם export: () => null)
+    const exportable = prepared.filter(({ col, values }) => {
+      if (col.export === false || col.export === null || col.export === "skip")
+        return false;
+      const allEmpty = values.every((v) => v === null || v === undefined);
+      return !allEmpty;
+    });
+
+    return exportable;
+  };
+
+  const exportExcel = async () => {
+    const exportable = prepareExport();
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet("Report");
+
+    // כותרת
+    ws.addRow([title]).font = { size: 14, bold: true };
+    ws.addRow([]);
+
+    // כותרות עמודות (רק לעמודות שנכנסות)
+    const headers = exportable.map(({ col }) => col.label);
+    ws.addRow(headers).font = { bold: true };
+
+    // שורות נתונים
+    filteredRows.forEach((_row, idx) => {
+      const dataRow = exportable.map(({ values }) => {
+        const v = values[idx];
+        // המרה קלה לייצוא (למניעת undefined)
+        return v == null ? "" : v;
+      });
+      ws.addRow(dataRow);
+    });
+
+    // רוחב עמודות
+    exportable.forEach(({ col }, i) => {
+      ws.getColumn(i + 1).width = col.width || 22;
+    });
+
     const buf = await wb.xlsx.writeBuffer();
     saveAs(new Blob([buf]), `${sanitize(title)}.xlsx`);
   };
 
   const exportPdf = () => {
+    // ל-PDF דרך הדפסה – נשתמש בתצוגה הקיימת (כולל הסתרת עמודת פעולות אם תרצה גם ויזואלית)
     const node = printTargetRef?.current;
     if (!node) return;
     const win = window.open("", "_blank", "width=1200,height=800");
@@ -47,6 +86,8 @@ export default function ReportExport({ printTargetRef }) {
           thead th { background:#f0f2f5; }
           tr:nth-child(even) td { background:#fafafa; }
           @page { size: A4; margin: 15mm; }
+          /* אם תרצה להסתיר ויזואלית את עמודת הפעולות גם ב-PDF:
+             th:last-child, td:last-child { display: none; } */
         </style>
       </head><body>
         ${node.innerHTML}

@@ -105,36 +105,43 @@ export default function Roles() {
       key: "can_manage_users",
       label: "ניהול משתמשים",
       render: (r) => renderCheck(r.can_manage_users),
+      export: (r) => (r.can_manage_users ? "✓" : "✗"),
     },
     {
       key: "can_view_reports",
       label: "צפייה בדוחות",
       render: (r) => renderCheck(r.can_view_reports),
+      export: (r) => (r.can_view_reports ? "✓" : "✗"),
     },
     {
       key: "can_assign_leads",
       label: "שייך פניות",
       render: (r) => renderCheck(r.can_assign_leads),
+      export: (r) => (r.can_assign_leads ? "✓" : "✗"),
     },
     {
       key: "can_edit_courses",
       label: "עריכת קורסים",
       render: (r) => renderCheck(r.can_edit_courses),
+      export: (r) => (r.can_edit_courses ? "✓" : "✗"),
     },
     {
       key: "can_manage_tasks",
       label: "ניהול משימות",
       render: (r) => renderCheck(r.can_manage_tasks),
+      export: (r) => (r.can_manage_tasks ? "✓" : "✗"),
     },
     {
       key: "can_access_all_data",
       label: "גישה לנתונים",
       render: (r) => renderCheck(r.can_access_all_data),
+      export: (r) => (r.can_access_all_data ? "✓" : "✗"),
     },
     {
       key: "status",
       label: "סטטוס",
       render: (r) => (r.is_active ? "פעיל" : "לא פעיל"),
+      export: (r) => (r.is_active ? "פעיל" : "לא פעיל"),
     },
     {
       key: "actions",
@@ -165,6 +172,7 @@ export default function Roles() {
           )}
         </div>
       ),
+      export: () => null,
     },
   ];
 
