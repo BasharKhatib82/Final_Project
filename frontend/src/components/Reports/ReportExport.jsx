@@ -2,17 +2,11 @@
  * ==========================================================
  * שם: ReportExport
  * תיאור:
- *   קומפוננטה לייצוא דוחות (Excel / PDF) כולל אפשרות
- *   הצגת תצוגה לפני הדפסה עם תמיכה מלאה בעברית (RTL).
+ *   קומפוננטה לייצוא דוחות ל־Excel ול־PDF כולל תצוגה לפני הדפסה
+ *   עם תמיכה מלאה בעברית (NotoSansHebrew).
  *
  * שימוש:
  *   <ReportExport />
- *
- * פרופסים:
- *   אין (נשען על useReport)
- *
- * פלט:
- *   כפתורי יצוא (Excel, PDF, Print Preview)
  *
  * ==========================================================
  */
@@ -23,13 +17,11 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { FileSpreadsheet, FileText, Printer } from "lucide-react";
 
-// ✅ pdfmake – גרסת דפדפן
 import pdfMake from "pdfmake/build/pdfmake";
-import pdfFonts from "pdfmake/build/vfs_fonts";
-import { NotoSansHebrew } from "../../fonts/NotoSansHebrew";
+import { vfs as hebrewFonts } from "../fonts/NotoSansHebrew"; //  מייבא את הגופן
 
-// חיבור פונטים
-pdfMake.vfs = { ...pdfFonts.pdfMake.vfs, ...NotoSansHebrew };
+// מגדירים ל־pdfmake להשתמש בגופן
+pdfMake.vfs = hebrewFonts;
 pdfMake.fonts = {
   NotoSans: {
     normal: "NotoSansHebrew-Regular.ttf",
@@ -40,9 +32,7 @@ pdfMake.fonts = {
 export default function ReportExport() {
   const { title, columns, filteredRows } = useReport();
 
-  /**
-   * יוצר חותמת זמן לשם הקובץ
-   */
+  /** חותמת זמן */
   const nowStamp = () => {
     const d = new Date();
     const y = d.getFullYear();
@@ -53,31 +43,8 @@ export default function ReportExport() {
     return `${y}-${m}-${day}_${hh}-${mm}`;
   };
 
-  /**
-   * מכין את העמודות והערכים ליצוא
-   */
-  const prepare = () => {
-    return columns.map((c) => {
-      const values = filteredRows.map((row) => {
-        if (typeof c.export === "function") return c.export(row);
-        if (c.export === false || c.export === "skip") return null;
-        return row[c.key] ?? "";
-      });
-      return { col: c, values };
-    });
-  };
-
-  /**
-   * יצוא לאקסל
-   */
+  /** יצוא לאקסל */
   const exportExcel = async () => {
-    const prepared = prepare();
-    const exportable = prepared.filter(({ col, values }) => {
-      if (col.export === false || col.export === "skip") return false;
-      const allEmpty = values.every((v) => v == null);
-      return !allEmpty;
-    });
-
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("Report");
 
@@ -86,21 +53,18 @@ export default function ReportExport() {
     titleRow.alignment = { horizontal: "center" };
     ws.addRow([]);
 
-    const headers = exportable.map(({ col }) => col.label);
+    const headers = columns
+      .filter((c) => c.key !== "actions")
+      .map((c) => c.label);
     const headerRow = ws.addRow(headers);
     headerRow.font = { bold: true };
     headerRow.alignment = { horizontal: "center" };
 
-    filteredRows.forEach((_r, idx) => {
-      const dataRow = exportable.map(({ values }) => values[idx] ?? "");
-      const row = ws.addRow(dataRow);
-      row.alignment = { horizontal: "center" };
-    });
-
-    exportable.forEach(({ col }, i) => {
-      const column = ws.getColumn(i + 1);
-      column.width = col.width || 22;
-      column.alignment = { horizontal: "center" };
+    filteredRows.forEach((row) => {
+      const dataRow = columns
+        .filter((c) => c.key !== "actions")
+        .map((c) => row[c.key] ?? "");
+      ws.addRow(dataRow).alignment = { horizontal: "center" };
     });
 
     const buf = await wb.xlsx.writeBuffer();
@@ -108,9 +72,7 @@ export default function ReportExport() {
     saveAs(new Blob([buf]), filename);
   };
 
-  /**
-   * יצוא ל־PDF (הורדה ישירה)
-   */
+  /** יצוא ל־PDF */
   const exportPdf = () => {
     const colsForPdf = columns.filter((c) => c.key !== "actions");
 
@@ -121,13 +83,10 @@ export default function ReportExport() {
         alignment: "center",
       })),
       ...filteredRows.map((row) =>
-        colsForPdf.map((c) => {
-          if (typeof c.export === "function")
-            return { text: c.export(row), alignment: "center" };
-          if (c.export === false || c.export === "skip")
-            return { text: "", alignment: "center" };
-          return { text: row[c.key] ?? "", alignment: "center" };
-        })
+        colsForPdf.map((c) => ({
+          text: row[c.key] ?? "",
+          alignment: "center",
+        }))
       ),
     ];
 
@@ -139,16 +98,13 @@ export default function ReportExport() {
           alignment: "center",
           margin: [0, 0, 0, 8],
         },
-        {
-          table: { headerRows: 1, body },
-          layout: "lightHorizontalLines",
-        },
+        { table: { headerRows: 1, body }, layout: "lightHorizontalLines" },
       ],
       styles: {
         header: { fontSize: 16, bold: true },
         tableHeader: { bold: true, fillColor: "#eeeeee" },
       },
-      defaultStyle: { font: "NotoSans" }, // ✅ עברית
+      defaultStyle: { font: "NotoSans" },
       pageMargins: [30, 30, 30, 30],
     };
 
@@ -156,9 +112,7 @@ export default function ReportExport() {
     pdfMake.createPdf(docDefinition).download(filename);
   };
 
-  /**
-   * תצוגה לפני הדפסה (PDF ב־Preview)
-   */
+  /** תצוגה לפני הדפסה */
   const previewPdf = () => {
     const colsForPdf = columns.filter((c) => c.key !== "actions");
 
@@ -169,13 +123,10 @@ export default function ReportExport() {
         alignment: "center",
       })),
       ...filteredRows.map((row) =>
-        colsForPdf.map((c) => {
-          if (typeof c.export === "function")
-            return { text: c.export(row), alignment: "center" };
-          if (c.export === false || c.export === "skip")
-            return { text: "", alignment: "center" };
-          return { text: row[c.key] ?? "", alignment: "center" };
-        })
+        colsForPdf.map((c) => ({
+          text: row[c.key] ?? "",
+          alignment: "center",
+        }))
       ),
     ];
 
@@ -187,27 +138,23 @@ export default function ReportExport() {
           alignment: "center",
           margin: [0, 0, 0, 8],
         },
-        {
-          table: { headerRows: 1, body },
-          layout: "lightHorizontalLines",
-        },
+        { table: { headerRows: 1, body }, layout: "lightHorizontalLines" },
       ],
       styles: {
         header: { fontSize: 16, bold: true },
         tableHeader: { bold: true, fillColor: "#eeeeee" },
       },
-      defaultStyle: { font: "NotoSans" }, // ✅ עברית
+      defaultStyle: { font: "NotoSans" },
       pageMargins: [30, 30, 30, 30],
     };
 
-    pdfMake.createPdf(docDefinition).open(); // preview
+    pdfMake.createPdf(docDefinition).open();
   };
 
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-slate-700">יצוא / הדפסה</span>
 
-      {/* Excel */}
       <button
         onClick={exportExcel}
         className="px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1"
@@ -215,7 +162,6 @@ export default function ReportExport() {
         <FileSpreadsheet size={16} /> Excel
       </button>
 
-      {/* PDF להורדה */}
       <button
         onClick={exportPdf}
         className="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 inline-flex items-center gap-1"
@@ -223,7 +169,6 @@ export default function ReportExport() {
         <FileText size={16} /> PDF
       </button>
 
-      {/* PDF לתצוגה לפני הדפסה */}
       <button
         onClick={previewPdf}
         className="px-3 py-1 rounded bg-orange-600 text-white hover:bg-orange-700 inline-flex items-center gap-1"
@@ -234,9 +179,6 @@ export default function ReportExport() {
   );
 }
 
-/**
- * פונקציות עזר
- */
 function sanitize(s) {
   return String(s).replace(/[\\/:*?"<>|]+/g, "_");
 }
