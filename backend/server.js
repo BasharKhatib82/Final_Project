@@ -25,7 +25,7 @@ import reportsRouter from "./routes/reportsRoutes.js";
 dotenv.config();
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: "10mb" }));
 
 // הגדרות CORS
 app.use(cors());

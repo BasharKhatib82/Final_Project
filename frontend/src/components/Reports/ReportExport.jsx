@@ -19,15 +19,19 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
   const { title, columns, filteredRows } = useReport();
 
   /** הורדת קובץ (Excel / PDF) */
-  const download = async (format = "xlsx") => {
+  const download = async (format) => {
     try {
       const res = await axios.post(
         `${apiBase}/reports/download`,
         { title, columns, rows: filteredRows, format },
-        { responseType: "blob", withCredentials: true }
+        {
+          withCredentials: true,
+          responseType: "blob", // 🔹 חשוב! אחרת נקבל 500
+          headers: { "Content-Type": "application/json" },
+        }
       );
 
-      // הורדה מקומית
+      // יצירת URL לקובץ והורדה
       const blob = new Blob([res.data], {
         type:
           format === "pdf"
@@ -35,14 +39,14 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
             : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${title}.${format}`;
-      a.click();
-      window.URL.revokeObjectURL(url);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `${title}.${format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
     } catch (err) {
-      console.error("❌ Download failed:", err);
-      alert("שגיאה ביצוא הקובץ");
+      console.error("Download failed:", err.response?.data || err.message);
     }
   };
 
