@@ -40,7 +40,7 @@ export default function ReportExport() {
     const day = String(d.getDate()).padStart(2, "0");
     const hh = String(d.getHours()).padStart(2, "0");
     const mm = String(d.getMinutes()).padStart(2, "0");
-    return `[${y}-${m}-${day}]_[${hh}:${mm}]`;
+    return `${hh}:${mm} - ${day}/${m}/${y}`;
   };
 
   /** יצוא לאקסל */
@@ -68,7 +68,7 @@ export default function ReportExport() {
     });
 
     const buf = await wb.xlsx.writeBuffer();
-    const filename = `${sanitize(title)}_${nowStamp()}.xlsx`;
+    const filename = `${sanitize(title)} ${nowStamp()}.xlsx`;
     saveAs(new Blob([buf]), filename);
   };
 
@@ -108,7 +108,7 @@ export default function ReportExport() {
       pageMargins: [30, 30, 30, 30],
     };
 
-    const filename = `${sanitize(title)}_${nowStamp()}.pdf`;
+    const filename = `${sanitize(title)} ${nowStamp()}.pdf`;
     pdfMake.createPdf(docDefinition).download(filename);
   };
 
