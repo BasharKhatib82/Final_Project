@@ -26,6 +26,8 @@ import { FileSpreadsheet, FileText, Printer } from "lucide-react";
 // ✅ pdfmake – גרסת דפדפן
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
+console.log("pdfMake:", pdfMake);
+console.log("pdfFonts:", pdfFonts);
 pdfMake.vfs = pdfFonts.pdfMake.vfs;
 
 export default function ReportExport() {
