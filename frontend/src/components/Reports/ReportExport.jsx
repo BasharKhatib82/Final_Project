@@ -2,14 +2,14 @@
  * ==========================================================
  * שם: ReportExport
  * תיאור:
- *   קומפוננטה ליצוא דוחות (Excel / PDF) כולל אפשרות
- *   להדפסה / הצגת תצוגה לפני הדפסה.
+ *   קומפוננטה לייצוא דוחות (Excel / PDF) כולל אפשרות
+ *   הצגת תצוגה לפני הדפסה עם תמיכה מלאה בעברית (RTL).
  *
  * שימוש:
  *   <ReportExport />
  *
  * פרופסים:
- *   - printTargetRef (useRef לטבלה – לא חובה כבר כאן, אפשר למחוק)
+ *   אין (נשען על useReport)
  *
  * פלט:
  *   כפתורי יצוא (Excel, PDF, Print Preview)
@@ -26,8 +26,16 @@ import { FileSpreadsheet, FileText, Printer } from "lucide-react";
 // ✅ pdfmake – גרסת דפדפן
 import pdfMake from "pdfmake/build/pdfmake";
 import pdfFonts from "pdfmake/build/vfs_fonts";
+import { NotoSansHebrew } from "../../fonts/NotoSansHebrew";
 
-pdfMake.vfs = pdfFonts.vfs;
+// חיבור פונטים
+pdfMake.vfs = { ...pdfFonts.pdfMake.vfs, ...NotoSansHebrew };
+pdfMake.fonts = {
+  NotoSans: {
+    normal: "NotoSansHebrew-Regular.ttf",
+    bold: "NotoSansHebrew-Bold.ttf",
+  },
+};
 
 export default function ReportExport() {
   const { title, columns, filteredRows } = useReport();
@@ -131,13 +139,16 @@ export default function ReportExport() {
           alignment: "center",
           margin: [0, 0, 0, 8],
         },
-        { table: { headerRows: 1, body }, layout: "lightHorizontalLines" },
+        {
+          table: { headerRows: 1, body },
+          layout: "lightHorizontalLines",
+        },
       ],
       styles: {
         header: { fontSize: 16, bold: true },
         tableHeader: { bold: true, fillColor: "#eeeeee" },
       },
-      defaultStyle: { font: "Helvetica" },
+      defaultStyle: { font: "NotoSans" }, // ✅ עברית
       pageMargins: [30, 30, 30, 30],
     };
 
@@ -176,17 +187,20 @@ export default function ReportExport() {
           alignment: "center",
           margin: [0, 0, 0, 8],
         },
-        { table: { headerRows: 1, body }, layout: "lightHorizontalLines" },
+        {
+          table: { headerRows: 1, body },
+          layout: "lightHorizontalLines",
+        },
       ],
       styles: {
         header: { fontSize: 16, bold: true },
         tableHeader: { bold: true, fillColor: "#eeeeee" },
       },
-      defaultStyle: { font: "Helvetica" },
+      defaultStyle: { font: "NotoSans" }, // ✅ עברית
       pageMargins: [30, 30, 30, 30],
     };
 
-    pdfMake.createPdf(docDefinition).open(); // ⬅️ מציג preview
+    pdfMake.createPdf(docDefinition).open(); // preview
   };
 
   return (
