@@ -44,7 +44,7 @@ import TaskDetails from "./Tasks/TaskDetails";
 function MyRoutes() {
   return (
     <div className="min-h-screen flex flex-col ">
-      {/* Header - גובה קבוע, לא תופס מקום נוסף  */}
+      {/* Header - גובה קבוע, לא תופס מקום נוסף . */}
       <header className="shrink-0">
         <Header />
       </header>
