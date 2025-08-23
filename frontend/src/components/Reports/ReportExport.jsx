@@ -3,7 +3,7 @@
  * שם: ReportExport
  * תיאור:
  *   קומפוננטה לייצוא דוחות ל־Excel ול־PDF כולל תצוגה לפני הדפסה
- *   עם תמיכה מלאה בעברית (NotoSansHebrew).
+ *   עם תמיכה מלאה בעברית (NotoSansHebrew)..
  *
  * שימוש:
  *   <ReportExport />
