@@ -3,7 +3,7 @@ import { useReport } from "./ReportContext";
 import axios from "axios";
 import { Mail, FileSpreadsheet, FileText } from "lucide-react";
 import { validateAndSanitizeEmail } from "../../utils/validateAndSanitizeEmail";
-import Popup from "../common/Popup"; // ✅ שימוש בקומפוננטת פופאפ שלך
+import Popup from "../Tools/Popup";
 
 const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 
