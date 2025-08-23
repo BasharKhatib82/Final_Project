@@ -2,22 +2,33 @@ import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import axios from "axios";
 import { Mail, FileSpreadsheet, FileText } from "lucide-react";
-import { validateAndSanitizeEmail } from "../../utils/validateAndSanitizeEmail"; // ⬅️ הוספה
+import { validateAndSanitizeEmail } from "../../utils/validateAndSanitizeEmail";
+import Popup from "../common/Popup"; // ✅ שימוש בקומפוננטת פופאפ שלך
 
 const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 
 export default function ReportEmail({ apiBase = ENV_API_BASE }) {
   const { title, columns, filteredRows } = useReport();
   const [to, setTo] = useState("");
+  const [popup, setPopup] = useState({
+    show: false,
+    title: "",
+    message: "",
+    mode: "",
+  });
 
   const send = async (format = "xlsx") => {
     if (!to) {
-      alert('נא להזין כתובת דוא"ל');
+      setPopup({
+        show: true,
+        title: "שגיאה",
+        message: 'נא להזין כתובת דוא"ל',
+        mode: "error",
+      });
       return;
     }
 
     try {
-      // ✅ בדיקה + ניקוי לפני השליחה
       const safeEmail = validateAndSanitizeEmail(to);
 
       await axios.post(
@@ -25,10 +36,21 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
         { title, columns, rows: filteredRows, to: safeEmail, format },
         { withCredentials: true }
       );
-      alert("נשלח!");
+
+      setPopup({
+        show: true,
+        title: "הצלחה",
+        message: "✅ הדוח נשלח בהצלחה למייל",
+        mode: "success",
+      });
     } catch (e) {
       console.error("Email send failed:", e?.response?.data || e.message);
-      alert(e.message || "שגיאה בשליחה");
+      setPopup({
+        show: true,
+        title: "שגיאה",
+        message: e.message || "אירעה שגיאה בשליחה",
+        mode: "error",
+      });
     }
   };
 
@@ -55,6 +77,23 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
       >
         <FileText size={16} /> PDF
       </button>
+
+      {/* ✅ חלון פופאפ */}
+      {popup.show && (
+        <Popup
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
+          onClose={() =>
+            setPopup({
+              show: false,
+              title: "",
+              message: "",
+              mode: "",
+            })
+          }
+        />
+      )}
     </div>
   );
 }
