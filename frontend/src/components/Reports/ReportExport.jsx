@@ -15,7 +15,7 @@ import React from "react";
 import { useReport } from "./ReportContext";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
-import { FileSpreadsheet, FileText, Printer } from "lucide-react";
+import { FileSpreadsheet, FileText } from "lucide-react";
 
 import pdfMake from "pdfmake/build/pdfmake";
 import { vfs as hebrewFonts } from "../../fonts/NotoSansHebrew"; //  מייבא את הגופן
@@ -40,7 +40,7 @@ export default function ReportExport() {
     const day = String(d.getDate()).padStart(2, "0");
     const hh = String(d.getHours()).padStart(2, "0");
     const mm = String(d.getMinutes()).padStart(2, "0");
-    return `${y}-${m}-${day}_${hh}-${mm}`;
+    return `${y}-${m}-${day}_${hh}:${mm}`;
   };
 
   /** יצוא לאקסל */
@@ -153,7 +153,7 @@ export default function ReportExport() {
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-slate-700">יצוא / הדפסה</span>
+      <span className="text-sm text-slate-700">יצוא קובץ</span>
 
       <button
         onClick={exportExcel}
