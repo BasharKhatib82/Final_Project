@@ -168,13 +168,6 @@ export default function ReportExport() {
       >
         <FileText size={16} /> PDF
       </button>
-
-      <button
-        onClick={previewPdf}
-        className="px-3 py-1 rounded bg-orange-600 text-white hover:bg-orange-700 inline-flex items-center gap-1"
-      >
-        <Printer size={16} /> הדפסה
-      </button>
     </div>
   );
 }
