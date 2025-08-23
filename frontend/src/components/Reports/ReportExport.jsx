@@ -18,7 +18,7 @@ import { saveAs } from "file-saver";
 import { FileSpreadsheet, FileText, Printer } from "lucide-react";
 
 import pdfMake from "pdfmake/build/pdfmake";
-import { vfs as hebrewFonts } from "../fonts/NotoSansHebrew"; //  מייבא את הגופן
+import { vfs as hebrewFonts } from "../../fonts/NotoSansHebrew"; //  מייבא את הגופן
 
 // מגדירים ל־pdfmake להשתמש בגופן
 pdfMake.vfs = hebrewFonts;
