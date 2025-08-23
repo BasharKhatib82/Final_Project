@@ -1,9 +1,11 @@
-// backend/routes/reportsRoutes.js
 import express from "express";
-import { generateExcel, generatePdf } from "../utils/reports.generator.js";
+import fs from "fs";
+import {
+  generateExcelBuffer,
+  generatePdfFile,
+} from "../utils/reports.generator.js";
 import { sendReportEmail } from "../utils/reports.mailer.js";
 import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
-import fs from "fs";
 
 const router = express.Router();
 
@@ -35,46 +37,60 @@ router.post("/download", async (req, res) => {
 
   try {
     const { title, columns, rows, format = "xlsx" } = req.body;
-    let result;
 
-    if (format === "xlsx")
-      result = await generateExcel({ title, columns, rows });
-    else if (format === "pdf")
-      result = await generatePdf({ title, columns, rows });
-    else return res.status(400).json({ error: "פורמט לא נתמך" });
+    if (format === "xlsx") {
+      const buffer = await generateExcelBuffer({ title, columns, rows });
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${title}.xlsx"`
+      );
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+      return res.send(Buffer.from(buffer));
+    }
 
-    res.download(result.filePath, result.filename, (err) => {
-      if (err) console.error("❌ error sending file:", err);
-      // מחיקת הקובץ אחרי שליחה
-      fs.unlink(result.filePath, () => {});
-    });
+    if (format === "pdf") {
+      const { filePath, filename } = await generatePdfFile({
+        title,
+        columns,
+        rows,
+      });
+      return res.download(filePath, filename, () =>
+        fs.unlink(filePath, () => {})
+      );
+    }
+
+    res.status(400).json({ error: "פורמט לא נתמך" });
   } catch (err) {
     console.error("❌ download failed", err);
     res.status(500).json({ error: "כשל בהורדת הדוח" });
   }
 });
 
-// 🖨️ הצגת PDF בחלון Preview (להדפסה)
+// 🖨️ תצוגת PDF בחלון (Preview)
 router.post("/preview", async (req, res) => {
   if (!validateReportInput(req, res)) return;
 
   try {
     const { title, columns, rows } = req.body;
-    const { filePath, filename } = await generatePdf({ title, columns, rows });
+    const { filePath, filename } = await generatePdfFile({
+      title,
+      columns,
+      rows,
+    });
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
-    res.sendFile(filePath, (err) => {
-      // מוחקים את הקובץ אחרי שליחה
-      fs.unlink(filePath, () => {});
-    });
+    res.sendFile(filePath, () => fs.unlink(filePath, () => {}));
   } catch (err) {
     console.error("❌ preview failed", err);
     res.status(500).json({ error: "כשל ביצירת תצוגת PDF" });
   }
 });
 
-// 📩 שליחת דוח למייל (Excel / PDF)
+// 📩 שליחת דוח במייל
 router.post("/send-email", async (req, res) => {
   if (!validateReportInput(req, res)) return;
 
@@ -85,11 +101,10 @@ router.post("/send-email", async (req, res) => {
       return res.status(400).json({ ok: false, error: "חסר יעד לשליחה (to)" });
     }
 
-    // ✅ ולידציה + ניקוי כתובת מייל
     let safeTo;
     try {
       safeTo = validateAndSanitizeEmail(to);
-    } catch (err) {
+    } catch {
       return res.status(400).json({ ok: false, error: "כתובת מייל לא חוקית" });
     }
 

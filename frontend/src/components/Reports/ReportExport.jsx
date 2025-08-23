@@ -18,7 +18,7 @@ const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 export default function ReportExport({ apiBase = ENV_API_BASE }) {
   const { title, columns, filteredRows } = useReport();
 
-  /** הורדת קובץ (Excel / PDF) */
+  /** 📥 הורדת קובץ (Excel / PDF) */
   const download = async (format) => {
     try {
       const res = await axios.post(
@@ -26,7 +26,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         { title, columns, rows: filteredRows, format },
         {
           withCredentials: true,
-          responseType: "blob", // 🔹 חשוב! אחרת נקבל 500
+          responseType: "blob", // 🔹 חובה כדי לקבל את הקובץ
           headers: { "Content-Type": "application/json" },
         }
       );
@@ -50,19 +50,23 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
     }
   };
 
-  /** תצוגה לפני הדפסה */
+  /** 🖨️ תצוגה לפני הדפסה (Preview PDF) */
   const previewPdf = () => {
     const form = document.createElement("form");
     form.method = "POST";
     form.action = `${apiBase}/reports/preview`;
     form.target = "_blank";
 
-    const input = document.createElement("input");
-    input.type = "hidden";
-    input.name = "payload";
-    input.value = JSON.stringify({ title, columns, rows: filteredRows });
+    // 🔹 שליחת הנתונים כשדות JSON רגילים (לא payload אחד)
+    const data = { title, columns, rows: filteredRows };
+    for (const [key, value] of Object.entries(data)) {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = key;
+      input.value = JSON.stringify(value); // השרת יקבל כ־req.body
+      form.appendChild(input);
+    }
 
-    form.appendChild(input);
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
