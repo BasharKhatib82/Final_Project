@@ -1,3 +1,26 @@
+/**
+ * ==========================================================
+ * שם: ReportEmail
+ * תיאור:
+ *   קומפוננטה לשליחת דוח במייל בפורמט Excel או PDF.
+ *   הקומפוננטה מציגה שדה להזנת כתובת מייל ושני כפתורים
+ *   לשליחת הקובץ הרצוי.
+ *
+ * שימוש:
+ *   <ReportEmail apiBase="https://api.domain.com" />
+ *
+ * פרופסים:
+ *   - apiBase (string): כתובת בסיס ל־API (ברירת מחדל: ENV_API_BASE)
+ *
+ * סטייט:
+ *   - to (string): כתובת מייל להזנה ידנית
+ *   - popup (object): אובייקט להצגת חלון פופאפ {show, title, message, mode}
+ *
+ * פלט:
+ *   UI לשליחת הדוח לכתובת מייל
+ * ==========================================================
+ */
+
 import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import axios from "axios";
@@ -17,6 +40,9 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
     mode: "",
   });
 
+  /**
+   * שליחת דוח לשרת לצורך יצירת קובץ ושליחתו במייל
+   */
   const send = async (format = "xlsx") => {
     if (!to) {
       setPopup({
@@ -29,6 +55,7 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
     }
 
     try {
+      // ✅ ולידציה + ניקוי
       const safeEmail = validateAndSanitizeEmail(to);
 
       await axios.post(
@@ -48,7 +75,7 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
       setPopup({
         show: true,
         title: "שגיאה",
-        message: e.message || "אירעה שגיאה בשליחה",
+        message: e?.response?.data?.error || e.message || "אירעה שגיאה בשליחה",
         mode: "error",
       });
     }

@@ -2,176 +2,92 @@
  * ==========================================================
  * שם: ReportExport
  * תיאור:
- *   קומפוננטה לייצוא דוחות ל־Excel ול־PDF כולל תצוגה לפני הדפסה
- *   עם תמיכה מלאה בעברית (NotoSansHebrew)..
- *
- * שימוש:
- *   <ReportExport />
+ *   קומפוננטה לייצוא דוחות (Excel / PDF / הדפסה - Preview).
+ *   ✅ כל הלוגיקה עוברת לצד שרת בלבד.
  *
  * ==========================================================
  */
 
 import React from "react";
 import { useReport } from "./ReportContext";
-import ExcelJS from "exceljs";
-import { saveAs } from "file-saver";
-import { FileSpreadsheet, FileText } from "lucide-react";
+import { FileSpreadsheet, FileText, Printer } from "lucide-react";
+import axios from "axios";
 
-import pdfMake from "pdfmake/build/pdfmake";
-import { vfs as hebrewFonts } from "../../fonts/NotoSansHebrew"; //  מייבא את הגופן
+const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 
-// מגדירים ל־pdfmake להשתמש בגופן
-pdfMake.vfs = hebrewFonts;
-pdfMake.fonts = {
-  NotoSans: {
-    normal: "NotoSansHebrew-Regular.ttf",
-    bold: "NotoSansHebrew-Bold.ttf",
-  },
-};
-
-export default function ReportExport() {
+export default function ReportExport({ apiBase = ENV_API_BASE }) {
   const { title, columns, filteredRows } = useReport();
 
-  /** חותמת זמן */
-  const nowStamp = () => {
-    const d = new Date();
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    const hh = String(d.getHours()).padStart(2, "0");
-    const mm = String(d.getMinutes()).padStart(2, "0");
-    return `${hh}-${mm} _ ${day}-${m}-${y}`;
-  };
+  /** הורדת קובץ (Excel / PDF) */
+  const download = async (format = "xlsx") => {
+    try {
+      const res = await axios.post(
+        `${apiBase}/reports/download`,
+        { title, columns, rows: filteredRows, format },
+        { responseType: "blob", withCredentials: true }
+      );
 
-  /** יצוא לאקסל */
-  const exportExcel = async () => {
-    const wb = new ExcelJS.Workbook();
-    const ws = wb.addWorksheet("Report");
-
-    const titleRow = ws.addRow([title]);
-    titleRow.font = { size: 14, bold: true };
-    titleRow.alignment = { horizontal: "center" };
-    ws.addRow([]);
-
-    const headers = columns
-      .filter((c) => c.key !== "actions")
-      .map((c) => c.label);
-    const headerRow = ws.addRow(headers);
-    headerRow.font = { bold: true };
-    headerRow.alignment = { horizontal: "center" };
-
-    filteredRows.forEach((row) => {
-      const dataRow = columns
-        .filter((c) => c.key !== "actions")
-        .map((c) => row[c.key] ?? "");
-      ws.addRow(dataRow).alignment = { horizontal: "center" };
-    });
-
-    const buf = await wb.xlsx.writeBuffer();
-    const filename = `${sanitize(title)} ${nowStamp()}.xlsx`;
-    saveAs(new Blob([buf]), filename);
-  };
-
-  /** יצוא ל־PDF */
-  const exportPdf = () => {
-    const colsForPdf = columns.filter((c) => c.key !== "actions");
-
-    const body = [
-      colsForPdf.map((c) => ({
-        text: c.label,
-        style: "tableHeader",
-        alignment: "center",
-      })),
-      ...filteredRows.map((row) =>
-        colsForPdf.map((c) => ({
-          text: row[c.key] ?? "",
-          alignment: "center",
-        }))
-      ),
-    ];
-
-    const docDefinition = {
-      content: [
-        {
-          text: title || "דוח",
-          style: "header",
-          alignment: "center",
-          margin: [0, 0, 0, 8],
-        },
-        { table: { headerRows: 1, body }, layout: "lightHorizontalLines" },
-      ],
-      styles: {
-        header: { fontSize: 16, bold: true },
-        tableHeader: { bold: true, fillColor: "#eeeeee" },
-      },
-      defaultStyle: { font: "NotoSans" },
-      pageMargins: [30, 30, 30, 30],
-    };
-
-    const filename = `${sanitize(title)} ${nowStamp()}.pdf`;
-    pdfMake.createPdf(docDefinition).download(filename);
+      // הורדה מקומית
+      const blob = new Blob([res.data], {
+        type:
+          format === "pdf"
+            ? "application/pdf"
+            : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${title}.${format}`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("❌ Download failed:", err);
+      alert("שגיאה ביצוא הקובץ");
+    }
   };
 
   /** תצוגה לפני הדפסה */
   const previewPdf = () => {
-    const colsForPdf = columns.filter((c) => c.key !== "actions");
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = `${apiBase}/reports/preview`;
+    form.target = "_blank";
 
-    const body = [
-      colsForPdf.map((c) => ({
-        text: c.label,
-        style: "tableHeader",
-        alignment: "center",
-      })),
-      ...filteredRows.map((row) =>
-        colsForPdf.map((c) => ({
-          text: row[c.key] ?? "",
-          alignment: "center",
-        }))
-      ),
-    ];
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = "payload";
+    input.value = JSON.stringify({ title, columns, rows: filteredRows });
 
-    const docDefinition = {
-      content: [
-        {
-          text: title || "דוח",
-          style: "header",
-          alignment: "center",
-          margin: [0, 0, 0, 8],
-        },
-        { table: { headerRows: 1, body }, layout: "lightHorizontalLines" },
-      ],
-      styles: {
-        header: { fontSize: 16, bold: true },
-        tableHeader: { bold: true, fillColor: "#eeeeee" },
-      },
-      defaultStyle: { font: "NotoSans" },
-      pageMargins: [30, 30, 30, 30],
-    };
-
-    pdfMake.createPdf(docDefinition).open();
+    form.appendChild(input);
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
   };
 
   return (
     <div className="flex items-center gap-2">
-      <span className="text-sm text-slate-700">יצוא קובץ</span>
+      <span className="text-sm text-slate-700">יצוא / הדפסה</span>
 
       <button
-        onClick={exportExcel}
+        onClick={() => download("xlsx")}
         className="px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1"
       >
         <FileSpreadsheet size={16} /> Excel
       </button>
 
       <button
-        onClick={exportPdf}
+        onClick={() => download("pdf")}
         className="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 inline-flex items-center gap-1"
       >
         <FileText size={16} /> PDF
       </button>
+
+      <button
+        onClick={previewPdf}
+        className="px-3 py-1 rounded bg-orange-600 text-white hover:bg-orange-700 inline-flex items-center gap-1"
+      >
+        <Printer size={16} /> הדפסה
+      </button>
     </div>
   );
-}
-
-function sanitize(s) {
-  return String(s).replace(/[\\/:*?"<>|]+/g, "_");
 }

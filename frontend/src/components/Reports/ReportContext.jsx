@@ -1,3 +1,4 @@
+// src/components/Reports/ReportContext.jsx
 import React, { createContext, useContext, useMemo, useState } from "react";
 
 const ReportCtx = createContext(null);
@@ -35,19 +36,29 @@ export function ReportProvider({
       } else if (f.type === "date") {
         data = data.filter((r) => formatDateOnly(r[f.name]) === v);
       } else if (f.type === "daterange" && Array.isArray(v)) {
-        const [from, to] = v;
+        const [fromRaw, toRaw] = v;
+        const from = fromRaw ? new Date(fromRaw) : null;
+        const to = toRaw ? new Date(toRaw) : null;
+
         data = data.filter((r) => {
-          const d = formatDateOnly(r[f.name]);
+          const d = new Date(r[f.name]);
+          if (isNaN(d)) return false;
           const ge = from ? d >= from : true;
           const le = to ? d <= to : true;
           return ge && le;
         });
       } else if (f.type === "text") {
-        data = data.filter((r) => String(r[f.name] ?? "").includes(v));
+        data = data.filter((r) =>
+          String(r[f.name] ?? "")
+            .toLowerCase()
+            .normalize("NFKC")
+            .includes(String(v).toLowerCase().normalize("NFKC"))
+        );
       }
     }
 
-    const term = (search || "").toLowerCase().trim();
+    // 🔎 חיפוש חופשי
+    const term = (search || "").toLowerCase().trim().normalize("NFKC");
     if (term) {
       const keys = searchableKeys.length
         ? searchableKeys
@@ -56,6 +67,7 @@ export function ReportProvider({
         keys.some((k) =>
           String(r[k] ?? "")
             .toLowerCase()
+            .normalize("NFKC")
             .includes(term)
         )
       );
@@ -66,7 +78,11 @@ export function ReportProvider({
 
   const total = filteredRows.length;
   const pages = Math.max(1, Math.ceil(total / pageSize));
-  const pageRows = filteredRows.slice((page - 1) * pageSize, page * pageSize);
+  const safePage = Math.min(page, pages); // 🔒 אם עברנו עמוד מעל המותר
+  const pageRows = filteredRows.slice(
+    (safePage - 1) * pageSize,
+    safePage * pageSize
+  );
 
   const value = {
     title,
@@ -77,7 +93,7 @@ export function ReportProvider({
     setFilter,
     search,
     setSearch,
-    page,
+    page: safePage,
     setPage,
     pages,
     filteredRows,

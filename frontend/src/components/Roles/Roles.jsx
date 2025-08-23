@@ -1,3 +1,4 @@
+// src/components/Roles/Roles.jsx
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -176,13 +177,14 @@ export default function Roles() {
     },
   ];
 
+  // 🔹 רק סינון לפי סטטוס
   const filtersDef = [
     {
       name: "status",
       label: "סטטוס",
       type: "select",
       options: [
-        { value: "active", label: "פעיל" }, // ברירת־מחדל – “פעיל”
+        { value: "active", label: "פעיל" },
         { value: "inactive", label: "לא פעיל" },
         { value: "", label: "כל הסטטוסים" },
       ],
