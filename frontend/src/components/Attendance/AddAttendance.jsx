@@ -30,18 +30,21 @@ const AddAttendance = () => {
   const specialStatuses = ["חופשה", "מחלה", "היעדרות"];
   const isSpecialStatus = specialStatuses.includes(form.status);
 
+  // ✅ טעינת עובדים פעילים בלבד
   useEffect(() => {
     axios
       .get(`${api}/users/active`, { withCredentials: true })
       .then((res) => {
-        if (res.data.Status) setUsers(res.data.Result);
-        else
+        if (res.data.Status) {
+          setUsers(res.data.Result || []);
+        } else {
           setPopupData({
             show: true,
             title: "שגיאה",
-            message: "שגיאה בטעינת עובדים",
+            message: res.data.Error || "שגיאה בטעינת עובדים",
             mode: "error",
           });
+        }
       })
       .catch(() =>
         setPopupData({
@@ -67,6 +70,7 @@ const AddAttendance = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // ✅ בדיקות חובה
     const requiredFields = ["user_id", "date", "status"];
     for (let field of requiredFields) {
       if (!form[field]) {
@@ -89,7 +93,7 @@ const AddAttendance = () => {
       });
     }
 
-    // פופאפ אישור לפני שמירה
+    // ✅ פופאפ אישור
     setPopupData({
       show: true,
       title: "אישור הוספת נוכחות",
@@ -100,15 +104,13 @@ const AddAttendance = () => {
 
   const confirmAdd = () => {
     axios
-      .post(`${api}/attendance/add`, form, {
-        withCredentials: true,
-      })
+      .post(`${api}/attendance/add`, form, { withCredentials: true })
       .then((res) => {
         if (res.data.Status) {
           setPopupData({
             show: true,
             title: "הצלחה",
-            message: "הנוכחות נוספה בהצלחה",
+            message: res.data.Message || "הנוכחות נוספה בהצלחה",
             mode: "success",
           });
         } else {
@@ -140,6 +142,7 @@ const AddAttendance = () => {
           הוספת רישום נוכחות
         </h2>
 
+        {/* בחירת עובד */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">
             בחר עובד
@@ -148,7 +151,7 @@ const AddAttendance = () => {
             name="user_id"
             value={form.user_id}
             onChange={handleChange}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
           >
             <option value="">-- בחר עובד --</option>
             {users.map((user) => (
@@ -159,6 +162,7 @@ const AddAttendance = () => {
           </select>
         </div>
 
+        {/* תאריך */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">תאריך</label>
           <input
@@ -167,17 +171,18 @@ const AddAttendance = () => {
             value={form.date}
             onChange={handleChange}
             max={new Date().toISOString().split("T")[0]}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
+        {/* סטטוס */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">סטטוס</label>
           <select
             name="status"
             value={form.status}
             onChange={handleChange}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 bg-white"
           >
             <option value="נוכח">נוכח</option>
             <option value="חופשה">חופשה</option>
@@ -186,6 +191,7 @@ const AddAttendance = () => {
           </select>
         </div>
 
+        {/* שעות נוכחות – יוצגו רק אם לא חופשה/מחלה/היעדרות */}
         {!isSpecialStatus && (
           <>
             <div>
@@ -197,7 +203,7 @@ const AddAttendance = () => {
                 name="check_in"
                 value={form.check_in}
                 onChange={handleChange}
-                className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
               />
             </div>
 
@@ -210,12 +216,13 @@ const AddAttendance = () => {
                 name="check_out"
                 value={form.check_out}
                 onChange={handleChange}
-                className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
               />
             </div>
           </>
         )}
 
+        {/* הערות */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">הערות</label>
           <textarea
@@ -223,17 +230,19 @@ const AddAttendance = () => {
             value={form.notes}
             onChange={handleChange}
             rows="2"
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none"
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 resize-none"
             placeholder="הזן הערה (אופציונלי)..."
           />
         </div>
 
+        {/* כפתורים */}
         <div className="flex justify-around pt-4">
           <AddSaveButton label="שמור רישום" />
           <ExitButton label="ביטול" linkTo="/dashboard/attendance" />
         </div>
       </form>
 
+      {/* פופאפ */}
       {popupData.show && (
         <Popup
           title={popupData.title}
