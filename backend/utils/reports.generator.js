@@ -1,24 +1,28 @@
-// backend/utils/reports.generator.js
 import ExcelJS from "exceljs";
 import PdfPrinter from "pdfmake";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import fixHebrewText from "./fixHebrewText.js"; // 👈 ייבוא נכון
+import fixHebrewText from "./fixHebrewText.js"; // 👈 תמיכה בעברית
 
+/**
+ * יוצר שם קובץ בטוח, כולל תמיכה בעברית
+ */
 function sanitizeFilename(s) {
   if (!s || typeof s !== "string") return "report";
 
-  // מנקים תווים אסורים לחלוטין (Windows / Linux / Mac)
+  // מחליף תווים אסורים במקף תחתון
   let safe = s.replace(/[\\/:*?"<>|]+/g, "_").trim();
 
-  // אם אחרי הניקוי יצא ריק – נחזיר את המקור כמו שהוא (גם אם בעברית),
-  // אחרת ניפול ל-"report"
+  // אם יצא ריק → מחזירים את המקור (בעברית למשל)
   if (!safe) safe = s.trim();
 
   return safe || "report";
 }
 
+/**
+ * מחזיר חותמת זמן: 12-45 24-08-2025
+ */
 function stamp() {
   const d = new Date();
   const y = d.getFullYear();
@@ -85,9 +89,9 @@ export async function generateExcel({ title, columns, rows }) {
 // ✅ PDF
 export async function generatePdf({ title, columns, rows }) {
   const fonts = {
-    DejaVuSans: {
-      normal: path.resolve("public/fonts/DejaVuSans.ttf"),
-      bold: path.resolve("public/fonts/DejaVuSans-Bold.ttf"),
+    OpenSans: {
+      normal: path.resolve("public/fonts/Open-Sans-Hebrew-Bold.ttf"),
+      bold: path.resolve("public/fonts/Open-Sans-Hebrew-Bold.ttf"),
     },
   };
   const printer = new PdfPrinter(fonts);
@@ -148,7 +152,7 @@ export async function generatePdf({ title, columns, rows }) {
       tableHeader: { bold: true, fillColor: "#eeeeee" },
     },
     defaultStyle: {
-      font: "DejaVuSans",
+      font: "OpenSans",
       alignment: "right",
       fontSize: 10,
     },
