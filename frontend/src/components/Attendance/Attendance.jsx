@@ -62,24 +62,57 @@ export default function Attendance() {
       .catch((err) => console.error("שגיאה בטעינת עובדים:", err));
   };
 
+  // 🟢 פורמט תאריך קצר
+  const formatDate = (dateStr) =>
+    dateStr ? new Date(dateStr).toISOString().split("T")[0] : "-";
+
+  // 🟢 פורמט שעה
+  const formatTime = (timeStr) => (timeStr ? timeStr.slice(0, 5) : "-");
+
+  // 🟢 עיצוב צבעוני לסטטוס
+  const renderStatus = (status) => {
+    let color = "text-blue-800";
+    if (status === "נוכח") color = "text-green-600 font-semibold";
+    else if (status === "היעדרות") color = "text-red-600 font-semibold";
+    return <span className={color}>{status}</span>;
+  };
+
   // 🟢 עמודות טבלה
   const columns = [
-    { key: "date", label: "תאריך", export: (r) => r.date?.split("T")[0] },
+    { key: "date", label: "תאריך", render: (r) => formatDate(r.date) },
     {
       key: "user_id",
       label: "שם עובד",
-      export: (r) => {
+      render: (r) => {
         const u = users.find((x) => x.user_id === r.user_id);
         return u ? `${u.first_name} ${u.last_name}` : "לא ידוע";
       },
     },
-    { key: "check_in", label: "כניסה", export: (r) => r.check_in || "-" },
-    { key: "check_out", label: "יציאה", export: (r) => r.check_out || "-" },
-    { key: "status", label: "סטטוס", export: (r) => r.status },
-    { key: "notes", label: "הערות", export: (r) => r.notes || "-" },
+    { key: "check_in", label: "כניסה", render: (r) => formatTime(r.check_in) },
+    {
+      key: "check_out",
+      label: "יציאה",
+      render: (r) => formatTime(r.check_out),
+    },
+    { key: "status", label: "סטטוס", render: (r) => renderStatus(r.status) },
+    { key: "notes", label: "הערות", render: (r) => r.notes || "-" },
+    {
+      key: "actions",
+      label: "פעולות",
+      render: (r) => (
+        <button
+          onClick={() =>
+            navigate(`/dashboard/edit_attendance/${r.attendance_id}`)
+          }
+          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+        >
+          עריכה
+        </button>
+      ),
+    },
   ];
 
-  // 🟢 פילטרים (מגדירים פעם אחת – ReportFilters עושה את השאר)
+  // 🟢 פילטרים
   const filtersDef = [
     {
       name: "status",
@@ -110,7 +143,7 @@ export default function Attendance() {
     {
       name: "date",
       label: "טווח תאריכים",
-      type: "daterange", // 🟢 נתמך ב־ReportFilters
+      type: "daterange",
     },
   ];
 
@@ -124,7 +157,7 @@ export default function Attendance() {
           columns={columns}
           rows={attendance}
           filtersDef={filtersDef}
-          searchableKeys={["status", "notes"]}
+          searchableKeys={["status", "notes", "user_id"]} // 🔍 נוסיף גם שם עובד
           pageSize={25}
           emailApiBase={api}
           addButton={
@@ -134,8 +167,8 @@ export default function Attendance() {
             />
           }
           defaultFilters={{}}
-          searchPlaceholder="חיפוש לפי סטטוס או הערה..."
-          filtersVariant="inline" // אפשר גם "block" אם רוצים שהפילטרים יהיו מתחת אחד לשני
+          searchPlaceholder="חיפוש לפי שם או סטטוס..."
+          filtersVariant="inline"
         />
       )}
     </div>
