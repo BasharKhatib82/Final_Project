@@ -107,7 +107,7 @@ router.post("/add", verifyToken, async (req, res) => {
     const hash = await bcrypt.hash(password, 10);
     const sql = `
       INSERT INTO users 
-      (user_id, first_name, last_name, phone_number, email, role_id, password, last_password_change, notes, is_active) 
+      (user_id, first_name, last_name, phone_number, email, role_id, password, last_password_change, notes, active) 
       VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
     `;
 
@@ -142,15 +142,8 @@ router.post("/add", verifyToken, async (req, res) => {
 // עדכון משתמש
 router.put("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-  const {
-    first_name,
-    last_name,
-    phone_number,
-    email,
-    role_id,
-    notes,
-    is_active,
-  } = req.body;
+  const { first_name, last_name, phone_number, email, role_id, notes, active } =
+    req.body;
 
   if (!first_name || !last_name || !email || !role_id) {
     return res.status(400).json({ success: false, message: "שדות חובה חסרים" });
@@ -160,7 +153,7 @@ router.put("/:id", verifyToken, async (req, res) => {
     const sql = `
       UPDATE users SET
         first_name = ?, last_name = ?, phone_number = ?, email = ?,
-        role_id = ?, notes = ?, is_active = ?
+        role_id = ?, notes = ?, active = ?
       WHERE user_id = ?
     `;
 
@@ -171,7 +164,7 @@ router.put("/:id", verifyToken, async (req, res) => {
       email,
       role_id,
       notes || null,
-      is_active,
+      active,
       id,
     ]);
 
@@ -193,7 +186,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
 
   try {
     const [result] = await db.query(
-      "UPDATE users SET is_active = 0 WHERE user_id = ?",
+      "UPDATE users SET active = 0 WHERE user_id = ?",
       [id]
     );
 
@@ -212,7 +205,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
 // שליפת משתמשים פעילים
 router.get("/active", verifyToken, async (req, res) => {
   try {
-    const [results] = await db.query("SELECT * FROM users WHERE is_active = 1");
+    const [results] = await db.query("SELECT * FROM users WHERE active = 1");
     res.json({ success: true, Result: results });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמשים פעילים:", err);
@@ -223,7 +216,7 @@ router.get("/active", verifyToken, async (req, res) => {
 // שליפת משתמשים לא פעילים
 router.get("/inactive", verifyToken, async (req, res) => {
   try {
-    const [results] = await db.query("SELECT * FROM users WHERE is_active = 0");
+    const [results] = await db.query("SELECT * FROM users WHERE active = 0");
     res.json({ success: true, Result: results });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמשים לא פעילים:", err);

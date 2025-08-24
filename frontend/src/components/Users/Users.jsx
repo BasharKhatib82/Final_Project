@@ -6,18 +6,18 @@ import NavigationButton from "../Buttons/NavigationButton";
 import ReportView from "../Reports/ReportView";
 
 const api = process.env.REACT_APP_API_URL;
-const asBool = (v) => v === true || v === 1 || v === "1";
 const isActive = (v) => v === true || v === 1 || v === "1";
 
 // --- מיפוי משתמש ---
 const mapUser = (u, roles = []) => {
-  const role = roles.find((r) => r.role_id === u.role_id);
+  const role = roles.find((r) => String(r.role_id) === String(u.role_id));
   return {
     ...u,
-    is_active: isActive(u.is_active),
-    full_name: `${u.first_name} ${u.last_name}`,
+    active: isActive(u.active),
+    first_name: u.first_name || "לא ידוע",
+    last_name: u.last_name || "לא ידוע",
     role_name: role ? role.role_name : "לא ידוע",
-    status_human: isActive(u.is_active) ? "פעיל" : "לא פעיל",
+    status_human: isActive(u.active) ? "פעיל" : "לא פעיל",
   };
 };
 
@@ -108,7 +108,7 @@ export default function Users() {
     axios
       .put(
         `${api}/users/delete/${user_id}`,
-        { is_active: 0 },
+        { active: 0 },
         { withCredentials: true }
       )
       .then(() => {
@@ -137,9 +137,9 @@ export default function Users() {
     { key: "role_name", label: "תפקיד", export: (u) => u.role_name },
     { key: "email", label: "אימייל", export: (u) => u.email },
     {
-      key: "is_active",
+      key: "active",
       label: "סטטוס",
-      render: (u) => renderCheckActive(u.is_active),
+      render: (u) => renderCheckActive(u.active),
       exportLabel: "status_human",
     },
     {
@@ -153,7 +153,7 @@ export default function Users() {
           >
             עריכה
           </button>
-          {u.is_active && (
+          {u.active && (
             <button
               onClick={() =>
                 setPopup({
@@ -177,7 +177,7 @@ export default function Users() {
 
   const filtersDef = [
     {
-      name: "is_active",
+      name: "active",
       label: "סטטוס",
       type: "select",
       options: [
@@ -200,7 +200,7 @@ export default function Users() {
     },
   ];
 
-  const defaultFilters = { is_active: "true" };
+  const defaultFilters = { active: "true" };
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
