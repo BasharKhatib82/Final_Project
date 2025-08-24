@@ -93,7 +93,7 @@ export async function generatePdf({ title, columns, rows }) {
 
   const headerRow = exportableCols
     .map((c) => ({
-      text: fixHebrewText(c.label),
+      text: c.label,
       style: "tableHeader",
       alignment: "center",
     }))

@@ -4,7 +4,6 @@ import fs from "fs";
 import { generateExcel, generatePdf } from "../utils/reports.generator.js";
 import { sendReportEmail } from "../utils/reports.mailer.js";
 import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
-import { makeSafeFilename } from "../utils/safeFilename.js";
 
 const router = express.Router();
 

@@ -38,6 +38,18 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         }
       );
 
+      // ברירת מחדל לשם קובץ
+      let filename = `report.${format}`;
+
+      // ניסיון לחלץ שם אמיתי מהשרת (Content-Disposition)
+      const disposition = res.headers["content-disposition"];
+      if (disposition) {
+        const match = disposition.match(/filename\*=UTF-8''(.+)/);
+        if (match && match[1]) {
+          filename = decodeURIComponent(match[1]);
+        }
+      }
+
       // יצירת URL לקובץ והורדה
       const blob = new Blob([res.data], {
         type:
@@ -48,7 +60,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", `${title}.${format}`);
+      link.download = filename; // 👈 עכשיו השם מהשרת עם תאריך ושעה
       document.body.appendChild(link);
       link.click();
       link.remove();
