@@ -1,5 +1,6 @@
 import express from "express";
 import fs from "fs";
+import path from "path";
 import { generateExcel, generatePdf } from "../utils/reports.generator.js";
 import { sendReportEmail } from "../utils/reports.mailer.js";
 import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
@@ -39,9 +40,11 @@ router.post("/download", async (req, res) => {
 
     if (format === "xlsx") {
       const buffer = await generateExcel({ title, columns, rows });
+
+      // שימוש בקידוד בטוח
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${safeFilename}"`
+        `attachment; filename*=UTF-8''${encodeURIComponent(safeFilename)}`
       );
       res.setHeader(
         "Content-Type",
@@ -76,7 +79,10 @@ router.post("/preview", async (req, res) => {
     const safeFilename = makeSafeFilename(title, "pdf");
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `inline; filename="${safeFilename}"`);
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename*=UTF-8''${encodeURIComponent(safeFilename)}`
+    );
     res.sendFile(filePath, () => fs.unlink(filePath, () => {}));
   } catch (err) {
     console.error("❌ preview failed", err);
