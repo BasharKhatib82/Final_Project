@@ -82,30 +82,40 @@ export async function generateExcel({ title, columns, rows }) {
 }
 
 /**
- * ✅ יצירת PDF כקובץ זמני
+ * ✅ יצירת PDF כקובץ זמני (תמיכה בעברית RTL)
  */
 export async function generatePdf({ title, columns, rows }) {
   const fonts = {
-    DejaVuSans: {
+    DejaVu: {
       normal: path.resolve(__dirname, "../fonts/DejaVuSans.ttf"),
       bold: path.resolve(__dirname, "../fonts/DejaVuSans-Bold.ttf"),
     },
   };
   const printer = new PdfPrinter(fonts);
 
+  // פונקציה לתיקון כיוון עברית
+  function fixRTL(text) {
+    if (!text) return "";
+    return String(text)
+      .split(" ")
+      .reverse()
+      .join(" ");
+  }
+
   const exportableCols = columns.filter(
     (c) => c.key !== "actions" && c.export !== false
   );
 
-  // 🔹 הופכים סדר העמודות ל־RTL
+  // כותרות טבלה (מימין לשמאל)
   const headerRow = exportableCols
     .map((c) => ({
-      text: c.label,
+      text: fixRTL(c.label),
       style: "tableHeader",
       alignment: "center",
     }))
     .reverse();
 
+  // תוכן השורות
   const bodyRows = rows.map((r) =>
     exportableCols
       .map((c) => {
@@ -114,12 +124,12 @@ export async function generatePdf({ title, columns, rows }) {
         else if (typeof c.export === "function") val = c.export(r);
         else val = toExportValue(r[c.key]);
 
-        // טיפול בתווי ✓✗ → נשתמש ב־✔ ✖
+        // המרה של ✓ ✗ → תווים ברורים
         if (val === "✓") val = "✔";
         if (val === "✗") val = "✖";
 
         return {
-          text: String(val),
+          text: fixRTL(val),
           alignment: "center",
           noWrap: false,
           margin: [2, 2, 2, 2],
@@ -133,7 +143,7 @@ export async function generatePdf({ title, columns, rows }) {
   const docDefinition = {
     content: [
       {
-        text: title || "דוח",
+        text: fixRTL(title || "דוח"),
         style: "header",
         alignment: "center",
         margin: [0, 0, 0, 10],
@@ -148,13 +158,13 @@ export async function generatePdf({ title, columns, rows }) {
       },
     ],
     styles: {
-      header: { fontSize: 12, bold: true },
+      header: { fontSize: 14, bold: true },
       tableHeader: { bold: true, fillColor: "#eeeeee" },
     },
     defaultStyle: {
-      font: "DejaVuSans",
-      alignment: "right", //
-      fontSize: 10,
+      font: "DejaVu",
+      alignment: "right",
+      fontSize: 9,
     },
     pageMargins: [30, 30, 30, 30],
   };
