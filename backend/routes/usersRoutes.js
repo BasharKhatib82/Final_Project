@@ -216,7 +216,7 @@ router.get("/active", verifyToken, async (req, res) => {
               u.notes,
               u.active
        FROM users u
-       LEFT JOIN roles r ON u.role_id = r.role_id
+       LEFT JOIN roles_permissions r ON u.role_id = r.role_id
        WHERE u.active = 1`
     );
     res.json({ success: true, Result: results });
@@ -240,7 +240,7 @@ router.get("/inactive", verifyToken, async (req, res) => {
               u.notes,
               u.active
        FROM users u
-       LEFT JOIN roles r ON u.role_id = r.role_id
+       LEFT JOIN roles_permissions r ON u.role_id = r.role_id
        WHERE u.active = 0`
     );
     res.json({ success: true, Result: results });
@@ -266,7 +266,7 @@ router.get("/:id", verifyToken, async (req, res) => {
               u.notes,
               u.active
        FROM users u
-       LEFT JOIN roles r ON u.role_id = r.role_id
+       LEFT JOIN roles_permissions r ON u.role_id = r.role_id
        WHERE u.user_id = ?`,
       [id]
     );
