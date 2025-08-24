@@ -152,7 +152,7 @@ export async function generatePdf({ title, columns, rows }) {
       tableHeader: { bold: true, fillColor: "#eeeeee" },
     },
     defaultStyle: {
-      font: "NotoSansHebrew",
+      font: fonts.NotoSansHebrew,
       alignment: "right", //
       fontSize: 10,
     },
