@@ -34,7 +34,7 @@ function toExportValue(v) {
 /**
  * ✅ יצירת Excel כ־Buffer (בלי לשמור לדיסק)
  */
-export async function generateExcelBuffer({ title, columns, rows }) {
+export async function generateExcel({ title, columns, rows }) {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Report");
 
