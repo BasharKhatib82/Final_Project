@@ -20,7 +20,7 @@ const mapRole = (r) => ({
   can_access_all_data: asBool(r.can_access_all_data),
   active: isActive(r.active),
 
-  //  שדה בעברית — ישמש גם לייצוא
+  // 👇 ניצור שדה ידידותי בעברית — ישמש גם לייצוא
   status_human: isActive(r.active) ? "פעיל" : "לא פעיל",
 });
 
@@ -208,7 +208,6 @@ export default function Roles() {
       ) : (
         <ReportView
           title="רשימת תפקידים"
-          title_human="רשימת תפקידים"
           columns={columns}
           rows={allRoles}
           filtersDef={filtersDef}

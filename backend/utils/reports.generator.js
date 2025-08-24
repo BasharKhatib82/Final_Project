@@ -119,6 +119,7 @@ export async function generatePdf({ title, columns, rows }) {
         return {
           text: String(val),
           alignment: "center",
+          rtl: true,
           noWrap: false,
           margin: [2, 2, 2, 2],
         };
