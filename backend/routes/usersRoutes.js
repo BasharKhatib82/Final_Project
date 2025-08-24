@@ -202,10 +202,23 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמשים פעילים
+// שליפת משתמשים פעילים עם שם תפקיד
 router.get("/active", verifyToken, async (req, res) => {
   try {
-    const [results] = await db.query("SELECT * FROM users WHERE active = 1");
+    const [results] = await db.query(
+      `SELECT u.user_id,
+              u.first_name,
+              u.last_name,
+              u.phone_number,
+              u.email,
+              u.role_id,
+              r.role_name,           
+              u.notes,
+              u.active
+       FROM users u
+       LEFT JOIN roles r ON u.role_id = r.role_id
+       WHERE u.active = 1`
+    );
     res.json({ success: true, Result: results });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמשים פעילים:", err);
@@ -213,10 +226,23 @@ router.get("/active", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמשים לא פעילים
+// שליפת משתמשים לא פעילים עם שם תפקיד
 router.get("/inactive", verifyToken, async (req, res) => {
   try {
-    const [results] = await db.query("SELECT * FROM users WHERE active = 0");
+    const [results] = await db.query(
+      `SELECT u.user_id,
+              u.first_name,
+              u.last_name,
+              u.phone_number,
+              u.email,
+              u.role_id,
+              r.role_name,          
+              u.notes,
+              u.active
+       FROM users u
+       LEFT JOIN roles r ON u.role_id = r.role_id
+       WHERE u.active = 0`
+    );
     res.json({ success: true, Result: results });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמשים לא פעילים:", err);
@@ -224,14 +250,26 @@ router.get("/inactive", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמש בודד לפי מזהה
+// שליפת משתמש בודד לפי מזהה עם שם תפקיד
 router.get("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [results] = await db.query("SELECT * FROM users WHERE user_id = ?", [
-      id,
-    ]);
+    const [results] = await db.query(
+      `SELECT u.user_id,
+              u.first_name,
+              u.last_name,
+              u.phone_number,
+              u.email,
+              u.role_id,
+              r.role_name,           
+              u.notes,
+              u.active
+       FROM users u
+       LEFT JOIN roles r ON u.role_id = r.role_id
+       WHERE u.user_id = ?`,
+      [id]
+    );
 
     if (results.length === 0) {
       return res.status(404).json({ success: false, message: "משתמש לא נמצא" });

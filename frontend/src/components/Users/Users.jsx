@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
@@ -7,20 +7,6 @@ import ReportView from "../Reports/ReportView";
 
 const api = process.env.REACT_APP_API_URL;
 const isActive = (v) => v === true || v === 1 || v === "1";
-
-// --- מיפוי משתמש ---
-const mapUser = (u, roles = []) => {
-  const role = roles.find((r) => String(r.role_id) === String(u.role_id));
-  return {
-    ...u,
-    active: isActive(u.active ?? u.is_active),
-    first_name: u.first_name || "לא ידוע",
-    last_name: u.last_name || "לא ידוע",
-    role_id: String(u.role_id),
-    role_name: role ? role.role_name : "לא ידוע",
-    status_human: isActive(u.active ?? u.is_active) ? "פעיל" : "לא פעיל",
-  };
-};
 
 const renderCheckActive = (v) => (
   <span className={v ? "text-green-600" : "text-red-500"}>
@@ -30,7 +16,6 @@ const renderCheckActive = (v) => (
 
 export default function Users() {
   const [allUsers, setAllUsers] = useState([]);
-  const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [popup, setPopup] = useState({
     show: false,
@@ -46,37 +31,11 @@ export default function Users() {
       .get(`${api}/auth/check`, { withCredentials: true })
       .then((res) => {
         if (res?.data?.loggedIn && res?.data?.user?.role_id === 1) {
-          fetchRoles().then(fetchUsers);
+          fetchUsers();
         } else navigate("/unauthorized");
       })
       .catch(() => navigate("/unauthorized"));
   }, [navigate]);
-
-  const fetchRoles = () => {
-    return Promise.all([
-      axios.get(`${api}/roles/active`, { withCredentials: true }),
-      axios.get(`${api}/roles/inactive`, { withCredentials: true }),
-    ])
-      .then(([activeRes, inactiveRes]) => {
-        const active = (activeRes?.data?.Roles || []).map((r) => ({
-          ...r,
-          active: true,
-        }));
-        const inactive = (inactiveRes?.data?.Roles || []).map((r) => ({
-          ...r,
-          active: false,
-        }));
-        setRoles([...active, ...inactive]);
-      })
-      .catch(() =>
-        setPopup({
-          show: true,
-          title: "שגיאה",
-          message: "שגיאה בטעינת תפקידים",
-          mode: "error",
-        })
-      );
-  };
 
   const fetchUsers = () => {
     setLoading(true);
@@ -85,12 +44,16 @@ export default function Users() {
       axios.get(`${api}/users/inactive`, { withCredentials: true }),
     ])
       .then(([activeRes, inactiveRes]) => {
-        const active = (activeRes?.data?.Result || []).map((u) =>
-          mapUser(u, roles)
-        );
-        const inactive = (inactiveRes?.data?.Result || []).map((u) =>
-          mapUser(u, roles)
-        );
+        const active = (activeRes?.data?.Result || []).map((u) => ({
+          ...u,
+          active: isActive(u.active),
+          status_human: isActive(u.active) ? "פעיל" : "לא פעיל",
+        }));
+        const inactive = (inactiveRes?.data?.Result || []).map((u) => ({
+          ...u,
+          active: isActive(u.active),
+          status_human: isActive(u.active) ? "פעיל" : "לא פעיל",
+        }));
         setAllUsers([...active, ...inactive]);
       })
       .catch(() =>
@@ -176,14 +139,6 @@ export default function Users() {
     },
   ];
 
-  // 🟢 רשימת תפקידים רק מהמשתמשים שמופיעים כרגע (filteredUsers)
-  // נשתמש ב־useMemo כדי לא לבנות כל פעם מחדש
-  const roleOptionsFromFiltered = useMemo(() => {
-    return [
-      ...new Map(allUsers.map((u) => [String(u.role_id), u.role_name])),
-    ].map(([value, label]) => ({ value, label }));
-  }, [allUsers]);
-
   const filtersDef = [
     {
       name: "active",
@@ -199,8 +154,8 @@ export default function Users() {
       name: "role_id",
       label: "תפקיד",
       type: "select",
-      dynamic: true, //  חדש – יבנה מתוך filteredRows
-      optionLabelKey: "role_name", //  מאיזה שדה לקחת label
+      dynamic: true, // 🟢 יבנה לפי filteredRows
+      optionLabelKey: "role_name",
     },
   ];
 

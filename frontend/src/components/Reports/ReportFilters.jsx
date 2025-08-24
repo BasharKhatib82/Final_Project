@@ -4,7 +4,7 @@ import { useReport } from "./ReportContext";
 import { Filter as FilterIcon } from "lucide-react";
 
 export default function ReportFilters({ variant = "block", showTotal = true }) {
-  const { filtersDef, filters, setFilter, total, filteredRows } = useReport(); // 🟢 נוסיף filteredRows
+  const { filtersDef, filters, setFilter, total, filteredRows } = useReport();
 
   return (
     <div
@@ -22,7 +22,7 @@ export default function ReportFilters({ variant = "block", showTotal = true }) {
           value={filters[f.name]}
           onChange={(v) => setFilter(f.name, v)}
           inline={variant === "inline"}
-          filteredRows={filteredRows} // 🟢 נעביר פנימה
+          filteredRows={filteredRows}
         />
       ))}
 
@@ -47,17 +47,20 @@ function Filter({ def, value, onChange, inline, filteredRows }) {
   // 🟢 אם הפילטר מוגדר dynamic: true – נבנה אפשרויות מהנתונים
   const dynamicOptions = useMemo(() => {
     if (def.type === "select" && def.dynamic && Array.isArray(filteredRows)) {
-      const uniq = [
-        ...new Map(
-          filteredRows.map((row) => [
-            String(row[def.name]),
-            row[def.optionLabelKey || def.name], // נבחר label ידידותי
-          ])
-        ),
-      ];
+      // יוצרים Map ייחודי לפי value
+      const uniq = new Map();
+      filteredRows.forEach((row) => {
+        const value = String(row[def.name] ?? "");
+        const label = row[def.optionLabelKey || def.name] || "לא ידוע"; // טיפול בחסר
+        if (!uniq.has(value)) uniq.set(value, label);
+      });
+
       return [
         { value: "", label: `כל ה${def.label}` },
-        ...uniq.map(([value, label]) => ({ value, label })),
+        ...Array.from(uniq.entries()).map(([value, label]) => ({
+          value,
+          label,
+        })),
       ];
     }
     return def.options || [];
