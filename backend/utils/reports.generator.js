@@ -33,25 +33,47 @@ function toExportValue(v) {
 }
 
 /**
- * ✅ יצירת Excel – מחזיר Buffer + filename
+ * ✅ יצירת Excel – Buffer + filename
  */
 export async function generateExcel({ title, columns, rows }) {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Report");
 
-  ws.addRow([title]).font = { size: 14, bold: true };
+  // כותרת עליונה
+  const titleRow = ws.addRow([title]);
+  titleRow.font = { size: 14, bold: true };
+  titleRow.alignment = { horizontal: "center", vertical: "middle" };
   ws.addRow([]);
 
+  // כותרות טבלה
   const headers = columns
-    .filter((c) => c.key !== "actions")
+    .filter((c) => c.key !== "actions" && c.export !== false)
     .map((c) => c.label);
-  ws.addRow(headers).font = { bold: true };
 
+  const headerRow = ws.addRow(headers);
+  headerRow.font = { bold: true };
+  headerRow.alignment = { horizontal: "center", vertical: "middle" };
+
+  // נתונים
   rows.forEach((r) => {
     const data = columns
-      .filter((c) => c.key !== "actions")
-      .map((c) => toExportValue(r[c.key]));
-    ws.addRow(data);
+      .filter((c) => c.key !== "actions" && c.export !== false)
+      .map((c) =>
+        typeof c.export === "function" ? c.export(r) : toExportValue(r[c.key])
+      );
+    const row = ws.addRow(data);
+    row.alignment = { horizontal: "center", vertical: "middle" };
+  });
+
+  // ✨ התאמת רוחב עמודות לפי התוכן הארוך ביותר
+  ws.columns.forEach((col) => {
+    let maxLength = 10;
+    col.eachCell({ includeEmpty: true }, (cell) => {
+      const val = cell.value ? cell.value.toString() : "";
+      maxLength = Math.max(maxLength, val.length + 2);
+    });
+    col.width = maxLength > 40 ? 40 : maxLength; // הגבלת מקסימום 40
+    col.alignment = { horizontal: "center", vertical: "middle" };
   });
 
   const buffer = await wb.xlsx.writeBuffer();
@@ -71,20 +93,33 @@ export async function generatePdf({ title, columns, rows }) {
   };
   const printer = new PdfPrinter(fonts);
 
-  const colsForPdf = columns.filter((c) => c.key !== "actions");
+  const exportableCols = columns.filter(
+    (c) => c.key !== "actions" && c.export !== false
+  );
+
   const body = [
-    colsForPdf.map((c) => ({
+    exportableCols.map((c) => ({
       text: c.label,
       style: "tableHeader",
       alignment: "center",
     })),
     ...rows.map((r) =>
-      colsForPdf.map((c) => ({
-        text: toExportValue(r[c.key]),
-        alignment: "center",
-      }))
+      exportableCols.map((c) => {
+        const val =
+          typeof c.export === "function"
+            ? c.export(r)
+            : toExportValue(r[c.key]);
+        return {
+          text: val,
+          alignment: "center",
+          noWrap: false, // מאפשר ירידת שורה
+          maxWidth: 150, // הגבלה כדי לא "לשבור" את כל הטבלה
+        };
+      })
     ),
   ];
+
+  const colWidths = exportableCols.map(() => "auto");
 
   const docDefinition = {
     content: [
@@ -94,13 +129,21 @@ export async function generatePdf({ title, columns, rows }) {
         alignment: "center",
         margin: [0, 0, 0, 10],
       },
-      { table: { headerRows: 1, body }, layout: "lightHorizontalLines" },
+      {
+        table: {
+          headerRows: 1,
+          widths: colWidths,
+          body,
+        },
+        layout: "lightHorizontalLines",
+      },
     ],
     styles: {
       header: { fontSize: 16, bold: true },
       tableHeader: { bold: true, fillColor: "#eeeeee" },
     },
     defaultStyle: { font: "NotoSans" },
+    pageMargins: [30, 30, 30, 30],
   };
 
   const filename = `${sanitizeFilename(title)} ${stamp()}.pdf`;
