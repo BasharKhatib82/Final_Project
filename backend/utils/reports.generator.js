@@ -7,11 +7,16 @@ import path from "path";
 import fixHebrewText from "./fixHebrewText.js"; // 👈 ייבוא נכון
 
 function sanitizeFilename(s) {
-  return (
-    String(s)
-      .replace(/[\\/:*?"<>|]+/g, "_")
-      .trim() || "report"
-  );
+  if (!s || typeof s !== "string") return "report";
+
+  // מנקים תווים אסורים לחלוטין (Windows / Linux / Mac)
+  let safe = s.replace(/[\\/:*?"<>|]+/g, "_").trim();
+
+  // אם אחרי הניקוי יצא ריק – נחזיר את המקור כמו שהוא (גם אם בעברית),
+  // אחרת ניפול ל-"report"
+  if (!safe) safe = s.trim();
+
+  return safe || "report";
 }
 
 function stamp() {
