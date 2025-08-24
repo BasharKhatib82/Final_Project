@@ -81,6 +81,20 @@ export async function generateExcel({ title, columns, rows }) {
   return { buffer, filename };
 }
 
+
+// פונקציה שמתקנת טקסט רק אם יש בו עברית
+function fixHebrew(text) {
+  if (!text) return "";
+  const hebrewRegex = /[\u0590-\u05FF]/; // טווח יוניקוד לאותיות עבריות
+  if (!hebrewRegex.test(text)) return String(text); // לא עברית → תחזיר כרגיל
+
+  return String(text)
+    .split(" ")
+    .reverse()
+    .join(" "); // הפוך מילים
+}
+
+
 /**
  * ✅ יצירת PDF כקובץ זמני (תמיכה בעברית RTL)
  */
@@ -93,29 +107,20 @@ export async function generatePdf({ title, columns, rows }) {
   };
   const printer = new PdfPrinter(fonts);
 
-  // פונקציה לתיקון כיוון עברית
-  function fixRTL(text) {
-    if (!text) return "";
-    return String(text)
-      .split(" ")
-      .reverse()
-      .join(" ");
-  }
-
   const exportableCols = columns.filter(
     (c) => c.key !== "actions" && c.export !== false
   );
 
-  // כותרות טבלה (מימין לשמאל)
+  // כותרות טבלה
   const headerRow = exportableCols
     .map((c) => ({
-      text: fixRTL(c.label),
+      text: fixHebrew(c.label),
       style: "tableHeader",
       alignment: "center",
     }))
     .reverse();
 
-  // תוכן השורות
+  // שורות טבלה
   const bodyRows = rows.map((r) =>
     exportableCols
       .map((c) => {
@@ -124,12 +129,12 @@ export async function generatePdf({ title, columns, rows }) {
         else if (typeof c.export === "function") val = c.export(r);
         else val = toExportValue(r[c.key]);
 
-        // המרה של ✓ ✗ → תווים ברורים
+        // טיפול ב־✓✗
         if (val === "✓") val = "✔";
         if (val === "✗") val = "✖";
 
         return {
-          text: fixRTL(val),
+          text: fixHebrew(String(val)),
           alignment: "center",
           noWrap: false,
           margin: [2, 2, 2, 2],
@@ -143,7 +148,7 @@ export async function generatePdf({ title, columns, rows }) {
   const docDefinition = {
     content: [
       {
-        text: fixRTL(title || "דוח"),
+        text: fixHebrew(title || "דוח"),
         style: "header",
         alignment: "center",
         margin: [0, 0, 0, 10],
