@@ -1,6 +1,6 @@
 import ExcelJS from "exceljs";
 import wkhtmltopdf from "wkhtmltopdf";
-import wkhtmltopdfInstaller from "wkhtmltopdf-installer"; 
+import wkhtmltopdfInstaller from "wkhtmltopdf-installer";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -105,13 +105,46 @@ export async function generatePdf({ title, columns, rows }) {
       <head>
         <meta charset="utf-8" />
         <style>
-          body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; }
-          h1 { text-align: center; color: darkblue; margin-bottom: 20px; }
-          table { border-collapse: collapse; width: 100%; }
-          th, td { border: 1px solid #000; padding: 6px; text-align: center; }
-          th { background: #eee; }
-          tr:nth-child(even) td { background: #f9f9f9; }
-        </style>
+  body { 
+    font-family: Arial, sans-serif; 
+    direction: rtl; 
+    padding: 20px; 
+    font-size: 11px;
+    color: #333;
+  }
+
+  h1 { 
+    font-size: 16px; 
+    text-align: center; 
+    color: #2c3e50; 
+    margin-bottom: 20px; 
+  }
+
+  table { 
+    border-collapse: collapse; 
+    width: 100%; 
+    font-size: 10px;
+  }
+
+  th { 
+    background-color: #f2f2f2;   /* 👈 אפור בהיר */
+    font-weight: bold;
+    padding: 8px;
+    border: 1px solid #999;
+    text-align: center;
+  }
+
+  td { 
+    padding: 6px; 
+    border: 1px solid #ccc; 
+    text-align: center; 
+  }
+
+  tr:nth-child(even) td { 
+    background-color: #fafafa;  /* 👈 לבן-אפור ממש עדין */
+  }
+</style>
+
       </head>
       <body>
         <h1>${title}</h1>
