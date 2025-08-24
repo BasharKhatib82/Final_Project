@@ -45,37 +45,34 @@ export async function generateExcel({ title, columns, rows }) {
   titleRow.alignment = { horizontal: "center", vertical: "middle" };
   ws.addRow([]);
 
-  // כותרות טבלה
-  const headers = columns
-    .filter((c) => c.key !== "actions" && c.export !== false)
-    .map((c) => c.label);
-
+  // כותרות
+  const exportableCols = columns.filter(
+    (c) => c.key !== "actions" && c.export !== false
+  );
+  const headers = exportableCols.map((c) => c.label);
   const headerRow = ws.addRow(headers);
   headerRow.font = { bold: true };
   headerRow.alignment = { horizontal: "center", vertical: "middle" };
 
-  // נתונים
+  // שורות
   rows.forEach((r) => {
-    const data = columns
-      .filter((c) => c.key !== "actions" && c.export !== false)
-      .map((c) => {
-        if (typeof c.export === "function") return c.export(r);
-        if (c.export === false) return "";
-        if (c.export != null) return c.export;
-        return toExportValue(r[c.key]);
-      });
+    const data = exportableCols.map((c) => {
+      if (c.exportLabel) return r[c.exportLabel];
+      if (typeof c.export === "function") return c.export(r);
+      return toExportValue(r[c.key]);
+    });
     const row = ws.addRow(data);
     row.alignment = { horizontal: "center", vertical: "middle" };
   });
 
-  // ✨ התאמת רוחב עמודות לפי התוכן הארוך ביותר
+  // התאמת רוחב
   ws.columns.forEach((col) => {
     let maxLength = 10;
     col.eachCell({ includeEmpty: true }, (cell) => {
       const val = cell.value ? cell.value.toString() : "";
       maxLength = Math.max(maxLength, val.length + 2);
     });
-    col.width = maxLength > 40 ? 40 : maxLength; // מקסימום 40
+    col.width = maxLength > 40 ? 40 : maxLength;
     col.alignment = { horizontal: "center", vertical: "middle" };
   });
 
@@ -85,7 +82,7 @@ export async function generateExcel({ title, columns, rows }) {
 }
 
 /**
- * ✅ יצירת PDF כקובץ זמני (pdfmake חייב stream)
+ * ✅ יצירת PDF כקובץ זמני
  */
 export async function generatePdf({ title, columns, rows }) {
   const fonts = {
@@ -109,15 +106,15 @@ export async function generatePdf({ title, columns, rows }) {
     ...rows.map((r) =>
       exportableCols.map((c) => {
         let val;
-        if (typeof c.export === "function") val = c.export(r);
-        else if (c.export === false) val = "";
-        else if (c.export != null) val = c.export;
+        if (c.exportLabel) val = r[c.exportLabel];
+        else if (typeof c.export === "function") val = c.export(r);
         else val = toExportValue(r[c.key]);
 
         return {
           text: val,
           alignment: "center",
           noWrap: false,
+          maxWidth: 150,
         };
       })
     ),
@@ -134,11 +131,7 @@ export async function generatePdf({ title, columns, rows }) {
         margin: [0, 0, 0, 10],
       },
       {
-        table: {
-          headerRows: 1,
-          widths: colWidths,
-          body,
-        },
+        table: { headerRows: 1, widths: colWidths, body },
         layout: "lightHorizontalLines",
       },
     ],

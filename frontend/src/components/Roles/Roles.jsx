@@ -20,6 +20,9 @@ const mapRole = (r) => ({
   can_manage_tasks: asBool(r.can_manage_tasks),
   can_access_all_data: asBool(r.can_access_all_data),
   active: isActive(r.active),
+
+  // 👇 ניצור שדה ידידותי בעברית — ישמש גם לייצוא
+  status_human: isActive(r.active) ? "פעיל" : "לא פעיל",
 });
 
 const renderCheck = (v) => (
@@ -63,12 +66,8 @@ export default function Roles() {
       axios.get(`${api}/roles/inactive`, { withCredentials: true }),
     ])
       .then(([activeRes, inactiveRes]) => {
-        const active = (activeRes?.data?.Roles || []).map((r) =>
-          mapRole(r, true)
-        );
-        const inactive = (inactiveRes?.data?.Roles || []).map((r) =>
-          mapRole(r, false)
-        );
+        const active = (activeRes?.data?.Roles || []).map(mapRole);
+        const inactive = (inactiveRes?.data?.Roles || []).map(mapRole);
         setAllRoles([...active, ...inactive]);
       })
       .catch(() => {
@@ -148,9 +147,8 @@ export default function Roles() {
       key: "active",
       label: "סטטוס",
       render: (r) => renderCheckActive(r.active),
-      export: (r) => (r.active ? "פעיל" : "לא פעיל"),
+      exportLabel: "status_human", // 👈 ערך חלופי לייצוא
     },
-
     {
       key: "actions",
       label: "פעולות",
@@ -162,7 +160,7 @@ export default function Roles() {
           >
             עריכה
           </button>
-          {r.is_active && (
+          {r.active && (
             <button
               onClick={() =>
                 setPopup({
@@ -184,21 +182,20 @@ export default function Roles() {
     },
   ];
 
-  // 🔹 רק סינון לפי סטטוס
-const filtersDef = [
-  {
-    name: "active",
-    label: "סטטוס",
-    type: "select",
-    options: [
-      { value: "1", label: "פעיל" },
-      { value: "0", label: "לא פעיל" },
-      { value: "", label: "כל הסטטוסים" },
-    ],
-  },
-];
+  const filtersDef = [
+    {
+      name: "active",
+      label: "סטטוס",
+      type: "select",
+      options: [
+        { value: "true", label: "פעיל" },
+        { value: "false", label: "לא פעיל" },
+        { value: "", label: "כל הסטטוסים" },
+      ],
+    },
+  ];
 
-const defaultFilters = { active: "1" };
+  const defaultFilters = { active: "true" };
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
@@ -210,7 +207,7 @@ const defaultFilters = { active: "1" };
           columns={columns}
           rows={allRoles}
           filtersDef={filtersDef}
-          searchableKeys={["role_name", "status"]}
+          searchableKeys={["role_name", "active"]}
           pageSize={25}
           emailApiBase={api}
           addButton={
