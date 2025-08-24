@@ -199,10 +199,8 @@ export default function Users() {
       name: "role_id",
       label: "תפקיד",
       type: "select",
-      options: [
-        { value: "", label: "כל התפקידים" },
-        ...roleOptionsFromFiltered,
-      ],
+      dynamic: true, //  חדש – יבנה מתוך filteredRows
+      optionLabelKey: "role_name", //  מאיזה שדה לקחת label
     },
   ];
 

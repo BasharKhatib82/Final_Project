@@ -1,10 +1,10 @@
 // src/components/Reports/ReportFilters.jsx
-import React from "react";
+import React, { useMemo } from "react";
 import { useReport } from "./ReportContext";
 import { Filter as FilterIcon } from "lucide-react";
 
 export default function ReportFilters({ variant = "block", showTotal = true }) {
-  const { filtersDef, filters, setFilter, total } = useReport();
+  const { filtersDef, filters, setFilter, total, filteredRows } = useReport(); // 🟢 נוסיף filteredRows
 
   return (
     <div
@@ -22,6 +22,7 @@ export default function ReportFilters({ variant = "block", showTotal = true }) {
           value={filters[f.name]}
           onChange={(v) => setFilter(f.name, v)}
           inline={variant === "inline"}
+          filteredRows={filteredRows} // 🟢 נעביר פנימה
         />
       ))}
 
@@ -34,7 +35,7 @@ export default function ReportFilters({ variant = "block", showTotal = true }) {
   );
 }
 
-function Filter({ def, value, onChange, inline }) {
+function Filter({ def, value, onChange, inline, filteredRows }) {
   const renderLabel = () =>
     inline && (
       <span className="text-sm text-slate-700 inline-flex items-center gap-1">
@@ -42,6 +43,25 @@ function Filter({ def, value, onChange, inline }) {
         {def.labelPrefix || def.label}
       </span>
     );
+
+  // 🟢 אם הפילטר מוגדר dynamic: true – נבנה אפשרויות מהנתונים
+  const dynamicOptions = useMemo(() => {
+    if (def.type === "select" && def.dynamic && Array.isArray(filteredRows)) {
+      const uniq = [
+        ...new Map(
+          filteredRows.map((row) => [
+            String(row[def.name]),
+            row[def.optionLabelKey || def.name], // נבחר label ידידותי
+          ])
+        ),
+      ];
+      return [
+        { value: "", label: `כל ה${def.label}` },
+        ...uniq.map(([value, label]) => ({ value, label })),
+      ];
+    }
+    return def.options || [];
+  }, [def, filteredRows]);
 
   // 🔹 Select
   if (def.type === "select") {
@@ -54,7 +74,7 @@ function Filter({ def, value, onChange, inline }) {
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value || "")}
         >
-          {(def.options || []).map((opt) => (
+          {(dynamicOptions || []).map((opt) => (
             <option key={String(opt.value)} value={opt.value}>
               {opt.label}
             </option>
@@ -80,7 +100,7 @@ function Filter({ def, value, onChange, inline }) {
     );
   }
 
-  // 🔹 טווח תאריכים (from + to) – נשמר כ־מערך [from, to]
+  // 🔹 טווח תאריכים
   if (def.type === "daterange") {
     const [from = "", to = ""] = value || [];
 
