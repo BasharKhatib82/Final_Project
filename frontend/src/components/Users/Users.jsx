@@ -96,15 +96,15 @@ export default function Users() {
 
   const columns = [
     { key: "user_id", label: "ת.ז", export: (u) => String(u.user_id) },
-    { key: "first_name", label: "שם פרטי", export: (u) => u.first_name || "-" },
-    { key: "last_name", label: "שם משפחה", export: (u) => u.last_name || "-" },
-    { key: "role_name", label: "תפקיד", export: (u) => u.role_name || "-" },
-    { key: "email", label: "אימייל", export: (u) => u.email || "-" },
+    { key: "first_name", label: "שם פרטי", export: (u) => u.first_name },
+    { key: "last_name", label: "שם משפחה", export: (u) => u.last_name },
+    { key: "role_name", label: "תפקיד", export: (u) => u.role_name },
+    { key: "email", label: "אימייל", export: (u) => u.email },
     {
       key: "active",
       label: "סטטוס",
       render: (u) => renderCheckActive(u.active),
-      export: (u) => u.status_human || "-", // ✅ החלפתי exportLabel → export
+      exportLabel: "status_human",
     },
     {
       key: "actions",
@@ -135,10 +135,10 @@ export default function Users() {
           )}
         </div>
       ),
-      export: false, // ✅ שלא יופיע ביצוא
+      export: () => null,
     },
   ];
-  //  הגדרות סינון
+
   const filtersDef = [
     {
       name: "active",
