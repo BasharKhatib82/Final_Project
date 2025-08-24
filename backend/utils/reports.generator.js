@@ -97,6 +97,7 @@ export async function generatePdf({ title, columns, rows }) {
     (c) => c.key !== "actions" && c.export !== false
   );
 
+  //pdf נתוני טבלה
   const body = [
     exportableCols.map((c) => ({
       text: c.label,
@@ -112,8 +113,8 @@ export async function generatePdf({ title, columns, rows }) {
         return {
           text: val,
           alignment: "center",
-          noWrap: false, // מאפשר ירידת שורה
-          maxWidth: 150, // הגבלה כדי לא "לשבור" את כל הטבלה
+          noWrap: false,
+          maxWidth: 150,
         };
       })
     ),
