@@ -17,9 +17,8 @@ router.get("/", verifyToken, async (req, res) => {
   };
 
   const queries = {
-    employees_active: "SELECT COUNT(*) AS count FROM users WHERE is_active = 1",
-    employees_inactive:
-      "SELECT COUNT(*) AS count FROM users WHERE is_active = 0",
+    employees_active: "SELECT COUNT(*) AS count FROM users WHERE active = 1",
+    employees_inactive: "SELECT COUNT(*) AS count FROM users WHERE active = 0",
 
     roles_total: "SELECT COUNT(*) AS count FROM roles_permissions",
     roles_active:
