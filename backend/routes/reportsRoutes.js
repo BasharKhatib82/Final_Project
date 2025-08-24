@@ -71,19 +71,34 @@ router.post("/download", async (req, res) => {
 
 // 🖨️ תצוגת PDF בחלון (Preview)
 router.post("/preview", async (req, res) => {
-  if (!validateReportInput(req, res)) return;
-
   try {
-    const { title, columns, rows } = req.body;
-    const { filePath, filename } = await generatePdfFile({
-      title,
-      columns,
-      rows,
-    });
+    // 🔹 תמיכה גם ב־JSON וגם ב־Form POST
+    let { title, columns, rows } = req.body;
+
+    if (typeof columns === "string") {
+      try {
+        columns = JSON.parse(columns);
+      } catch {
+        columns = [];
+      }
+    }
+    if (typeof rows === "string") {
+      try {
+        rows = JSON.parse(rows);
+      } catch {
+        rows = [];
+      }
+    }
+
+    if (!title || !columns || !rows) {
+      return res.status(400).json({ error: "Missing report data" });
+    }
+
+    const { filePath, filename } = await generatePdf({ title, columns, rows });
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
-    res.sendFile(filePath, () => fs.unlink(filePath, () => {}));
+    res.sendFile(filePath);
   } catch (err) {
     console.error("❌ preview failed", err);
     res.status(500).json({ error: "כשל ביצירת תצוגת PDF" });

@@ -50,26 +50,25 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
     }
   };
 
-  /** 🖨️ תצוגה לפני הדפסה (Preview PDF) */
-  const previewPdf = () => {
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = `${apiBase}/reports/preview`;
-    form.target = "_blank";
+  /** 🖨️ תצוגה לפני הדפסה */
+  const previewPdf = async () => {
+    try {
+      const res = await axios.post(
+        `${apiBase}/reports/preview`,
+        { title, columns, rows: filteredRows },
+        {
+          withCredentials: true,
+          responseType: "blob",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
-    // 🔹 שליחת הנתונים כשדות JSON רגילים (לא payload אחד)
-    const data = { title, columns, rows: filteredRows };
-    for (const [key, value] of Object.entries(data)) {
-      const input = document.createElement("input");
-      input.type = "hidden";
-      input.name = key;
-      input.value = JSON.stringify(value); // השרת יקבל כ־req.body
-      form.appendChild(input);
+      const blob = new Blob([res.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (err) {
+      console.error("Preview failed:", err.response?.data || err.message);
     }
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
   };
 
   return (
