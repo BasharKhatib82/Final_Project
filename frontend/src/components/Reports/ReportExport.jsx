@@ -4,10 +4,10 @@
  * תיאור:
  *   קומפוננטה לייצוא דוחות (Excel / PDF / הדפסה - Preview).
  *   ✅ כולל עיבוד ערכים לייצוא:
+ *      - שימוש ב־export / exportLabel / key
  *      - תאריכים → YYYY-MM-DD
  *      - שעות → HH:mm
  *      - ערכים ריקים → "-"
- *      - שימוש ב־col.export / col.exportLabel אם קיימים
  * ==========================================================
  */
 
@@ -18,6 +18,36 @@ import axios from "axios";
 import Popup from "../Tools/Popup";
 
 const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
+
+// 🟢 פונקציית עזר – הפקת ערך לייצוא עבור תא
+function getExportValue(col, row) {
+  // אם יש פונקציית export מותאמת
+  if (typeof col.export === "function") {
+    return col.export(row) ?? "-";
+  }
+
+  // אם יש שדה חלופי לייצוא
+  if (col.exportLabel && row[col.exportLabel] !== undefined) {
+    return row[col.exportLabel] ?? "-";
+  }
+
+  // ברירת מחדל – הערך הרגיל
+  let val = row[col.key];
+
+  if (val === null || val === undefined || val === "") return "-";
+
+  // טיפול בפורמט תאריך ISO
+  if (typeof val === "string" && val.includes("T")) {
+    return val.split("T")[0];
+  }
+
+  // טיפול בשעות עם שניות
+  if (typeof val === "string" && /^\d{2}:\d{2}:\d{2}$/.test(val)) {
+    return val.slice(0, 5);
+  }
+
+  return val;
+}
 
 export default function ReportExport({ apiBase = ENV_API_BASE }) {
   const { title, columns, filteredRows } = useReport();
@@ -31,34 +61,12 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
   /** 📥 הורדת קובץ (Excel / PDF) */
   const download = async (format) => {
     try {
-      // 🟢 מכינים rows אחרי עיבוד עמודות (export/exportLabel/format)
+      // 🟢 בניית שורות לייצוא
       const exportRows = filteredRows.map((row) => {
         const r = {};
         columns.forEach((col) => {
-          if (col.export === false) return; // דילוג על עמודות שלא נרצה לייצא
-
-          if (typeof col.export === "function") {
-            r[col.label] = col.export(row);
-          } else if (col.exportLabel && row[col.exportLabel]) {
-            r[col.label] = row[col.exportLabel];
-          } else {
-            // ברירת מחדל: ערך מהשורה
-            const val = row[col.key];
-            if (val === null || val === undefined || val === "") {
-              r[col.label] = "-";
-            } else if (typeof val === "string" && val.includes("T")) {
-              // 🟢 תאריך בפורמט ISO
-              r[col.label] = val.split("T")[0];
-            } else if (
-              typeof val === "string" &&
-              val.match(/^\d{2}:\d{2}:\d{2}$/)
-            ) {
-              // 🟢 שעה עם שניות → רק HH:mm
-              r[col.label] = val.slice(0, 5);
-            } else {
-              r[col.label] = val;
-            }
-          }
+          if (col.export === false) return; // דילוג אם ביקשנו לא לייצא
+          r[col.label] = getExportValue(col, row);
         });
         return r;
       });
@@ -73,20 +81,16 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         }
       );
 
-      // 📝 יצירת שם קובץ
+      // 📝 שם קובץ
       let filename;
       const disposition = res.headers["content-disposition"];
       if (disposition) {
         const match = disposition.match(/filename\*=UTF-8''(.+)/);
-        if (match && match[1]) {
-          filename = decodeURIComponent(match[1]);
-        }
+        if (match && match[1]) filename = decodeURIComponent(match[1]);
       }
       if (!filename) {
         const now = new Date();
-        const datePart = `${now.getDate()}.${
-          now.getMonth() + 1
-        }.${now.getFullYear()}`;
+        const datePart = now.toISOString().split("T")[0];
         const timePart = `${String(now.getHours()).padStart(2, "0")}-${String(
           now.getMinutes()
         ).padStart(2, "0")}`;
@@ -136,26 +140,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         const r = {};
         columns.forEach((col) => {
           if (col.export === false) return;
-
-          if (typeof col.export === "function") {
-            r[col.label] = col.export(row);
-          } else if (col.exportLabel && row[col.exportLabel]) {
-            r[col.label] = row[col.exportLabel];
-          } else {
-            const val = row[col.key];
-            if (val === null || val === undefined || val === "") {
-              r[col.label] = "-";
-            } else if (typeof val === "string" && val.includes("T")) {
-              r[col.label] = val.split("T")[0];
-            } else if (
-              typeof val === "string" &&
-              val.match(/^\d{2}:\d{2}:\d{2}$/)
-            ) {
-              r[col.label] = val.slice(0, 5);
-            } else {
-              r[col.label] = val;
-            }
-          }
+          r[col.label] = getExportValue(col, row);
         });
         return r;
       });
