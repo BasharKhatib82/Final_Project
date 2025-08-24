@@ -20,6 +20,7 @@ export default function ReportView({
   emailApiBase = ENV_API_BASE,
   defaultFilters = {},
   searchPlaceholder = "חיפוש...",
+  filtersVariant = "inline", // 🟢 חדש – אפשר לבחור "inline" או "block"
 }) {
   const printRef = useRef(null);
 
@@ -49,17 +50,15 @@ export default function ReportView({
 
         <section className="rounded-xl border border-slate-200 bg-white/95 p-3 shadow-sm">
           <div className="flex flex-col space-y-3">
-            {/* שורה ראשונה: סטטוס + חיפוש */}
-            <div className="flex items-center gap-4">
-              <ReportFilters
-                variant="inline"
-                showTotal={false}
-                labelPrefix="סטטוס :"
-              />
+            {/* 🔹 שורה ראשונה: פילטרים + חיפוש */}
+            <div className="flex flex-wrap items-center gap-4">
+              {filtersDef.length > 0 && (
+                <ReportFilters variant={filtersVariant} showTotal={false} />
+              )}
               <ReportSearch label="חיפוש :" placeholder={searchPlaceholder} />
             </div>
 
-            {/* שורה שנייה: יצוא + שליחה למייל */}
+            {/* 🔹 שורה שנייה: יצוא + שליחה למייל */}
             <div className="flex items-center gap-4">
               <ReportExport apiBase={emailApiBase} />
               {emailApiBase && <ReportEmail apiBase={emailApiBase} />}

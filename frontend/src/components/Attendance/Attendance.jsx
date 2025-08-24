@@ -1,246 +1,269 @@
-// ✅ קובץ Attendance.jsx מתוקן — כולל טיפול בעובדים לא פעילים
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Tooltip from "../Tools/Tooltip";
-import NavigationButton from "../Buttons/NavigationButton";
+import ExitButton from "../Buttons/ExitButton";
+import AddSaveButton from "../Buttons/AddSaveButton";
+import Popup from "../Tools/Popup";
 
 const api = process.env.REACT_APP_API_URL;
 
-const Attendance = () => {
-  const [attendance, setAttendance] = useState([]);
-  const [users, setUsers] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [employeeFilter, setEmployeeFilter] = useState("all");
+const AddAttendance = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    checkPermissions();
-    fetchAttendance();
-    fetchUsers();
-  }, []);
-
-  const checkPermissions = async () => {
-    try {
-      const res = await axios.get(`${api}/auth/check`, {
-        withCredentials: true,
-      });
-      const allowedRoles = [1];
-      if (!res.data.loggedIn || !allowedRoles.includes(res.data.user.role_id)) {
-        navigate("/unauthorized");
-      }
-    } catch (err) {
-      console.error("שגיאה בבדיקת הרשאות", err);
-      navigate("/unauthorized");
-    }
-  };
-
-  const fetchAttendance = () => {
-    axios
-      .get(`${api}/attendance`, { withCredentials: true })
-      .then((res) => {
-        setAttendance(res.data.Result || []);
-      })
-      .catch((err) => {
-        console.error("שגיאה בטעינת נוכחות:", err);
-      });
-  };
-
-  const fetchUsers = () => {
-    Promise.all([
-      axios.get(`${api}/users/active`, {
-        withCredentials: true,
-      }),
-      axios.get(`${api}/users/inactive`, {
-        withCredentials: true,
-      }),
-    ])
-      .then(([activeRes, inactiveRes]) => {
-        const active = activeRes.data.Result.map((user) => ({
-          ...user,
-          active: true,
-        }));
-
-        const inactive = inactiveRes.data.Result.map((user) => ({
-          ...user,
-          active: false,
-        }));
-
-        setUsers([...active, ...inactive]);
-      })
-      .catch((err) => {
-        console.error("שגיאה בטעינת משתמשים:", err);
-      });
-  };
-
-  const getUserName = (userId) => {
-    const user = users.find((u) => u.user_id === userId);
-    if (!user) return "לא ידוע";
-
-    return (
-      <>
-        {user.first_name} {user.last_name}
-        {!user.active ? (
-          <Tooltip message="עובד זה לא פעיל יותר">
-            <span className="text-yellow-500"> ⚠ </span>
-          </Tooltip>
-        ) : null}
-      </>
-    );
-  };
-
-  const formatTime = (timeStr) => (timeStr ? timeStr.slice(0, 5) : "-");
-
-  const toLocalDate = (dateStr) => {
-    if (!dateStr) return "-";
-    const date = new Date(dateStr);
-    const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-    return local.toISOString().split("T")[0];
-  };
-
-  const filteredData = attendance.filter((record) => {
-    const name = `${getUserName(record.user_id)}`.toLowerCase();
-    const statusText = record.status.toLowerCase();
-    const dateText = toLocalDate(record.date);
-
-    const search = searchTerm.toLowerCase();
-
-    const matchesSearch =
-      search === "" ||
-      name.includes(search) ||
-      statusText.includes(search) ||
-      dateText.includes(search);
-
-    const matchesStatus =
-      statusFilter === "all" || record.status === statusFilter;
-
-    const matchesEmployee =
-      employeeFilter === "all" ||
-      record.user_id.toString() === employeeFilter.toString();
-
-    return matchesSearch && matchesStatus && matchesEmployee;
+  const [users, setUsers] = useState([]);
+  const [form, setForm] = useState({
+    user_id: "",
+    date: "",
+    check_in: "",
+    check_out: "",
+    status: "נוכח",
+    notes: "",
   });
 
+  const [popupData, setPopupData] = useState({
+    show: false,
+    title: "",
+    message: "",
+    mode: "info",
+  });
+
+  const specialStatuses = ["חופשה", "מחלה", "היעדרות"];
+  const isSpecialStatus = specialStatuses.includes(form.status);
+
+  // ✅ טעינת עובדים פעילים בלבד
+  useEffect(() => {
+    axios
+      .get(`${api}/users/active`, { withCredentials: true })
+      .then((res) => {
+        if (res.data.Status) {
+          setUsers(res.data.Result || []);
+        } else {
+          setPopupData({
+            show: true,
+            title: "שגיאה",
+            message: res.data.Error || "שגיאה בטעינת עובדים",
+            mode: "error",
+          });
+        }
+      })
+      .catch(() =>
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "שגיאה בעת טעינת העובדים",
+          mode: "error",
+        })
+      );
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+      ...(name === "status" && specialStatuses.includes(value)
+        ? { check_in: "", check_out: "" }
+        : {}),
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // ✅ בדיקות חובה
+    const requiredFields = ["user_id", "date", "status"];
+    for (let field of requiredFields) {
+      if (!form[field]) {
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: `שדה חובה חסר: ${field}`,
+          mode: "error",
+        });
+        return;
+      }
+    }
+
+    if (!isSpecialStatus && (!form.check_in || !form.check_out)) {
+      return setPopupData({
+        show: true,
+        title: "שגיאה",
+        message: "יש להזין שעת כניסה ויציאה",
+        mode: "error",
+      });
+    }
+
+    // ✅ פופאפ אישור
+    setPopupData({
+      show: true,
+      title: "אישור הוספת נוכחות",
+      message: "האם אתה בטוח שברצונך להוסיף רישום נוכחות?",
+      mode: "confirm",
+    });
+  };
+
+  const confirmAdd = () => {
+    axios
+      .post(`${api}/attendance/add`, form, { withCredentials: true })
+      .then((res) => {
+        if (res.data.Status) {
+          setPopupData({
+            show: true,
+            title: "הצלחה",
+            message: res.data.Message || "הנוכחות נוספה בהצלחה",
+            mode: "success",
+          });
+        } else {
+          setPopupData({
+            show: true,
+            title: "שגיאה",
+            message: res.data.Error || "שגיאה בשמירה",
+            mode: "error",
+          });
+        }
+      })
+      .catch(() =>
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "אירעה שגיאה בשמירה",
+          mode: "error",
+        })
+      );
+  };
+
   return (
-    <div className="p-6 text-right">
-      <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
-        רשימת נוכחות
-      </h2>
+    <div className="flex justify-center items-center pt-10">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-3"
+      >
+        <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center mb-2">
+          הוספת רישום נוכחות
+        </h2>
 
-      <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-2">
-        <NavigationButton
-          linkTo="/dashboard/add_attendance"
-          label="הוספת נוכחות חדשה"
-        />
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="font-rubik border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
-        >
-          <option value="all">הכל</option>
-          <option value="נוכח">נוכח</option>
-          <option value="מחלה">מחלה</option>
-          <option value="חופשה">חופשה</option>
-          <option value="היעדרות">היעדרות</option>
-        </select>
-
-        <select
-          value={employeeFilter}
-          onChange={(e) => setEmployeeFilter(e.target.value)}
-          className="font-rubik border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
-        >
-          <option value="all">כל העובדים</option>
-          {users.map((user) => (
-            <option key={user.user_id} value={user.user_id}>
-              {user.first_name} {user.last_name}
-              {!user.active ? " ⚠ לא פעיל" : ""}
-            </option>
-          ))}
-        </select>
-
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="🔍 חיפוש לפי שם או תאריך..."
-            className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 text-red-500 cursor-pointer"
-            >
-              ✖
-            </button>
-          )}
+        {/* בחירת עובד */}
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">
+            בחר עובד
+          </label>
+          <select
+            name="user_id"
+            value={form.user_id}
+            onChange={handleChange}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+          >
+            <option value="">-- בחר עובד --</option>
+            {users.map((user) => (
+              <option key={user.user_id} value={user.user_id}>
+                {user.first_name} {user.last_name}
+              </option>
+            ))}
+          </select>
         </div>
-      </div>
 
-      <div className="overflow-auto rounded-lg shadow-lg bg-white/85">
-        <table className="w-full table-auto border-collapse text-sm text-center">
-          <thead>
-            <tr className="bg-slate-100 text-gray-800">
-              <th className="p-2 border">תאריך</th>
-              <th className="p-2 border">שם עובד</th>
-              <th className="p-2 border">כניסה</th>
-              <th className="p-2 border">יציאה</th>
-              <th className="p-2 border">סטטוס</th>
-              <th className="p-2 border">הערות</th>
-              <th className="p-2 border">פעולות</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredData.length === 0 ? (
-              <tr>
-                <td colSpan="7" className="text-center text-red-500 p-4">
-                  אין רשומות להצגה
-                </td>
-              </tr>
-            ) : (
-              filteredData.map((record) => (
-                <tr
-                  key={record.attendance_id}
-                  className="hover:bg-blue-50 transition"
-                >
-                  <td className="border p-2">{toLocalDate(record.date)}</td>
-                  <td className="border p-2">{getUserName(record.user_id)}</td>
-                  <td className="border p-2">{formatTime(record.check_in)}</td>
-                  <td className="border p-2">{formatTime(record.check_out)}</td>
-                  <td
-                    className={`border p-2 font-semibold ${
-                      record.status === "נוכח"
-                        ? "text-green-600"
-                        : record.status === "היעדרות"
-                        ? "text-red-600"
-                        : "text-blue-800"
-                    }`}
-                  >
-                    {record.status}
-                  </td>
-                  <td className="border p-2">{record.notes || "-"}</td>
-                  <td className="border p-2 text-center">
-                    <button
-                      onClick={() =>
-                        navigate(
-                          `/dashboard/edit_attendance/${record.attendance_id}`
-                        )
-                      }
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
-                    >
-                      עריכה
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+        {/* תאריך */}
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">תאריך</label>
+          <input
+            type="date"
+            name="date"
+            value={form.date}
+            onChange={handleChange}
+            max={new Date().toISOString().split("T")[0]}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+          />
+        </div>
+
+        {/* סטטוס */}
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">סטטוס</label>
+          <select
+            name="status"
+            value={form.status}
+            onChange={handleChange}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 bg-white"
+          >
+            <option value="נוכח">נוכח</option>
+            <option value="חופשה">חופשה</option>
+            <option value="מחלה">מחלה</option>
+            <option value="היעדרות">היעדרות</option>
+          </select>
+        </div>
+
+        {/* שעות נוכחות – יוצגו רק אם לא חופשה/מחלה/היעדרות */}
+        {!isSpecialStatus && (
+          <>
+            <div>
+              <label className="font-rubik block mb-0.5 font-medium">
+                שעת כניסה
+              </label>
+              <input
+                type="time"
+                name="check_in"
+                value={form.check_in}
+                onChange={handleChange}
+                className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+              />
+            </div>
+
+            <div>
+              <label className="font-rubik block mb-0.5 font-medium">
+                שעת יציאה
+              </label>
+              <input
+                type="time"
+                name="check_out"
+                value={form.check_out}
+                onChange={handleChange}
+                className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+              />
+            </div>
+          </>
+        )}
+
+        {/* הערות */}
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">הערות</label>
+          <textarea
+            name="notes"
+            value={form.notes}
+            onChange={handleChange}
+            rows="2"
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 resize-none"
+            placeholder="הזן הערה (אופציונלי)..."
+          />
+        </div>
+
+        {/* כפתורים */}
+        <div className="flex justify-around pt-4">
+          <AddSaveButton label="שמור רישום" />
+          <ExitButton label="ביטול" linkTo="/dashboard/attendance" />
+        </div>
+      </form>
+
+      {/* פופאפ */}
+      {popupData.show && (
+        <Popup
+          title={popupData.title}
+          message={popupData.message}
+          mode={popupData.mode}
+          onClose={() => {
+            setPopupData({
+              show: false,
+              title: "",
+              message: "",
+              mode: "info",
+            });
+            if (popupData.mode === "success") {
+              navigate("/dashboard/attendance");
+            }
+          }}
+          onConfirm={popupData.mode === "confirm" ? confirmAdd : undefined}
+        />
+      )}
     </div>
   );
 };
 
-export default Attendance;
+export default AddAttendance;

@@ -66,10 +66,22 @@ router.post("/add", verifyToken, async (req, res) => {
 });
 
 // ✅ שליפת כל הנוכחויות
+// ✅ שליפת כל הנוכחויות (כולל פרטי עובד)
 router.get("/", verifyToken, async (req, res) => {
   try {
     const [rows] = await db.query(
-      "SELECT * FROM attendance ORDER BY date DESC"
+      `SELECT a.attendance_id,
+              a.user_id,
+              u.first_name,
+              u.last_name,
+              a.date,
+              a.check_in,
+              a.check_out,
+              a.status,
+              a.notes
+       FROM attendance a
+       LEFT JOIN users u ON a.user_id = u.user_id
+       ORDER BY a.date DESC`
     );
     res.json({ Status: true, Result: rows });
   } catch (err) {
@@ -150,7 +162,7 @@ router.get("/generate-absence-report", async (req, res) => {
        FROM users u
        LEFT JOIN attendance a
          ON u.user_id = a.user_id AND a.date = ?
-       WHERE a.attendance_id IS NULL AND u.is_active = 1`,
+       WHERE a.attendance_id IS NULL AND u.active = 1`,
       [today]
     );
 

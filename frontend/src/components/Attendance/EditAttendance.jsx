@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import Tooltip from "../Tools/Tooltip";
 import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
@@ -24,6 +23,7 @@ const EditAttendance = () => {
 
   const [popup, setPopup] = useState({
     show: false,
+    title: "",
     message: "",
     type: "",
   });
@@ -38,21 +38,18 @@ const EditAttendance = () => {
     fetchAttendance();
   }, [id]);
 
+  // ✅ שליפת משתמשים פעילים + לא פעילים
   const fetchUsers = () => {
     Promise.all([
-      axios.get(`${api}/users/active`, {
-        withCredentials: true,
-      }),
-      axios.get(`${api}/users/inactive`, {
-        withCredentials: true,
-      }),
+      axios.get(`${api}/users/active`, { withCredentials: true }),
+      axios.get(`${api}/users/inactive`, { withCredentials: true }),
     ])
       .then(([activeRes, inactiveRes]) => {
-        const active = activeRes.data.Result.map((user) => ({
+        const active = (activeRes.data.Result || []).map((user) => ({
           ...user,
           active: true,
         }));
-        const inactive = inactiveRes.data.Result.map((user) => ({
+        const inactive = (inactiveRes.data.Result || []).map((user) => ({
           ...user,
           active: false,
         }));
@@ -62,12 +59,14 @@ const EditAttendance = () => {
         console.error("שגיאה בטעינת משתמשים:", err);
         setPopup({
           show: true,
+          title: "שגיאה",
           message: "שגיאה בטעינת המשתמשים",
           type: "error",
         });
       });
   };
 
+  // ✅ שליפת נתוני נוכחות קיימת
   const fetchAttendance = () => {
     axios
       .get(`${api}/attendance/${id}`, { withCredentials: true })
@@ -83,18 +82,27 @@ const EditAttendance = () => {
             status: data.status,
             notes: data.notes || "",
           });
+        } else {
+          setPopup({
+            show: true,
+            title: "שגיאה",
+            message: res.data.Error || "לא נמצאה רשומה",
+            type: "error",
+          });
         }
       })
       .catch((err) => {
         console.error("שגיאה בטעינת נוכחות:", err);
         setPopup({
           show: true,
+          title: "שגיאה",
           message: "שגיאה בטעינת פרטי הנוכחות",
           type: "error",
         });
       });
   };
 
+  // ✅ שינוי ערכים
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updated = { ...form, [name]: value };
@@ -107,13 +115,14 @@ const EditAttendance = () => {
     setForm(updated);
   };
 
+  // ✅ שליחה עם בדיקות
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // בדיקות תקינות לפני פתיחת פופאפ אישור
     if (!form.user_id || !form.date || !form.status) {
       return setPopup({
         show: true,
+        title: "שגיאה",
         message: "נא למלא את כל שדות החובה",
         type: "error",
       });
@@ -122,6 +131,7 @@ const EditAttendance = () => {
     if (!isSpecialStatus && (!form.check_in || !form.check_out)) {
       return setPopup({
         show: true,
+        title: "שגיאה",
         message: "יש להזין שעת כניסה ויציאה",
         type: "error",
       });
@@ -130,6 +140,7 @@ const EditAttendance = () => {
     setShowConfirmPopup(true);
   };
 
+  // ✅ שמירה סופית
   const handleConfirmSave = () => {
     setShowConfirmPopup(false);
 
@@ -146,6 +157,7 @@ const EditAttendance = () => {
       .then(() => {
         setPopup({
           show: true,
+          title: "הצלחה",
           message: "הנוכחות עודכנה בהצלחה",
           type: "success",
         });
@@ -154,6 +166,7 @@ const EditAttendance = () => {
         console.error("שגיאה בעדכון נוכחות:", err);
         setPopup({
           show: true,
+          title: "שגיאה",
           message: "שגיאה בעדכון הנתונים",
           type: "error",
         });
@@ -274,10 +287,11 @@ const EditAttendance = () => {
       {/* פופאפ הצלחה/שגיאה */}
       {popup.show && (
         <Popup
+          title={popup.title}
           message={popup.message}
           mode={popup.type}
           onClose={() => {
-            setPopup({ show: false, message: "", type: "" });
+            setPopup({ show: false, title: "", message: "", type: "" });
             if (popup.type === "success") {
               navigate("/dashboard/attendance");
             }
@@ -288,7 +302,8 @@ const EditAttendance = () => {
       {/* פופאפ אישור שמירה */}
       {showConfirmPopup && (
         <Popup
-          message="האם אתה בטוח שברצונך לעדכן את הנוכחות ?"
+          title="אישור עדכון"
+          message="האם אתה בטוח שברצונך לעדכן את הנוכחות?"
           mode="confirm"
           onClose={() => setShowConfirmPopup(false)}
           onConfirm={handleConfirmSave}
