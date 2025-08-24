@@ -101,6 +101,7 @@ export async function generatePdf({ title, columns, rows }) {
       text: c.label,
       style: "tableHeader",
       alignment: "center",
+    
     }))
     .reverse();
 
@@ -118,7 +119,7 @@ export async function generatePdf({ title, columns, rows }) {
           text: val,
           alignment: "center",
           noWrap: false,
-          margin: [2, 2, 2, 2],
+          margin: [1, 1, 1, 1],
         };
       })
       .reverse()
@@ -149,7 +150,7 @@ export async function generatePdf({ title, columns, rows }) {
     },
     defaultStyle: {
       font: "DejaVuSans",
-      alignment: "right",
+      alignment: "center",
       fontSize: 10,
     },
     pageMargins: [30, 30, 30, 30],

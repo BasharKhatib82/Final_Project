@@ -107,10 +107,9 @@ export default function Roles() {
     {
       key: "role_id",
       label: "מזהה",
-      width: 12,
       export: (r) => String(r.role_id),
     },
-    { key: "role_name", label: "שם תפקיד", width: 24 },
+    { key: "role_name", label: "שם תפקיד", export: (r) => String(r.role_name) },
     {
       key: "can_manage_users",
       label: "ניהול משתמשים",
