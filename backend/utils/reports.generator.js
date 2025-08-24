@@ -83,9 +83,9 @@ export async function generateExcel({ title, columns, rows }) {
  */
 export async function generatePdf({ title, columns, rows }) {
   const fonts = {
-    NotoSansHebrew: {
-      normal: path.resolve("public/fonts/NotoSansHebrew-Regular.ttf"),
-      bold: path.resolve("public/fonts/NotoSansHebrew-Bold.ttf"),
+    DejaVuSans: {
+      normal: path.resolve("public/fonts/DejaVuSans.ttf"),
+      bold: path.resolve("public/fonts/DejaVuSans-Bold.ttf"),
     },
   };
   const printer = new PdfPrinter(fonts);
@@ -145,7 +145,7 @@ export async function generatePdf({ title, columns, rows }) {
       tableHeader: { bold: true, fillColor: "#eeeeee" },
     },
     defaultStyle: {
-      font: "NotoSansHebrew",
+      font: "DejaVuSans",
       alignment: "right", //
       fontSize: 10,
     },
