@@ -4,9 +4,6 @@ import PdfPrinter from "pdfmake";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function sanitizeFilename(s) {
   return (
@@ -148,7 +145,7 @@ export async function generatePdf({ title, columns, rows }) {
       tableHeader: { bold: true, fillColor: "#eeeeee" },
     },
     defaultStyle: {
-      font: "DejaVuSans",
+      font: "NotoSansHebrew",
       alignment: "right", //
       fontSize: 10,
     },
