@@ -148,11 +148,11 @@ export async function generatePdf({ title, columns, rows }) {
       },
     ],
     styles: {
-      header: { font: "NotoSansHebrew", fontSize: 12, bold: true }, // 👈 פונט קטן יותר
+      header: { fontSize: 12, bold: true }, // 👈 פונט קטן יותר
       tableHeader: { bold: true, fillColor: "#eeeeee" },
     },
     defaultStyle: {
-      font: "NotoSansHebrew",
+      font: "NotoSans",
       alignment: "right", // 👈 כיוון ברירת מחדל RTL
       fontSize: 10,
     },
