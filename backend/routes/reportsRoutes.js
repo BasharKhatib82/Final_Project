@@ -3,6 +3,7 @@ import fs from "fs";
 import { generateExcel, generatePdf } from "../utils/reports.generator.js";
 import { sendReportEmail } from "../utils/reports.mailer.js";
 import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
+import { makeSafeFilename } from "../utils/safeFilename.js";
 
 const router = express.Router();
 
@@ -34,12 +35,13 @@ router.post("/download", async (req, res) => {
 
   try {
     const { title, columns, rows, format = "xlsx" } = req.body;
+    const safeFilename = makeSafeFilename(title, format);
 
     if (format === "xlsx") {
       const buffer = await generateExcel({ title, columns, rows });
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${title}.xlsx"`
+        `attachment; filename="${safeFilename}"`
       );
       res.setHeader(
         "Content-Type",
@@ -49,12 +51,8 @@ router.post("/download", async (req, res) => {
     }
 
     if (format === "pdf") {
-      const { filePath, filename } = await generatePdfFile({
-        title,
-        columns,
-        rows,
-      });
-      return res.download(filePath, filename, () =>
+      const { filePath } = await generatePdf({ title, columns, rows });
+      return res.download(filePath, safeFilename, () =>
         fs.unlink(filePath, () => {})
       );
     }
@@ -69,33 +67,17 @@ router.post("/download", async (req, res) => {
 // 🖨️ תצוגת PDF בחלון (Preview)
 router.post("/preview", async (req, res) => {
   try {
-    // 🔹 תמיכה גם ב־JSON וגם ב־Form POST
     let { title, columns, rows } = req.body;
-
-    if (typeof columns === "string") {
-      try {
-        columns = JSON.parse(columns);
-      } catch {
-        columns = [];
-      }
-    }
-    if (typeof rows === "string") {
-      try {
-        rows = JSON.parse(rows);
-      } catch {
-        rows = [];
-      }
-    }
-
     if (!title || !columns || !rows) {
       return res.status(400).json({ error: "Missing report data" });
     }
 
-    const { filePath, filename } = await generatePdf({ title, columns, rows });
+    const { filePath } = await generatePdf({ title, columns, rows });
+    const safeFilename = makeSafeFilename(title, "pdf");
 
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
-    res.sendFile(filePath);
+    res.setHeader("Content-Disposition", `inline; filename="${safeFilename}"`);
+    res.sendFile(filePath, () => fs.unlink(filePath, () => {}));
   } catch (err) {
     console.error("❌ preview failed", err);
     res.status(500).json({ error: "כשל ביצירת תצוגת PDF" });
