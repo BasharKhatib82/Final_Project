@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
@@ -13,11 +13,12 @@ const mapUser = (u, roles = []) => {
   const role = roles.find((r) => String(r.role_id) === String(u.role_id));
   return {
     ...u,
-    active: isActive(u.active),
+    active: isActive(u.active ?? u.is_active),
     first_name: u.first_name || "לא ידוע",
     last_name: u.last_name || "לא ידוע",
+    role_id: String(u.role_id),
     role_name: role ? role.role_name : "לא ידוע",
-    status_human: isActive(u.active) ? "פעיל" : "לא פעיל",
+    status_human: isActive(u.active ?? u.is_active) ? "פעיל" : "לא פעיל",
   };
 };
 
@@ -175,6 +176,14 @@ export default function Users() {
     },
   ];
 
+  // 🟢 רשימת תפקידים רק מהמשתמשים שמופיעים כרגע (filteredUsers)
+  // נשתמש ב־useMemo כדי לא לבנות כל פעם מחדש
+  const roleOptionsFromFiltered = useMemo(() => {
+    return [
+      ...new Map(allUsers.map((u) => [String(u.role_id), u.role_name])),
+    ].map(([value, label]) => ({ value, label }));
+  }, [allUsers]);
+
   const filtersDef = [
     {
       name: "active",
@@ -192,10 +201,7 @@ export default function Users() {
       type: "select",
       options: [
         { value: "", label: "כל התפקידים" },
-        ...roles.map((r) => ({
-          value: String(r.role_id),
-          label: r.role_name,
-        })),
+        ...roleOptionsFromFiltered,
       ],
     },
   ];
