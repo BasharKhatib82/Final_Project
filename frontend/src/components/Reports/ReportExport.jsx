@@ -33,15 +33,14 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         { title, columns, rows: filteredRows, format },
         {
           withCredentials: true,
-          responseType: "blob", // חובה כדי לקבל את הקובץ
+          responseType: "blob",
           headers: { "Content-Type": "application/json" },
         }
       );
 
-      // ברירת מחדל לשם קובץ – אם לא הצלחנו לחלץ מהשרת
-      let filename = `${title || "דוח"}.${format}`;
+      let filename;
 
-      // ניסיון לחלץ שם אמיתי מהשרת (Content-Disposition)
+      // ניסיון לחלץ שם אמיתי מהשרת (עם עברית + תאריך/שעה)
       const disposition = res.headers["content-disposition"];
       if (disposition) {
         const match = disposition.match(/filename\*=UTF-8''(.+)/);
@@ -50,7 +49,14 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         }
       }
 
-      // יצירת URL לקובץ והורדה
+      // fallback – רק אם ממש אין header
+      if (!filename) {
+        filename = `${title || "דוח"}_${new Date()
+          .toLocaleString("he-IL")
+          .replace(/[/:]/g, "-")}.${format}`;
+      }
+
+      // הורדה
       const blob = new Blob([res.data], {
         type:
           format === "pdf"
@@ -60,10 +66,11 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = filename; // 👈 עכשיו השם מהשרת עם תאריך ושעה
+      link.download = filename;
       document.body.appendChild(link);
       link.click();
       link.remove();
+      window.URL.revokeObjectURL(url);
 
       setPopup({
         show: true,
