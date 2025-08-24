@@ -1,314 +1,252 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Tooltip from "../Tools/Tooltip";
-import NavigationButton from "../Buttons/NavigationButton";
 import Popup from "../Tools/Popup";
-const api = process.env.REACT_APP_API_URL;
+import NavigationButton from "../Buttons/NavigationButton";
+import ReportView from "../Reports/ReportView";
 
-const Users = () => {
+const api = process.env.REACT_APP_API_URL;
+const asBool = (v) => v === true || v === 1 || v === "1";
+const isActive = (v) => v === true || v === 1 || v === "1";
+
+// --- מיפוי משתמש ---
+const mapUser = (u, roles = []) => {
+  const role = roles.find((r) => r.role_id === u.role_id);
+  return {
+    ...u,
+    is_active: isActive(u.is_active),
+    full_name: `${u.first_name} ${u.last_name}`,
+    role_name: role ? role.role_name : "לא ידוע",
+    status_human: isActive(u.is_active) ? "פעיל" : "לא פעיל",
+  };
+};
+
+const renderCheckActive = (v) => (
+  <span className={v ? "text-green-600" : "text-red-500"}>
+    {v ? "פעיל" : "לא פעיל"}
+  </span>
+);
+
+export default function Users() {
   const [allUsers, setAllUsers] = useState([]);
   const [roles, setRoles] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("active");
-  const [popupData, setPopupData] = useState({
+  const [loading, setLoading] = useState(true);
+  const [popup, setPopup] = useState({
     show: false,
     title: "",
     message: "",
-    mode: "info",
+    mode: "",
     user_id: null,
   });
-
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkPermissions();
-    fetchUsers();
-    fetchRoles();
-  }, []);
-
-  const checkPermissions = async () => {
-    try {
-      const res = await axios.get(`${api}/auth/check`, {
-        withCredentials: true,
-      });
-      if (!res.data.loggedIn || res.data.user.role_id !== 1) {
-        navigate("/unauthorized");
-      }
-    } catch (err) {
-      console.error("שגיאה בבדיקת הרשאות", err);
-      navigate("/unauthorized");
-    }
-  };
-
-  const fetchUsers = () => {
-    Promise.all([
-      axios.get(`${api}/users/active`, {
-        withCredentials: true,
-      }),
-      axios.get(`${api}/users/inactive`, {
-        withCredentials: true,
-      }),
-    ])
-      .then(([activeRes, inactiveRes]) => {
-        const active = activeRes.data.Result.map((user) => ({
-          ...user,
-          is_active: true,
-        }));
-        const inactive = inactiveRes.data.Result.map((user) => ({
-          ...user,
-          is_active: false,
-        }));
-        setAllUsers([...active, ...inactive]);
+    axios
+      .get(`${api}/auth/check`, { withCredentials: true })
+      .then((res) => {
+        if (res?.data?.loggedIn && res?.data?.user?.role_id === 1) {
+          fetchRoles().then(fetchUsers);
+        } else navigate("/unauthorized");
       })
-      .catch((err) => {
-        setPopupData({
-          show: true,
-          title: "שגיאה",
-          message: "שגיאה בטעינת העובדים",
-          mode: "error",
-        });
-        console.error(err);
-      });
-  };
+      .catch(() => navigate("/unauthorized"));
+  }, [navigate]);
 
   const fetchRoles = () => {
-    Promise.all([
-      axios.get(`${api}/roles/active`, {
-        withCredentials: true,
-      }),
-      axios.get(`${api}/roles/inactive`, {
-        withCredentials: true,
-      }),
+    return Promise.all([
+      axios.get(`${api}/roles/active`, { withCredentials: true }),
+      axios.get(`${api}/roles/inactive`, { withCredentials: true }),
     ])
       .then(([activeRes, inactiveRes]) => {
-        const active = activeRes.data.Roles.map((role) => ({
-          ...role,
+        const active = (activeRes?.data?.Roles || []).map((r) => ({
+          ...r,
           active: true,
         }));
-        const inactive = inactiveRes.data.Roles.map((role) => ({
-          ...role,
+        const inactive = (inactiveRes?.data?.Roles || []).map((r) => ({
+          ...r,
           active: false,
         }));
         setRoles([...active, ...inactive]);
       })
-      .catch((err) => {
-        setPopupData({
+      .catch(() =>
+        setPopup({
           show: true,
           title: "שגיאה",
           message: "שגיאה בטעינת תפקידים",
           mode: "error",
-        });
-        console.error(err);
-      });
+        })
+      );
   };
 
-  const getRoleName = (roleId) => {
-    const role = roles.find((r) => r.role_id === roleId);
-    if (!role) return <span className="text-gray-500">לא ידוע</span>;
-    return (
-      <span>
-        {role.role_name}
-        {!role.active && (
-          <Tooltip message="תפקיד זה לא פעיל יותר – נא לעדכן תפקיד">
-            <span className="text-yellow-500"> ⚠ </span>
-          </Tooltip>
-        )}
-      </span>
-    );
+  const fetchUsers = () => {
+    setLoading(true);
+    Promise.all([
+      axios.get(`${api}/users/active`, { withCredentials: true }),
+      axios.get(`${api}/users/inactive`, { withCredentials: true }),
+    ])
+      .then(([activeRes, inactiveRes]) => {
+        const active = (activeRes?.data?.Result || []).map((u) =>
+          mapUser(u, roles)
+        );
+        const inactive = (inactiveRes?.data?.Result || []).map((u) =>
+          mapUser(u, roles)
+        );
+        setAllUsers([...active, ...inactive]);
+      })
+      .catch(() =>
+        setPopup({
+          show: true,
+          title: "שגיאה",
+          message: "שגיאה בטעינת עובדים",
+          mode: "error",
+        })
+      )
+      .finally(() => setLoading(false));
   };
 
-  const filteredUsers = allUsers.filter((user) => {
-    const term = searchTerm.toLowerCase();
-    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
-    const statusText = user.is_active ? "פעיל" : "לא פעיל";
-    const statusCheck =
-      statusFilter === "all"
-        ? true
-        : statusFilter === "active"
-        ? user.is_active
-        : !user.is_active;
-    return (
-      statusCheck && (fullName.includes(term) || statusText.includes(term))
-    );
-  });
-
-  const handleDeactivate = (userId) => {
-    setPopupData({
-      show: true,
-      title: "אישור מחיקת משתמש",
-      message: "⚠️ האם אתה בטוח שברצונך להפוך משתמש זה ללא פעיל?",
-      mode: "confirm",
-      user_id: userId,
-    });
-  };
-
-  const confirmDeactivate = (userId) => {
+  const handleEdit = (user_id) => navigate(`/dashboard/users/edit/${user_id}`);
+  const confirmDelete = (user_id) => {
     axios
       .put(
-        `${api}/users/delete/${userId}`,
+        `${api}/users/delete/${user_id}`,
         { is_active: 0 },
         { withCredentials: true }
       )
-      .then((res) => {
-        if (res.data.Status) {
-          setPopupData({
-            show: true,
-            title: "הצלחה",
-            message: "המשתמש סומן כלא פעיל",
-            mode: "success",
-          });
-          fetchUsers();
-        } else {
-          setPopupData({
-            show: true,
-            title: "שגיאה",
-            message: res.data.Error || "שגיאה בעדכון סטטוס משתמש",
-            mode: "error",
-          });
-        }
+      .then(() => {
+        setPopup({
+          show: true,
+          title: "הצלחה",
+          message: "✅ המשתמש סומן כלא פעיל",
+          mode: "success",
+        });
+        fetchUsers();
       })
-      .catch((err) => {
-        setPopupData({
+      .catch(() =>
+        setPopup({
           show: true,
           title: "שגיאה",
-          message: "אירעה שגיאה בעדכון סטטוס משתמש",
+          message: "אירעה שגיאה במחיקה",
           mode: "error",
-        });
-        console.error(err);
-      });
+        })
+      );
   };
 
-  return (
-    <div className="p-6 text-right">
-      <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
-        רשימת משתמשים
-      </h2>
-
-      <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-2">
-        <NavigationButton
-          linkTo="/dashboard/add_user"
-          label="הוספת משתמש חדש"
-        />
-
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="font-rubik border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
-        >
-          <option value="active">משתמשים פעילים</option>
-          <option value="inactive">משתמשים לא פעילים</option>
-          <option value="all">הכל</option>
-        </select>
-
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="🔍 חיפוש לפי שם..."
-            className="border border-gray-300 rounded px-3 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 transition duration-150"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
+  const columns = [
+    { key: "user_id", label: "ת.ז", export: (u) => String(u.user_id) },
+    { key: "first_name", label: "שם פרטי", export: (u) => u.first_name },
+    { key: "last_name", label: "שם משפחה", export: (u) => u.last_name },
+    { key: "role_name", label: "תפקיד", export: (u) => u.role_name },
+    { key: "email", label: "אימייל", export: (u) => u.email },
+    {
+      key: "is_active",
+      label: "סטטוס",
+      render: (u) => renderCheckActive(u.is_active),
+      exportLabel: "status_human",
+    },
+    {
+      key: "actions",
+      label: "פעולות",
+      render: (u) => (
+        <div className="text-center">
+          <button
+            onClick={() => handleEdit(u.user_id)}
+            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+          >
+            עריכה
+          </button>
+          {u.is_active && (
             <button
-              onClick={() => setSearchTerm("")}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 text-red-500"
+              onClick={() =>
+                setPopup({
+                  show: true,
+                  title: "אישור מחיקה",
+                  message: "⚠️ להפוך את המשתמש ללא פעיל?",
+                  mode: "confirm",
+                  user_id: u.user_id,
+                })
+              }
+              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
             >
-              ✖
+              מחיקה
             </button>
           )}
         </div>
-      </div>
+      ),
+      export: () => null,
+    },
+  ];
 
-      <div className="overflow-auto rounded-lg shadow-lg bg-white/85">
-        <table className="w-full table-auto border-collapse text-sm text-center">
-          <thead>
-            <tr className="text-center bg-slate-100 text-gray-800">
-              <th className="p-2 border">ת.ז</th>
-              <th className="p-2 border">שם פרטי</th>
-              <th className="p-2 border">שם משפחה</th>
-              <th className="p-2 border">תפקיד</th>
-              <th className="p-2 border">אימייל</th>
-              <th className="p-2 border">סטטוס</th>
-              <th className="p-2 border">פעולות</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.length === 0 ? (
-              <tr>
-                <td colSpan="7" className="text-center text-red-500 p-4">
-                  אין משתמשים להצגה
-                </td>
-              </tr>
-            ) : (
-              filteredUsers.map((user) => (
-                <tr
-                  key={user.user_id}
-                  className={`transition duration-200 hover:bg-blue-50 cursor-pointer ${
-                    !user.is_active ? "bg-gray-100" : ""
-                  }`}
-                >
-                  <td className="border p-2 text-center">{user.user_id}</td>
-                  <td className="border p-2">{user.first_name}</td>
-                  <td className="border p-2">{user.last_name}</td>
-                  <td className="border p-2">{getRoleName(user.role_id)}</td>
-                  <td className="border p-2">{user.email}</td>
-                  <td
-                    className={`border p-2 text-center font-semibold ${
-                      user.is_active ? "text-green-600" : "text-red-500"
-                    }`}
-                  >
-                    {user.is_active ? "פעיל" : "לא פעיל"}
-                  </td>
-                  <td className="border p-2 text-center">
-                    <button
-                      onClick={() =>
-                        navigate(`/dashboard/users/edit/${user.user_id}`)
-                      }
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
-                    >
-                      עריכה
-                    </button>
-                    {user.is_active && (
-                      <button
-                        onClick={() => handleDeactivate(user.user_id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                      >
-                        מחיקה
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+  const filtersDef = [
+    {
+      name: "is_active",
+      label: "סטטוס",
+      type: "select",
+      options: [
+        { value: "true", label: "פעיל" },
+        { value: "false", label: "לא פעיל" },
+        { value: "", label: "כל הסטטוסים" },
+      ],
+    },
+    {
+      name: "role_id",
+      label: "תפקיד",
+      type: "select",
+      options: [
+        { value: "", label: "כל התפקידים" },
+        ...roles.map((r) => ({
+          value: String(r.role_id),
+          label: r.role_name,
+        })),
+      ],
+    },
+  ];
 
-      {/* Popup */}
-      {popupData.show && (
+  const defaultFilters = { is_active: "true" };
+
+  return (
+    <div className="flex flex-col flex-1 p-6 text-right">
+      {loading ? (
+        <div className="text-center text-gray-600">טוען נתונים...</div>
+      ) : (
+        <ReportView
+          title="רשימת עובדים"
+          columns={columns}
+          rows={allUsers}
+          filtersDef={filtersDef}
+          searchableKeys={["first_name", "last_name", "email", "role_name"]}
+          pageSize={25}
+          emailApiBase={api}
+          addButton={
+            <NavigationButton
+              linkTo="/dashboard/add_user"
+              label="הוספת עובד חדש"
+            />
+          }
+          defaultFilters={defaultFilters}
+          searchPlaceholder="חיפוש לפי שם או אימייל..."
+        />
+      )}
+
+      {popup.show && (
         <Popup
-          title={popupData.title}
-          message={popupData.message}
-          mode={popupData.mode}
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
           onClose={() =>
-            setPopupData({
+            setPopup({
               show: false,
               title: "",
               message: "",
-              mode: "info",
+              mode: "",
               user_id: null,
             })
           }
           onConfirm={
-            popupData.mode === "confirm"
-              ? () => confirmDeactivate(popupData.user_id)
+            popup.mode === "confirm"
+              ? () => confirmDelete(popup.user_id)
               : undefined
           }
         />
       )}
     </div>
   );
-};
-
-export default Users;
+}
