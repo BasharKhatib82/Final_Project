@@ -51,9 +51,14 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
 
       // fallback – רק אם ממש אין header
       if (!filename) {
-        filename = `${title || "דוח"}_${new Date()
-          .toLocaleString("he-IL")
-          .replace(/[/:]/g, "-")}.${format}`;
+        const now = new Date();
+        const datePart = `${now.getDate()}.${
+          now.getMonth() + 1
+        }.${now.getFullYear()}`;
+        const timePart = `${String(now.getHours()).padStart(2, "0")}-${String(
+          now.getMinutes()
+        ).padStart(2, "0")}`;
+        filename = `${title || "דוח"}_${datePart}_${timePart}.${format}`;
       }
 
       // הורדה
