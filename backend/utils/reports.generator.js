@@ -1,8 +1,11 @@
 import ExcelJS from "exceljs";
 import wkhtmltopdf from "wkhtmltopdf";
+import wkhtmltopdfInstaller from "wkhtmltopdf-installer"; 
 import fs from "fs";
 import os from "os";
 import path from "path";
+
+wkhtmltopdf.command = wkhtmltopdfInstaller.path;
 
 // --- פונקציות עזר ---
 function sanitizeFilename(s) {
