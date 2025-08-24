@@ -29,7 +29,7 @@ const renderCheck = (v) => (
 );
 
 const renderCheckActive = (v) => (
-  <span className={v ? "text-green-600 font-bold" : "text-red-500 font-bold"}>
+  <span className={v ? "text-green-600" : "text-red-500"}>
     {v ? "פעיל" : "לא פעיל"}
   </span>
 );
@@ -185,20 +185,20 @@ export default function Roles() {
   ];
 
   // 🔹 רק סינון לפי סטטוס
-  const filtersDef = [
-    {
-      name: "status",
-      label: "סטטוס",
-      type: "select",
-      options: [
-        { value: "active", label: "פעיל" },
-        { value: "inactive", label: "לא פעיל" },
-        { value: "", label: "כל הסטטוסים" },
-      ],
-    },
-  ];
+const filtersDef = [
+  {
+    name: "active",
+    label: "סטטוס",
+    type: "select",
+    options: [
+      { value: "1", label: "פעיל" },
+      { value: "0", label: "לא פעיל" },
+      { value: "", label: "כל הסטטוסים" },
+    ],
+  },
+];
 
-  const defaultFilters = { status: "active" };
+const defaultFilters = { active: "1" };
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
