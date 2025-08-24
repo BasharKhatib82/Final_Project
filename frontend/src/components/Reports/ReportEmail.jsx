@@ -74,7 +74,7 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
       </span>
       <input
         className="border rounded px-2 py-1 text-sm"
-        placeholder='דוא"ל נמען'
+        placeholder='דוא"ל לשליחת הקובץ'
         value={to}
         onChange={(e) => setTo(e.target.value)}
       />

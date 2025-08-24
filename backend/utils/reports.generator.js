@@ -94,12 +94,12 @@ export async function generatePdf({ title, columns, rows }) {
     (c) => c.key !== "actions" && c.export !== false
   );
 
-  // 🔹 הופכים סדר העמודות ל־RTL
   const headerRow = exportableCols
     .map((c) => ({
       text: c.label,
       style: "tableHeader",
       alignment: "center",
+      rtl: true,
     }))
     .reverse();
 
@@ -114,6 +114,7 @@ export async function generatePdf({ title, columns, rows }) {
         return {
           text: String(val),
           alignment: "center",
+          rtl: true,
           noWrap: false,
           margin: [2, 2, 2, 2],
         };
@@ -129,6 +130,7 @@ export async function generatePdf({ title, columns, rows }) {
         text: title || "דוח",
         style: "header",
         alignment: "center",
+        rtl: true, //  מוסיף תמיכה בעברית
         margin: [0, 0, 0, 10],
       },
       {
@@ -146,7 +148,8 @@ export async function generatePdf({ title, columns, rows }) {
     },
     defaultStyle: {
       font: "DejaVuSans",
-      alignment: "right", //
+      alignment: "right",
+      rtl: true,
       fontSize: 10,
     },
     pageMargins: [30, 30, 30, 30],
