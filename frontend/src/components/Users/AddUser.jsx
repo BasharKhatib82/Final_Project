@@ -40,7 +40,8 @@ const AddUser = () => {
     axios
       .get(`${api}/roles/active`, { withCredentials: true })
       .then((res) => {
-        if (res.data.success && Array.isArray(res.data.Roles)) {
+        // ✅ עדכון לפי ה־API שלך
+        if (res.data.Status && Array.isArray(res.data.Roles)) {
           setRoles(res.data.Roles);
         } else {
           setPopupData({
@@ -89,18 +90,19 @@ const AddUser = () => {
     axios
       .post(`${api}/users/add`, user, { withCredentials: true })
       .then((res) => {
-        if (res.data.success) {
+        // ✅ שינוי ל־Status / Message / Error
+        if (res.data.Status) {
           setPopupData({
             show: true,
             title: "הצלחה",
-            message: res.data.message || "המשתמש נוסף בהצלחה",
+            message: res.data.Message || "המשתמש נוסף בהצלחה",
             mode: "success",
           });
         } else {
           setPopupData({
             show: true,
             title: "שגיאה",
-            message: res.data.message || "שגיאה בהוספת המשתמש",
+            message: res.data.Error || "שגיאה בהוספת המשתמש",
             mode: "error",
           });
         }
