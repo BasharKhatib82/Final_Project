@@ -86,7 +86,7 @@ export async function generateExcel({ title, columns, rows }) {
  */
 export async function generatePdf({ title, columns, rows }) {
   const fonts = {
-    NotoSans: {
+    NotoSansHebrew: {
       normal: path.resolve(__dirname, "../fonts/NotoSansHebrew-Regular.ttf"),
       bold: path.resolve(__dirname, "../fonts/NotoSansHebrew-Bold.ttf"),
     },
@@ -148,12 +148,12 @@ export async function generatePdf({ title, columns, rows }) {
       },
     ],
     styles: {
-      header: { fontSize: 12, bold: true }, // 👈 פונט קטן יותר
+      header: { fontSize: 12, bold: true },
       tableHeader: { bold: true, fillColor: "#eeeeee" },
     },
     defaultStyle: {
-      font: "NotoSans",
-      alignment: "right", // 👈 כיוון ברירת מחדל RTL
+      font: "NotoSansHebrew",
+      alignment: "right", //
       fontSize: 10,
     },
     pageMargins: [30, 30, 30, 30],
