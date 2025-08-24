@@ -3,7 +3,10 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
+import Popup from "../Tools/Popup"; // ✅ הוספנו
+
 const api = process.env.REACT_APP_API_URL;
+
 const AddUser = () => {
   const navigate = useNavigate();
 
@@ -21,26 +24,41 @@ const AddUser = () => {
 
   const [roles, setRoles] = useState([]);
 
+  // ✅ סטייט לפופאפ
+  const [popupData, setPopupData] = useState({
+    show: false,
+    title: "",
+    message: "",
+    mode: "info",
+  });
+
   useEffect(() => {
     fetchRoles();
   }, []);
 
   const fetchRoles = () => {
     axios
-      .get(`${api}/roles/active`, {
-        withCredentials: true,
-        params: { t: new Date().getTime() },
-      })
+      .get(`${api}/roles/active`, { withCredentials: true })
       .then((res) => {
-        if (res.data.Status && Array.isArray(res.data.Roles)) {
+        if (res.data.success && Array.isArray(res.data.Roles)) {
           setRoles(res.data.Roles);
         } else {
-          alert("לא התקבלה רשימת תפקידים");
+          setPopupData({
+            show: true,
+            title: "שגיאה",
+            message: "לא התקבלה רשימת תפקידים",
+            mode: "error",
+          });
         }
       })
       .catch((err) => {
         console.error("שגיאה בטעינת תפקידים:", err);
-        alert("שגיאה בעת טעינת רשימת התפקידים. ודא שאתה מחובר כמנהל כללי.");
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "שגיאה בטעינת רשימת התפקידים",
+          mode: "error",
+        });
       });
   };
 
@@ -59,22 +77,42 @@ const AddUser = () => {
 
     for (let field of requiredFields) {
       if (!user[field]) {
-        return alert(`שדה חובה חסר: ${field}`);
+        return setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: `שדה חובה חסר: ${field}`,
+          mode: "error",
+        });
       }
     }
 
     axios
       .post(`${api}/users/add`, user, { withCredentials: true })
       .then((res) => {
-        if (res.data.Status) {
-          navigate("/dashboard/add_user/success");
+        if (res.data.success) {
+          setPopupData({
+            show: true,
+            title: "הצלחה",
+            message: res.data.message || "המשתמש נוסף בהצלחה",
+            mode: "success",
+          });
         } else {
-          alert("שגיאה: " + res.data.Error);
+          setPopupData({
+            show: true,
+            title: "שגיאה",
+            message: res.data.message || "שגיאה בהוספת המשתמש",
+            mode: "error",
+          });
         }
       })
       .catch((err) => {
-        console.log(err);
-        alert("אירעה שגיאה בהוספת העובד.");
+        console.error("שגיאה בהוספת משתמש:", err);
+        setPopupData({
+          show: true,
+          title: "שגיאה",
+          message: "שגיאת שרת - נסה שוב מאוחר יותר.",
+          mode: "error",
+        });
       });
   };
 
@@ -93,6 +131,7 @@ const AddUser = () => {
           הוספת עובד חדש
         </h2>
 
+        {/* תעודת זהות */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">
             תעודת זהות
@@ -110,6 +149,7 @@ const AddUser = () => {
           />
         </div>
 
+        {/* שם פרטי */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">שם פרטי</label>
           <input
@@ -122,6 +162,7 @@ const AddUser = () => {
           />
         </div>
 
+        {/* שם משפחה */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">
             שם משפחה
@@ -136,6 +177,7 @@ const AddUser = () => {
           />
         </div>
 
+        {/* מספר טלפון */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">
             מספר טלפון
@@ -150,6 +192,7 @@ const AddUser = () => {
           />
         </div>
 
+        {/* אימייל */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">אימייל</label>
           <input
@@ -162,6 +205,7 @@ const AddUser = () => {
           />
         </div>
 
+        {/* תפקיד */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">תפקיד</label>
           <select
@@ -179,6 +223,7 @@ const AddUser = () => {
           </select>
         </div>
 
+        {/* סיסמה */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">סיסמה</label>
           <input
@@ -191,6 +236,7 @@ const AddUser = () => {
           />
         </div>
 
+        {/* הערות */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">הערות</label>
           <textarea
@@ -207,6 +253,21 @@ const AddUser = () => {
           <ExitButton label="ביטול" linkTo="/dashboard/users" />
         </div>
       </form>
+
+      {/* ✅ חלון פופאפ */}
+      {popupData.show && (
+        <Popup
+          title={popupData.title}
+          message={popupData.message}
+          mode={popupData.mode}
+          onClose={() => {
+            setPopupData({ show: false, title: "", message: "", mode: "info" });
+            if (popupData.mode === "success") {
+              navigate("/dashboard/users");
+            }
+          }}
+        />
+      )}
     </div>
   );
 };

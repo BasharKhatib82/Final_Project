@@ -3,11 +3,8 @@
  * שם: ReportExport
  * תיאור:
  *   קומפוננטה לייצוא דוחות (Excel / PDF / הדפסה - Preview).
- *   ✅ כולל עיבוד ערכים לייצוא:
- *      - תאריכים → YYYY-MM-DD
- *      - שעות → HH:mm
- *      - ערכים ריקים → "-"
- *      - שימוש ב־col.export / col.exportLabel אם קיימים
+ *   ✅ כל הלוגיקה עוברת לצד שרת בלבד.
+ *
  * ==========================================================
  */
 
@@ -31,41 +28,9 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
   /** 📥 הורדת קובץ (Excel / PDF) */
   const download = async (format) => {
     try {
-      // 🟢 מכינים rows אחרי עיבוד עמודות (export/exportLabel/format)
-      const exportRows = filteredRows.map((row) => {
-        const r = {};
-        columns.forEach((col) => {
-          if (col.export === false) return; // דילוג על עמודות שלא נרצה לייצא
-
-          if (typeof col.export === "function") {
-            r[col.label] = col.export(row);
-          } else if (col.exportLabel && row[col.exportLabel]) {
-            r[col.label] = row[col.exportLabel];
-          } else {
-            // ברירת מחדל: ערך מהשורה
-            const val = row[col.key];
-            if (val === null || val === undefined || val === "") {
-              r[col.label] = "-";
-            } else if (typeof val === "string" && val.includes("T")) {
-              // 🟢 תאריך בפורמט ISO
-              r[col.label] = val.split("T")[0];
-            } else if (
-              typeof val === "string" &&
-              val.match(/^\d{2}:\d{2}:\d{2}$/)
-            ) {
-              // 🟢 שעה עם שניות → רק HH:mm
-              r[col.label] = val.slice(0, 5);
-            } else {
-              r[col.label] = val;
-            }
-          }
-        });
-        return r;
-      });
-
       const res = await axios.post(
         `${apiBase}/reports/download`,
-        { title, columns, rows: exportRows, format },
+        { title, columns, rows: filteredRows, format },
         {
           withCredentials: true,
           responseType: "blob",
@@ -73,8 +38,9 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         }
       );
 
-      // 📝 יצירת שם קובץ
       let filename;
+
+      // ניסיון לחלץ שם אמיתי מהשרת (עם עברית + תאריך/שעה)
       const disposition = res.headers["content-disposition"];
       if (disposition) {
         const match = disposition.match(/filename\*=UTF-8''(.+)/);
@@ -82,6 +48,8 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
           filename = decodeURIComponent(match[1]);
         }
       }
+
+      // fallback – רק אם ממש אין header
       if (!filename) {
         const now = new Date();
         const datePart = `${now.getDate()}.${
@@ -93,7 +61,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         filename = `${title || "דוח"}_${datePart}_${timePart}.${format}`;
       }
 
-      // 📂 שמירת הקובץ
+      // הורדה
       const blob = new Blob([res.data], {
         type:
           format === "pdf"
@@ -132,37 +100,9 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
   /** 🖨️ תצוגה לפני הדפסה */
   const previewPdf = async () => {
     try {
-      const exportRows = filteredRows.map((row) => {
-        const r = {};
-        columns.forEach((col) => {
-          if (col.export === false) return;
-
-          if (typeof col.export === "function") {
-            r[col.label] = col.export(row);
-          } else if (col.exportLabel && row[col.exportLabel]) {
-            r[col.label] = row[col.exportLabel];
-          } else {
-            const val = row[col.key];
-            if (val === null || val === undefined || val === "") {
-              r[col.label] = "-";
-            } else if (typeof val === "string" && val.includes("T")) {
-              r[col.label] = val.split("T")[0];
-            } else if (
-              typeof val === "string" &&
-              val.match(/^\d{2}:\d{2}:\d{2}$/)
-            ) {
-              r[col.label] = val.slice(0, 5);
-            } else {
-              r[col.label] = val;
-            }
-          }
-        });
-        return r;
-      });
-
       const res = await axios.post(
         `${apiBase}/reports/preview`,
-        { title, columns, rows: exportRows },
+        { title, columns, rows: filteredRows },
         {
           withCredentials: true,
           responseType: "blob",
@@ -212,6 +152,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         <Printer size={16} /> הדפסה
       </button>
 
+      {/* ✅ חלון פופאפ לשגיאות/הצלחות */}
       {popup.show && (
         <Popup
           title={popup.title}

@@ -99,16 +99,24 @@ router.post("/add", verifyToken, async (req, res) => {
     notes,
   } = req.body;
 
-  if (!first_name || !last_name || !email || !role_id || !password) {
+  if (
+    !first_name ||
+    !last_name ||
+    !email ||
+    !role_id ||
+    !password ||
+    !user_id
+  ) {
     return res.status(400).json({ success: false, message: "שדות חובה חסרים" });
   }
 
   try {
     const hash = await bcrypt.hash(password, 10);
+
     const sql = `
       INSERT INTO users 
       (user_id, first_name, last_name, phone_number, email, role_id, password, last_password_change, notes, active) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, 1)
     `;
 
     await db.query(sql, [
@@ -120,7 +128,6 @@ router.post("/add", verifyToken, async (req, res) => {
       role_id,
       hash,
       notes,
-      1,
     ]);
 
     logAction("הוספת משתמש חדש")(req, res, () => {});
@@ -131,7 +138,7 @@ router.post("/add", verifyToken, async (req, res) => {
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(409).json({
         success: false,
-        message: "האימייל או הטלפון כבר קיימים במערכת",
+        message: "❌ המשתמש כבר קיים במערכת (ת.ז כפולה)",
       });
     }
 
