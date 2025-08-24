@@ -1,10 +1,10 @@
 // backend/utils/reports.generator.js
 import ExcelJS from "exceljs";
 import PdfPrinter from "pdfmake";
-import fixHebrewText from "../utils/fixHebrewText.js";
 import fs from "fs";
 import os from "os";
 import path from "path";
+import fixHebrewText from "./fixHebrewText.js"; // 👈 ייבוא נכון
 
 function sanitizeFilename(s) {
   return (
@@ -25,45 +25,43 @@ function stamp() {
 }
 
 function toExportValue(v) {
-  if (typeof v === "boolean") return v ? "✓" : "✗";
+  if (typeof v === "boolean") return v ? "✔" : "✖";
   if (v == null) return "";
   return String(v);
 }
 
-/**
- * ✅ יצירת Excel – Buffer + filename
- */
+// ✅ Excel
 export async function generateExcel({ title, columns, rows }) {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Report");
 
-  // כותרת עליונה
-  const titleRow = ws.addRow([title]);
+  const titleRow = ws.addRow([fixHebrewText(title)]);
   titleRow.font = { size: 14, bold: true };
   titleRow.alignment = { horizontal: "center", vertical: "middle" };
   ws.addRow([]);
 
-  // כותרות
   const exportableCols = columns.filter(
     (c) => c.key !== "actions" && c.export !== false
   );
-  const headers = exportableCols.map((c) => c.label);
+  const headers = exportableCols.map((c) => fixHebrewText(c.label));
   const headerRow = ws.addRow(headers);
   headerRow.font = { bold: true };
   headerRow.alignment = { horizontal: "center", vertical: "middle" };
 
-  // שורות
   rows.forEach((r) => {
     const data = exportableCols.map((c) => {
-      if (c.exportLabel) return r[c.exportLabel];
-      if (typeof c.export === "function") return c.export(r);
-      return toExportValue(r[c.key]);
+      let val;
+      if (c.exportLabel) val = r[c.exportLabel];
+      else if (typeof c.export === "function") val = c.export(r);
+      else val = toExportValue(r[c.key]);
+
+      if (typeof val === "string") val = fixHebrewText(val);
+      return val;
     });
     const row = ws.addRow(data);
     row.alignment = { horizontal: "center", vertical: "middle" };
   });
 
-  // התאמת רוחב
   ws.columns.forEach((col) => {
     let maxLength = 10;
     col.eachCell({ includeEmpty: true }, (cell) => {
@@ -79,9 +77,7 @@ export async function generateExcel({ title, columns, rows }) {
   return { buffer, filename };
 }
 
-/**
- * ✅ יצירת PDF כקובץ זמני
- */
+// ✅ PDF
 export async function generatePdf({ title, columns, rows }) {
   const fonts = {
     DejaVuSans: {
@@ -97,10 +93,9 @@ export async function generatePdf({ title, columns, rows }) {
 
   const headerRow = exportableCols
     .map((c) => ({
-      text: c.label,
+      text: fixHebrewText(c.label),
       style: "tableHeader",
       alignment: "center",
-      rtl: true,
     }))
     .reverse();
 
@@ -112,14 +107,11 @@ export async function generatePdf({ title, columns, rows }) {
         else if (typeof c.export === "function") val = c.export(r);
         else val = toExportValue(r[c.key]);
 
-        if (typeof val === "string") {
-          val = fixHebrewText(val);
-        }
+        if (typeof val === "string") val = fixHebrewText(val);
 
         return {
-          text: String(val),
+          text: val,
           alignment: "center",
-          rtl: true,
           noWrap: false,
           margin: [2, 2, 2, 2],
         };
@@ -135,7 +127,6 @@ export async function generatePdf({ title, columns, rows }) {
         text: fixHebrewText(title) || "דוח",
         style: "header",
         alignment: "center",
-        rtl: true, //  מוסיף תמיכה בעברית
         margin: [0, 0, 0, 10],
       },
       {
@@ -154,7 +145,6 @@ export async function generatePdf({ title, columns, rows }) {
     defaultStyle: {
       font: "DejaVuSans",
       alignment: "right",
-      rtl: true,
       fontSize: 10,
     },
     pageMargins: [30, 30, 30, 30],
