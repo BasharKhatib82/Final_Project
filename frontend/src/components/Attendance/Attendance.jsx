@@ -36,9 +36,7 @@ export default function Attendance() {
     setLoading(true);
     axios
       .get(`${api}/attendance`, { withCredentials: true })
-      .then((res) => {
-        setAttendance(res.data.Result || []);
-      })
+      .then((res) => setAttendance(res.data.Result || []))
       .catch((err) => console.error("שגיאה בטעינת נוכחות:", err))
       .finally(() => setLoading(false));
   };
@@ -77,9 +75,14 @@ export default function Attendance() {
     return <span className={color}>{status}</span>;
   };
 
-  // 🟢 עמודות טבלה
+  // 🟢 עמודות טבלה + export
   const columns = [
-    { key: "date", label: "תאריך", render: (r) => formatDate(r.date) },
+    {
+      key: "date",
+      label: "תאריך",
+      render: (r) => formatDate(r.date),
+      export: (r) => formatDate(r.date),
+    },
     {
       key: "user_id",
       label: "שם עובד",
@@ -87,15 +90,35 @@ export default function Attendance() {
         const u = users.find((x) => x.user_id === r.user_id);
         return u ? `${u.first_name} ${u.last_name}` : "לא ידוע";
       },
+      export: (r) => {
+        const u = users.find((x) => x.user_id === r.user_id);
+        return u ? `${u.first_name} ${u.last_name}` : "לא ידוע";
+      },
     },
-    { key: "check_in", label: "כניסה", render: (r) => formatTime(r.check_in) },
+    {
+      key: "check_in",
+      label: "כניסה",
+      render: (r) => formatTime(r.check_in),
+      export: (r) => formatTime(r.check_in),
+    },
     {
       key: "check_out",
       label: "יציאה",
       render: (r) => formatTime(r.check_out),
+      export: (r) => formatTime(r.check_out),
     },
-    { key: "status", label: "סטטוס", render: (r) => renderStatus(r.status) },
-    { key: "notes", label: "הערות", render: (r) => r.notes || "-" },
+    {
+      key: "status",
+      label: "סטטוס",
+      render: (r) => renderStatus(r.status),
+      export: (r) => r.status,
+    },
+    {
+      key: "notes",
+      label: "הערות",
+      render: (r) => r.notes || "-",
+      export: (r) => r.notes || "-",
+    },
     {
       key: "actions",
       label: "פעולות",
@@ -109,10 +132,10 @@ export default function Attendance() {
           עריכה
         </button>
       ),
+      export: () => null, // ❌ לא מייצאים כפתורים
     },
   ];
 
-  // 🟢 פילטרים
   const filtersDef = [
     {
       name: "status",
@@ -157,7 +180,7 @@ export default function Attendance() {
           columns={columns}
           rows={attendance}
           filtersDef={filtersDef}
-          searchableKeys={["status", "notes", "user_id"]} // 🔍 נוסיף גם שם עובד
+          searchableKeys={["status", "notes", "user_id"]}
           pageSize={25}
           emailApiBase={api}
           addButton={
