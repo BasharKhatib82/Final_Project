@@ -97,30 +97,38 @@ export async function generatePdf({ title, columns, rows }) {
     (c) => c.key !== "actions" && c.export !== false
   );
 
-  const body = [
-    exportableCols.map((c) => ({
+  // 🔹 הופכים סדר העמודות ל־RTL
+  const headerRow = exportableCols
+    .map((c) => ({
       text: c.label,
       style: "tableHeader",
       alignment: "center",
-    })),
-    ...rows.map((r) =>
-      exportableCols.map((c) => {
+    }))
+    .reverse();
+
+  const bodyRows = rows.map((r) =>
+    exportableCols
+      .map((c) => {
         let val;
         if (c.exportLabel) val = r[c.exportLabel];
         else if (typeof c.export === "function") val = c.export(r);
         else val = toExportValue(r[c.key]);
 
+        // טיפול בתווי ✓✗ → נשתמש ב־✔ ✖
+        if (val === "✓") val = "✔";
+        if (val === "✗") val = "✖";
+
         return {
-          text: val,
+          text: String(val),
           alignment: "center",
           noWrap: false,
-          maxWidth: 150,
+          margin: [2, 2, 2, 2],
         };
       })
-    ),
-  ];
+      .reverse()
+  );
 
-  const colWidths = exportableCols.map(() => "auto");
+  const colWidths = exportableCols.map(() => "auto").reverse();
 
   const docDefinition = {
     content: [
@@ -131,15 +139,23 @@ export async function generatePdf({ title, columns, rows }) {
         margin: [0, 0, 0, 10],
       },
       {
-        table: { headerRows: 1, widths: colWidths, body },
+        table: {
+          headerRows: 1,
+          widths: colWidths,
+          body: [headerRow, ...bodyRows],
+        },
         layout: "lightHorizontalLines",
       },
     ],
     styles: {
-      header: { fontSize: 16, bold: true },
+      header: { fontSize: 14, bold: true }, // 👈 פונט קטן יותר
       tableHeader: { bold: true, fillColor: "#eeeeee" },
     },
-    defaultStyle: { font: "NotoSans" },
+    defaultStyle: {
+      font: "NotoSans",
+      alignment: "right", // 👈 כיוון ברירת מחדל RTL
+      fontSize: 10,
+    },
     pageMargins: [30, 30, 30, 30],
   };
 
