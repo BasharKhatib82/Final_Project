@@ -8,11 +8,10 @@ import ReportView from "../Reports/ReportView";
 
 const api = process.env.REACT_APP_API_URL;
 const asBool = (v) => v === true || v === 1 || v === "1";
+const isActive = (el) => el === true || el === 1 || el === "1";
 
-const mapRole = (r, isActive) => ({
+const mapRole = (r) => ({
   ...r,
-  is_active: isActive,
-  status: isActive ? "active" : "inactive",
   role_management: asBool(r.role_management),
   can_manage_users: asBool(r.can_manage_users),
   can_view_reports: asBool(r.can_view_reports),
@@ -20,11 +19,18 @@ const mapRole = (r, isActive) => ({
   can_edit_courses: asBool(r.can_edit_courses),
   can_manage_tasks: asBool(r.can_manage_tasks),
   can_access_all_data: asBool(r.can_access_all_data),
+  active: isActive(r.active),
 });
 
 const renderCheck = (v) => (
   <span className={v ? "text-green-600 font-bold" : "text-red-500 font-bold"}>
     {v ? "✓" : "✗"}
+  </span>
+);
+
+const renderCheckActive = (v) => (
+  <span className={v ? "text-green-600 font-bold" : "text-red-500 font-bold"}>
+    {v ? "פעיל" : "לא פעיל"}
   </span>
 );
 
@@ -139,10 +145,10 @@ export default function Roles() {
       export: (r) => (r.can_access_all_data ? "✓" : "✗"),
     },
     {
-      key: "status",
+      key: "active",
       label: "סטטוס",
-      render: (r) => (r.is_active ? renderCheck(true) : renderCheck(false)),
-      export: (r) => (r.is_active ? "פעיל" : "לא פעיל"),
+      render: (r) => renderCheckActive(r.active),
+      export: (r) => (r.active ? "פעיל" : "לא פעיל"),
     },
 
     {
