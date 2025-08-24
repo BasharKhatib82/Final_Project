@@ -12,7 +12,7 @@
  */
 export function validateAndSanitizeEmail(email) {
   if (!email || typeof email !== "string") {
-    throw new Error("Email must be a string");
+    throw new Error("כתובת דואר אלקטרוני לא חוקית");
   }
 
   // 1. Normalize & remove hidden Unicode chars
@@ -24,7 +24,7 @@ export function validateAndSanitizeEmail(email) {
   // 3. Validate format with regex
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(sanitized)) {
-    throw new Error("Invalid email address");
+    throw new Error("כתובת דואר אלקטרוני לא חוקית");
   }
 
   return sanitized;
