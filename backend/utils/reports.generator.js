@@ -1,23 +1,13 @@
-// backend/utils/reports.generator.js
 import ExcelJS from "exceljs";
-import puppeteer from "puppeteer";
+import wkhtmltopdf from "wkhtmltopdf";
 import fs from "fs";
 import os from "os";
 import path from "path";
 
-
-
+// --- פונקציות עזר ---
 function sanitizeFilename(s) {
   if (!s || typeof s !== "string") return "report";
-
-  // מנקים תווים אסורים לחלוטין (Windows / Linux / Mac)
-  let safe = s.replace(/[\\/:*?"<>|]+/g, "_").trim();
-
-  // אם אחרי הניקוי יצא ריק – נחזיר את המקור כמו שהוא (גם אם בעברית),
-  // אחרת ניפול ל-"report"
-  if (!safe) safe = s.trim();
-
-  return safe || "report";
+  return s.replace(/[\\/:*?"<>|]+/g, "_").trim() || "report";
 }
 
 function stamp() {
@@ -36,12 +26,12 @@ function toExportValue(v) {
   return String(v);
 }
 
-// ✅ Excel
+// ✅ Excel (כמו שהיה אצלך)
 export async function generateExcel({ title, columns, rows }) {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Report");
 
-  const titleRow = ws.addRow([(title)]);
+  const titleRow = ws.addRow([title]);
   titleRow.font = { size: 14, bold: true };
   titleRow.alignment = { horizontal: "center", vertical: "middle" };
   ws.addRow([]);
@@ -60,8 +50,6 @@ export async function generateExcel({ title, columns, rows }) {
       if (c.exportLabel) val = r[c.exportLabel];
       else if (typeof c.export === "function") val = c.export(r);
       else val = toExportValue(r[c.key]);
-
-      if (typeof val === "string") val = val;
       return val;
     });
     const row = ws.addRow(data);
@@ -83,17 +71,16 @@ export async function generateExcel({ title, columns, rows }) {
   return { buffer, filename };
 }
 
-// ✅ PDF
-// --- PDF חדש עם Puppeteer ---
-export async function generatePdf({ title, columns, rows, logoPath }) {
+// ✅ PDF (עם טבלה מלאה)
+export async function generatePdf({ title, columns, rows }) {
   const exportableCols = columns.filter(
     (c) => c.key !== "actions" && c.export !== false
   );
 
-  // headers
+  // בניית כותרות
   const headersHtml = exportableCols.map((c) => `<th>${c.label}</th>`).join("");
 
-  // body rows
+  // בניית שורות
   const bodyHtml = rows
     .map((r) => {
       const cells = exportableCols
@@ -109,40 +96,39 @@ export async function generatePdf({ title, columns, rows, logoPath }) {
     })
     .join("");
 
-  // HTML content
+  // HTML מלא
   const html = `
-    <html lang="he" dir="rtl">
-    <head>
-      <meta charset="utf-8">
-      <style>
-        body { font-family: "Arial", sans-serif; direction: rtl; }
-        h1 { text-align: center; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #000; padding: 6px; text-align: center; }
-        th { background: #eee; }
-        img.logo { max-width: 150px; display: block; margin: 0 auto 20px; }
-      </style>
-    </head>
-    <body>
-      ${logoPath ? `<img class="logo" src="file://${logoPath}">` : ""}
-      <h1>${title}</h1>
-      <table>
-        <thead><tr>${headersHtml}</tr></thead>
-        <tbody>${bodyHtml}</tbody>
-      </table>
-    </body>
+    <html dir="rtl" lang="he">
+      <head>
+        <meta charset="utf-8" />
+        <style>
+          body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; }
+          h1 { text-align: center; color: darkblue; margin-bottom: 20px; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #000; padding: 6px; text-align: center; }
+          th { background: #eee; }
+          tr:nth-child(even) td { background: #f9f9f9; }
+        </style>
+      </head>
+      <body>
+        <h1>${title}</h1>
+        <table>
+          <thead><tr>${headersHtml}</tr></thead>
+          <tbody>${bodyHtml}</tbody>
+        </table>
+      </body>
     </html>
   `;
 
-  const browser = await puppeteer.launch({ headless: "new" });
-  const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: "networkidle0" });
-
+  // יצירת קובץ
   const filename = `${sanitizeFilename(title)} ${stamp()}.pdf`;
   const filePath = path.join(os.tmpdir(), filename);
 
-  await page.pdf({ path: filePath, format: "A4", printBackground: true });
-  await browser.close();
+  return new Promise((resolve, reject) => {
+    const stream = fs.createWriteStream(filePath);
+    wkhtmltopdf(html, { encoding: "utf-8" }).pipe(stream);
 
-  return { filePath, filename };
+    stream.on("finish", () => resolve({ filePath, filename }));
+    stream.on("error", reject);
+  });
 }

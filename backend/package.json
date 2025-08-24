@@ -25,8 +25,7 @@
     "mysql2": "^3.14.0",
     "node-cron": "^4.1.0",
     "nodemailer": "^7.0.5",
-    "nodemon": "^3.1.9",
     "path": "^0.12.7",
-    "puppeteer": "^24.17.0"
+    "wkhtmltopdf": "^0.4.0"
   }
 }
