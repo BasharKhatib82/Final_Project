@@ -89,13 +89,6 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
       const blob = new Blob([res.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       window.open(url, "_blank");
-
-      setPopup({
-        show: true,
-        title: "הצלחה",
-        message: "✅ תצוגת PDF נפתחה בהצלחה",
-        mode: "success",
-      });
     } catch (err) {
       console.error("Preview failed:", err.response?.data || err.message);
       setPopup({

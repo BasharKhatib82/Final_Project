@@ -58,9 +58,12 @@ export async function generateExcel({ title, columns, rows }) {
   rows.forEach((r) => {
     const data = columns
       .filter((c) => c.key !== "actions" && c.export !== false)
-      .map((c) =>
-        typeof c.export === "function" ? c.export(r) : toExportValue(r[c.key])
-      );
+      .map((c) => {
+        if (typeof c.export === "function") return c.export(r);
+        if (c.export === false) return "";
+        if (c.export != null) return c.export;
+        return toExportValue(r[c.key]);
+      });
     const row = ws.addRow(data);
     row.alignment = { horizontal: "center", vertical: "middle" };
   });
@@ -72,7 +75,7 @@ export async function generateExcel({ title, columns, rows }) {
       const val = cell.value ? cell.value.toString() : "";
       maxLength = Math.max(maxLength, val.length + 2);
     });
-    col.width = maxLength > 40 ? 40 : maxLength; // הגבלת מקסימום 40
+    col.width = maxLength > 40 ? 40 : maxLength; // מקסימום 40
     col.alignment = { horizontal: "center", vertical: "middle" };
   });
 
@@ -97,7 +100,6 @@ export async function generatePdf({ title, columns, rows }) {
     (c) => c.key !== "actions" && c.export !== false
   );
 
-  //pdf נתוני טבלה
   const body = [
     exportableCols.map((c) => ({
       text: c.label,
@@ -106,15 +108,16 @@ export async function generatePdf({ title, columns, rows }) {
     })),
     ...rows.map((r) =>
       exportableCols.map((c) => {
-        const val =
-          typeof c.export === "function"
-            ? c.export(r)
-            : toExportValue(r[c.key]);
+        let val;
+        if (typeof c.export === "function") val = c.export(r);
+        else if (c.export === false) val = "";
+        else if (c.export != null) val = c.export;
+        else val = toExportValue(r[c.key]);
+
         return {
           text: val,
           alignment: "center",
           noWrap: false,
-          maxWidth: 150,
         };
       })
     ),
