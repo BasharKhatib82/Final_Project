@@ -40,7 +40,7 @@ export async function generateExcel({ title, columns, rows }) {
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet("Report");
 
-  const titleRow = ws.addRow([fixHebrewText(title)]);
+  const titleRow = ws.addRow([(title)]);
   titleRow.font = { size: 14, bold: true };
   titleRow.alignment = { horizontal: "center", vertical: "middle" };
   ws.addRow([]);
@@ -48,7 +48,7 @@ export async function generateExcel({ title, columns, rows }) {
   const exportableCols = columns.filter(
     (c) => c.key !== "actions" && c.export !== false
   );
-  const headers = exportableCols.map((c) => fixHebrewText(c.label));
+  const headers = exportableCols.map((c) => c.label);
   const headerRow = ws.addRow(headers);
   headerRow.font = { bold: true };
   headerRow.alignment = { horizontal: "center", vertical: "middle" };
@@ -60,7 +60,7 @@ export async function generateExcel({ title, columns, rows }) {
       else if (typeof c.export === "function") val = c.export(r);
       else val = toExportValue(r[c.key]);
 
-      if (typeof val === "string") val = fixHebrewText(val);
+      if (typeof val === "string") val = val;
       return val;
     });
     const row = ws.addRow(data);
