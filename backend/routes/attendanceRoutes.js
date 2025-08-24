@@ -147,7 +147,7 @@ router.put("/edit/:id", verifyToken, async (req, res) => {
 
     res.json({ Status: true, Message: "הנוכחות עודכנה בהצלחה" });
   } catch (err) {
-    console.error("❌ שגיאה בעדכון נוכחות:", err);
+    console.error(" שגיאה בעדכון נוכחות:", err);
     res.status(500).json({ Status: false, Error: "שגיאת שרת" });
   }
 });
