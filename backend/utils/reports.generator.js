@@ -81,28 +81,14 @@ export async function generateExcel({ title, columns, rows }) {
   return { buffer, filename };
 }
 
-
-// פונקציה שמתקנת טקסט רק אם יש בו עברית
-function fixHebrew(text) {
-  if (!text) return "";
-  const hebrewRegex = /[\u0590-\u05FF]/; // טווח יוניקוד לאותיות עבריות
-  if (!hebrewRegex.test(text)) return String(text); // לא עברית → תחזיר כרגיל
-
-  return String(text)
-    .split(" ")
-    .reverse()
-    .join(" "); // הפוך מילים
-}
-
-
 /**
- * ✅ יצירת PDF כקובץ זמני (תמיכה בעברית RTL)
+ * ✅ יצירת PDF כקובץ זמני
  */
 export async function generatePdf({ title, columns, rows }) {
   const fonts = {
-    DejaVu: {
-      normal: path.resolve(__dirname, "../fonts/DejaVuSans.ttf"),
-      bold: path.resolve(__dirname, "../fonts/DejaVuSans-Bold.ttf"),
+    NotoSansHebrew: {
+      normal: path.resolve("public/fonts/NotoSansHebrew-Regular.ttf"),
+      bold: path.resolve("public/fonts/NotoSansHebrew-Bold.ttf"),
     },
   };
   const printer = new PdfPrinter(fonts);
@@ -111,16 +97,15 @@ export async function generatePdf({ title, columns, rows }) {
     (c) => c.key !== "actions" && c.export !== false
   );
 
-  // כותרות טבלה
+  // 🔹 הופכים סדר העמודות ל־RTL
   const headerRow = exportableCols
     .map((c) => ({
-      text: fixHebrew(c.label),
+      text: c.label,
       style: "tableHeader",
       alignment: "center",
     }))
     .reverse();
 
-  // שורות טבלה
   const bodyRows = rows.map((r) =>
     exportableCols
       .map((c) => {
@@ -129,12 +114,8 @@ export async function generatePdf({ title, columns, rows }) {
         else if (typeof c.export === "function") val = c.export(r);
         else val = toExportValue(r[c.key]);
 
-        // טיפול ב־✓✗
-        if (val === "✓") val = "✔";
-        if (val === "✗") val = "✖";
-
         return {
-          text: fixHebrew(String(val)),
+          text: String(val),
           alignment: "center",
           noWrap: false,
           margin: [2, 2, 2, 2],
@@ -148,7 +129,7 @@ export async function generatePdf({ title, columns, rows }) {
   const docDefinition = {
     content: [
       {
-        text: fixHebrew(title || "דוח"),
+        text: title || "דוח",
         style: "header",
         alignment: "center",
         margin: [0, 0, 0, 10],
@@ -163,13 +144,13 @@ export async function generatePdf({ title, columns, rows }) {
       },
     ],
     styles: {
-      header: { fontSize: 14, bold: true },
+      header: { fontSize: 12, bold: true },
       tableHeader: { bold: true, fillColor: "#eeeeee" },
     },
     defaultStyle: {
-      font: "DejaVu",
-      alignment: "right",
-      fontSize: 9,
+      font: "DejaVuSans",
+      alignment: "right", //
+      fontSize: 10,
     },
     pageMargins: [30, 30, 30, 30],
   };

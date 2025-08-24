@@ -1,4 +1,5 @@
 import express from "express";
+import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
@@ -31,6 +32,8 @@ app.use(express.json({ limit: "10mb" }));
 app.use(cors());
 
 app.use(cookieParser());
+
+app.use("/fonts", express.static(path.join(process.cwd(), "public/fonts")));
 
 // ✅ ראוטים
 app.use("/admin", adminRoutes);
