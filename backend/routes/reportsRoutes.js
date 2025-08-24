@@ -1,9 +1,6 @@
 import express from "express";
 import fs from "fs";
-import {
-  generateExcelBuffer,
-  generatePdfFile,
-} from "../utils/reports.generator.js";
+import { generateExcel, generatePdf } from "../utils/reports.generator.js";
 import { sendReportEmail } from "../utils/reports.mailer.js";
 import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
 
@@ -39,7 +36,7 @@ router.post("/download", async (req, res) => {
     const { title, columns, rows, format = "xlsx" } = req.body;
 
     if (format === "xlsx") {
-      const buffer = await generateExcelBuffer({ title, columns, rows });
+      const buffer = await generateExcel({ title, columns, rows });
       res.setHeader(
         "Content-Disposition",
         `attachment; filename="${title}.xlsx"`
