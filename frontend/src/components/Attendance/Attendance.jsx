@@ -1,8 +1,7 @@
-// ✅ Attendance.jsx – עם ReportView אחיד
+// src/components/Attendance.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
 import ReportView from "../Reports/ReportView";
 
@@ -12,18 +11,12 @@ export default function Attendance() {
   const [attendance, setAttendance] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [popup, setPopup] = useState({
-    show: false,
-    title: "",
-    message: "",
-    mode: "",
-  });
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkPermissions().then(() => {
-      fetchUsers().then(fetchAttendance);
-    });
+    checkPermissions();
+    fetchAttendance();
+    fetchUsers();
   }, []);
 
   const checkPermissions = async () => {
@@ -34,123 +27,69 @@ export default function Attendance() {
       if (!res.data.loggedIn || res.data.user.role_id !== 1) {
         navigate("/unauthorized");
       }
-    } catch (err) {
-      console.error("❌ שגיאה בבדיקת הרשאות:", err);
+    } catch {
       navigate("/unauthorized");
     }
   };
 
-  const fetchUsers = async () => {
-    try {
-      const [activeRes, inactiveRes] = await Promise.all([
-        axios.get(`${api}/users/active`, { withCredentials: true }),
-        axios.get(`${api}/users/inactive`, { withCredentials: true }),
-      ]);
-      const active = (activeRes.data.Result || []).map((u) => ({
-        ...u,
-        active: true,
-      }));
-      const inactive = (inactiveRes.data.Result || []).map((u) => ({
-        ...u,
-        active: false,
-      }));
-      setUsers([...active, ...inactive]);
-    } catch (err) {
-      console.error("❌ שגיאה בטעינת עובדים:", err);
-    }
-  };
-
-  const fetchAttendance = async () => {
+  const fetchAttendance = () => {
     setLoading(true);
-    try {
-      const res = await axios.get(`${api}/attendance`, {
-        withCredentials: true,
-      });
-      setAttendance(res.data.Result || []);
-    } catch (err) {
-      console.error("❌ שגיאה בטעינת נוכחות:", err);
-      setPopup({
-        show: true,
-        title: "שגיאה",
-        message: "שגיאה בטעינת רשומות נוכחות",
-        mode: "error",
-      });
-    } finally {
-      setLoading(false);
-    }
+    axios
+      .get(`${api}/attendance`, { withCredentials: true })
+      .then((res) => {
+        setAttendance(res.data.Result || []);
+      })
+      .catch((err) => console.error("שגיאה בטעינת נוכחות:", err))
+      .finally(() => setLoading(false));
   };
 
-  // 🟢 עמודות
+  const fetchUsers = () => {
+    Promise.all([
+      axios.get(`${api}/users/active`, { withCredentials: true }),
+      axios.get(`${api}/users/inactive`, { withCredentials: true }),
+    ])
+      .then(([activeRes, inactiveRes]) => {
+        const active = (activeRes.data.Result || []).map((u) => ({
+          ...u,
+          active: true,
+        }));
+        const inactive = (inactiveRes.data.Result || []).map((u) => ({
+          ...u,
+          active: false,
+        }));
+        setUsers([...active, ...inactive]);
+      })
+      .catch((err) => console.error("שגיאה בטעינת עובדים:", err));
+  };
+
+  // 🟢 עמודות טבלה
   const columns = [
-    {
-      key: "date",
-      label: "תאריך",
-      export: (r) => r.date,
-    },
+    { key: "date", label: "תאריך", export: (r) => r.date?.split("T")[0] },
     {
       key: "user_id",
       label: "שם עובד",
-      render: (r) => {
-        const user = users.find((u) => u.user_id === r.user_id);
-        if (!user) return "לא ידוע";
-        return `${user.first_name} ${user.last_name} ${
-          !user.active ? "⚠ לא פעיל" : ""
-        }`;
-      },
       export: (r) => {
-        const user = users.find((u) => u.user_id === r.user_id);
-        return user ? `${user.first_name} ${user.last_name}` : "לא ידוע";
+        const u = users.find((x) => x.user_id === r.user_id);
+        return u ? `${u.first_name} ${u.last_name}` : "לא ידוע";
       },
     },
     { key: "check_in", label: "כניסה", export: (r) => r.check_in || "-" },
     { key: "check_out", label: "יציאה", export: (r) => r.check_out || "-" },
-    {
-      key: "status",
-      label: "סטטוס",
-      export: (r) => r.status,
-      render: (r) => (
-        <span
-          className={`${
-            r.status === "נוכח"
-              ? "text-green-600"
-              : r.status === "היעדרות"
-              ? "text-red-600"
-              : "text-blue-800"
-          } font-semibold`}
-        >
-          {r.status}
-        </span>
-      ),
-    },
+    { key: "status", label: "סטטוס", export: (r) => r.status },
     { key: "notes", label: "הערות", export: (r) => r.notes || "-" },
-    {
-      key: "actions",
-      label: "פעולות",
-      render: (r) => (
-        <button
-          onClick={() =>
-            navigate(`/dashboard/edit_attendance/${r.attendance_id}`)
-          }
-          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-        >
-          עריכה
-        </button>
-      ),
-      export: () => null,
-    },
   ];
 
-  // 🟢 פילטרים
+  // 🟢 פילטרים (מגדירים פעם אחת – ReportFilters עושה את השאר)
   const filtersDef = [
     {
       name: "status",
-      label: "סטטוס נוכחות",
+      label: "סטטוס",
       type: "select",
       options: [
         { value: "", label: "כל הסטטוסים" },
         { value: "נוכח", label: "נוכח" },
-        { value: "מחלה", label: "מחלה" },
         { value: "חופשה", label: "חופשה" },
+        { value: "מחלה", label: "מחלה" },
         { value: "היעדרות", label: "היעדרות" },
       ],
     },
@@ -158,26 +97,22 @@ export default function Attendance() {
       name: "user_id",
       label: "עובד",
       type: "select",
-      dynamic: true,
-      optionLabelKey: "full_name", // נבנה בשורת mapUser
+      options: [
+        { value: "", label: "כל העובדים" },
+        ...users.map((u) => ({
+          value: String(u.user_id),
+          label: `${u.first_name} ${u.last_name}${
+            !u.active ? " ⚠ לא פעיל" : ""
+          }`,
+        })),
+      ],
     },
     {
       name: "date",
       label: "טווח תאריכים",
-      type: "daterange",
+      type: "daterange", // 🟢 נתמך ב־ReportFilters
     },
   ];
-
-  // 🟢 נעדכן כל רשומה עם full_name בשביל dynamic filter
-  const rows = attendance.map((a) => {
-    const user = users.find((u) => u.user_id === a.user_id);
-    return {
-      ...a,
-      full_name: user ? `${user.first_name} ${user.last_name}` : "לא ידוע",
-    };
-  });
-
-  const defaultFilters = {};
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
@@ -187,9 +122,9 @@ export default function Attendance() {
         <ReportView
           title="רשימת נוכחות"
           columns={columns}
-          rows={rows}
+          rows={attendance}
           filtersDef={filtersDef}
-          searchableKeys={["full_name", "status", "date"]}
+          searchableKeys={["status", "notes"]}
           pageSize={25}
           emailApiBase={api}
           addButton={
@@ -198,19 +133,9 @@ export default function Attendance() {
               label="הוספת נוכחות חדשה"
             />
           }
-          defaultFilters={defaultFilters}
-          searchPlaceholder="חיפוש לפי שם או תאריך..."
-        />
-      )}
-
-      {popup.show && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() =>
-            setPopup({ show: false, title: "", message: "", mode: "" })
-          }
+          defaultFilters={{}}
+          searchPlaceholder="חיפוש לפי סטטוס או הערה..."
+          filtersVariant="inline" // אפשר גם "block" אם רוצים שהפילטרים יהיו מתחת אחד לשני
         />
       )}
     </div>
