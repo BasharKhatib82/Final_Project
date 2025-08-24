@@ -1,6 +1,7 @@
 // backend/utils/reports.generator.js
 import ExcelJS from "exceljs";
 import PdfPrinter from "pdfmake";
+import fixHebrewText from "../utils/fixHebrewText.js";
 import fs from "fs";
 import os from "os";
 import path from "path";
@@ -94,12 +95,12 @@ export async function generatePdf({ title, columns, rows }) {
     (c) => c.key !== "actions" && c.export !== false
   );
 
-  // 🔹 הופכים סדר העמודות ל־RTL
   const headerRow = exportableCols
     .map((c) => ({
       text: c.label,
       style: "tableHeader",
       alignment: "center",
+      rtl: true,
     }))
     .reverse();
 
@@ -110,6 +111,10 @@ export async function generatePdf({ title, columns, rows }) {
         if (c.exportLabel) val = r[c.exportLabel];
         else if (typeof c.export === "function") val = c.export(r);
         else val = toExportValue(r[c.key]);
+
+        if (typeof val === "string") {
+          val = fixHebrewText(val);
+        }
 
         return {
           text: String(val),
@@ -126,9 +131,10 @@ export async function generatePdf({ title, columns, rows }) {
   const docDefinition = {
     content: [
       {
-        text: title || "דוח",
+        text: fixHebrewText(title) || "דוח",
         style: "header",
         alignment: "center",
+        rtl: true, //  מוסיף תמיכה בעברית
         margin: [0, 0, 0, 10],
       },
       {
@@ -146,7 +152,8 @@ export async function generatePdf({ title, columns, rows }) {
     },
     defaultStyle: {
       font: "DejaVuSans",
-      alignment: "right", //
+      alignment: "right",
+      rtl: true,
       fontSize: 10,
     },
     pageMargins: [30, 30, 30, 30],

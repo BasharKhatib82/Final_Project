@@ -1,4 +1,3 @@
-// src/components/Roles/Roles.jsx
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -21,7 +20,7 @@ const mapRole = (r) => ({
   can_access_all_data: asBool(r.can_access_all_data),
   active: isActive(r.active),
 
-  // 👇 ניצור שדה ידידותי בעברית — ישמש גם לייצוא
+  //  שדה בעברית — ישמש גם לייצוא
   status_human: isActive(r.active) ? "פעיל" : "לא פעיל",
 });
 
@@ -105,7 +104,12 @@ export default function Roles() {
   };
 
   const columns = [
-    { key: "role_id", label: "מזהה", width: 12 },
+    {
+      key: "role_id",
+      label: "מזהה",
+      width: 12,
+      export: (r) => String(r.role_id),
+    },
     { key: "role_name", label: "שם תפקיד", width: 24 },
     {
       key: "can_manage_users",
@@ -147,7 +151,7 @@ export default function Roles() {
       key: "active",
       label: "סטטוס",
       render: (r) => renderCheckActive(r.active),
-      exportLabel: "status_human", // 👈 ערך חלופי לייצוא
+      exportLabel: "status_human", // 👈 ערך קריא לייצוא
     },
     {
       key: "actions",
@@ -204,6 +208,7 @@ export default function Roles() {
       ) : (
         <ReportView
           title="רשימת תפקידים"
+          title_human="רשימת תפקידים"
           columns={columns}
           rows={allRoles}
           filtersDef={filtersDef}
