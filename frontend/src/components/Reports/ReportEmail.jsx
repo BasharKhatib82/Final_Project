@@ -39,7 +39,11 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
    */
   const send = async (format = "xlsx") => {
     if (!to) {
-      return showPopup("שגיאה", 'נא להזין כתובת דוא"ל', "error");
+      return showPopup(
+        "שדה דואר אלקטרוני חובה",
+        'נא להזין כתובת דוא"ל',
+        "warning"
+      );
     }
 
     try {

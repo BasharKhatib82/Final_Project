@@ -10,7 +10,7 @@ export function ReportProvider({
   rows = [],
   filtersDef = [],
   searchableKeys = [],
-  pageSize = 20,
+  pageSize = 10,
   children,
   defaultFilters = {},
 }) {

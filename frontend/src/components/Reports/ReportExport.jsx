@@ -38,8 +38,8 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         }
       );
 
-      // ברירת מחדל לשם קובץ
-      let filename = `report.${format}`;
+      // ברירת מחדל לשם קובץ – אם לא הצלחנו לחלץ מהשרת
+      let filename = `${title || "דוח"}.${format}`;
 
       // ניסיון לחלץ שם אמיתי מהשרת (Content-Disposition)
       const disposition = res.headers["content-disposition"];
