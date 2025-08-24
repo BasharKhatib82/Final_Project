@@ -59,7 +59,7 @@ export async function generateExcel({ title, columns, rows }) {
 /**
  * ✅ יצירת PDF כקובץ זמני (pdfmake חייב stream)
  */
-export async function generatePdfFile({ title, columns, rows }) {
+export async function generatePdf({ title, columns, rows }) {
   const fonts = {
     NotoSans: {
       normal: path.resolve(__dirname, "../fonts/NotoSansHebrew-Regular.ttf"),
