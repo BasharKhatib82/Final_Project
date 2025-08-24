@@ -22,15 +22,9 @@ const mapRole = (r, isActive) => ({
   can_access_all_data: asBool(r.can_access_all_data),
 });
 
-const renderCheck1 = (v) => (
+const renderCheck = (v) => (
   <span className={v ? "text-green-600 font-bold" : "text-red-500 font-bold"}>
     {v ? "✓" : "✗"}
-  </span>
-);
-
-const renderCheck2 = (v) => (
-  <span className={v ? "text-green-600 font-bold" : "text-red-500 font-bold"}>
-    {v ? "פעיל" : "לא פעיל"}
   </span>
 );
 
@@ -111,45 +105,46 @@ export default function Roles() {
     {
       key: "can_manage_users",
       label: "ניהול משתמשים",
-      render: (r) => renderCheck1(r.can_manage_users),
+      render: (r) => renderCheck(r.can_manage_users),
       export: (r) => (r.can_manage_users ? "✓" : "✗"),
     },
     {
       key: "can_view_reports",
       label: "צפייה בדוחות",
-      render: (r) => renderCheck1(r.can_view_reports),
+      render: (r) => renderCheck(r.can_view_reports),
       export: (r) => (r.can_view_reports ? "✓" : "✗"),
     },
     {
       key: "can_assign_leads",
       label: "שייך פניות",
-      render: (r) => renderCheck1(r.can_assign_leads),
+      render: (r) => renderCheck(r.can_assign_leads),
       export: (r) => (r.can_assign_leads ? "✓" : "✗"),
     },
     {
       key: "can_edit_courses",
       label: "עריכת קורסים",
-      render: (r) => renderCheck1(r.can_edit_courses),
+      render: (r) => renderCheck(r.can_edit_courses),
       export: (r) => (r.can_edit_courses ? "✓" : "✗"),
     },
     {
       key: "can_manage_tasks",
       label: "ניהול משימות",
-      render: (r) => renderCheck1(r.can_manage_tasks),
+      render: (r) => renderCheck(r.can_manage_tasks),
       export: (r) => (r.can_manage_tasks ? "✓" : "✗"),
     },
     {
       key: "can_access_all_data",
       label: "גישה לנתונים",
-      render: (r) => renderCheck1(r.can_access_all_data),
+      render: (r) => renderCheck(r.can_access_all_data),
       export: (r) => (r.can_access_all_data ? "✓" : "✗"),
     },
     {
       key: "status",
       label: "סטטוס",
-      render: (r) => renderCheck2(r.status),
-      export: (r) => (r.status ? "פעיל" : "לא פעיל"),
+      render: (r) => (r.is_active ? renderCheck(true) : renderCheck(false)),
+      export: (r) => (r.is_active ? "פעיל" : "לא פעיל"),
     },
+
     {
       key: "actions",
       label: "פעולות",
