@@ -204,7 +204,7 @@ const AddUser = () => {
 
         <div className="flex justify-around pt-4">
           <AddSaveButton label="הוסף עובד" type="submit" />
-          <ExitButton label="ביטול" linkTo="/dashboard/roles" />
+          <ExitButton label="ביטול" linkTo="/dashboard/users" />
         </div>
       </form>
     </div>

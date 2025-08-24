@@ -129,12 +129,10 @@ router.post("/add", verifyToken, async (req, res) => {
     console.error("❌ שגיאה בהוספת משתמש:", err);
 
     if (err.code === "ER_DUP_ENTRY") {
-      return res
-        .status(409)
-        .json({
-          success: false,
-          message: "האימייל או הטלפון כבר קיימים במערכת",
-        });
+      return res.status(409).json({
+        success: false,
+        message: "האימייל או הטלפון כבר קיימים במערכת",
+      });
     }
 
     res.status(500).json({ success: false, message: "שגיאת שרת" });
@@ -215,7 +213,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
 router.get("/active", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query("SELECT * FROM users WHERE is_active = 1");
-    res.json({ success: true, data: results });
+    res.json({ success: true, Result: results });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמשים פעילים:", err);
     res.status(500).json({ success: false, message: "שגיאת שרת" });
@@ -226,7 +224,7 @@ router.get("/active", verifyToken, async (req, res) => {
 router.get("/inactive", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query("SELECT * FROM users WHERE is_active = 0");
-    res.json({ success: true, data: results });
+    res.json({ success: true, Result: results });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמשים לא פעילים:", err);
     res.status(500).json({ success: false, message: "שגיאת שרת" });
