@@ -29,7 +29,7 @@ const EditUser = () => {
       const res = await axios.get(`${api}/users/${id}`, {
         withCredentials: true,
       });
-      const currentUser = res.data.User;
+      const currentUser = res.data.data;
       setUser(currentUser);
 
       const rolesRes = await axios.get(`${api}/roles/active`, {
@@ -40,9 +40,9 @@ const EditUser = () => {
         active: true,
       }));
 
-      const roleExists = activeRoles.some(
-        (role) => role.role_id === currentUser.role_id
-      );
+      const roleExists = currentUser
+        ? activeRoles.some((role) => role.role_id === currentUser.role_id)
+        : false;
 
       if (!roleExists) {
         const roleRes = await axios.get(`${api}/roles/${currentUser.role_id}`, {
@@ -215,13 +215,13 @@ const EditUser = () => {
         <div>
           <label className="font-rubik block mb-0.5 font-medium">סטטוס</label>
           <select
-            name="is_active"
-            value={user.is_active}
+            name="active"
+            value={user.active}
             onChange={handleChange}
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
           >
-            <option value={1}>פעיל</option>
-            <option value={0}>לא פעיל</option>
+            <option value="1">פעיל</option>
+            <option value="0">לא פעיל</option>
           </select>
         </div>
 
