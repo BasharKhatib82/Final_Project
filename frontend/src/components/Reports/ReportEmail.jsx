@@ -3,21 +3,8 @@
  * שם: ReportEmail
  * תיאור:
  *   קומפוננטה לשליחת דוח במייל בפורמט Excel או PDF.
- *   הקומפוננטה מציגה שדה להזנת כתובת מייל ושני כפתורים
- *   לשליחת הקובץ הרצוי.
+ *   מציגה שדה להזנת כתובת מייל ושני כפתורים לבחירת הפורמט.
  *
- * שימוש:
- *   <ReportEmail apiBase="https://api.domain.com" />
- *
- * פרופסים:
- *   - apiBase (string): כתובת בסיס ל־API (ברירת מחדל: ENV_API_BASE)
- *
- * סטייט:
- *   - to (string): כתובת מייל להזנה ידנית
- *   - popup (object): אובייקט להצגת חלון פופאפ {show, title, message, mode}
- *
- * פלט:
- *   UI לשליחת הדוח לכתובת מייל
  * ==========================================================
  */
 
@@ -41,21 +28,22 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
   });
 
   /**
+   * הצגת הודעה בפופאפ
+   */
+  const showPopup = (title, message, mode) => {
+    setPopup({ show: true, title, message, mode });
+  };
+
+  /**
    * שליחת דוח לשרת לצורך יצירת קובץ ושליחתו במייל
    */
   const send = async (format = "xlsx") => {
     if (!to) {
-      setPopup({
-        show: true,
-        title: "שגיאה",
-        message: 'נא להזין כתובת דוא"ל',
-        mode: "error",
-      });
-      return;
+      return showPopup("שגיאה", 'נא להזין כתובת דוא"ל', "error");
     }
 
     try {
-      // ✅ ולידציה + ניקוי
+      // ✅ ולידציה + ניקוי מקומי
       const safeEmail = validateAndSanitizeEmail(to);
 
       await axios.post(
@@ -64,20 +52,18 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
         { withCredentials: true }
       );
 
-      setPopup({
-        show: true,
-        title: "הצלחה",
-        message: "✅ הדוח נשלח בהצלחה למייל",
-        mode: "success",
-      });
+      showPopup("הצלחה", "✅ הדוח נשלח בהצלחה למייל", "success");
     } catch (e) {
       console.error("Email send failed:", e?.response?.data || e.message);
-      setPopup({
-        show: true,
-        title: "שגיאה",
-        message: e?.response?.data?.error || e.message || "אירעה שגיאה בשליחה",
-        mode: "error",
-      });
+
+      // נעדיף שגיאת שרת אמיתית אם קיימת
+      const msg =
+        e?.response?.data?.error ||
+        e?.response?.data?.message ||
+        e.message ||
+        "אירעה שגיאה בשליחה";
+
+      showPopup("שגיאה", msg, "error");
     }
   };
 
@@ -112,12 +98,7 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
           message={popup.message}
           mode={popup.mode}
           onClose={() =>
-            setPopup({
-              show: false,
-              title: "",
-              message: "",
-              mode: "",
-            })
+            setPopup({ show: false, title: "", message: "", mode: "" })
           }
         />
       )}

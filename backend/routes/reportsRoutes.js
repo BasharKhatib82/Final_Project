@@ -1,6 +1,6 @@
+// backend/routes/reportsRoutes.js
 import express from "express";
 import fs from "fs";
-import path from "path";
 import { generateExcel, generatePdf } from "../utils/reports.generator.js";
 import { sendReportEmail } from "../utils/reports.mailer.js";
 import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
@@ -36,15 +36,17 @@ router.post("/download", async (req, res) => {
 
   try {
     const { title, columns, rows, format = "xlsx" } = req.body;
-    const safeFilename = makeSafeFilename(title, format);
 
     if (format === "xlsx") {
-      const buffer = await generateExcel({ title, columns, rows });
+      const { buffer, filename } = await generateExcel({
+        title,
+        columns,
+        rows,
+      });
 
-      // שימוש בקידוד בטוח
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename*=UTF-8''${encodeURIComponent(safeFilename)}`
+        `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`
       );
       res.setHeader(
         "Content-Type",
@@ -54,8 +56,12 @@ router.post("/download", async (req, res) => {
     }
 
     if (format === "pdf") {
-      const { filePath } = await generatePdf({ title, columns, rows });
-      return res.download(filePath, safeFilename, () =>
+      const { filePath, filename } = await generatePdf({
+        title,
+        columns,
+        rows,
+      });
+      return res.download(filePath, filename, () =>
         fs.unlink(filePath, () => {})
       );
     }
@@ -75,13 +81,12 @@ router.post("/preview", async (req, res) => {
       return res.status(400).json({ error: "Missing report data" });
     }
 
-    const { filePath } = await generatePdf({ title, columns, rows });
-    const safeFilename = makeSafeFilename(title, "pdf");
+    const { filePath, filename } = await generatePdf({ title, columns, rows });
 
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader(
       "Content-Disposition",
-      `inline; filename*=UTF-8''${encodeURIComponent(safeFilename)}`
+      `inline; filename*=UTF-8''${encodeURIComponent(filename)}`
     );
     res.sendFile(filePath, () => fs.unlink(filePath, () => {}));
   } catch (err) {

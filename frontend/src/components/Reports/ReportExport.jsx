@@ -8,15 +8,22 @@
  * ==========================================================
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import { FileSpreadsheet, FileText, Printer } from "lucide-react";
 import axios from "axios";
+import Popup from "../Tools/Popup";
 
 const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 
 export default function ReportExport({ apiBase = ENV_API_BASE }) {
   const { title, columns, filteredRows } = useReport();
+  const [popup, setPopup] = useState({
+    show: false,
+    title: "",
+    message: "",
+    mode: "",
+  });
 
   /** 📥 הורדת קובץ (Excel / PDF) */
   const download = async (format) => {
@@ -26,7 +33,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         { title, columns, rows: filteredRows, format },
         {
           withCredentials: true,
-          responseType: "blob", // 🔹 חובה כדי לקבל את הקובץ
+          responseType: "blob", // חובה כדי לקבל את הקובץ
           headers: { "Content-Type": "application/json" },
         }
       );
@@ -45,8 +52,24 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
       document.body.appendChild(link);
       link.click();
       link.remove();
+
+      setPopup({
+        show: true,
+        title: "הצלחה",
+        message: `✅ הדוח הורד בהצלחה בפורמט ${format.toUpperCase()}`,
+        mode: "success",
+      });
     } catch (err) {
       console.error("Download failed:", err.response?.data || err.message);
+      setPopup({
+        show: true,
+        title: "שגיאה",
+        message:
+          err?.response?.data?.error ||
+          err?.message ||
+          "אירעה שגיאה בהורדת הקובץ",
+        mode: "error",
+      });
     }
   };
 
@@ -66,8 +89,24 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
       const blob = new Blob([res.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
       window.open(url, "_blank");
+
+      setPopup({
+        show: true,
+        title: "הצלחה",
+        message: "✅ תצוגת PDF נפתחה בהצלחה",
+        mode: "success",
+      });
     } catch (err) {
       console.error("Preview failed:", err.response?.data || err.message);
+      setPopup({
+        show: true,
+        title: "שגיאה",
+        message:
+          err?.response?.data?.error ||
+          err?.message ||
+          "אירעה שגיאה ביצירת תצוגת PDF",
+        mode: "error",
+      });
     }
   };
 
@@ -95,6 +134,23 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
       >
         <Printer size={16} /> הדפסה
       </button>
+
+      {/* ✅ חלון פופאפ לשגיאות/הצלחות */}
+      {popup.show && (
+        <Popup
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
+          onClose={() =>
+            setPopup({
+              show: false,
+              title: "",
+              message: "",
+              mode: "",
+            })
+          }
+        />
+      )}
     </div>
   );
 }

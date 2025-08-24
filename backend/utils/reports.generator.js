@@ -1,3 +1,4 @@
+// backend/utils/reports.generator.js
 import ExcelJS from "exceljs";
 import PdfPrinter from "pdfmake";
 import fs from "fs";
@@ -32,7 +33,7 @@ function toExportValue(v) {
 }
 
 /**
- * ✅ יצירת Excel כ־Buffer (בלי לשמור לדיסק)
+ * ✅ יצירת Excel – מחזיר Buffer + filename
  */
 export async function generateExcel({ title, columns, rows }) {
   const wb = new ExcelJS.Workbook();
@@ -53,7 +54,9 @@ export async function generateExcel({ title, columns, rows }) {
     ws.addRow(data);
   });
 
-  return await wb.xlsx.writeBuffer();
+  const buffer = await wb.xlsx.writeBuffer();
+  const filename = `${sanitizeFilename(title)} ${stamp()}.xlsx`;
+  return { buffer, filename };
 }
 
 /**

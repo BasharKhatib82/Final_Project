@@ -1,6 +1,8 @@
 // backend/utils/reports.mailer.js
 import nodemailer from "nodemailer";
 import fs from "fs";
+import path from "path";
+import os from "os";
 import { generateExcel, generatePdf } from "./reports.generator.js";
 
 const transporter = nodemailer.createTransport({
@@ -21,7 +23,7 @@ export function verifySmtp() {
   });
 }
 
-// 📨 שליחת דוח למייל
+// 📨 שליחת דוח במייל
 export async function sendReportEmail({
   title,
   columns,
@@ -31,13 +33,18 @@ export async function sendReportEmail({
 }) {
   if (!to) throw new Error("missing 'to'");
 
-  let filePath, filename;
+  let filePath, filename, buffer;
 
-  // ✅ מייצר קובץ זמני לפי פורמט
   if (format === "xlsx") {
-    ({ filePath, filename } = await generateExcel({ title, columns, rows }));
+    // ✅ Excel – נשתמש ב־buffer
+    const excelResult = await generateExcel({ title, columns, rows });
+    buffer = excelResult.buffer;
+    filename = excelResult.filename;
   } else if (format === "pdf") {
-    ({ filePath, filename } = await generatePdf({ title, columns, rows }));
+    // ✅ PDF – נשתמש בקובץ זמני
+    const pdfResult = await generatePdf({ title, columns, rows });
+    filePath = pdfResult.filePath;
+    filename = pdfResult.filename;
   } else {
     throw new Error(`unsupported format: ${format}`);
   }
@@ -48,12 +55,18 @@ export async function sendReportEmail({
       to,
       subject: `דוח חדש מהמערכת: ${title}`,
       text: `מצורף הדוח "${title}" בפורמט ${format.toUpperCase()}.`,
-      attachments: [{ filename, path: filePath }],
+      attachments: [
+        format === "xlsx"
+          ? { filename, content: buffer } // ✅ שולחים כ־buffer
+          : { filename, path: filePath }, // ✅ שולחים כקובץ זמני
+      ],
     });
 
-    return { ok: true, filename }; // ✨ נחזיר גם את שם הקובץ
+    return { ok: true, filename };
   } finally {
-    // ניקוי הקובץ בכל מקרה
-    fs.unlink(filePath, () => {});
+    // ✅ ננקה רק קובץ PDF זמני (Excel נשלח כ-buffer)
+    if (filePath && typeof filePath === "string") {
+      fs.unlink(filePath, () => {});
+    }
   }
 }
