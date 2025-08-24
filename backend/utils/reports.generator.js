@@ -1,10 +1,11 @@
 // backend/utils/reports.generator.js
 import ExcelJS from "exceljs";
-import PdfPrinter from "pdfmake";
+import puppeteer from "puppeteer";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import fixHebrewText from "./fixHebrewText.js"; // 👈 ייבוא נכון
+
+
 
 function sanitizeFilename(s) {
   if (!s || typeof s !== "string") return "report";
@@ -83,88 +84,65 @@ export async function generateExcel({ title, columns, rows }) {
 }
 
 // ✅ PDF
-export async function generatePdf({ title, columns, rows }) {
-  const fonts = {
-    DejaVuSans: {
-      normal: path.resolve("public/fonts/DejaVuSans.ttf"),
-      bold: path.resolve("public/fonts/DejaVuSans-Bold.ttf"),
-    },
-  };
-  const printer = new PdfPrinter(fonts);
-
+// --- PDF חדש עם Puppeteer ---
+export async function generatePdf({ title, columns, rows, logoPath }) {
   const exportableCols = columns.filter(
     (c) => c.key !== "actions" && c.export !== false
   );
 
-  const headerRow = exportableCols
-    .map((c) => ({
-      text: c.label,
-      style: "tableHeader",
-      alignment: "center",
-    
-    }))
-    .reverse();
+  // headers
+  const headersHtml = exportableCols.map((c) => `<th>${c.label}</th>`).join("");
 
-  const bodyRows = rows.map((r) =>
-    exportableCols
-      .map((c) => {
-        let val;
-        if (c.exportLabel) val = r[c.exportLabel];
-        else if (typeof c.export === "function") val = c.export(r);
-        else val = toExportValue(r[c.key]);
+  // body rows
+  const bodyHtml = rows
+    .map((r) => {
+      const cells = exportableCols
+        .map((c) => {
+          let val;
+          if (c.exportLabel) val = r[c.exportLabel];
+          else if (typeof c.export === "function") val = c.export(r);
+          else val = toExportValue(r[c.key]);
+          return `<td>${val}</td>`;
+        })
+        .join("");
+      return `<tr>${cells}</tr>`;
+    })
+    .join("");
 
-        if (typeof val === "string") val = fixHebrewText(val);
+  // HTML content
+  const html = `
+    <html lang="he" dir="rtl">
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: "Arial", sans-serif; direction: rtl; }
+        h1 { text-align: center; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 6px; text-align: center; }
+        th { background: #eee; }
+        img.logo { max-width: 150px; display: block; margin: 0 auto 20px; }
+      </style>
+    </head>
+    <body>
+      ${logoPath ? `<img class="logo" src="file://${logoPath}">` : ""}
+      <h1>${title}</h1>
+      <table>
+        <thead><tr>${headersHtml}</tr></thead>
+        <tbody>${bodyHtml}</tbody>
+      </table>
+    </body>
+    </html>
+  `;
 
-        return {
-          text: val,
-          alignment: "center",
-          noWrap: false,
-          margin: [1, 1, 1, 1],
-        };
-      })
-      .reverse()
-  );
-
-  const colWidths = exportableCols.map(() => "auto").reverse();
-
-  const docDefinition = {
-    content: [
-      {
-        text: fixHebrewText(title) || "דוח",
-        style: "header",
-        alignment: "center",
-        margin: [0, 0, 0, 10],
-      },
-      {
-        table: {
-          headerRows: 1,
-          widths: colWidths,
-          body: [headerRow, ...bodyRows],
-        },
-        layout: "lightHorizontalLines",
-      },
-    ],
-    styles: {
-      header: { fontSize: 12, bold: true },
-      tableHeader: { bold: true, fillColor: "#eeeeee" },
-    },
-    defaultStyle: {
-      font: "DejaVuSans",
-      alignment: "center",
-      fontSize: 10,
-    },
-    pageMargins: [30, 30, 30, 30],
-  };
+  const browser = await puppeteer.launch({ headless: "new" });
+  const page = await browser.newPage();
+  await page.setContent(html, { waitUntil: "networkidle0" });
 
   const filename = `${sanitizeFilename(title)} ${stamp()}.pdf`;
   const filePath = path.join(os.tmpdir(), filename);
 
-  return new Promise((resolve, reject) => {
-    const pdfDoc = printer.createPdfKitDocument(docDefinition);
-    const stream = fs.createWriteStream(filePath);
-    pdfDoc.pipe(stream);
-    pdfDoc.end();
-    stream.on("finish", () => resolve({ filePath, filename }));
-    stream.on("error", reject);
-  });
+  await page.pdf({ path: filePath, format: "A4", printBackground: true });
+  await browser.close();
+
+  return { filePath, filename };
 }
