@@ -31,15 +31,15 @@ router.get("/", verifyToken, async (req, res) => {
 
 // ✅ הוספת פרויקט חדש
 router.post("/add", verifyToken, async (req, res) => {
-  const { project_name, project_description, is_active } = req.body;
+  const { project_name, project_description, active } = req.body;
   if (!project_name?.trim()) {
     return sendResponse(res, false, null, "יש להזין שם פרויקט", 400);
   }
 
   try {
     const [result] = await db.query(
-      `INSERT INTO projects (project_name, project_description, is_active) VALUES (?, ?, ?)`,
-      [project_name.trim(), project_description || null, is_active ?? 1]
+      `INSERT INTO projects (project_name, project_description, active) VALUES (?, ?, ?)`,
+      [project_name.trim(), project_description || null, active ?? 1]
     );
 
     logAction(`הוספת פרויקט חדש: ${project_name}`)(req, res, () => {});
@@ -58,7 +58,7 @@ router.post("/add", verifyToken, async (req, res) => {
 // ✅ עדכון פרויקט קיים
 router.put("/edit/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
-  const { project_name, project_description, is_active } = req.body;
+  const { project_name, project_description, active } = req.body;
 
   if (!project_name?.trim()) {
     return sendResponse(res, false, null, "יש להזין שם פרויקט", 400);
@@ -66,8 +66,8 @@ router.put("/edit/:id", verifyToken, async (req, res) => {
 
   try {
     const [result] = await db.query(
-      `UPDATE projects SET project_name=?, project_description=?, is_active=? WHERE project_id=?`,
-      [project_name.trim(), project_description || null, is_active ?? 1, id]
+      `UPDATE projects SET project_name=?, project_description=?, active=? WHERE project_id=?`,
+      [project_name.trim(), project_description || null, active ?? 1, id]
     );
 
     if (result.affectedRows === 0) {
@@ -87,7 +87,7 @@ router.delete("/delete/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
     const [result] = await db.query(
-      `UPDATE projects SET is_active=0 WHERE project_id=?`,
+      `UPDATE projects SET active=0 WHERE project_id=?`,
       [id]
     );
 
@@ -109,7 +109,7 @@ router.get("/status/:active", verifyToken, async (req, res) => {
   const isActive = active === "1" ? 1 : 0;
 
   try {
-    const [rows] = await db.query(`SELECT * FROM projects WHERE is_active=?`, [
+    const [rows] = await db.query(`SELECT * FROM projects WHERE active=?`, [
       isActive,
     ]);
     sendResponse(res, true, rows);

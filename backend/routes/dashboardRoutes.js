@@ -39,10 +39,9 @@ router.get("/", verifyToken, async (req, res) => {
       "SELECT COUNT(*) AS count FROM tasks WHERE status = 'הושלם'",
 
     projects_total: "SELECT COUNT(*) AS count FROM projects",
-    projects_active:
-      "SELECT COUNT(*) AS count FROM projects WHERE is_active = 1",
+    projects_active: "SELECT COUNT(*) AS count FROM projects WHERE active = 1",
     projects_inactive:
-      "SELECT COUNT(*) AS count FROM projects WHERE is_active = 0",
+      "SELECT COUNT(*) AS count FROM projects WHERE active = 0",
 
     logs_by_day: `
       SELECT DATE(time_date) AS date, COUNT(*) AS total_logs
