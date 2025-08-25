@@ -40,7 +40,7 @@ const Leads = () => {
       const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
-      if (res.data.Status) {
+      if (res.data.success) {
         setUsers(res.data.Result);
       }
     } catch (err) {
