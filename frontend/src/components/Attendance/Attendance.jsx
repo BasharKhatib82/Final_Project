@@ -1,4 +1,3 @@
-// src/components/Attendance.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -60,14 +59,11 @@ export default function Attendance() {
       .catch((err) => console.error("שגיאה בטעינת עובדים:", err));
   };
 
-  // 🟢 פורמט תאריך קצר
   const formatDate = (dateStr) =>
     dateStr ? new Date(dateStr).toISOString().split("T")[0] : "-";
 
-  // 🟢 פורמט שעה
   const formatTime = (timeStr) => (timeStr ? timeStr.slice(0, 5) : "-");
 
-  // 🟢 עיצוב צבעוני לסטטוס
   const renderStatus = (status) => {
     let color = "text-blue-800";
     if (status === "נוכח") color = "text-green-600 font-semibold";
@@ -75,7 +71,6 @@ export default function Attendance() {
     return <span className={color}>{status}</span>;
   };
 
-  // 🟢 עמודות טבלה + export
   const columns = [
     {
       key: "date",
@@ -132,7 +127,7 @@ export default function Attendance() {
           עריכה
         </button>
       ),
-      export: () => null, // ❌ לא מייצאים כפתורים
+      export: () => null,
     },
   ];
 
@@ -172,7 +167,7 @@ export default function Attendance() {
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
-      {loading ? (
+      {loading || users.length === 0 ? (
         <div className="text-center text-gray-600">טוען נתונים...</div>
       ) : (
         <ReportView

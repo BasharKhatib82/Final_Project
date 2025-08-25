@@ -1,13 +1,3 @@
-/**
- * ==========================================================
- * שם: ReportExport
- * תיאור:
- *   קומפוננטה לייצוא דוחות (Excel / PDF / הדפסה - Preview).
- *   ✅ כל הלוגיקה עוברת לצד שרת בלבד.
- *
- * ==========================================================
- */
-
 import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import { FileSpreadsheet, FileText, Printer } from "lucide-react";
@@ -28,9 +18,26 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
   /** 📥 הורדת קובץ (Excel / PDF) */
   const download = async (format) => {
     try {
+      // 🛠️ עיבוד שורות לפי export לפני שליחה לשרת
+      const processedRows = filteredRows.map((row) =>
+        Object.fromEntries(
+          columns
+            .filter((col) => col.export !== false)
+            .map((col) => [
+              col.key,
+              typeof col.export === "function" ? col.export(row) : row[col.key],
+            ])
+        )
+      );
+
       const res = await axios.post(
         `${apiBase}/reports/download`,
-        { title, columns, rows: filteredRows, format },
+        {
+          title,
+          columns,
+          rows: processedRows, // 🟢 במקום filteredRows
+          format,
+        },
         {
           withCredentials: true,
           responseType: "blob",
@@ -40,7 +47,6 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
 
       let filename;
 
-      // ניסיון לחלץ שם אמיתי מהשרת (עם עברית + תאריך/שעה)
       const disposition = res.headers["content-disposition"];
       if (disposition) {
         const match = disposition.match(/filename\*=UTF-8''(.+)/);
@@ -49,7 +55,6 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         }
       }
 
-      // fallback – רק אם ממש אין header
       if (!filename) {
         const now = new Date();
         const datePart = `${now.getDate()}.${
@@ -61,7 +66,6 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         filename = `${title || "דוח"}_${datePart}_${timePart}.${format}`;
       }
 
-      // הורדה
       const blob = new Blob([res.data], {
         type:
           format === "pdf"
@@ -100,9 +104,24 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
   /** 🖨️ תצוגה לפני הדפסה */
   const previewPdf = async () => {
     try {
+      const processedRows = filteredRows.map((row) =>
+        Object.fromEntries(
+          columns
+            .filter((col) => col.export !== false)
+            .map((col) => [
+              col.key,
+              typeof col.export === "function" ? col.export(row) : row[col.key],
+            ])
+        )
+      );
+
       const res = await axios.post(
         `${apiBase}/reports/preview`,
-        { title, columns, rows: filteredRows },
+        {
+          title,
+          columns,
+          rows: processedRows,
+        },
         {
           withCredentials: true,
           responseType: "blob",
@@ -152,7 +171,6 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         <Printer size={16} /> הדפסה
       </button>
 
-      {/* ✅ חלון פופאפ לשגיאות/הצלחות */}
       {popup.show && (
         <Popup
           title={popup.title}
