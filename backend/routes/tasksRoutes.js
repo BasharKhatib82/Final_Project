@@ -5,17 +5,6 @@ import logAction from "../utils/logAction.js";
 
 const router = express.Router();
 
-// ✅ פונקציית תגובה אחידה
-const sendResponse = (
-  res,
-  success,
-  data = null,
-  message = null,
-  status = 200
-) => {
-  res.status(status).json({ success, data, message });
-};
-
 // ✅ שליפת כל המשימות
 router.get("/", verifyToken, async (req, res) => {
   const sql = `
@@ -32,10 +21,10 @@ router.get("/", verifyToken, async (req, res) => {
         ? `${t.assigned_to_first_name} ${t.assigned_to_last_name}`
         : "ללא",
     }));
-    sendResponse(res, true, tasks);
+    res.json({ success: true, data: tasks });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משימות:", err);
-    sendResponse(res, false, null, "שגיאה בשליפת המשימות", 500);
+    res.status(500).json({ success: false, message: "שגיאה בשליפת משימות" });
   }
 });
 
@@ -43,54 +32,42 @@ router.get("/", verifyToken, async (req, res) => {
 router.post("/add", verifyToken, async (req, res) => {
   const { task_title, description, status, due_date, user_id } = req.body;
   if (!task_title || !due_date || !status) {
-    return sendResponse(res, false, null, "נא למלא את כל השדות החובה", 400);
+    return res
+      .status(400)
+      .json({ success: false, message: "נא למלא את כל שדות החובה" });
   }
-  const sql = `
-    INSERT INTO tasks (task_title, description, status, due_date, user_id)
-    VALUES (?, ?, ?, ?, ?)
-  `;
   try {
-    await db.query(sql, [
-      task_title,
-      description,
-      status,
-      due_date,
-      user_id || null,
-    ]);
+    await db.query(
+      `INSERT INTO tasks (task_title, description, status, due_date, user_id) VALUES (?, ?, ?, ?, ?)`,
+      [task_title, description, status, due_date, user_id || null]
+    );
     logAction("הוספת משימה חדשה")(req, res, () => {});
-    sendResponse(res, true, null, "המשימה נוספה בהצלחה");
+    res.json({ success: true, message: "המשימה נוספה בהצלחה" });
   } catch (err) {
     console.error("❌ שגיאה בהוספת משימה:", err);
-    sendResponse(res, false, null, "שגיאה בהוספת משימה", 500);
+    res.status(500).json({ success: false, message: "שגיאה בהוספת משימה" });
   }
 });
 
-// ✅ עריכת משימה
+// ✅ עדכון משימה
 router.put("/edit/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { task_title, description, status, due_date, user_id } = req.body;
   if (!task_title || !due_date || !status) {
-    return sendResponse(res, false, null, "נא למלא את כל השדות החובה", 400);
+    return res
+      .status(400)
+      .json({ success: false, message: "נא למלא את כל שדות החובה" });
   }
-  const sql = `
-    UPDATE tasks
-    SET task_title=?, description=?, status=?, due_date=?, user_id=?
-    WHERE task_id=?
-  `;
   try {
-    await db.query(sql, [
-      task_title,
-      description,
-      status,
-      due_date,
-      user_id || null,
-      id,
-    ]);
+    await db.query(
+      `UPDATE tasks SET task_title=?, description=?, status=?, due_date=?, user_id=? WHERE task_id=?`,
+      [task_title, description, status, due_date, user_id || null, id]
+    );
     logAction(`עדכון משימה #${id}`)(req, res, () => {});
-    sendResponse(res, true, null, "המשימה עודכנה בהצלחה");
+    res.json({ success: true, message: "המשימה עודכנה בהצלחה" });
   } catch (err) {
     console.error("❌ שגיאה בעריכת משימה:", err);
-    sendResponse(res, false, null, "שגיאה בעריכת משימה", 500);
+    res.status(500).json({ success: false, message: "שגיאה בעריכת משימה" });
   }
 });
 
@@ -100,28 +77,30 @@ router.delete("/delete/:id", verifyToken, async (req, res) => {
   try {
     await db.query("UPDATE tasks SET status='בוטלה' WHERE task_id=?", [id]);
     logAction(`ביטול משימה #${id}`)(req, res, () => {});
-    sendResponse(res, true, null, "המשימה בוטלה בהצלחה");
+    res.json({ success: true, message: "המשימה בוטלה בהצלחה" });
   } catch (err) {
-    console.error("❌ שגיאה במחיקת משימה:", err);
-    sendResponse(res, false, null, "שגיאה במחיקת משימה", 500);
+    console.error("❌ שגיאה בביטול משימה:", err);
+    res.status(500).json({ success: false, message: "שגיאה בביטול משימה" });
   }
 });
 
-// ✅ bulk assign
+// ✅ שיוך מרובה
 router.put("/bulk-assign", verifyToken, async (req, res) => {
   const { taskIds, user_id } = req.body;
   if (!Array.isArray(taskIds) || taskIds.length === 0) {
-    return sendResponse(res, false, null, "יש לבחור משימות", 400);
+    return res.status(400).json({ success: false, message: "יש לבחור משימות" });
   }
   const placeholders = taskIds.map(() => "?").join(",");
-  const sql = `UPDATE tasks SET user_id=? WHERE task_id IN (${placeholders})`;
   try {
-    await db.query(sql, [user_id || null, ...taskIds]);
+    await db.query(
+      `UPDATE tasks SET user_id=? WHERE task_id IN (${placeholders})`,
+      [user_id || null, ...taskIds]
+    );
     logAction(`שיוך מרובה למשימות [${taskIds.join(", ")}]`)(req, res, () => {});
-    sendResponse(res, true, null, "שיוך מרובה עודכן בהצלחה");
+    res.json({ success: true, message: "שיוך מרובה עודכן בהצלחה" });
   } catch (err) {
     console.error("❌ שגיאה בשיוך מרובה:", err);
-    sendResponse(res, false, null, "שגיאה בשיוך מרובה", 500);
+    res.status(500).json({ success: false, message: "שגיאה בשיוך מרובה" });
   }
 });
 
