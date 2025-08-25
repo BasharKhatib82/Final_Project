@@ -37,7 +37,7 @@ const Projects = () => {
     axios
       .get(`${api}/projects`, { withCredentials: true })
       .then((res) => {
-        setProjects(res.data.Result || []);
+        setProjects(res.data.data || []);
       })
       .catch((err) => {
         console.error("שגיאה בטעינת פרויקטים:", err);
