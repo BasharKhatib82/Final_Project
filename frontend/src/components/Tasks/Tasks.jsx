@@ -84,7 +84,7 @@ const Tasks = () => {
       } else {
         setPopupData({
           title: "שגיאה",
-          message: res.data.message || "שגיאה בביטול המשימה",
+          message: res.data.message,
           mode: "error",
         });
       }
@@ -109,20 +109,18 @@ const Tasks = () => {
 
   const handleBulkAssignConfirm = () => {
     if (selectedTasks.length === 0) {
-      setPopupData({
+      return setPopupData({
         title: "שגיאה",
         message: "יש לבחור משימות",
         mode: "error",
       });
-      return;
     }
     if (!bulkUserId) {
-      setPopupData({
+      return setPopupData({
         title: "שגיאה",
         message: "יש לבחור נציג לשיוך",
         mode: "error",
       });
-      return;
     }
     setBulkAssignConfirm(true);
   };
@@ -262,7 +260,7 @@ const Tasks = () => {
     return matchSearch && matchStatus && matchUser;
   });
 
-  // 🟢 עמודות לייצוא
+  // עמודות ייצוא
   const columns = [
     { key: "task_id", label: "מזהה", export: (r) => r.task_id },
     { key: "task_title", label: "כותרת", export: (r) => r.task_title },
@@ -293,6 +291,7 @@ const Tasks = () => {
         רשימת משימות
       </h2>
 
+      {/* 🔹 סרגל מסננים */}
       <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-4">
         <NavigationButton
           linkTo="/dashboard/add_task"
@@ -367,7 +366,7 @@ const Tasks = () => {
         </div>
       </div>
 
-      {/* 🔹 סרגל ייצוא / שליחה למייל */}
+      {/* 🔹 סרגל ייצוא */}
       <ReportProvider
         title="רשימת משימות"
         columns={columns}
@@ -381,11 +380,151 @@ const Tasks = () => {
 
       {/* 🔹 טבלה */}
       <div className="overflow-auto rounded-lg shadow-lg bg-white/85 mt-4">
-        {/* ... הטבלה שלך בדיוק כמו קודם ... */}
+        <table className="w-full table-auto border-collapse text-sm text-center">
+          <thead>
+            <tr className="bg-slate-100 text-gray-800">
+              <th className="p-2 border">✔️</th>
+              <th className="p-2 border">מזהה</th>
+              <th className="p-2 border">כותרת</th>
+              <th className="p-2 border">תאריך יעד</th>
+              <th className="p-2 border">סטטוס</th>
+              <th className="p-2 border">נציג מטפל</th>
+              <th className="p-2 border">פעולות</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTasks.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="text-center text-red-500 p-4">
+                  אין משימות להצגה
+                </td>
+              </tr>
+            ) : (
+              filteredTasks.map((task) => (
+                <tr key={task.task_id} className="hover:bg-blue-50 transition">
+                  <td className="border p-2">
+                    <input
+                      type="checkbox"
+                      checked={selectedTasks.includes(task.task_id)}
+                      onChange={() => handleSelectTask(task.task_id)}
+                    />
+                  </td>
+                  <td className="border p-2">{task.task_id}</td>
+                  <td className="border p-2">{task.task_title}</td>
+                  <td className="border p-2">
+                    {new Date(task.due_date).toLocaleDateString("he-IL")}
+                  </td>
+                  <td className="border p-2">
+                    <select
+                      value={task.selectedStatus}
+                      onChange={(e) =>
+                        handleStatusSelect(task.task_id, e.target.value)
+                      }
+                      className="border border-gray-300 rounded px-2 py-1 text-sm"
+                    >
+                      <option value="חדש">חדש</option>
+                      <option value="בתהליך">בתהליך</option>
+                      <option value="הושלם">הושלם</option>
+                      <option value="בוטלה">בוטלה</option>
+                    </select>
+                  </td>
+                  <td className="border p-2">
+                    <select
+                      value={task.selectedRepId}
+                      onChange={(e) =>
+                        handleRepSelect(task.task_id, e.target.value)
+                      }
+                      className="border border-gray-300 rounded px-2 py-1 text-sm"
+                    >
+                      <option value="">ללא</option>
+                      {users.map((u) => (
+                        <option key={u.user_id} value={u.user_id}>
+                          {u.first_name} {u.last_name}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td className="border p-2 flex flex-wrap justify-center gap-1">
+                    <button
+                      onClick={() =>
+                        navigate(`/dashboard/details_task/${task.task_id}`)
+                      }
+                      className="bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
+                    >
+                      פתח משימה
+                    </button>
+                    <button
+                      onClick={() =>
+                        navigate(`/dashboard/edit_task/${task.task_id}`)
+                      }
+                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+                    >
+                      עריכה
+                    </button>
+                    {task.status !== "בוטלה" && (
+                      <DeleteButton
+                        onClick={() => setTaskToDelete(task.task_id)}
+                      />
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* 🔹 פופאפים */}
-      {/* ... כמו קודם ... */}
+      {taskToDelete && (
+        <Popup
+          title="אישור ביטול משימה"
+          message="האם אתה בטוח שברצונך לבטל משימה זו?"
+          mode="confirm"
+          onConfirm={handleDelete}
+          onClose={() => setTaskToDelete(null)}
+        />
+      )}
+      {bulkAssignConfirm && (
+        <Popup
+          title="אישור שיוך מרובה"
+          message={`האם אתה בטוח שברצונך לשייך ${selectedTasks.length} משימות?`}
+          mode="confirm"
+          onConfirm={handleBulkAssign}
+          onClose={() => setBulkAssignConfirm(false)}
+        />
+      )}
+      {repToSave && (
+        <Popup
+          title="אישור שינוי נציג"
+          message="האם אתה בטוח שברצונך לשנות את הנציג המטפל?"
+          mode="confirm"
+          onConfirm={() => handleRepSave(repToSave, newRepId)}
+          onClose={() => {
+            setRepToSave(null);
+            setNewRepId(null);
+          }}
+        />
+      )}
+      {statusToSave && (
+        <Popup
+          title="אישור שינוי סטטוס"
+          message="האם אתה בטוח שברצונך לעדכן את סטטוס המשימה?"
+          mode="confirm"
+          onConfirm={() => handleStatusSave(statusToSave, newStatusValue)}
+          onClose={() => {
+            setStatusToSave(null);
+            setNewStatusValue(null);
+          }}
+        />
+      )}
+      {popupData && (
+        <Popup
+          title={popupData.title}
+          message={popupData.message}
+          mode={popupData.mode}
+          onClose={handleClosePopup}
+        />
+      )}
     </div>
   );
 };

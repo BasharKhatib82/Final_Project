@@ -26,8 +26,8 @@ const EditProject = () => {
     axios
       .get(`${api}/projects/${id}`, { withCredentials: true })
       .then((res) => {
-        if (res.data.Status && res.data.Result) {
-          setForm(res.data.Result);
+        if (res.data.success && res.data.data) {
+          setForm(res.data.data);
         } else {
           setError("לא ניתן לטעון את נתוני הפרויקט");
         }
