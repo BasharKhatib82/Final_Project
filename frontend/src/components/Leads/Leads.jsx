@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import NavigationButton from "../Buttons/NavigationButton";
 import DeleteButton from "../Buttons/DeleteButton";
 import Popup from "../Tools/Popup";
+import ReportExport from "../Reports/ReportExport";
+import ReportEmail from "../Reports/ReportEmail";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -303,6 +305,39 @@ const Leads = () => {
 
     return matchesSearch && matchesStatus && matchesProject && matchesRep;
   });
+
+  const columns = [
+    { key: "lead_id", label: "מס׳ פנייה", export: (r) => r.lead_id },
+    {
+      key: "created_at",
+      label: "תאריך יצירה",
+      export: (r) =>
+        new Date(r.created_at).toLocaleString("he-IL", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+    },
+    { key: "phone_number", label: "טלפון", export: (r) => r.phone_number },
+    {
+      key: "full_name",
+      label: "שם לקוח",
+      export: (r) => `${r.first_name} ${r.last_name}`,
+    },
+    { key: "project_name", label: "פרויקט", export: (r) => r.project_name },
+    {
+      key: "rep",
+      label: "נציג מטפל",
+      export: (r) => {
+        const u = users.find((u) => u.user_id === r.user_id);
+        return u ? `${u.first_name} ${u.last_name}` : "ללא";
+      },
+    },
+    { key: "status", label: "סטטוס", export: (r) => r.status },
+  ];
+
   return (
     <>
       <div className="p-4 text-right">
@@ -395,6 +430,22 @@ const Leads = () => {
               שייך את הנבחרות ({selectedLeads.length})
             </button>
           </div>
+        </div>
+        {/* 🔹 שורת ייצוא / הדפסה / שליחה למייל */}
+        <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
+          <ReportExport
+            apiBase={api}
+            title="רשימת פניות"
+            columns={columns}
+            rows={filteredLeads}
+          />
+
+          <ReportEmail
+            apiBase={api}
+            title="רשימת פניות"
+            columns={columns}
+            rows={filteredLeads}
+          />
         </div>
 
         <div className="overflow-auto rounded-lg shadow-lg bg-white/85 mt-4">
