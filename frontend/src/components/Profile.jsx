@@ -1,54 +1,34 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import Popup from "./Tools/Popup";
-import jwtDecode from "jwt-decode"; // npm i jwt-decode
+import Popup from "../Tools/Popup";
+import { useUser } from "../Tools/UserContext";
 
 const api = process.env.REACT_APP_API_URL;
 
-const Profile = () => {
+const AccountSettings = () => {
+  const { user } = useUser(); // 🟢 נקח את המשתמש מהקונטקסט
   const [formData, setFormData] = useState({
     user_id: "",
     first_name: "",
     last_name: "",
     role_name: "",
-    email: "",
     phone_number: "",
+    email: "",
   });
-
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
-
-  const [loading, setLoading] = useState(true);
   const [popupData, setPopupData] = useState(null);
-  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    getUserIdFromToken();
-  }, []);
-
-  useEffect(() => {
-    if (userId) {
-      fetchUserInfo(userId);
+    if (user?.user_id) {
+      fetchUser(user.user_id);
     }
-  }, [userId]);
+  }, [user]);
 
-  // 🟢 חילוץ user_id מהטוקן
-  const getUserIdFromToken = () => {
-    try {
-      const token = localStorage.getItem("token"); // או בקוקי – תלוי איך שמרת
-      if (!token) return;
-      const decoded = jwtDecode(token);
-      setUserId(decoded.user_id);
-    } catch (err) {
-      console.error("❌ שגיאה בפענוח טוקן:", err);
-    }
-  };
-
-  // 🟢 שליפת פרטי המשתמש
-  const fetchUserInfo = async (id) => {
+  const fetchUser = async (id) => {
     try {
       const res = await axios.get(`${api}/users/${id}`, {
         withCredentials: true,
@@ -57,14 +37,12 @@ const Profile = () => {
         setFormData(res.data.data);
       }
     } catch (err) {
-      console.error("❌ שגיאה בשליפת פרטי משתמש:", err);
+      console.error("שגיאה בשליפת פרטי משתמש:", err);
       setPopupData({
         title: "שגיאה",
-        message: "שגיאה בשליפת פרטי המשתמש",
+        message: "לא ניתן לטעון פרטי משתמש",
         mode: "error",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -73,38 +51,40 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePasswordChange = (e) => {
-    const { name, value } = e.target;
-    setPasswordData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // ✅ עדכון טלפון / מייל בלבד
-  const handleSubmit = async (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     try {
-      const { email, phone_number } = formData;
-      await axios.put(
-        `${api}/users/edit/${userId}`,
-        { email, phone_number },
-        { withCredentials: true }
+      const res = await axios.put(
+        `${api}/users/${formData.user_id}`,
+        formData,
+        {
+          withCredentials: true,
+        }
       );
-      setPopupData({
-        title: "הצלחה",
-        message: "🎉 פרטי החשבון עודכנו בהצלחה",
-        mode: "success",
-      });
+      if (res.data.success) {
+        setPopupData({
+          title: "הצלחה",
+          message: "פרטי המשתמש עודכנו בהצלחה",
+          mode: "success",
+        });
+      } else {
+        setPopupData({
+          title: "שגיאה",
+          message: res.data.message || "שגיאה בעדכון פרטי המשתמש",
+          mode: "error",
+        });
+      }
     } catch (err) {
-      console.error("❌ שגיאה בעדכון פרטי חשבון:", err);
+      console.error("שגיאה בעדכון פרטי משתמש:", err);
       setPopupData({
         title: "שגיאה",
-        message: "שגיאה בעדכון פרטי החשבון",
+        message: "שגיאה בעדכון פרטי המשתמש",
         mode: "error",
       });
     }
   };
 
-  // ✅ שינוי סיסמה
-  const handlePasswordSubmit = async (e) => {
+  const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       return setPopupData({
@@ -113,173 +93,177 @@ const Profile = () => {
         mode: "error",
       });
     }
+
     try {
-      await axios.put(`${api}/users/change-password/${userId}`, passwordData, {
-        withCredentials: true,
-      });
-      setPopupData({
-        title: "הצלחה",
-        message: "🔑 הסיסמה שונתה בהצלחה",
-        mode: "success",
-      });
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
+      const res = await axios.put(
+        `${api}/users/change-password/${formData.user_id}`,
+        {
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword,
+        },
+        { withCredentials: true }
+      );
+      if (res.data.success) {
+        setPopupData({
+          title: "הצלחה",
+          message: "הסיסמה עודכנה בהצלחה",
+          mode: "success",
+        });
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+      } else {
+        setPopupData({
+          title: "שגיאה",
+          message: res.data.message || "שגיאה בעדכון סיסמה",
+          mode: "error",
+        });
+      }
     } catch (err) {
-      console.error("❌ שגיאה בשינוי סיסמה:", err);
+      console.error("שגיאה בעדכון סיסמה:", err);
       setPopupData({
         title: "שגיאה",
-        message: "שגיאה בשינוי הסיסמה",
+        message: "שגיאה בעדכון סיסמה",
         mode: "error",
       });
     }
   };
 
-  const handleClosePopup = () => setPopupData(null);
-
-  if (loading)
-    return (
-      <p className="text-center text-blue-600 text-lg">טוען פרטי משתמש...</p>
-    );
+  if (!formData.user_id) {
+    return <p className="text-center text-blue-600">טוען פרטי משתמש...</p>;
+  }
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white shadow rounded text-right">
       <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
-        הגדרות חשבון - פרטי משתמש
+        הגדרות חשבון
       </h2>
 
-      {/* פרטי משתמש */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {/* טופס פרטי משתמש */}
+      <form onSubmit={handleSave} className="space-y-4">
         <div>
-          <label className="block mb-1 font-medium">תעודת זהות:</label>
+          <label className="block mb-1">מזהה משתמש:</label>
           <input
-            type="text"
             value={formData.user_id}
             disabled
-            className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2 bg-gray-100"
           />
         </div>
-
         <div>
-          <label className="block mb-1 font-medium">שם פרטי:</label>
+          <label className="block mb-1">שם פרטי:</label>
           <input
-            type="text"
             value={formData.first_name}
             disabled
-            className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2 bg-gray-100"
           />
         </div>
-
         <div>
-          <label className="block mb-1 font-medium">שם משפחה:</label>
+          <label className="block mb-1">שם משפחה:</label>
           <input
-            type="text"
             value={formData.last_name}
             disabled
-            className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2 bg-gray-100"
           />
         </div>
-
         <div>
-          <label className="block mb-1 font-medium">תפקיד:</label>
+          <label className="block mb-1">תפקיד:</label>
           <input
-            type="text"
             value={formData.role_name}
             disabled
-            className="w-full bg-gray-100 border border-gray-300 rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2 bg-gray-100"
           />
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">אימייל:</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email || ""}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">טלפון:</label>
+          <label className="block mb-1">טלפון:</label>
           <input
             type="text"
             name="phone_number"
             value={formData.phone_number || ""}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+        <div>
+          <label className="block mb-1">אימייל:</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email || ""}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2"
           />
         </div>
 
         <button
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded"
         >
-          עדכון פרטי קשר
+          עדכון פרטים
         </button>
       </form>
 
       {/* שינוי סיסמה */}
-      <h3 className="font-rubik text-xl font-semibold text-gray-700 mt-8 mb-4 text-center">
-        שינוי סיסמה
-      </h3>
-      <form onSubmit={handlePasswordSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-1 font-medium">סיסמה נוכחית:</label>
+      <div className="mt-8 border-t pt-4">
+        <h3 className="text-lg font-semibold mb-3">שינוי סיסמה</h3>
+        <form onSubmit={handlePasswordChange} className="space-y-3">
           <input
             type="password"
-            name="currentPassword"
+            placeholder="סיסמה נוכחית"
             value={passwordData.currentPassword}
-            onChange={handlePasswordChange}
+            onChange={(e) =>
+              setPasswordData({
+                ...passwordData,
+                currentPassword: e.target.value,
+              })
+            }
+            className="w-full border rounded px-3 py-2"
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
           />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">סיסמה חדשה:</label>
           <input
             type="password"
-            name="newPassword"
+            placeholder="סיסמה חדשה"
             value={passwordData.newPassword}
-            onChange={handlePasswordChange}
+            onChange={(e) =>
+              setPasswordData({ ...passwordData, newPassword: e.target.value })
+            }
+            className="w-full border rounded px-3 py-2"
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
           />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">אימות סיסמה חדשה:</label>
           <input
             type="password"
-            name="confirmPassword"
+            placeholder="אימות סיסמה חדשה"
             value={passwordData.confirmPassword}
-            onChange={handlePasswordChange}
+            onChange={(e) =>
+              setPasswordData({
+                ...passwordData,
+                confirmPassword: e.target.value,
+              })
+            }
+            className="w-full border rounded px-3 py-2"
             required
-            className="w-full border border-gray-300 rounded px-3 py-2"
           />
-        </div>
+          <button
+            type="submit"
+            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded"
+          >
+            עדכון סיסמה
+          </button>
+        </form>
+      </div>
 
-        <button
-          type="submit"
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded transition"
-        >
-          עדכון סיסמה
-        </button>
-      </form>
-
-      {/* פופאפ */}
       {popupData && (
         <Popup
           title={popupData.title}
           message={popupData.message}
           mode={popupData.mode}
-          onClose={handleClosePopup}
+          onClose={() => setPopupData(null)}
         />
       )}
     </div>
   );
 };
 
-export default Profile;
+export default AccountSettings;
