@@ -29,7 +29,7 @@ const EditUser = () => {
       const res = await axios.get(`${api}/users/${id}`, {
         withCredentials: true,
       });
-      const currentUser = res.data.Result;
+      const currentUser = res.data.data;
       setUser(currentUser);
 
       const rolesRes = await axios.get(`${api}/roles/active`, {

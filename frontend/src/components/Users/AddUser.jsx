@@ -90,7 +90,7 @@ const AddUser = () => {
     axios
       .post(`${api}/users/add`, user, { withCredentials: true })
       .then((res) => {
-        if (res.data.Status) {
+        if (res.data.success) {
           setPopupData({
             show: true,
             title: "הצלחה",

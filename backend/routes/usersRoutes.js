@@ -107,7 +107,7 @@ router.post("/add", verifyToken, async (req, res) => {
     !password ||
     !user_id
   ) {
-    return res.status(400).json({ Status: false, message: "שדות חובה חסרים" });
+    return res.status(400).json({ success: false, message: "שדות חובה חסרים" });
   }
 
   try {
@@ -131,7 +131,7 @@ router.post("/add", verifyToken, async (req, res) => {
     ]);
 
     logAction("הוספת משתמש חדש")(req, res, () => {});
-    res.json({ Status: true, message: "המשתמש נוסף בהצלחה" });
+    res.json({ success: true, message: "המשתמש נוסף בהצלחה" });
   } catch (err) {
     console.error("❌ שגיאה בהוספת משתמש:", err);
 
@@ -142,7 +142,7 @@ router.post("/add", verifyToken, async (req, res) => {
       });
     }
 
-    res.status(500).json({ Status: false, message: "שגיאת שרת" });
+    res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
 
