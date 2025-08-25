@@ -442,7 +442,7 @@ const Leads = () => {
             columns={columns}
             rows={filteredLeads}
           >
-            <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
+            <div className="flex items-center flex-wrap gap-4 ">
               <ReportExport apiBase={api} />
               <ReportEmail apiBase={api} />
             </div>
