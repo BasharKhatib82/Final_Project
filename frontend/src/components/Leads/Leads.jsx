@@ -41,7 +41,7 @@ const Leads = () => {
         withCredentials: true,
       });
       if (res.data.success) {
-        setUsers(res.data.Result);
+        setUsers(res.data.data);
       }
     } catch (err) {
       console.error("שגיאה בטעינת עובדים:", err);
@@ -54,7 +54,7 @@ const Leads = () => {
         withCredentials: true,
       });
       if (res.data.success) {
-        setProjects(res.data.Result);
+        setProjects(res.data.data);
       }
     } catch (err) {
       console.error("שגיאה בטעינת פרויקטים:", err);
@@ -345,13 +345,12 @@ const Leads = () => {
         <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
           רשימת פניות
         </h2>
+        <NavigationButton
+          linkTo="/dashboard/add_lead"
+          label="הוספת פנייה חדשה"
+        />
 
         <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-4">
-          <NavigationButton
-            linkTo="/dashboard/add_lead"
-            label="הוספת פנייה חדשה"
-          />
-
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
