@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import NavigationButton from "../Buttons/NavigationButton";
 import DeleteButton from "../Buttons/DeleteButton";
 import Popup from "../Tools/Popup";
+import { ReportProvider } from "../Reports/ReportContext";
 import ReportExport from "../Reports/ReportExport";
 import ReportEmail from "../Reports/ReportEmail";
 
@@ -432,21 +433,16 @@ const Leads = () => {
           </div>
         </div>
         {/* 🔹 שורת ייצוא / הדפסה / שליחה למייל */}
-        <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
-          <ReportExport
-            apiBase={api}
-            title="רשימת פניות"
-            columns={columns}
-            rows={filteredLeads}
-          />
-
-          <ReportEmail
-            apiBase={api}
-            title="רשימת פניות"
-            columns={columns}
-            rows={filteredLeads}
-          />
-        </div>
+        <ReportProvider
+          title="רשימת פניות"
+          columns={columns}
+          rows={filteredLeads}
+        >
+          <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
+            <ReportExport apiBase={api} />
+            <ReportEmail apiBase={api} />
+          </div>
+        </ReportProvider>
 
         <div className="overflow-auto rounded-lg shadow-lg bg-white/85 mt-4">
           <table className="w-full table-auto border-collapse text-sm text-center">
