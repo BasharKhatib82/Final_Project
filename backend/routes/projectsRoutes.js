@@ -5,16 +5,9 @@ import logAction from "../utils/logAction.js";
 
 const router = express.Router();
 
-// פונקציית עזר לאחידות תגובה
-const sendResponse = (
-  res,
-  success,
-  data = null,
-  message = null,
-  status = 200
-) => {
-  res.status(status).json({ success, data, message });
-};
+/* ===============================
+   ניהול פרויקטים
+================================= */
 
 // ✅ שליפת כל הפרויקטים
 router.get("/", verifyToken, async (req, res) => {
@@ -22,18 +15,21 @@ router.get("/", verifyToken, async (req, res) => {
     const [rows] = await db.query(
       "SELECT * FROM projects ORDER BY project_id DESC"
     );
-    sendResponse(res, true, rows);
+    res.json({ success: true, data: rows });
   } catch (err) {
     console.error("❌ שגיאה בשליפת פרויקטים:", err);
-    sendResponse(res, false, null, "שגיאה בשליפת פרויקטים", 500);
+    res.status(500).json({ success: false, message: "שגיאה בשליפת פרויקטים" });
   }
 });
 
 // ✅ הוספת פרויקט חדש
 router.post("/add", verifyToken, async (req, res) => {
   const { project_name, project_description, active } = req.body;
+
   if (!project_name?.trim()) {
-    return sendResponse(res, false, null, "יש להזין שם פרויקט", 400);
+    return res
+      .status(400)
+      .json({ success: false, message: "יש להזין שם פרויקט" });
   }
 
   try {
@@ -43,15 +39,14 @@ router.post("/add", verifyToken, async (req, res) => {
     );
 
     logAction(`הוספת פרויקט חדש: ${project_name}`)(req, res, () => {});
-    sendResponse(
-      res,
-      true,
-      { project_id: result.insertId },
-      "הפרויקט נוסף בהצלחה"
-    );
+    res.json({
+      success: true,
+      data: { project_id: result.insertId },
+      message: "הפרויקט נוסף בהצלחה",
+    });
   } catch (err) {
     console.error("❌ שגיאה בהוספת פרויקט:", err);
-    sendResponse(res, false, null, "שגיאה בהוספת פרויקט", 500);
+    res.status(500).json({ success: false, message: "שגיאה בהוספת פרויקט" });
   }
 });
 
@@ -61,7 +56,9 @@ router.put("/edit/:id", verifyToken, async (req, res) => {
   const { project_name, project_description, active } = req.body;
 
   if (!project_name?.trim()) {
-    return sendResponse(res, false, null, "יש להזין שם פרויקט", 400);
+    return res
+      .status(400)
+      .json({ success: false, message: "יש להזין שם פרויקט" });
   }
 
   try {
@@ -71,14 +68,16 @@ router.put("/edit/:id", verifyToken, async (req, res) => {
     );
 
     if (result.affectedRows === 0) {
-      return sendResponse(res, false, null, "פרויקט לא נמצא", 404);
+      return res
+        .status(404)
+        .json({ success: false, message: "פרויקט לא נמצא" });
     }
 
     logAction(`עדכון פרויקט #${id}`)(req, res, () => {});
-    sendResponse(res, true, null, "הפרויקט עודכן בהצלחה");
+    res.json({ success: true, message: "הפרויקט עודכן בהצלחה" });
   } catch (err) {
     console.error("❌ שגיאה בעדכון פרויקט:", err);
-    sendResponse(res, false, null, "שגיאה בעדכון פרויקט", 500);
+    res.status(500).json({ success: false, message: "שגיאה בעדכון פרויקט" });
   }
 });
 
@@ -92,14 +91,16 @@ router.delete("/delete/:id", verifyToken, async (req, res) => {
     );
 
     if (result.affectedRows === 0) {
-      return sendResponse(res, false, null, "פרויקט לא נמצא", 404);
+      return res
+        .status(404)
+        .json({ success: false, message: "פרויקט לא נמצא" });
     }
 
     logAction(`מחיקת פרויקט #${id} (לוגית)`)(req, res, () => {});
-    sendResponse(res, true, null, "הפרויקט הועבר לארכיון");
+    res.json({ success: true, message: "הפרויקט הועבר לארכיון" });
   } catch (err) {
     console.error("❌ שגיאה במחיקת פרויקט:", err);
-    sendResponse(res, false, null, "שגיאה במחיקת פרויקט", 500);
+    res.status(500).json({ success: false, message: "שגיאה במחיקת פרויקט" });
   }
 });
 
@@ -112,10 +113,10 @@ router.get("/status/:active", verifyToken, async (req, res) => {
     const [rows] = await db.query(`SELECT * FROM projects WHERE active=?`, [
       isActive,
     ]);
-    sendResponse(res, true, rows);
+    res.json({ success: true, data: rows });
   } catch (err) {
     console.error("❌ שגיאה בשליפת פרויקטים:", err);
-    sendResponse(res, false, null, "שגיאה בשליפת פרויקטים", 500);
+    res.status(500).json({ success: false, message: "שגיאה בשליפת פרויקטים" });
   }
 });
 
@@ -128,13 +129,15 @@ router.get("/:id", verifyToken, async (req, res) => {
     ]);
 
     if (rows.length === 0) {
-      return sendResponse(res, false, null, "הפרויקט לא נמצא", 404);
+      return res
+        .status(404)
+        .json({ success: false, message: "הפרויקט לא נמצא" });
     }
 
-    sendResponse(res, true, rows[0]);
+    res.json({ success: true, data: rows[0] });
   } catch (err) {
     console.error("❌ שגיאה בשליפת פרויקט:", err);
-    sendResponse(res, false, null, "שגיאה בשליפת פרויקט", 500);
+    res.status(500).json({ success: false, message: "שגיאה בשליפת פרויקט" });
   }
 });
 

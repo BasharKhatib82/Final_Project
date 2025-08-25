@@ -37,7 +37,9 @@ const Projects = () => {
     axios
       .get(`${api}/projects`, { withCredentials: true })
       .then((res) => {
-        setProjects(res.data.data || []);
+        if (res.data.success) {
+          setProjects(res.data.data || []);
+        }
       })
       .catch((err) => {
         console.error("שגיאה בטעינת פרויקטים:", err);
@@ -53,17 +55,17 @@ const Projects = () => {
         { withCredentials: true }
       );
 
-      if (res.data.Status) {
+      if (res.data.success) {
         fetchProjects();
         setPopupData({
           title: "הצלחה",
-          message: "הפרויקט סומן כלא פעיל",
+          message: res.data.message || "הפרויקט סומן כלא פעיל",
           mode: "success",
         });
       } else {
         setPopupData({
           title: "שגיאה",
-          message: res.data?.Error || "שגיאה במחיקת פרויקט",
+          message: res.data.message || "שגיאה במחיקת פרויקט",
           mode: "error",
         });
       }
@@ -87,8 +89,8 @@ const Projects = () => {
       statusFilter === "all"
         ? true
         : statusFilter === "active"
-        ? project.is_active
-        : !project.is_active;
+        ? project.active === 1
+        : project.active === 0;
     return statusCheck && (nameMatch || descMatch);
   });
 
@@ -156,7 +158,7 @@ const Projects = () => {
                 <tr
                   key={project.project_id}
                   className={`hover:bg-blue-50 transition ${
-                    !project.is_active ? "bg-gray-100" : ""
+                    project.active === 0 ? "bg-gray-100" : ""
                   }`}
                 >
                   <td className="border p-2">{project.project_id}</td>
@@ -166,10 +168,10 @@ const Projects = () => {
                   </td>
                   <td
                     className={`border p-2 font-semibold ${
-                      project.is_active ? "text-green-600" : "text-red-500"
+                      project.active === 1 ? "text-green-600" : "text-red-500"
                     }`}
                   >
-                    {project.is_active ? "פעיל" : "לא פעיל"}
+                    {project.active === 1 ? "פעיל" : "לא פעיל"}
                   </td>
                   <td className="border p-2 flex justify-center gap-2">
                     <button
@@ -182,7 +184,7 @@ const Projects = () => {
                     >
                       עריכה
                     </button>
-                    {project.is_active && (
+                    {project.active === 1 && (
                       <button
                         onClick={() => setProjectToDelete(project.project_id)}
                         className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
