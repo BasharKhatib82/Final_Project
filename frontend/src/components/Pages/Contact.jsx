@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import Popup from "./Tools/Popup";
+import Popup from "../Tools/Popup.jsx";
 
 const api = process.env.REACT_APP_API_URL;
 
