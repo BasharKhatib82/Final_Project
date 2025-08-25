@@ -150,7 +150,7 @@ export default function Roles() {
       key: "active",
       label: "סטטוס",
       render: (r) => renderCheckActive(r.active),
-      exportLabel: (r) => r.status_human,
+      export: (r) => r.status_human,
     },
     {
       key: "actions",
