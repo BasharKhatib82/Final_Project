@@ -342,14 +342,19 @@ const Leads = () => {
   return (
     <>
       <div className="p-4 text-right">
-        <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
-          רשימת פניות
-        </h2>
-        <NavigationButton
-          linkTo="/dashboard/add_lead"
-          label="הוספת פנייה חדשה"
-        />
-
+        <header className="flex items-center justify-center py-0 my-0">
+          <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-2 text-center">
+            רשימת פניות
+          </h2>
+        </header>
+        <div className="flex justify-start">
+          <div className="inline-flex">
+            <NavigationButton
+              linkTo="/dashboard/add_lead"
+              label="הוספת פנייה חדשה"
+            />
+          </div>
+        </div>
         <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-4">
           <select
             value={statusFilter}
