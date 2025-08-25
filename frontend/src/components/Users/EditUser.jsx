@@ -29,7 +29,7 @@ const EditUser = () => {
       const res = await axios.get(`${api}/users/${id}`, {
         withCredentials: true,
       });
-      const currentUser = res.data.data;
+      const currentUser = res.data.Result;
       setUser(currentUser);
 
       const rolesRes = await axios.get(`${api}/roles/active`, {
@@ -91,7 +91,7 @@ const EditUser = () => {
     axios
       .put(`${api}/users/${id}`, user, { withCredentials: true })
       .then((res) => {
-        if (res.data.success) {
+        if (res.data.Status) {
           setPopupData({
             show: true,
             title: "הצלחה",

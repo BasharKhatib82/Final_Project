@@ -40,7 +40,7 @@ const Leads = () => {
       const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
-      if (res.data.success) {
+      if (res.data.Status) {
         setUsers(res.data.Result);
       }
     } catch (err) {
@@ -53,8 +53,8 @@ const Leads = () => {
       const res = await axios.get(`${api}/projects`, {
         withCredentials: true,
       });
-      if (res.data.success) {
-        setProjects(res.data.data);
+      if (res.data.Status) {
+        setProjects(res.data.Result);
       }
     } catch (err) {
       console.error("שגיאה בטעינת פרויקטים:", err);

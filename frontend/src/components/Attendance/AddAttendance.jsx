@@ -35,7 +35,7 @@ const AddAttendance = () => {
     axios
       .get(`${api}/users/active`, { withCredentials: true })
       .then((res) => {
-        if (res.data.success) {
+        if (res.data.Status) {
           setUsers(res.data.Result || []);
         } else {
           setPopupData({

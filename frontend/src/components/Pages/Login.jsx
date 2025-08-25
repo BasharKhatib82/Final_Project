@@ -24,7 +24,7 @@ function Login() {
         withCredentials: true,
       });
 
-      if (loginRes.data.success) {
+      if (loginRes.data.Status) {
         const authRes = await axios.get(`${api}/auth/check`, {
           withCredentials: true,
         });
