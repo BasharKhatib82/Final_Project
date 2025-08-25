@@ -32,7 +32,7 @@ router.post("/", async (req, res) => {
   try {
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: "reports@resondify-crm.co.il", // כתובת היעד
+      to: "reports@respondify-crm.co.il", // כתובת היעד
       subject: `📩 פנייה חדשה מצור קשר - ${subject}`,
       html: `
         <h2>פנייה חדשה מהאתר</h2>
