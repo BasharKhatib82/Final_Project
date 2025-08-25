@@ -289,4 +289,55 @@ router.get("/:id", verifyToken, async (req, res) => {
   }
 });
 
+// ✅ שינוי סיסמה
+router.put("/change-password/:id", verifyToken, async (req, res) => {
+  const { id } = req.params;
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "יש להזין סיסמה נוכחית וסיסמה חדשה",
+    });
+  }
+
+  try {
+    // שליפת המשתמש מה־DB
+    const [rows] = await db.query(
+      "SELECT password FROM users WHERE user_id = ?",
+      [id]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "משתמש לא נמצא" });
+    }
+
+    const hashedPassword = rows[0].password;
+
+    // בדיקת סיסמה נוכחית
+    const isMatch = await bcrypt.compare(currentPassword, hashedPassword);
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ success: false, message: "סיסמה נוכחית שגויה" });
+    }
+
+    // הצפנת סיסמה חדשה
+    const salt = await bcrypt.genSalt(10);
+    const newHashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // עדכון DB
+    await db.query("UPDATE users SET password = ? WHERE user_id = ?", [
+      newHashedPassword,
+      id,
+    ]);
+
+    logAction(`שינוי סיסמה למשתמש #${id}`)(req, res, () => {});
+    res.json({ success: true, message: "הסיסמה עודכנה בהצלחה" });
+  } catch (err) {
+    console.error("❌ שגיאה בשינוי סיסמה:", err);
+    res.status(500).json({ success: false, message: "שגיאת שרת בשינוי סיסמה" });
+  }
+});
+
 export default router;
