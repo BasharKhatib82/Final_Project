@@ -430,19 +430,19 @@ const Leads = () => {
               שייך את הנבחרות ({selectedLeads.length})
             </button>
           </div>
-        </div>
-        {/* 🔹 שורת ייצוא / הדפסה / שליחה למייל */}
-        <ReportProvider
-          title="רשימת פניות"
-          columns={columns}
-          rows={filteredLeads}
-        >
-          <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
-            <ReportExport apiBase={api} />
-            <ReportEmail apiBase={api} />
-          </div>
-        </ReportProvider>
 
+          {/* 🔹 שורת ייצוא / הדפסה / שליחה למייל */}
+          <ReportProvider
+            title="רשימת פניות"
+            columns={columns}
+            rows={filteredLeads}
+          >
+            <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
+              <ReportExport apiBase={api} />
+              <ReportEmail apiBase={api} />
+            </div>
+          </ReportProvider>
+        </div>
         <div className="overflow-auto rounded-lg shadow-lg bg-white/85 mt-4">
           <table className="w-full table-auto border-collapse text-sm text-center">
             <thead>
