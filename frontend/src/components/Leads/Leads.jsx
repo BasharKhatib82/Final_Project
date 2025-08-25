@@ -53,8 +53,8 @@ const Leads = () => {
       const res = await axios.get(`${api}/projects`, {
         withCredentials: true,
       });
-      if (res.data.Status) {
-        setProjects(res.data.Result);
+      if (res.data.success) {
+        setProjects(res.data.data);
       }
     } catch (err) {
       console.error("שגיאה בטעינת פרויקטים:", err);
