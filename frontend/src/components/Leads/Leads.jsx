@@ -66,7 +66,7 @@ const Leads = () => {
       const res = await axios.get(`${api}/leads`, {
         withCredentials: true,
       });
-      if (res.data.success) {
+      if (res.data.Status) {
         const updatedLeads = res.data.Result.map((lead) => ({
           ...lead,
           selectedRepId: lead.user_id || "",
