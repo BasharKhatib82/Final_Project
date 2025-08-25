@@ -5,7 +5,7 @@ import { useUser } from "./Tools/UserContext.jsx";
 
 const api = process.env.REACT_APP_API_URL;
 
-const AccountSettings = () => {
+const Profile = () => {
   const { user } = useUser(); // 🟢 נקח את המשתמש מהקונטקסט
   const [formData, setFormData] = useState({
     user_id: "",
@@ -266,4 +266,4 @@ const AccountSettings = () => {
   );
 };
 
-export default AccountSettings;
+export default Profile;
