@@ -3,6 +3,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import NavigationButton from "../Buttons/NavigationButton";
 import Popup from "../Tools/Popup";
+import { ReportProvider } from "../Reports/ReportContext";
+import ReportExport from "../Reports/ReportExport";
+import ReportEmail from "../Reports/ReportEmail";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -94,6 +97,22 @@ const Projects = () => {
     return statusCheck && (nameMatch || descMatch);
   });
 
+  // 🟢 הגדרת העמודות לייצוא
+  const columns = [
+    { key: "project_id", label: "קוד פרויקט", export: (r) => r.project_id },
+    { key: "project_name", label: "שם פרויקט", export: (r) => r.project_name },
+    {
+      key: "project_description",
+      label: "תיאור",
+      export: (r) => r.project_description || "-",
+    },
+    {
+      key: "active",
+      label: "סטטוס",
+      export: (r) => (r.active === 1 ? "פעיל" : "לא פעיל"),
+    },
+  ];
+
   return (
     <div className="p-6 text-right">
       <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
@@ -119,7 +138,7 @@ const Projects = () => {
         <div className="relative">
           <input
             type="text"
-            placeholder="🔍 חיפוש לפי שם או תיאור..."
+            placeholder="🔍 חיפוש לפי שם פרויקט..."
             className="border border-gray-300 rounded px-3 py-1 text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -134,6 +153,18 @@ const Projects = () => {
           )}
         </div>
       </div>
+
+      {/* 🔹 סרגל ייצוא / הדפסה / שליחה למייל */}
+      <ReportProvider
+        title="רשימת פרויקטים"
+        columns={columns}
+        rows={filteredProjects}
+      >
+        <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
+          <ReportExport apiBase={api} />
+          <ReportEmail apiBase={api} />
+        </div>
+      </ReportProvider>
 
       <div className="overflow-auto rounded-lg shadow-lg bg-white/85">
         <table className="w-full table-auto border-collapse text-sm text-center">
