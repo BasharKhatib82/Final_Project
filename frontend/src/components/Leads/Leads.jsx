@@ -40,7 +40,7 @@ const Leads = () => {
       const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
-      if (res.data.Status) {
+      if (res.data.success) {
         setUsers(res.data.Result);
       }
     } catch (err) {
@@ -53,7 +53,7 @@ const Leads = () => {
       const res = await axios.get(`${api}/projects`, {
         withCredentials: true,
       });
-      if (res.data.Status) {
+      if (res.data.success) {
         setProjects(res.data.Result);
       }
     } catch (err) {
@@ -66,7 +66,7 @@ const Leads = () => {
       const res = await axios.get(`${api}/leads`, {
         withCredentials: true,
       });
-      if (res.data.Status) {
+      if (res.data.success) {
         const updatedLeads = res.data.Result.map((lead) => ({
           ...lead,
           selectedRepId: lead.user_id || "",
