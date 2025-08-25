@@ -104,7 +104,7 @@ export default function Users() {
       key: "active",
       label: "סטטוס",
       render: (u) => renderCheckActive(u.active),
-      exportLabel: "status_human",
+      export: (u) => u.status_human, // ✅ תיקון כאן
     },
     {
       key: "actions",
