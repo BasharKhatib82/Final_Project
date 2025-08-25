@@ -6,12 +6,16 @@ const router = express.Router();
 
 // 🔹 יצירת טרנספורטר עם SMTP (משתמש בהגדרות שלך)
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: process.env.SMTP_PORT || 587,
-  secure: false,
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 465,
+  secure: process.env.SMTP_SECURE === "true", // true = פורט 465
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+  tls: {
+    // אם השרת משתמש בתעודה self-signed
+    rejectUnauthorized: false,
   },
 });
 
@@ -48,6 +52,21 @@ router.post("/", async (req, res) => {
       success: false,
       message: "שגיאה בשליחת הפנייה, נסה שוב מאוחר יותר",
     });
+  }
+});
+
+router.get("/test-mail", async (req, res) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_USER,
+      to: "yourpersonal@email.com",
+      subject: "בדיקת מייל 🚀",
+      text: "שלום, זו הודעת בדיקה מ-CRM",
+    });
+    res.json({ success: true, message: "המייל נשלח בהצלחה" });
+  } catch (err) {
+    console.error("❌ בדיקת מייל נכשלה:", err);
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 
