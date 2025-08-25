@@ -22,6 +22,7 @@ import logsRoutes from "./routes/logsRoutes.js";
 import whatsappRoutes from "./routes/whatsappRoutes.js";
 import flowDataRoutes from "./routes/flowDataRoutes.js";
 import reportsRouter from "./routes/reportsRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -51,6 +52,7 @@ app.use("/logs", logsRoutes);
 app.use("/whatsapp", whatsappRoutes);
 app.use("/flows", flowDataRoutes);
 app.use("/reports", reportsRouter);
+app.use("/contact", contactRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
