@@ -347,7 +347,7 @@ const Leads = () => {
             רשימת פניות
           </h2>
         </header>
-        <div className="flex justify-start">
+        <div className="flex justify-start mb-2">
           <div className="inline-flex">
             <NavigationButton
               linkTo="/dashboard/add_lead"
@@ -355,7 +355,7 @@ const Leads = () => {
             />
           </div>
         </div>
-        <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-4">
+        <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 ">
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
