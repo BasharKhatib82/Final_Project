@@ -41,7 +41,7 @@ const Leads = () => {
         withCredentials: true,
       });
       if (res.data.success) {
-        setUsers(res.data.data);
+        setUsers(res.data.Result);
       }
     } catch (err) {
       console.error("שגיאה בטעינת עובדים:", err);
