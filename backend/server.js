@@ -19,8 +19,6 @@ import usersRoutes from "./routes/usersRoutes.js";
 import attendanceRoutes from "./routes/attendanceRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import logsRoutes from "./routes/logsRoutes.js";
-import whatsappRoutes from "./routes/whatsappRoutes.js";
-import flowDataRoutes from "./routes/flowDataRoutes.js";
 import reportsRouter from "./routes/reportsRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import "./utils/whatsappBot.js";
@@ -50,8 +48,6 @@ app.use("/attendance", attendanceRoutes);
 app.use("/projects", projectsRoutes);
 app.use("/dashboard", dashboardRoutes);
 app.use("/logs", logsRoutes);
-app.use("/whatsapp", whatsappRoutes);
-app.use("/flows", flowDataRoutes);
 app.use("/reports", reportsRouter);
 app.use("/contact", contactRoutes);
 
