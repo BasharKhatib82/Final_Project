@@ -2,6 +2,7 @@ import express from "express";
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import verifyToken from "../utils/verifyToken.js";
+import { verifyBotWA } from "../utils/verifyBotWA.js";
 
 const router = express.Router();
 
@@ -57,6 +58,63 @@ router.get("/:id", verifyToken, async (req, res) => {
 
 // ✅ יצירת פנייה חדשה (עם טרנזקציה)
 router.post("/add", verifyToken, async (req, res) => {
+  const {
+    phone_number,
+    project_id,
+    status,
+    first_name,
+    last_name,
+    email,
+    city,
+  } = req.body;
+
+  if (!phone_number || !project_id || !status)
+    return res
+      .status(400)
+      .json({ Status: false, Error: "נא למלא את כל השדות החובה" });
+
+  if (!validStatuses.includes(status))
+    return res.status(400).json({ Status: false, Error: "סטטוס לא חוקי" });
+
+  if (email && !isValidEmail(email))
+    return res.status(400).json({ Status: false, Error: "אימייל לא תקין" });
+
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+
+    const [clients] = await conn.query(
+      "SELECT * FROM clients WHERE phone_number = ?",
+      [phone_number]
+    );
+    if (clients.length === 0) {
+      await conn.query(
+        `INSERT INTO clients (phone_number, first_name, last_name, email, city) VALUES (?, ?, ?, ?, ?)`,
+        [phone_number, first_name, last_name, email, city]
+      );
+    }
+
+    await conn.query(
+      `INSERT INTO leads (phone_number, project_id, status, user_id) VALUES (?, ?, ?, ?)`,
+      [phone_number, project_id, status, req.user.user_id]
+    );
+
+    await conn.commit();
+
+    logAction("הוספת פנייה חדשה", req.user.user_id)(req, res, () => {});
+    res.json({ Status: true, Message: "הפנייה נשמרה בהצלחה" });
+  } catch (err) {
+    await conn.rollback();
+    console.error("❌ שגיאה ביצירת פנייה:", err);
+    res.status(500).json({ Status: false, Error: "שגיאה בשרת" });
+  } finally {
+    conn.release();
+  }
+});
+
+
+// ✅ יצירת פנייה חדשה (עם טרנזקציה)
+router.post("/add-from-boot", verifyBotWA, async (req, res) => {
   const {
     phone_number,
     project_id,

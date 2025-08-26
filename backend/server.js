@@ -23,6 +23,7 @@ import whatsappRoutes from "./routes/whatsappRoutes.js";
 import flowDataRoutes from "./routes/flowDataRoutes.js";
 import reportsRouter from "./routes/reportsRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
+import "./utils/whatsappBot.js";
 
 dotenv.config();
 const app = express();

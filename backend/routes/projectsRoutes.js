@@ -22,6 +22,16 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
+router.get("/for-bot", verifyBot, async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM projects WHERE active=1");
+    res.json({ success: true, data: rows });
+  } catch (err) {
+    console.error("❌ שגיאה בשליפת פרויקטים:", err);
+    res.status(500).json({ success: false, message: "שגיאה בשליפת פרויקטים" });
+  }
+});
+
 // ✅ הוספת פרויקט חדש
 router.post("/add", verifyToken, async (req, res) => {
   const { project_name, project_description, active } = req.body;
