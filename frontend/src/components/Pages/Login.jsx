@@ -114,9 +114,9 @@ function Login() {
       </div>
       {showPopup && (
         <Popup
-          title="חשבון זוהה בהצלחה ✅"
-          message="נעביר אותך לאזור האישי..."
-          mode="success"
+          title="חשבונך זוהה בהצלחה"
+          message="כעת נעביר אותך לאזור האישי שלך"
+          mode="successMessage"
           autoClose={2000} // יעלם אחרי 2 שניות
           redirectOnClose="/dashboard" // לאחר הסגירה או היעלמות
           onClose={() => setShowPopup(false)} // לסגור את הפופאפ ידנית אם צריך
