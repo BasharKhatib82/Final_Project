@@ -6,6 +6,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
+import nodemailer from "nodemailer";
 import verifyToken from "../utils/verifyToken.js";
 import logAction from "../utils/logAction.js";
 
@@ -166,10 +167,12 @@ router.post("/forgot-password", async (req, res) => {
 
     // שולחים מייל עם לינק
     const transporter = nodemailer.createTransport({
-      service: "Gmail",
+      host: process.env.SMTP_HOST, // mail.respondify-crm.co.il
+      port: process.env.SMTP_PORT, // 465
+      secure: process.env.SMTP_SECURE === "true", // true
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: process.env.SMTP_USER, // reports@respondify-crm.co.il
+        pass: process.env.SMTP_PASS, // ********
       },
     });
 
