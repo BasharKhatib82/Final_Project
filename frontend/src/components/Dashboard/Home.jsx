@@ -52,11 +52,11 @@ const Home = () => {
       )}
 
       {/* 📦 כרטיסי סטטיסטיקה */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* עובדים */}
         <div
           onClick={handleClickUsers}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-6 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center mb-3">
             <div className="bg-blue-100 text-blue-600 rounded-full p-3 text-2xl">
@@ -82,7 +82,7 @@ const Home = () => {
         {/* מחוברים */}
         <div
           onClick={handleClickUsers}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-6 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center mb-3">
             <div className="bg-green-100 text-green-600 rounded-full p-3 text-2xl">
@@ -105,7 +105,7 @@ const Home = () => {
         {/* תפקידים */}
         <div
           onClick={handleClickRoles}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-6 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center mb-3">
             <div className="bg-purple-100 text-purple-600 rounded-full p-3 text-2xl">
@@ -131,7 +131,7 @@ const Home = () => {
         {/* פרויקטים */}
         <div
           onClick={handleClickProjects}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-6 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center mb-3">
             <div className="bg-indigo-100 text-indigo-600 rounded-full p-3 text-2xl">
@@ -157,7 +157,7 @@ const Home = () => {
         {/* פניות */}
         <div
           onClick={handleClickLeads}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-6 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center mb-3">
             <div className="bg-yellow-100 text-yellow-600 rounded-full p-3 text-2xl">
@@ -181,7 +181,7 @@ const Home = () => {
         </div>
         <div
           onClick={handleClickTasks}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-6 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center mb-3">
             <div className="bg-slate-100 text-yellow-600 rounded-full p-3 text-2xl">

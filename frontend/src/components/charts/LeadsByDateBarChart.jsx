@@ -52,7 +52,7 @@ const LeadsByDateBarChart = ({ dataByDay }) => {
       <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">
         פניות לפי תאריך
       </h3>
-      <div className="w-[220px] h-[220px]">
+      <div className="w-[200px] h-[200px]">
         <Bar data={chartData} options={options} />
       </div>
     </div>

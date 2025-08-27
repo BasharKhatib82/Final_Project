@@ -27,7 +27,7 @@ const LeadsStatusPieChart = ({ data }) => {
         labels: {
           font: {
             family: "Rubik",
-            size: 14,
+            size: 12,
             weight: "500",
           },
           color: "#374151", // gray-700
@@ -38,8 +38,10 @@ const LeadsStatusPieChart = ({ data }) => {
 
   return (
     <div>
-      <h3 className="text-lg font-semibold text-gray-700 mb-4">סטטוס הפניות</h3>
-      <div className="w-[220px] h-[220px]">
+      <h3 className="text-lg font-semibold text-gray-700 mb-4text-center">
+        סטטוס הפניות
+      </h3>
+      <div className="w-[200px] h-[200px]">
         <Doughnut data={chartData} options={options} />
       </div>
     </div>
