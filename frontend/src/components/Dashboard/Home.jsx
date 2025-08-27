@@ -183,16 +183,16 @@ const Home = () => {
 
       {/* 🟦 גרפים */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center h-80">
+        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center">
           <LeadsStatusPieChart data={stats.leads} />
         </div>
-        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center h-80">
+        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center">
           <LeadsByDateBarChart dataByDay={stats.leads_by_day} />
         </div>
-        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center h-80">
+        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center">
           <LeadsBySourceChart data={stats.leads_by_source} />
         </div>
-        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center h-80">
+        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center">
           <LeadsByUserChart data={stats.leads_by_user} />
         </div>
       </div>
