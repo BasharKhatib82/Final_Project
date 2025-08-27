@@ -14,7 +14,12 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const LeadsByDateBarChart = ({ dataByDay }) => {
   const chartData = {
-    labels: dataByDay.map((item) => item.date),
+    labels: dataByDay.map((item) =>
+      new Date(item.date).toLocaleDateString("he-IL", {
+        day: "2-digit",
+        month: "2-digit",
+      })
+    ),
     datasets: [
       {
         label: "פניות",
