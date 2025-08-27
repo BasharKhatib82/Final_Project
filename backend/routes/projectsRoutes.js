@@ -1,7 +1,7 @@
 import express from "express";
 import { db } from "../utils/dbSingleton.js";
 import verifyToken from "../utils/verifyToken.js";
-import { verifyBot } from "../utils/verifyBotWA.js";
+import { verifyBotWA } from "../utils/verifyBotWA.js";
 import logAction from "../utils/logAction.js";
 
 const router = express.Router();
@@ -23,7 +23,7 @@ router.get("/", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/for-bot", verifyBot, async (req, res) => {
+router.get("/for-bot", verifyBotWA, async (req, res) => {
   try {
     const [rows] = await db.query("SELECT * FROM projects WHERE active=1");
     res.json({ success: true, data: rows });
