@@ -7,11 +7,35 @@ const api = process.env.REACT_APP_API_URL;
 function ResetPassword() {
   const { token } = useParams();
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const validatePassword = (pwd) => {
+    if (pwd.length < 8) return "הסיסמה חייבת להכיל לפחות 8 תווים";
+    if (!/[A-Z]/.test(pwd)) return "הסיסמה חייבת לכלול אות גדולה";
+    if (!/[a-z]/.test(pwd)) return "הסיסמה חייבת לכלול אות קטנה";
+    if (!/[0-9]/.test(pwd)) return "הסיסמה חייבת לכלול מספר";
+    return null;
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // בדיקת סיסמה
+    const validationError = validatePassword(password);
+    if (validationError) {
+      setMessage(validationError);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setMessage("הסיסמאות אינן תואמות");
+      return;
+    }
+
+    setLoading(true);
     try {
       const res = await axios.post(`${api}/auth/reset-password`, {
         token,
@@ -23,6 +47,8 @@ function ResetPassword() {
       }
     } catch (err) {
       setMessage("שגיאה באיפוס סיסמה");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -35,10 +61,26 @@ function ResetPassword() {
             type="password"
             placeholder="סיסמה חדשה"
             className="w-full border px-3 py-2 rounded"
+            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          <button className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded">
-            שמור סיסמה
+          <input
+            type="password"
+            placeholder="אשר סיסמה חדשה"
+            className="w-full border px-3 py-2 rounded"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className={`w-full font-semibold py-2 rounded transition ${
+              loading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700 text-white"
+            }`}
+          >
+            {loading ? "שומר..." : "שמור סיסמה"}
           </button>
         </form>
         {message && (

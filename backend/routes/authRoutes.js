@@ -5,6 +5,7 @@ import { db } from "../utils/dbSingleton.js";
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import verifyToken from "../utils/verifyToken.js";
 import logAction from "../utils/logAction.js";
 
@@ -142,6 +143,7 @@ router.post("/logout", async (req, res) => {
   res.json({ success: true, message: "התנתקת מהמערכת" });
 });
 
+// ✅ איפוס סיסמה - שליחת מייל עם טוקן
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   try {
@@ -153,12 +155,13 @@ router.post("/forgot-password", async (req, res) => {
       return res.status(404).json({ message: "לא נמצא משתמש עם האימייל הזה" });
     }
 
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    const resetToken = randomBytes(32).toString("hex");
     const expire = new Date(Date.now() + 1000 * 60 * 15); // 15 דקות
 
+    // שומרים את הטוקן בטבלת password_resets (לא בתוך users!)
     await db.query(
-      "UPDATE users SET reset_token = ?, reset_expires = ? WHERE email = ?",
-      [resetToken, expire, email]
+      "INSERT INTO password_resets (user_id, reset_token, reset_expires) VALUES (?, ?, ?)",
+      [user[0].user_id, resetToken, expire]
     );
 
     // שולחים מייל עם לינק
@@ -181,35 +184,44 @@ router.post("/forgot-password", async (req, res) => {
 
     res.json({ message: "נשלח מייל עם לינק לאיפוס סיסמה" });
   } catch (err) {
-    console.error("שגיאת איפוס:", err);
+    console.error("❌ שגיאת איפוס:", err);
     res.status(500).json({ message: "שגיאת שרת" });
   }
 });
 
+// ✅ איפוס סיסמה בפועל
 router.post("/reset-password", async (req, res) => {
   const { token, password } = req.body;
   try {
-    const [user] = await db.query(
-      "SELECT * FROM users WHERE reset_token = ? AND reset_expires > NOW()",
+    // מאתרים את הטוקן האחרון שעדיין בתוקף
+    const [resetRows] = await db.query(
+      "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > NOW() ORDER BY id DESC LIMIT 1",
       [token]
     );
 
-    if (!user.length) {
+    if (!resetRows.length) {
       return res
         .status(400)
         .json({ success: false, message: "הטוקן לא תקף או פג תוקפו" });
     }
 
-    const hashed = crypto.createHash("sha256").update(password).digest("hex");
+    const resetData = resetRows[0];
 
-    await db.query(
-      "UPDATE users SET password = ?, reset_token = NULL, reset_expires = NULL WHERE user_id = ?",
-      [hashed, user[0].user_id]
-    );
+    // מצפינים סיסמה חדשה עם bcryptjs
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // עדכון סיסמה בטבלת users
+    await db.query("UPDATE users SET password = ? WHERE user_id = ?", [
+      hashedPassword,
+      resetData.user_id,
+    ]);
+
+    // מוחקים את רשומת האיפוס (שימוש חד פעמי)
+    await db.query("DELETE FROM password_resets WHERE id = ?", [resetData.id]);
 
     res.json({ success: true, message: "הסיסמה שונתה בהצלחה" });
   } catch (err) {
-    console.error("שגיאת Reset:", err);
+    console.error("❌ שגיאת Reset:", err);
     res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
