@@ -32,6 +32,7 @@ const LeadsByDateBarChart = ({ dataByDay }) => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false, // ✅ מתיחה מלאה לגובה הכרטיסיה
     plugins: {
       legend: {
         display: false,
@@ -48,11 +49,11 @@ const LeadsByDateBarChart = ({ dataByDay }) => {
   };
 
   return (
-    <div>
-      <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">
+    <div className="w-full h-full flex flex-col">
+      <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
         פניות לפי תאריך
       </h3>
-      <div className="w-[200px] h-[200px]">
+      <div className="flex-grow w-full">
         <Bar data={chartData} options={options} />
       </div>
     </div>

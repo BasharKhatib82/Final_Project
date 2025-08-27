@@ -51,22 +51,22 @@ const Home = () => {
         </div>
       )}
 
-      {/* 📦 כרטיסי סטטיסטיקה */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* 📦 כרטיסי סטטיסטיקה - 6 בשורה אחת */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* עובדים */}
         <div
           onClick={handleClickUsers}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
-          <div className="flex justify-center items-center mb-3">
+          <div className="flex justify-center items-center">
             <div className="bg-blue-100 text-blue-600 rounded-full p-3 text-2xl">
               👥
             </div>
           </div>
-          <h4 className="text-center text-lg font-bold text-gray-700 mb-2">
+          <h4 className="text-center text-lg font-bold text-gray-700">
             עובדים
           </h4>
-          <ul className="text-sm text-gray-600 space-y-1 text-center">
+          <ul className="text-sm text-gray-600 text-center">
             <li>
               פעילים: <strong>{stats.employees.active}</strong>
             </li>
@@ -74,7 +74,7 @@ const Home = () => {
               לא פעילים: <strong>{stats.employees.inactive}</strong>
             </li>
             <li>
-              מחוברים כעת: <strong>{stats.employees.online_list.length}</strong>
+              מחוברים: <strong>{stats.employees.online_list.length}</strong>
             </li>
           </ul>
         </div>
@@ -82,17 +82,17 @@ const Home = () => {
         {/* מחוברים */}
         <div
           onClick={handleClickUsers}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
-          <div className="flex justify-center items-center mb-3">
+          <div className="flex justify-center items-center">
             <div className="bg-green-100 text-green-600 rounded-full p-3 text-2xl">
               🟢
             </div>
           </div>
-          <h4 className="text-center text-lg font-bold text-gray-700 mb-2">
-            מחוברים כעת
+          <h4 className="text-center text-lg font-bold text-gray-700">
+            מחוברים
           </h4>
-          <ul className="text-sm text-gray-600 space-y-1 text-center">
+          <ul className="text-sm text-gray-600 text-center">
             {stats.employees.online_list.map((user, i) => (
               <li key={i}>
                 <span className="text-green-500">●</span> {user.name} -{" "}
@@ -105,17 +105,17 @@ const Home = () => {
         {/* תפקידים */}
         <div
           onClick={handleClickRoles}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
-          <div className="flex justify-center items-center mb-3">
+          <div className="flex justify-center items-center">
             <div className="bg-purple-100 text-purple-600 rounded-full p-3 text-2xl">
               🛡️
             </div>
           </div>
-          <h4 className="text-center text-lg font-bold text-gray-700 mb-2">
+          <h4 className="text-center text-lg font-bold text-gray-700">
             תפקידים
           </h4>
-          <ul className="text-sm text-gray-600 space-y-1 text-center">
+          <ul className="text-sm text-gray-600 text-center">
             <li>
               סה"כ: <strong>{stats.roles.total}</strong>
             </li>
@@ -131,17 +131,17 @@ const Home = () => {
         {/* פרויקטים */}
         <div
           onClick={handleClickProjects}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
-          <div className="flex justify-center items-center mb-3">
+          <div className="flex justify-center items-center">
             <div className="bg-indigo-100 text-indigo-600 rounded-full p-3 text-2xl">
               💼
             </div>
           </div>
-          <h4 className="text-center text-lg font-bold text-gray-700 mb-2">
+          <h4 className="text-center text-lg font-bold text-gray-700">
             פרויקטים
           </h4>
-          <ul className="text-sm text-gray-600 space-y-1 text-center">
+          <ul className="text-sm text-gray-600 text-center">
             <li>
               סה"כ: <strong>{stats.projects.total}</strong>
             </li>
@@ -157,17 +157,15 @@ const Home = () => {
         {/* פניות */}
         <div
           onClick={handleClickLeads}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
-          <div className="flex justify-center items-center mb-3">
+          <div className="flex justify-center items-center">
             <div className="bg-yellow-100 text-yellow-600 rounded-full p-3 text-2xl">
               📩
             </div>
           </div>
-          <h4 className="text-center text-lg font-bold text-gray-700 mb-2">
-            פניות
-          </h4>
-          <ul className="text-sm text-gray-600 space-y-1 text-center">
+          <h4 className="text-center text-lg font-bold text-gray-700">פניות</h4>
+          <ul className="text-sm text-gray-600 text-center">
             <li>
               חדשות: <strong>{stats.leads.new}</strong>
             </li>
@@ -179,19 +177,21 @@ const Home = () => {
             </li>
           </ul>
         </div>
+
+        {/* משימות */}
         <div
           onClick={handleClickTasks}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-3 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
-          <div className="flex justify-center items-center mb-3">
+          <div className="flex justify-center items-center">
             <div className="bg-slate-100 text-yellow-600 rounded-full p-3 text-2xl">
               🔄
             </div>
           </div>
-          <h4 className="text-center text-lg font-bold text-gray-700 mb-2">
+          <h4 className="text-center text-lg font-bold text-gray-700">
             משימות
           </h4>
-          <ul className="text-sm text-gray-600 space-y-1 text-center">
+          <ul className="text-sm text-gray-600 text-center">
             <li>
               חדשות: <strong>{stats.tasks.new}</strong>
             </li>
@@ -205,19 +205,27 @@ const Home = () => {
         </div>
       </div>
 
-      {/* 🟦 גרפים */}
+      {/* 🟦 גרפים - 4 באותו גובה */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center">
-          <LeadsStatusPieChart data={stats.leads} />
+        <div className="bg-white rounded-xl shadow p-4 h-80">
+          <div className="w-full h-full">
+            <LeadsStatusPieChart data={stats.leads} />
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center">
-          <LeadsByDateBarChart dataByDay={stats.leads_by_day} />
+        <div className="bg-white rounded-xl shadow p-4 h-80">
+          <div className="w-full h-full">
+            <LeadsByDateBarChart dataByDay={stats.leads_by_day} />
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center">
-          <LeadsBySourceChart data={stats.leads_by_source} />
+        <div className="bg-white rounded-xl shadow p-4 h-80">
+          <div className="w-full h-full">
+            <LeadsBySourceChart data={stats.leads_by_source} />
+          </div>
         </div>
-        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center">
-          <LeadsByUserChart data={stats.leads_by_user} />
+        <div className="bg-white rounded-xl shadow p-4 h-80">
+          <div className="w-full h-full">
+            <LeadsByUserChart data={stats.leads_by_user} />
+          </div>
         </div>
       </div>
 

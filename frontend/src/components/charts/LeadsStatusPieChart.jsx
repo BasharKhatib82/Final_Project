@@ -20,7 +20,8 @@ const LeadsStatusPieChart = ({ data }) => {
 
   const options = {
     responsive: true,
-    cutout: "65%", // להפוך לעוגה מודרנית (כמו דונאט)
+    maintainAspectRatio: false, // ✅ מאפשר לגרף להתפרס לגובה/רוחב מלא
+    cutout: "65%", // דונאט מודרני
     plugins: {
       legend: {
         position: "bottom",
@@ -37,11 +38,11 @@ const LeadsStatusPieChart = ({ data }) => {
   };
 
   return (
-    <div>
-      <h3 className="text-lg font-semibold text-gray-700 mb-4text-center">
+    <div className="w-full h-full flex flex-col">
+      <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
         סטטוס הפניות
       </h3>
-      <div className="w-[200px] h-[200px]">
+      <div className="flex-grow w-full">
         <Doughnut data={chartData} options={options} />
       </div>
     </div>

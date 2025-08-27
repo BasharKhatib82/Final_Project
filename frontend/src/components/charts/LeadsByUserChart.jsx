@@ -27,7 +27,8 @@ const LeadsByUserChart = ({ data }) => {
 
   const options = {
     responsive: true,
-    indexAxis: "y", // אופקי
+    maintainAspectRatio: false, // ✅ מתיחה אוטומטית לגובה/רוחב
+    indexAxis: "y", // גרף אופקי
     plugins: {
       legend: {
         display: false,
@@ -42,11 +43,11 @@ const LeadsByUserChart = ({ data }) => {
   };
 
   return (
-    <div>
-      <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">
+    <div className="w-full h-full flex flex-col">
+      <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
         פניות לפי עובד
       </h3>
-      <div className="w-[200px] h-[200px]">
+      <div className="flex-grow w-full">
         <Bar data={chartData} options={options} />
       </div>
     </div>
