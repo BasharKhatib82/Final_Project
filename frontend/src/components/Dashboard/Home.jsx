@@ -182,11 +182,19 @@ const Home = () => {
       </div>
 
       {/* 🟦 גרפים */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <LeadsStatusPieChart data={stats.leads} />
-        <LeadsByDateBarChart dataByDay={stats.leads_by_day} />
-        <LeadsBySourceChart data={stats.leads_by_source} />
-        <LeadsByUserChart data={stats.leads_by_user} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center h-80">
+          <LeadsStatusPieChart data={stats.leads} />
+        </div>
+        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center h-80">
+          <LeadsByDateBarChart dataByDay={stats.leads_by_day} />
+        </div>
+        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center h-80">
+          <LeadsBySourceChart data={stats.leads_by_source} />
+        </div>
+        <div className="bg-white rounded-xl shadow p-4 flex flex-col items-center justify-center h-80">
+          <LeadsByUserChart data={stats.leads_by_user} />
+        </div>
       </div>
 
       {/* 📋 טבלאות */}
