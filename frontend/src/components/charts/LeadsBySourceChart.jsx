@@ -46,7 +46,9 @@ const LeadsBySourceChart = ({ data }) => {
       <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">
         פניות לפי מקור
       </h3>
-      <Bar data={chartData} options={options} />
+      <div className="w-[220px] h-[220px]">
+        <Bar data={chartData} options={options} />
+      </div>
     </div>
   );
 };
