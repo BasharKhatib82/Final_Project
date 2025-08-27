@@ -84,8 +84,8 @@ router.get("/", verifyToken, async (req, res) => {
     leads_by_user: `
   SELECT CONCAT(u.first_name, ' ', u.last_name) AS name, COUNT(*) AS count
   FROM leads l
-  JOIN users u ON l.assigned_to = u.user_id
-  GROUP BY l.assigned_to
+  JOIN users u ON l.user_id = u.user_id
+  GROUP BY l.user_id
   ORDER BY count DESC
 `,
   };
