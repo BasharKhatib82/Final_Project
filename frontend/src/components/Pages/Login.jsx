@@ -115,7 +115,7 @@ function Login() {
       </div>
       {showPopup && (
         <Popup
-          icon="<FcApproval />"
+          icon={<FcApproval className="text-5xl" />}
           title="חשבונך זוהה בהצלחה"
           message="כעת נעביר אותך לאזור האישי שלך"
           mode="successMessage"
