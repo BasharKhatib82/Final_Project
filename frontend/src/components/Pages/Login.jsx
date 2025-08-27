@@ -36,7 +36,9 @@ function Login() {
         if (authRes.data.loggedIn) {
           // כאן שמים את כל פרטי המשתמש — כולל ההרשאות
           setUser(loginRes.data.user);
-          navigate("/dashboard");
+
+          // ✅ מציגים פופאפ הצלחה
+          setShowPopup(true);
         } else {
           setError("שגיאה באימות ההתחברות");
         }
@@ -51,16 +53,6 @@ function Login() {
 
   return (
     <div className="flex justify-center items-center font-rubik pt-[10%]">
-      {showPopup && (
-        <Popup
-          title="חשבון זוהה בהצלחה ✅"
-          message="נעביר אותך לאזור האישי..."
-          mode="success"
-          autoClose={2000} // יעלם אחרי 2 שניות
-          redirectOnClose="/dashboard" // לאחר הסגירה או היעלמות
-          onClose={() => setShowPopup(false)} // לסגור את הפופאפ ידנית אם צריך
-        />
-      )}
       <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           התחברות למערכת
@@ -120,6 +112,16 @@ function Login() {
           </button>
         </form>
       </div>
+      {showPopup && (
+        <Popup
+          title="חשבון זוהה בהצלחה ✅"
+          message="נעביר אותך לאזור האישי..."
+          mode="success"
+          autoClose={2000} // יעלם אחרי 2 שניות
+          redirectOnClose="/dashboard" // לאחר הסגירה או היעלמות
+          onClose={() => setShowPopup(false)} // לסגור את הפופאפ ידנית אם צריך
+        />
+      )}
     </div>
   );
 }
