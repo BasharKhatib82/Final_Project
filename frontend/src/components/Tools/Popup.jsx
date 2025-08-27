@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Popup = ({
@@ -10,8 +10,21 @@ const Popup = ({
   onConfirm,
   redirectOnConfirm, // אופציונלי: קישור לעבור אליו אחרי אישור
   redirectOnClose, // אופציונלי: קישור לעבור אליו אחרי סגירה/ביטול
+  autoClose, // ⏳ מספר מילישניות לסגירה אוטומטית
 }) => {
   const navigate = useNavigate();
+
+  // ✅ סגירה אוטומטית אם הועבר autoClose
+  useEffect(() => {
+    if (autoClose) {
+      const timer = setTimeout(() => {
+        if (onClose) onClose();
+        if (redirectOnClose) navigate(redirectOnClose);
+      }, autoClose);
+
+      return () => clearTimeout(timer);
+    }
+  }, [autoClose, onClose, redirectOnClose, navigate]);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -26,7 +39,6 @@ const Popup = ({
   const getColor = () => {
     switch (mode) {
       case "success":
-        return "bg-green-600 hover:bg-green-700";
       case "successMessage":
         return "bg-green-600 hover:bg-green-700";
       case "error":
@@ -45,14 +57,16 @@ const Popup = ({
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4">
       <div className="bg-white w-full max-w-md rounded-lg border shadow-md p-6 text-center space-y-4">
-        icon && (<div className="text-4xl mb-2 flex justify-center">{icon}</div>
-        {/* כותרת */}
+        {icon && (
+          <div className="text-4xl mb-2 flex justify-center">{icon}</div>
+        )}
+
         <h2 className="font-rubik text-xl font-semibold text-gray-800">
           {title}
         </h2>
-        {/* הודעה */}
+
         <p className="text-base text-gray-700 leading-relaxed">{message}</p>
-        {/* כפתורים */}
+
         {mode === "confirm" ? (
           <div className="flex justify-center gap-4 pt-2">
             <button
