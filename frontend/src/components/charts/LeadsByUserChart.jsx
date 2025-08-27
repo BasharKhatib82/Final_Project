@@ -42,7 +42,7 @@ const LeadsByUserChart = ({ data }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6">
+    <div>
       <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">
         פניות לפי עובד
       </h3>

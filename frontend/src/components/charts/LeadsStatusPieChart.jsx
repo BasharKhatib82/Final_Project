@@ -37,7 +37,7 @@ const LeadsStatusPieChart = ({ data }) => {
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 flex flex-col items-center justify-center">
+    <div>
       <h3 className="text-lg font-semibold text-gray-700 mb-4">סטטוס הפניות</h3>
       <div className="w-[220px] h-[220px]">
         <Doughnut data={chartData} options={options} />
