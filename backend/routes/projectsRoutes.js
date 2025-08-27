@@ -1,7 +1,6 @@
 import express from "express";
 import { db } from "../utils/dbSingleton.js";
 import verifyToken from "../utils/verifyToken.js";
-import { verifyBotWA } from "../utils/verifyBotWA.js";
 import logAction from "../utils/logAction.js";
 
 const router = express.Router();
@@ -16,16 +15,6 @@ router.get("/", verifyToken, async (req, res) => {
     const [rows] = await db.query(
       "SELECT * FROM projects ORDER BY project_id DESC"
     );
-    res.json({ success: true, data: rows });
-  } catch (err) {
-    console.error("❌ שגיאה בשליפת פרויקטים:", err);
-    res.status(500).json({ success: false, message: "שגיאה בשליפת פרויקטים" });
-  }
-});
-
-router.get("/for-bot", verifyBotWA, async (req, res) => {
-  try {
-    const [rows] = await db.query("SELECT * FROM projects WHERE active=1");
     res.json({ success: true, data: rows });
   } catch (err) {
     console.error("❌ שגיאה בשליפת פרויקטים:", err);
