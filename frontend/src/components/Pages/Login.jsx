@@ -18,7 +18,7 @@ function Login() {
     event.preventDefault();
 
     if (!values.user_id || !values.password) {
-      setError(" כל השדות חוב");
+      setError(" כל השדות חובה");
       return;
     }
 
@@ -32,14 +32,11 @@ function Login() {
           withCredentials: true,
         });
         const userData = loginRes.data.user;
-        // מוסיפים full_name
         userData.full_name = `${userData.first_name} ${userData.last_name}`;
-        if (authRes.data.loggedIn) {
-          // כאן שמים את כל פרטי המשתמש — כולל ההרשאות
-          setUser(loginRes.data.user);
 
-          // ✅ מציגים פופאפ הצלחה
-          setShowPopup(true);
+        if (authRes.data.loggedIn) {
+          setUser(loginRes.data.user);
+          setShowPopup(true); // ✅ מציג פופאפ הצלחה
         } else {
           setError("שגיאה באימות ההתחברות");
         }
@@ -112,16 +109,29 @@ function Login() {
             התחברות
           </button>
         </form>
+
+        {/* 🔗 כפתור שכחת סיסמה */}
+        <div className="text-center mt-4">
+          <button
+            type="button"
+            onClick={() => navigate("/forgot-password")}
+            className="text-sm text-blue-600 hover:underline"
+          >
+            שכחת סיסמה?
+          </button>
+        </div>
       </div>
+
+      {/* ✅ פופאפ הצלחה */}
       {showPopup && (
         <Popup
           icon={<FcApproval className="text-5xl" />}
           title="חשבונך זוהה בהצלחה"
           message="כעת נעביר אותך לאזור האישי שלך"
           mode="successMessage"
-          autoClose={2000} // יעלם אחרי 2 שניות
-          redirectOnClose="/dashboard" // לאחר הסגירה או היעלמות
-          onClose={() => setShowPopup(false)} // לסגור את הפופאפ ידנית אם צריך
+          autoClose={2000}
+          redirectOnClose="/dashboard"
+          onClose={() => setShowPopup(false)}
         />
       )}
     </div>

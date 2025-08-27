@@ -142,4 +142,76 @@ router.post("/logout", async (req, res) => {
   res.json({ success: true, message: "התנתקת מהמערכת" });
 });
 
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  try {
+    // מחפשים את המשתמש
+    const [user] = await db.query("SELECT * FROM users WHERE email = ?", [
+      email,
+    ]);
+    if (!user.length) {
+      return res.status(404).json({ message: "לא נמצא משתמש עם האימייל הזה" });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const expire = new Date(Date.now() + 1000 * 60 * 15); // 15 דקות
+
+    await db.query(
+      "UPDATE users SET reset_token = ?, reset_expires = ? WHERE email = ?",
+      [resetToken, expire, email]
+    );
+
+    // שולחים מייל עם לינק
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
+      },
+    });
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    await transporter.sendMail({
+      from: `"מערכת CRM" <${process.env.SMTP_USER}>`,
+      to: email,
+      subject: "איפוס סיסמה",
+      html: `<p>לחץ על הלינק לאיפוס סיסמה:</p><a href="${resetLink}">${resetLink}</a>`,
+    });
+
+    res.json({ message: "נשלח מייל עם לינק לאיפוס סיסמה" });
+  } catch (err) {
+    console.error("שגיאת איפוס:", err);
+    res.status(500).json({ message: "שגיאת שרת" });
+  }
+});
+
+router.post("/reset-password", async (req, res) => {
+  const { token, password } = req.body;
+  try {
+    const [user] = await db.query(
+      "SELECT * FROM users WHERE reset_token = ? AND reset_expires > NOW()",
+      [token]
+    );
+
+    if (!user.length) {
+      return res
+        .status(400)
+        .json({ success: false, message: "הטוקן לא תקף או פג תוקפו" });
+    }
+
+    const hashed = crypto.createHash("sha256").update(password).digest("hex");
+
+    await db.query(
+      "UPDATE users SET password = ?, reset_token = NULL, reset_expires = NULL WHERE user_id = ?",
+      [hashed, user[0].user_id]
+    );
+
+    res.json({ success: true, message: "הסיסמה שונתה בהצלחה" });
+  } catch (err) {
+    console.error("שגיאת Reset:", err);
+    res.status(500).json({ success: false, message: "שגיאת שרת" });
+  }
+});
+
 export default router;
