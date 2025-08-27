@@ -21,7 +21,7 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import logsRoutes from "./routes/logsRoutes.js";
 import reportsRouter from "./routes/reportsRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
-import "./utils/whatsappBot.js";
+
 
 dotenv.config();
 const app = express();
