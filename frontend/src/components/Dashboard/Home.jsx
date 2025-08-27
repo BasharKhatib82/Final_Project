@@ -182,7 +182,7 @@ const Home = () => {
       </div>
 
       {/* 🟦 גרפים */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         <LeadsStatusPieChart data={stats.leads} />
         <LeadsByDateBarChart dataByDay={stats.leads_by_day} />
         <LeadsBySourceChart data={stats.leads_by_source} />
