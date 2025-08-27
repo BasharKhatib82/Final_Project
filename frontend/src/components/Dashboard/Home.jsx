@@ -179,6 +179,30 @@ const Home = () => {
             </li>
           </ul>
         </div>
+        <div
+          onClick={handleClickTasks}
+          className="bg-white rounded-xl shadow hover:shadow-lg p-6 cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+        >
+          <div className="flex justify-center items-center mb-3">
+            <div className="bg-slate-100 text-yellow-600 rounded-full p-3 text-2xl">
+              🔄
+            </div>
+          </div>
+          <h4 className="text-center text-lg font-bold text-gray-700 mb-2">
+            משימות
+          </h4>
+          <ul className="text-sm text-gray-600 space-y-1 text-center">
+            <li>
+              חדשות: <strong>{stats.tasks.new}</strong>
+            </li>
+            <li>
+              בטיפול: <strong>{stats.tasks.in_progress}</strong>
+            </li>
+            <li>
+              טופלו: <strong>{stats.tasks.completed}</strong>
+            </li>
+          </ul>
+        </div>
       </div>
 
       {/* 🟦 גרפים */}
