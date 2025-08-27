@@ -4,6 +4,9 @@ import About from "./Pages/About";
 import Contact from "./Pages/Contact";
 import Header from "./Pages/Header";
 import Login from "./Pages/Login";
+import ForgotPassword from "./Pages/ForgotPassword";
+import ResetPassword from "./Pages/ResetPassword";
+
 import Dashboard from "./Dashboard/Dashboard";
 import Home from "./Dashboard/Home";
 
@@ -56,6 +59,8 @@ function MyRoutes() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/userlogin" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/dashboard" element={<Dashboard />}>
             <Route index element={<Home />} />
             <Route path="roles" element={<Roles />} />
