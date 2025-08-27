@@ -1,6 +1,7 @@
 import express from "express";
 import { db } from "../utils/dbSingleton.js";
 import verifyToken from "../utils/verifyToken.js";
+import { verifyBot } from "../utils/verifyBotWA.js";
 import logAction from "../utils/logAction.js";
 
 const router = express.Router();
