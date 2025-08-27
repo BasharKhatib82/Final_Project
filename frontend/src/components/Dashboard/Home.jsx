@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import LeadsStatusPieChart from "../charts/LeadsStatusPieChart";
+import LeadsByDateBarChart from "../charts/LeadsByDateBarChart";
+import LeadsBySourceChart from "../charts/LeadsBySourceChart";
+import LeadsByUserChart from "../charts/LeadsByUserChart";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -172,6 +176,9 @@ const Home = () => {
             </li>
           </ul>
         </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6 mt-6">
+        <LeadsStatusPieChart data={stats.leads} />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 cursor-pointer">
         {/* חתימות לפי עובד */}
