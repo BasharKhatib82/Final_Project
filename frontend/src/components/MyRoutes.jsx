@@ -94,7 +94,7 @@ function MyRoutes() {
         </Routes>
       </main>
 
-      {/* Footer */}
+      {/* Footer  */}
       <footer className="shrink-0">
         <Footer />
       </footer>
