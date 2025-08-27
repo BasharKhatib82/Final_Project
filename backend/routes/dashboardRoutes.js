@@ -65,6 +65,29 @@ router.get("/", verifyToken, async (req, res) => {
       JOIN users u ON t.user_id = u.user_id
       JOIN roles_permissions r ON u.role_id = r.role_id
     `,
+    leads_by_day: `
+  SELECT DATE(created_at) AS date, COUNT(*) AS count
+  FROM leads
+  WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+  GROUP BY DATE(created_at)
+  ORDER BY date ASC
+`,
+
+    leads_by_source: `
+  SELECT source, COUNT(*) AS count
+  FROM leads
+  WHERE source IS NOT NULL AND source != ''
+  GROUP BY source
+  ORDER BY count DESC
+`,
+
+    leads_by_user: `
+  SELECT CONCAT(u.first_name, ' ', u.last_name) AS name, COUNT(*) AS count
+  FROM leads l
+  JOIN users u ON l.assigned_to = u.user_id
+  GROUP BY l.assigned_to
+  ORDER BY count DESC
+`,
   };
 
   try {
@@ -92,9 +115,26 @@ router.get("/", verifyToken, async (req, res) => {
       logs_by_day,
       attendance_by_user,
       online_users,
+      leads_by_day,
+      leads_by_source,
+      leads_by_user,
     ] = results;
 
     // ✅ השמה מסודרת
+    summary.leads_by_day = leads_by_day[0].map((row) => ({
+      date: row.date,
+      count: row.count,
+    }));
+
+    summary.leads_by_source = leads_by_source[0].map((row) => ({
+      source: row.source,
+      count: row.count,
+    }));
+
+    summary.leads_by_user = leads_by_user[0].map((row) => ({
+      name: row.name,
+      count: row.count,
+    }));
     summary.employees = {
       active: employees_active[0][0].count,
       inactive: employees_inactive[0][0].count,

@@ -1,4 +1,4 @@
-// components/charts/LeadsBySourceChart.jsx
+// src/components/charts/LeadsBySourceChart.jsx
 import React from "react";
 import { Bar } from "react-chartjs-2";
 import {
@@ -13,24 +13,40 @@ import {
 ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const LeadsBySourceChart = ({ data }) => {
-  const labels = data.map((item) => item.source);
-  const values = data.map((item) => item.count);
-
   const chartData = {
-    labels,
+    labels: data.map((item) => item.source),
     datasets: [
       {
-        label: "לידים לפי מקור",
-        data: values,
-        backgroundColor: "#34d399",
+        label: "פניות",
+        data: data.map((item) => item.count),
+        backgroundColor: "#10b981", // green-500
+        borderRadius: 6,
       },
     ],
   };
 
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    indexAxis: "x",
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: { stepSize: 1 },
+      },
+    },
+  };
+
   return (
-    <div className="bg-white rounded-lg p-4 shadow">
-      <h3 className="text-center font-semibold mb-4">פניות לפי מקור</h3>
-      <Bar data={chartData} />
+    <div className="bg-white rounded-xl shadow-md p-6">
+      <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">
+        פניות לפי מקור
+      </h3>
+      <Bar data={chartData} options={options} />
     </div>
   );
 };

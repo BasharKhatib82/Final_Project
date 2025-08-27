@@ -1,4 +1,4 @@
-// components/charts/LeadsByDateBarChart.jsx
+// src/components/charts/LeadsByDateBarChart.jsx
 import React from "react";
 import { Bar } from "react-chartjs-2";
 import {
@@ -17,17 +17,37 @@ const LeadsByDateBarChart = ({ dataByDay }) => {
     labels: dataByDay.map((item) => item.date),
     datasets: [
       {
-        label: "כמות פניות",
+        label: "פניות",
         data: dataByDay.map((item) => item.count),
-        backgroundColor: "#60a5fa",
+        backgroundColor: "#3b82f6", // blue-500
+        borderRadius: 6,
       },
     ],
   };
 
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    scales: {
+      y: {
+        ticks: {
+          stepSize: 1,
+          beginAtZero: true,
+        },
+      },
+    },
+  };
+
   return (
-    <div className="bg-white rounded-lg p-4 shadow">
-      <h3 className="text-center font-semibold mb-4">פניות לפי תאריך</h3>
-      <Bar data={chartData} />
+    <div className="bg-white rounded-xl shadow-md p-6">
+      <h3 className="text-lg font-semibold text-gray-700 mb-4 text-center">
+        פניות לפי תאריך
+      </h3>
+      <Bar data={chartData} options={options} />
     </div>
   );
 };
