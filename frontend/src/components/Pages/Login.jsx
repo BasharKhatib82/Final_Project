@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../components/Tools/UserContext";
 import Popup from "../../components/Tools/Popup";
+import { FcApproval } from "react-icons/fc";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -114,6 +115,7 @@ function Login() {
       </div>
       {showPopup && (
         <Popup
+          icon="<FcApproval />"
           title="חשבונך זוהה בהצלחה"
           message="כעת נעביר אותך לאזור האישי שלך"
           mode="successMessage"
