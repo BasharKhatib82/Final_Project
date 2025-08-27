@@ -3,7 +3,22 @@ import qrcode from "qrcode-terminal";
 import axios from "axios";
 
 const { Client } = pkg;
-const client = new Client();
+
+// ✅ הגדרות Puppeteer שימנעו בעיות בלינוקס VPS
+const client = new Client({
+  puppeteer: {
+    headless: true, // רץ בלי לפתוח חלון
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage",
+      "--disable-accelerated-2d-canvas",
+      "--no-first-run",
+      "--no-zygote",
+      "--disable-gpu",
+    ],
+  },
+});
 
 let userStates = {}; // מצב שיחה לכל משתמש
 
