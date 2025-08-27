@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const Popup = ({
@@ -9,8 +9,20 @@ const Popup = ({
   onConfirm,
   redirectOnConfirm, // אופציונלי: קישור לעבור אליו אחרי אישור
   redirectOnClose, // אופציונלי: קישור לעבור אליו אחרי סגירה/ביטול
+  autoClose, // ⏳ זמן לסגירה אוטומטית (ms)
 }) => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (autoClose) {
+      const timer = setTimeout(() => {
+        if (onClose) onClose();
+        if (redirectOnClose) navigate(redirectOnClose);
+      }, autoClose);
+
+      return () => clearTimeout(timer);
+    }
+  }, [autoClose, onClose, redirectOnClose, navigate]);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -42,31 +54,12 @@ const Popup = ({
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4">
       <div className="bg-white w-full max-w-md rounded-lg border shadow-md p-6 text-center space-y-4">
-        {/* כותרת */}
         <h2 className="font-rubik text-xl font-semibold text-gray-800">
           {title}
         </h2>
-
-        {/* הודעה */}
         <p className="text-base text-gray-700 leading-relaxed">{message}</p>
 
-        {/* כפתורים */}
-        {mode === "confirm" ? (
-          <div className="flex justify-center gap-4 pt-2">
-            <button
-              onClick={handleConfirm}
-              className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
-            >
-              אישור
-            </button>
-            <button
-              onClick={handleClose}
-              className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 transition"
-            >
-              ביטול
-            </button>
-          </div>
-        ) : (
+        {mode !== "confirm" && (
           <button
             onClick={handleClose}
             className={`text-white px-6 py-2 rounded transition ${getColor()}`}

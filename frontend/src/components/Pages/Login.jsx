@@ -2,12 +2,14 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../components/Tools/UserContext";
+import Popup from "../../components/Tools/Popup";
 
 const api = process.env.REACT_APP_API_URL;
 
 function Login() {
   const [values, setValues] = useState({ user_id: "", password: "" });
   const [error, setError] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
   const { setUser } = useUser();
 
@@ -49,6 +51,16 @@ function Login() {
 
   return (
     <div className="flex justify-center items-center font-rubik pt-[10%]">
+      {showPopup && (
+        <Popup
+          title="חשבון זוהה בהצלחה ✅"
+          message="נעביר אותך לאזור האישי..."
+          mode="success"
+          autoClose={2000} // יעלם אחרי 2 שניות
+          redirectOnClose="/dashboard" // לאחר הסגירה או היעלמות
+          onClose={() => setShowPopup(false)} // לסגור את הפופאפ ידנית אם צריך
+        />
+      )}
       <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
           התחברות למערכת
