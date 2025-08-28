@@ -215,7 +215,7 @@ router.post("/reset-password", async (req, res) => {
 
     // עדכון סיסמה בטבלת users
     await db.query(
-      "UPDATE users SET password = ? last_password_change = NOW() WHERE user_id = ?",
+      "UPDATE users SET password = ? ,last_password_change = NOW() WHERE user_id = ?",
       [hashedPassword, resetData.user_id]
     );
 
