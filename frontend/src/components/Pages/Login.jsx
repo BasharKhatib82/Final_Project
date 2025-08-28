@@ -269,7 +269,8 @@ function Login() {
           redirectOnClose="/userlogin"
           onClose={() => {
             setShowPopup(false);
-            navigate("/login");
+            navigate("/userlogin");
+            setMustChange(false);
           }}
         />
       )}
