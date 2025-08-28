@@ -18,24 +18,18 @@ export const UserProvider = ({ children }) => {
         const res = await axios.get(`${api}/auth/check`, {
           withCredentials: true,
         });
+
         if (res.data.loggedIn) {
           setUser(res.data.user);
         } else {
           setUser(null);
         }
       } catch (err) {
-        // ⚡️ במקרה שאין טוקן או פג תוקף (401/403) -> פשוט setUser(null)
-        if (
-          err.response &&
-          (err.response.status === 401 || err.response.status === 403)
-        ) {
-          setUser(null);
-        } else {
-          console.error("Auth Check Failed:", err);
-        }
+        console.error("Auth Check Failed:", err);
+        setUser(null);
       } finally {
         setAuthChecked(true);
-        setLoading(false); // סיום טעינה
+        setLoading(false);
       }
     };
 
