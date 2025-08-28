@@ -266,7 +266,7 @@ function Login() {
           message="כעת ניתן להתחבר מחדש עם הסיסמה החדשה"
           mode="successMessage"
           autoClose={2500}
-          redirectOnClose="/login"
+          redirectOnClose="/userlogin"
           onClose={() => {
             setShowPopup(false);
             navigate("/login");
