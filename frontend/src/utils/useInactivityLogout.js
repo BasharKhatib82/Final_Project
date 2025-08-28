@@ -1,32 +1,26 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-
-const api = process.env.REACT_APP_API_URL;
+import { useUser } from "../components/Tools/UserContext";
 
 export default function useInactivityLogout() {
   const navigate = useNavigate();
+  const { user, logout } = useUser(); // 👈 לוקחים את ה־logout מהקונטקסט
 
   useEffect(() => {
-    const timeoutDuration = 5 * 60 * 1000; // 5 דקות
+    if (!user) return;
+
+    const timeoutDuration = 5 * 60 * 1000;
     let timeout;
 
-    const logout = () => {
+    const handleLogout = () => {
       console.log("משתמש נותק עקב חוסר פעילות");
-
-      // ✅ שולח את הבקשה עם credentials כדי ש-cookie יישלח
-      fetch(`${api}/auth/logout`, {
-        method: "POST",
-        credentials: "include", // ← חובה
-      })
-        .catch((err) => console.error("שגיאה בניתוק:", err))
-        .finally(() => {
-          navigate("/userlogin");
-        });
+      logout(); // 👈 מנקה גם את ה־context
+      navigate("/userlogin");
     };
 
     const resetTimer = () => {
       clearTimeout(timeout);
-      timeout = setTimeout(logout, timeoutDuration);
+      timeout = setTimeout(handleLogout, timeoutDuration);
     };
 
     const events = ["mousemove", "keydown", "scroll", "click"];
@@ -37,5 +31,5 @@ export default function useInactivityLogout() {
       clearTimeout(timeout);
       events.forEach((e) => window.removeEventListener(e, resetTimer));
     };
-  }, [navigate]);
+  }, [user, logout, navigate]);
 }
