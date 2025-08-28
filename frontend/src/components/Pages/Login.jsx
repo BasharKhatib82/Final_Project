@@ -53,14 +53,15 @@ function Login() {
       } else {
         setError(loginRes.data.message);
       }
-    } catch (error) {
-      console.error("Login error:", error);
-    }
-    if (error.res && error.res.data && error.res.data.message) {
-      // מקבל את ההודעה המדויקת מהשרת
-      setError(error.response.data.message);
-    } else {
-      setError("שגיאת שרת, נסה שוב מאוחר יותר");
+    } catch (err) {
+      console.error("Login error:", err);
+
+      if (err.response && err.response.data && err.response.data.message) {
+        setError(err.response.data.message); // הודעה מדויקת מהשרת
+      } else {
+        setError("שגיאת שרת, נסה שוב מאוחר יותר");
+      }
+      setShowPopup(true);
     }
   };
 
@@ -277,6 +278,32 @@ function Login() {
             navigate("/userlogin");
             setMustChange(false);
           }}
+        />
+      )}
+      {/*  פופאפ שגיאה- סיסמה שגויה או משתמש לא קיים */}
+      {showPopup && error && (
+        <Popup
+          icon={
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-10 h-10 text-red-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          }
+          title="שגיאה"
+          message={error}
+          mode="error"
+          autoClose={3000}
+          onClose={() => setShowPopup(false)}
         />
       )}
     </div>
