@@ -223,7 +223,7 @@ function Login() {
 
           <button
             type="button"
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition"
             onClick={async () => {
               if (!pwdForm.current || !pwdForm.next || !pwdForm.confirm) {
                 setError("יש למלא את כל השדות");
