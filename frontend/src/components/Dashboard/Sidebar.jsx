@@ -57,8 +57,11 @@ const Sidebar = () => {
         to: "/dashboard/leads",
         icon: <FaPhone />,
       },
-
-      { label: "ניהול פרויקטים", to: "/dashboard/projects", icon: <FaBook /> },
+      user.can_edit_courses === 1 && {
+        label: "ניהול פרויקטים",
+        to: "/dashboard/projects",
+        icon: <FaBook />,
+      },
 
       user.can_manage_tasks === 1 && {
         label: "ניהול משימות",
