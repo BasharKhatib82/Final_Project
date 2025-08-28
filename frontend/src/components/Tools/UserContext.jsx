@@ -11,7 +11,6 @@ export const UserProvider = ({ children }) => {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    // פשוט בודק תמיד, כי הטוקן ב־cookie HttpOnly נשלח אוטומטית
     axios
       .get(`${api}/auth/check`, { withCredentials: true })
       .then((res) => {
@@ -22,8 +21,15 @@ export const UserProvider = ({ children }) => {
         }
       })
       .catch((err) => {
-        console.error("Auth Check Failed:", err);
-        setUser(null);
+        // במקום לזרוק שגיאה בקונסול, נבדוק אם זה 401/403
+        if (
+          err.response &&
+          (err.response.status === 401 || err.response.status === 403)
+        ) {
+          setUser(null);
+        } else {
+          console.error("Auth Check Failed:", err);
+        }
       })
       .finally(() => {
         setAuthChecked(true);
