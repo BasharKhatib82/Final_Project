@@ -41,18 +41,12 @@ function Login() {
       }
 
       if (loginRes.data.success) {
-        const authRes = await axios.get(`${api}/auth/check`, {
-          withCredentials: true,
-        });
         const userData = loginRes.data.user;
         userData.full_name = `${userData.first_name} ${userData.last_name}`;
 
-        if (authRes.data.loggedIn) {
-          setUser(loginRes.data.user);
-          setShowPopup(true); // ✅ מציג פופאפ הצלחה
-        } else {
-          setError("שגיאה באימות ההתחברות");
-        }
+        setUser(userData);
+        setShowPopup(true); // מציג פופאפ הצלחה
+        setError(null);
       } else {
         setError(loginRes.data.message);
       }
