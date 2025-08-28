@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-import Popup from "../Tools/Popup.jsx"; 
+import Popup from "../Tools/Popup.jsx";
 const api = process.env.REACT_APP_API_URL;
 
 function ForgotPassword() {
@@ -56,8 +56,8 @@ function ForgotPassword() {
           mode={message.includes("שגיאה") ? "error" : "success"}
           title={message.includes("שגיאה") ? "שגיאה" : "קישור נשלח"}
           message={message}
-          redirectOnClose="/login" //  מעבר ללוגאין בלחיצה על סגירה
-          redirectOnConfirm="/login" //  מעבר ללוגאין בלחיצה על אישור (במצב confirm)
+          redirectOnClose="/userlogin" //  מעבר ללוגאין בלחיצה על סגירה
+          redirectOnConfirm="/userlogin" //  מעבר ללוגאין בלחיצה על אישור (במצב confirm)
           onClose={() => setShowPopup(false)}
           onConfirm={() => setShowPopup(false)}
         />

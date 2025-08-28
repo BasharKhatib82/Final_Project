@@ -96,13 +96,13 @@ function ResetPassword() {
       {/* ✅ פופאפ הצלחה שמפנה ללוגאין על סגירה/אישור (ואפשר גם אוטו-סגירה) */}
       {showSuccessPopup && (
         <Popup
-          mode="confirm"
+          mode="success"
           title="הסיסמה הוגדרה בהצלחה"
           message={message || "כעת ניתן להתחבר עם הסיסמה החדשה."}
           onClose={() => setShowSuccessPopup(false)}
           onConfirm={() => setShowSuccessPopup(false)}
-          redirectOnClose="/login" // מעבר ללוגאין בלחיצה על סגור
-          redirectOnConfirm="/login" // מעבר ללוגאין בלחיצה על אישור (אם תגדיר מצב confirm)
+          redirectOnClose="/userlogin" // מעבר ללוגאין בלחיצה על סגור
+          redirectOnConfirm="/userlogin" // מעבר ללוגאין בלחיצה על אישור (אם תגדיר מצב confirm)
           // autoClose={2500}          //  אופציונלי: סגירה אוטומטית + הפניה לאחר 2.5 שניות
         />
       )}
