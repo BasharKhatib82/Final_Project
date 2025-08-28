@@ -13,6 +13,7 @@ function Login() {
   const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
   const { setUser } = useUser();
+  const [showPwd, setShowPwd] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -83,23 +84,64 @@ function Login() {
             />
           </div>
 
-          <div>
+          <div className="relative">
             <label
               htmlFor="password"
               className="block text-sm font-medium mb-1"
             >
               סיסמה:
             </label>
+
             <input
-              type="password"
+              type={showPwd ? "text" : "password"}
               name="password"
               id="password"
               placeholder="הקלד סיסמה"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+              autoComplete="current-password"
+              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 pl-10"
               onChange={(e) =>
                 setValues({ ...values, password: e.target.value })
               }
             />
+
+            {/* כפתור עין */}
+            <button
+              type="button"
+              onClick={() => setShowPwd((s) => !s)}
+              aria-label={showPwd ? "הסתר סיסמה" : "הצג סיסמה"}
+              title={showPwd ? "הסתר סיסמה" : "הצג סיסמה"}
+              className="absolute inset-y-[30px] left-2 grid place-items-center h-8 w-8 rounded hover:bg-gray-100 focus:outline-none"
+            >
+              {showPwd ? (
+                // Eye-off (slash)
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="w-5 h-5"
+                >
+                  <path d="M3 3l18 18" />
+                  <path d="M10.58 10.58A3 3 0 0 0 12 15a3 3 0 0 0 2.84-3.79" />
+                  <path d="M9.88 5.09A10 10 0 0 1 12 5c7 0 11 7 11 7a13 13 0 0 1-3.07 4.21" />
+                  <path d="M6.61 6.61A13 13 0 0 0 2 12s4 7 10 7c1.3 0 2.54-.23 3.68-.65" />
+                </svg>
+              ) : (
+                // Eye
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="w-5 h-5"
+                >
+                  <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12Z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+              )}
+            </button>
           </div>
 
           <button
