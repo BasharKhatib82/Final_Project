@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
+import Popup from "./Popup"; // 👈 הקומפוננטה שלך
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -10,7 +11,7 @@ function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   const validatePassword = (pwd) => {
     if (pwd.length < 8) return "הסיסמה חייבת להכיל לפחות 8 תווים";
@@ -23,27 +24,28 @@ function ResetPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // בדיקת סיסמה
+    // ולידציה בסיסית
     const validationError = validatePassword(password);
     if (validationError) {
       setMessage(validationError);
       return;
     }
-
     if (password !== confirmPassword) {
       setMessage("הסיסמאות אינן תואמות");
       return;
     }
 
     setLoading(true);
+    setMessage(null);
     try {
       const res = await axios.post(`${api}/auth/reset-password`, {
         token,
         password,
       });
-      setMessage(res.data.message);
+
+      setMessage(res.data.message || "הסיסמה הוגדרה בהצלחה");
       if (res.data.success) {
-        setTimeout(() => navigate("/login"), 2000);
+        setShowSuccessPopup(true); // ✅ מציגים פופאפ הצלחה בלבד
       }
     } catch (err) {
       setMessage("שגיאה באיפוס סיסמה");
@@ -53,9 +55,10 @@ function ResetPassword() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex justify-center items-center font-rubik pt-[10%]">
       <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-bold text-center mb-4">הגדרת סיסמה חדשה</h2>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="password"
@@ -83,10 +86,26 @@ function ResetPassword() {
             {loading ? "שומר..." : "שמור סיסמה"}
           </button>
         </form>
-        {message && (
+
+        {/* הודעה טקסטואלית במקרה שגיאה / ולידציה */}
+        {message && !showSuccessPopup && (
           <p className="mt-4 text-center text-sm text-gray-700">{message}</p>
         )}
       </div>
+
+      {/* ✅ פופאפ הצלחה שמפנה ללוגאין על סגירה/אישור (ואפשר גם אוטו-סגירה) */}
+      {showSuccessPopup && (
+        <Popup
+          mode="confirm"
+          title="הסיסמה הוגדרה בהצלחה"
+          message={message || "כעת ניתן להתחבר עם הסיסמה החדשה."}
+          onClose={() => setShowSuccessPopup(false)}
+          onConfirm={() => setShowSuccessPopup(false)}
+          redirectOnClose="/login" // מעבר ללוגאין בלחיצה על סגור
+          redirectOnConfirm="/login" // מעבר ללוגאין בלחיצה על אישור (אם תגדיר מצב confirm)
+          // autoClose={2500}          // 👈 אופציונלי: סגירה אוטומטית + הפניה לאחר 2.5 שניות
+        />
+      )}
     </div>
   );
 }

@@ -1,12 +1,13 @@
 import { useState } from "react";
 import axios from "axios";
-
+import Popup from "./Popup"; // 👈 ייבוא הקומפוננטה שלך
 const api = process.env.REACT_APP_API_URL;
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,15 +15,17 @@ function ForgotPassword() {
     try {
       const res = await axios.post(`${api}/auth/forgot-password`, { email });
       setMessage(res.data.message);
+      setShowPopup(true); // ✅ פתיחת הפופאפ אחרי הצלחה
     } catch (err) {
       setMessage("שגיאה בשליחת בקשת איפוס סיסמה");
+      setShowPopup(true); // גם במקרה של שגיאה נציג פופאפ
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen">
+    <div className="flex justify-center items-center font-rubik pt-[10%]">
       <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-bold text-center mb-4">שחזור סיסמה</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -45,10 +48,20 @@ function ForgotPassword() {
             {loading ? "שולח..." : "שלח קישור לאיפוס"}
           </button>
         </form>
-        {message && (
-          <p className="mt-4 text-center text-sm text-gray-700">{message}</p>
-        )}
       </div>
+
+      {/* ✅ הצגת הפופאפ */}
+      {showPopup && (
+        <Popup
+          mode={message.includes("שגיאה") ? "error" : "success"}
+          title={message.includes("שגיאה") ? "שגיאה" : "קישור נשלח"}
+          message={message}
+          redirectOnClose="/login" // 👈 מעבר ללוגאין בלחיצה על סגירה
+          redirectOnConfirm="/login" // 👈 מעבר ללוגאין בלחיצה על אישור (במצב confirm)
+          onClose={() => setShowPopup(false)}
+          onConfirm={() => setShowPopup(false)}
+        />
+      )}
     </div>
   );
 }
