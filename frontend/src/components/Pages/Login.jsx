@@ -229,7 +229,7 @@ function Login() {
               }
               try {
                 const resp = await axios.put(
-                  `${api}/auth/change-password/${values.user_id}`,
+                  `${api}/users/change-password/${values.user_id}`,
                   {
                     currentPassword: pwdForm.current,
                     newPassword: pwdForm.next,
