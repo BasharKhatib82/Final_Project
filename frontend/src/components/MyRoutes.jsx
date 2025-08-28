@@ -44,7 +44,10 @@ import Footer from "./Pages/Footer";
 import EditTask from "./Tasks/EditTask";
 import TaskDetails from "./Tasks/TaskDetails";
 
+import useInactivityLogout from "../utils/useInactivityLogout.js";
+
 function MyRoutes() {
+  useInactivityLogout();
   return (
     <div className="min-h-screen flex flex-col ">
       {/* Header - גובה קבוע, לא תופס מקום נוסף . */}

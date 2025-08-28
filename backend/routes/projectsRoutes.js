@@ -50,7 +50,9 @@ router.post("/add", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ עדכון פרויקט קיים
+//*****************************/
+//    עדכון פרויקט קיים       /
+//*****************************/
 router.put("/edit/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { project_name, project_description, active } = req.body;
