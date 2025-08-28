@@ -9,19 +9,21 @@ export const useUser = () => useContext(UserContext);
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [loading, setLoading] = useState(true); // 🔄 מצב טעינה
 
   useEffect(() => {
-    axios
-      .get(`${api}/auth/check`, { withCredentials: true })
-      .then((res) => {
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get(`${api}/auth/check`, {
+          withCredentials: true,
+        });
         if (res.data.loggedIn) {
           setUser(res.data.user);
         } else {
           setUser(null);
         }
-      })
-      .catch((err) => {
-        // במקום לזרוק שגיאה בקונסול, נבדוק אם זה 401/403
+      } catch (err) {
+        // ⚡️ במקרה שאין טוקן או פג תוקף (401/403) -> פשוט setUser(null)
         if (
           err.response &&
           (err.response.status === 401 || err.response.status === 403)
@@ -30,23 +32,28 @@ export const UserProvider = ({ children }) => {
         } else {
           console.error("Auth Check Failed:", err);
         }
-      })
-      .finally(() => {
+      } finally {
         setAuthChecked(true);
-      });
+        setLoading(false); // סיום טעינה
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const logout = () => {
     axios
       .post(`${api}/auth/logout`, null, { withCredentials: true })
       .then(() => {
-        setUser(null); // לא צריך למחוק טוקן, כי הוא בקוקי HttpOnly
+        setUser(null);
       })
       .catch((err) => console.error("Logout Error:", err));
   };
 
   return (
-    <UserContext.Provider value={{ user, setUser, logout, authChecked }}>
+    <UserContext.Provider
+      value={{ user, setUser, logout, authChecked, loading }}
+    >
       {children}
     </UserContext.Provider>
   );
