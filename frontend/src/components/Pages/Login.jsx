@@ -302,7 +302,7 @@ function Login() {
           title="שגיאה"
           message={error}
           mode="error"
-          autoClose={3000}
+          redirectOnClose="/userlogin"
           onClose={() => setShowPopup(false)}
         />
       )}
