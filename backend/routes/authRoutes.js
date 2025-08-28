@@ -1,13 +1,9 @@
-// קובץ: routes/authRoutes.js
-
-// ✅ ייבוא הקוד המקצועי של ה-DB מהקובץ dbSingleton.js
 import { db } from "../utils/dbSingleton.js";
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
 import nodemailer from "nodemailer";
-import verifyToken from "../utils/verifyToken.js";
 import logAction from "../utils/logAction.js";
 
 const router = express.Router();
@@ -19,8 +15,6 @@ router.post("/login", async (req, res) => {
   const { user_id, password } = req.body;
 
   try {
-    // ✅ שינוי מרכזי: שימוש ב-async/await וב-db.query
-    // זה מבטיח שהחיבור מנוהל על ידי ה-pool ומונע שגיאות ECONNRESET
     const query = `
       SELECT u.*, 
             r.role_name,
@@ -42,11 +36,6 @@ router.post("/login", async (req, res) => {
     }
 
     const user = results[0];
-
-    bcrypt.compare(password, user.password).then((res) => {
-      console.log("match?", res);
-    });
-
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
@@ -62,15 +51,17 @@ router.post("/login", async (req, res) => {
 
       if (daysSince >= 90) {
         const resetToken = randomBytes(32).toString("hex");
-        const expire = new Date(Date.now() + 1000 * 60 * 5); // 5 דקות
+        const expire = new Date(Date.now() + 1000 * 60 * 15); // 15 דקות
 
         await db.query(
           "INSERT INTO password_resets (user_id, reset_token, reset_expires) VALUES (?, ?, ?)",
           [user.user_id, resetToken, expire]
         );
+
         return res.json({
           success: false,
-          mustChangePassword: true, //
+          mustChangePassword: true,
+          resetToken, // 👈 מחזירים לפרונט
           message: "עברו 90 יום מאז שינוי הסיסמה. יש להגדיר סיסמה חדשה.",
         });
       }
@@ -94,7 +85,6 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    // שמירת הטוקן כ-Cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
@@ -103,8 +93,6 @@ router.post("/login", async (req, res) => {
       domain: ".respondify-crm.co.il",
     });
 
-    // ✅ שינוי: מחיקת טוקן קודם ושמירת טוקן חדש באמצעות async/await
-    // שימוש בשאילתות נפרדות מבטיח עקביות
     await db.query("DELETE FROM active_tokens WHERE user_id = ?", [
       user.user_id,
     ]);
@@ -113,10 +101,8 @@ router.post("/login", async (req, res) => {
       user.user_id,
     ]);
 
-    // רישום פעולה ליומן
     logAction("התחברות למערכת", user.user_id)(req, res, () => {});
 
-    // תגובה ללקוח
     res.json({
       success: true,
       user: {
@@ -141,9 +127,8 @@ router.post("/login", async (req, res) => {
 });
 
 // ********************************************** /
-//      Promise - בדיקת התחברות - שימוש ב       /
+//      בדיקת התחברות
 // ********************************************** /
-// בדיקת התחברות - מחזיר תמיד 200
 router.get("/check", (req, res) => {
   const token = req.cookies?.token;
 
@@ -163,15 +148,13 @@ router.get("/check", (req, res) => {
   });
 });
 
-// ✅ התנתקות - קוד מתוקן ומקצועי
+// ✅ התנתקות
 router.post("/logout", async (req, res) => {
   const token = req.cookies?.token;
 
   if (token) {
     try {
-      // ✅ שינוי: מחיקת הטוקן מהמסד באמצעות async/await
       await db.query("DELETE FROM active_tokens WHERE token = ?", [token]);
-
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       if (decoded?.user_id) {
         logAction("התנתקות מהמערכת", decoded.user_id)(req, res, () => {});
@@ -189,7 +172,6 @@ router.post("/logout", async (req, res) => {
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   try {
-    // מחפשים את המשתמש
     const [user] = await db.query("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
@@ -198,22 +180,20 @@ router.post("/forgot-password", async (req, res) => {
     }
 
     const resetToken = randomBytes(32).toString("hex");
-    const expire = new Date(Date.now() + 1000 * 60 * 15); // 15 דקות
+    const expire = new Date(Date.now() + 1000 * 60 * 15);
 
-    // שומרים את הטוקן בטבלת password_resets (לא בתוך users!)
     await db.query(
       "INSERT INTO password_resets (user_id, reset_token, reset_expires) VALUES (?, ?, ?)",
       [user[0].user_id, resetToken, expire]
     );
 
-    // שולחים מייל עם לינק
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST, // mail.respondify-crm.co.il
-      port: process.env.SMTP_PORT, // 465
-      secure: process.env.SMTP_SECURE === "true", // true
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PORT,
+      secure: process.env.SMTP_SECURE === "true",
       auth: {
-        user: process.env.SMTP_USER, // reports@respondify-crm.co.il
-        pass: process.env.SMTP_PASS, // ********
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS,
       },
     });
 
@@ -237,7 +217,6 @@ router.post("/forgot-password", async (req, res) => {
 router.post("/reset-password", async (req, res) => {
   const { token, password } = req.body;
   try {
-    // מאתרים את הטוקן האחרון שעדיין בתוקף
     const [resetRows] = await db.query(
       "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > NOW() ORDER BY id DESC LIMIT 1",
       [token]
@@ -250,17 +229,13 @@ router.post("/reset-password", async (req, res) => {
     }
 
     const resetData = resetRows[0];
-
-    // מצפינים סיסמה חדשה עם bcryptjs
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // עדכון סיסמה בטבלת users
     await db.query(
       "UPDATE users SET password = ? ,last_password_change = NOW() WHERE user_id = ?",
       [hashedPassword, resetData.user_id]
     );
 
-    // מוחקים את רשומת האיפוס (שימוש חד פעמי)
     await db.query("DELETE FROM password_resets WHERE id = ?", [resetData.id]);
 
     res.json({ success: true, message: "הסיסמה שונתה בהצלחה" });

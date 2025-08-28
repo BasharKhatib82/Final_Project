@@ -14,9 +14,10 @@ function Login() {
   const navigate = useNavigate();
   const { setUser } = useUser();
   const [showPwd, setShowPwd] = useState(false);
+
+  // מצב שינוי סיסמה מאולץ
   const [mustChange, setMustChange] = useState(false);
   const [pwdForm, setPwdForm] = useState({
-    current: "",
     next: "",
     confirm: "",
   });
@@ -26,7 +27,7 @@ function Login() {
     event.preventDefault();
 
     if (!values.user_id || !values.password) {
-      setError(" כל השדות חובה");
+      setError("כל השדות חובה");
       return;
     }
 
@@ -38,7 +39,7 @@ function Login() {
       if (loginRes.data.mustChangePassword) {
         setError(null);
         setMustChange(true);
-        setResetToken(loginRes.data.resetToken);
+        setResetToken(loginRes.data.resetToken); // קבלת resetToken מהשרת
         return;
       }
 
@@ -47,7 +48,7 @@ function Login() {
         userData.full_name = `${userData.first_name} ${userData.last_name}`;
 
         setUser(userData);
-        setShowPopup(true); // מציג פופאפ הצלחה
+        setShowPopup(true);
         setError(null);
       } else {
         setError(loginRes.data.message);
@@ -58,8 +59,35 @@ function Login() {
     }
   };
 
+  const handleForcePasswordChange = async () => {
+    if (!pwdForm.next || !pwdForm.confirm) {
+      setError("יש למלא את כל השדות");
+      return;
+    }
+    if (pwdForm.next !== pwdForm.confirm) {
+      setError("הסיסמאות אינן תואמות");
+      return;
+    }
+    try {
+      const resp = await axios.post(`${api}/auth/reset-password`, {
+        token: resetToken,
+        password: pwdForm.next,
+      });
+
+      if (resp.data.success) {
+        setMustChange("done");
+        setShowPopup(true);
+      } else {
+        setError(resp.data.message);
+      }
+    } catch (err) {
+      setError("שגיאה בשינוי הסיסמה");
+    }
+  };
+
   return (
     <div className="flex justify-center items-center font-rubik pt-[10%]">
+      {/* מסך התחברות רגיל */}
       {!mustChange && (
         <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-md w-full max-w-md">
           <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
@@ -125,7 +153,7 @@ function Login() {
                 className="absolute inset-y-[30px] left-2 grid place-items-center h-8 w-8 rounded hover:bg-gray-100 focus:outline-none"
               >
                 {showPwd ? (
-                  // Eye-off (slash)
+                  // Eye-off
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 24 24"
@@ -210,31 +238,7 @@ function Login() {
           <button
             type="button"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition"
-            onClick={async () => {
-              if (!pwdForm.next || !pwdForm.confirm) {
-                setError("יש למלא את כל השדות");
-                return;
-              }
-              if (pwdForm.next !== pwdForm.confirm) {
-                setError("הסיסמאות אינן תואמות");
-                return;
-              }
-              try {
-                const resp = await axios.post(`${api}/auth/reset-password`, {
-                  token: resetToken, // 👈 שימוש בטוקן מהשרת
-                  password: pwdForm.next, // הסיסמה החדשה
-                });
-
-                if (resp.data.success) {
-                  setMustChange("done");
-                  setShowPopup(true);
-                } else {
-                  setError(resp.data.message);
-                }
-              } catch (err) {
-                setError("שגיאה בשינוי הסיסמה");
-              }
-            }}
+            onClick={handleForcePasswordChange}
           >
             שמור סיסמה חדשה
           </button>
