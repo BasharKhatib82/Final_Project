@@ -18,3 +18,18 @@ cron.schedule(
     timezone: "Asia/Jerusalem", // 🔑 לוודא שה־cron עובד לפי שעון ישראל
   }
 );
+
+// כל שעה, רק טוקנים שפג תוקפם.
+// כל שעה עגולה
+cron.schedule("0 * * * *", async () => {
+  try {
+    const [result] = await db.query(
+      "DELETE FROM password_resets WHERE reset_expires < NOW()"
+    );
+    if (result.affectedRows > 0) {
+      console.log(`🧹 נמחקו ${result.affectedRows} טוקנים שפג תוקפם`);
+    }
+  } catch (err) {
+    console.error("שגיאה בניקוי טוקנים שפג תוקפם:", err);
+  }
+});
