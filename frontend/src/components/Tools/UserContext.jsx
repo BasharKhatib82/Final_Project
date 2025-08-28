@@ -11,20 +11,9 @@ export const UserProvider = ({ children }) => {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token"); // או לקחת מ-cookie
-
-    if (!token) {
-      // אין טוקן בכלל → המשתמש לא מחובר
-      setUser(null);
-      setAuthChecked(true);
-      return;
-    }
-
+    // פשוט בודק תמיד, כי הטוקן ב־cookie HttpOnly נשלח אוטומטית
     axios
-      .get(`${api}/auth/check`, {
-        headers: { Authorization: `Bearer ${token}` }, // שולחים טוקן רק אם קיים
-        withCredentials: true,
-      })
+      .get(`${api}/auth/check`, { withCredentials: true })
       .then((res) => {
         if (res.data.loggedIn) {
           setUser(res.data.user);
@@ -45,8 +34,7 @@ export const UserProvider = ({ children }) => {
     axios
       .post(`${api}/auth/logout`, null, { withCredentials: true })
       .then(() => {
-        localStorage.removeItem("token");
-        setUser(null);
+        setUser(null); // לא צריך למחוק טוקן, כי הוא בקוקי HttpOnly
       })
       .catch((err) => console.error("Logout Error:", err));
   };
