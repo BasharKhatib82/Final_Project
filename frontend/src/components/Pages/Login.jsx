@@ -14,6 +14,12 @@ function Login() {
   const navigate = useNavigate();
   const { setUser } = useUser();
   const [showPwd, setShowPwd] = useState(false);
+  const [mustChange, setMustChange] = useState(false);
+  const [pwdForm, setPwdForm] = useState({
+    current: "",
+    next: "",
+    confirm: "",
+  });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -27,6 +33,12 @@ function Login() {
       const loginRes = await axios.post(`${api}/auth/login`, values, {
         withCredentials: true,
       });
+
+      if (loginRes.data.mustChangePassword) {
+        setError(null);
+        setMustChange(true); // מפעיל מסך שינוי סיסמה
+        return;
+      }
 
       if (loginRes.data.success) {
         const authRes = await axios.get(`${api}/auth/check`, {
@@ -164,8 +176,82 @@ function Login() {
         </div>
       </div>
 
-      {/* ✅ פופאפ הצלחה */}
-      {showPopup && (
+      {/* מסך שינוי סיסמה מאולץ */}
+      {mustChange && (
+        <div className="bg-white p-6 rounded shadow-md mt-6 w-full max-w-md">
+          <h3 className="text-lg font-semibold mb-3">נדרש שינוי סיסמה</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            עברו 90 יום מאז שינוי הסיסמה האחרון. יש להזין סיסמה חדשה כדי להמשיך.
+          </p>
+
+          <input
+            type="password"
+            placeholder="סיסמה נוכחית"
+            className="w-full border px-3 py-2 rounded mb-3"
+            value={pwdForm.current}
+            onChange={(e) =>
+              setPwdForm({ ...pwdForm, current: e.target.value })
+            }
+          />
+
+          <input
+            type="password"
+            placeholder="סיסמה חדשה"
+            className="w-full border px-3 py-2 rounded mb-3"
+            value={pwdForm.next}
+            onChange={(e) => setPwdForm({ ...pwdForm, next: e.target.value })}
+          />
+
+          <input
+            type="password"
+            placeholder="אישור סיסמה חדשה"
+            className="w-full border px-3 py-2 rounded mb-3"
+            value={pwdForm.confirm}
+            onChange={(e) =>
+              setPwdForm({ ...pwdForm, confirm: e.target.value })
+            }
+          />
+
+          <button
+            type="button"
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded w-full"
+            onClick={async () => {
+              if (!pwdForm.current || !pwdForm.next || !pwdForm.confirm) {
+                setError("יש למלא את כל השדות");
+                return;
+              }
+              if (pwdForm.next !== pwdForm.confirm) {
+                setError("הסיסמאות אינן תואמות");
+                return;
+              }
+              try {
+                const resp = await axios.put(
+                  `${api}/auth/change-password/${values.user_id}`,
+                  {
+                    currentPassword: pwdForm.current,
+                    newPassword: pwdForm.next,
+                  },
+                  { withCredentials: true }
+                );
+
+                if (resp.data.success) {
+                  setMustChange("done");
+                  setShowPopup(true);
+                } else {
+                  setError(resp.data.message);
+                }
+              } catch (err) {
+                setError("שגיאה בשינוי הסיסמה");
+              }
+            }}
+          >
+            שמור סיסמה חדשה
+          </button>
+        </div>
+      )}
+
+      {/* פופאפ התחברות רגילה */}
+      {showPopup && mustChange === false && (
         <Popup
           icon={<FcApproval className="text-5xl" />}
           title="חשבונך זוהה בהצלחה"
@@ -174,6 +260,22 @@ function Login() {
           autoClose={2000}
           redirectOnClose="/dashboard"
           onClose={() => setShowPopup(false)}
+        />
+      )}
+
+      {/* פופאפ שינוי סיסמה מאולץ */}
+      {showPopup && mustChange === "done" && (
+        <Popup
+          icon={<FcApproval className="text-5xl" />}
+          title="הסיסמה הוחלפה בהצלחה"
+          message="כעת ניתן להתחבר מחדש עם הסיסמה החדשה"
+          mode="successMessage"
+          autoClose={2500}
+          redirectOnClose="/login"
+          onClose={() => {
+            setShowPopup(false);
+            navigate("/login");
+          }}
         />
       )}
     </div>

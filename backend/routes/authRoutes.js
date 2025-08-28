@@ -12,7 +12,9 @@ import logAction from "../utils/logAction.js";
 
 const router = express.Router();
 
-// ✅ התחברות משתמש - קוד מתוקן ומקצועי
+// **************************** /
+//        התחברות משתמש        /
+// **************************** /
 router.post("/login", async (req, res) => {
   const { user_id, password } = req.body;
 
@@ -49,6 +51,22 @@ router.post("/login", async (req, res) => {
 
     if (!match) {
       return res.status(401).json({ success: false, message: "סיסמה שגויה" });
+    }
+
+    // בדיקה אם עברו 90 ימים משינוי סיסמה אחרון
+    if (user.last_password_change) {
+      const daysSince = Math.floor(
+        (Date.now() - new Date(user.last_password_change).getTime()) /
+          (1000 * 60 * 60 * 24)
+      );
+
+      if (daysSince >= 90) {
+        return res.json({
+          success: false,
+          mustChangePassword: true, // 👈 פלג ל-Frontend
+          message: "עברו 90 יום מאז שינוי הסיסמה. יש להגדיר סיסמה חדשה.",
+        });
+      }
     }
 
     // יצירת טוקן — כולל ההרשאות !
@@ -114,7 +132,9 @@ router.post("/login", async (req, res) => {
   }
 });
 
-// ✅ בדיקת התחברות - שינוי קל לשימוש ב-Promise
+// ********************************************** /
+//      Promise - בדיקת התחברות - שימוש ב       /
+// ********************************************** /
 router.get("/check", verifyToken, (req, res) => {
   res.json({
     loggedIn: true,
