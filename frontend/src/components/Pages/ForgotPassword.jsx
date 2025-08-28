@@ -22,7 +22,7 @@ function ForgotPassword() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-50">
+    <div className="flex justify-center items-center min-h-screen">
       <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-bold text-center mb-4">שחזור סיסמה</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
