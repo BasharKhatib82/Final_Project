@@ -191,16 +191,6 @@ function Login() {
 
           <input
             type="password"
-            placeholder="סיסמה נוכחית"
-            className="w-full border px-3 py-2 rounded mb-3"
-            value={pwdForm.current}
-            onChange={(e) =>
-              setPwdForm({ ...pwdForm, current: e.target.value })
-            }
-          />
-
-          <input
-            type="password"
             placeholder="סיסמה חדשה"
             className="w-full border px-3 py-2 rounded mb-3"
             value={pwdForm.next}
