@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import Popup from "./Popup"; // 👈 הקומפוננטה שלך
+import Popup from "../Tools/Popup.jsx"; //
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -103,7 +103,7 @@ function ResetPassword() {
           onConfirm={() => setShowSuccessPopup(false)}
           redirectOnClose="/login" // מעבר ללוגאין בלחיצה על סגור
           redirectOnConfirm="/login" // מעבר ללוגאין בלחיצה על אישור (אם תגדיר מצב confirm)
-          // autoClose={2500}          // 👈 אופציונלי: סגירה אוטומטית + הפניה לאחר 2.5 שניות
+          // autoClose={2500}          //  אופציונלי: סגירה אוטומטית + הפניה לאחר 2.5 שניות
         />
       )}
     </div>
