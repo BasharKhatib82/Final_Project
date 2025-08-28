@@ -184,7 +184,7 @@ function Login() {
       {/* מסך שינוי סיסמה מאולץ */}
       {mustChange && (
         <div className="bg-white bg-opacity-90 p-8 rounded-lg shadow-md w-full max-w-md">
-          <h3 className="text-2xl font-bold text-center text-gray-800 mb-6">
+          <h3 className="text-2xl font-bold text-center text-gray-800 mb-3">
             נדרש שינוי סיסמה
           </h3>
           <p className="text-sm text-gray-600 mb-4 text-center">
