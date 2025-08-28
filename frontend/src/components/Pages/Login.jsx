@@ -53,9 +53,14 @@ function Login() {
       } else {
         setError(loginRes.data.message);
       }
-    } catch (err) {
-      console.error("Login error:", err);
-      setError("שם המשתמש או הסיסמה אינם נכונים");
+    } catch (error) {
+      console.error("Login error:", error);
+    }
+    if (error.res && error.res.data && error.res.data.message) {
+      // מקבל את ההודעה המדויקת מהשרת
+      setError(error.response.data.message);
+    } else {
+      setError("שגיאת שרת, נסה שוב מאוחר יותר");
     }
   };
 
