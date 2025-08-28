@@ -20,6 +20,7 @@ function Login() {
     next: "",
     confirm: "",
   });
+  const [resetToken, setResetToken] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -36,7 +37,8 @@ function Login() {
 
       if (loginRes.data.mustChangePassword) {
         setError(null);
-        setMustChange(true); // מפעיל מסך שינוי סיסמה
+        setMustChange(true);
+        setResetToken(loginRes.data.resetToken);
         return;
       }
 
@@ -219,7 +221,7 @@ function Login() {
             type="button"
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition"
             onClick={async () => {
-              if (!pwdForm.current || !pwdForm.next || !pwdForm.confirm) {
+              if (!pwdForm.next || !pwdForm.confirm) {
                 setError("יש למלא את כל השדות");
                 return;
               }
@@ -228,14 +230,10 @@ function Login() {
                 return;
               }
               try {
-                const resp = await axios.put(
-                  `${api}/users/change-password/${values.user_id}`,
-                  {
-                    currentPassword: pwdForm.current,
-                    newPassword: pwdForm.next,
-                  },
-                  { withCredentials: true }
-                );
+                const resp = await axios.post(`${api}/auth/reset-password`, {
+                  token: resetToken, // 👈 שימוש בטוקן מהשרת
+                  password: pwdForm.next, // הסיסמה החדשה
+                });
 
                 if (resp.data.success) {
                   setMustChange("done");

@@ -61,9 +61,16 @@ router.post("/login", async (req, res) => {
       );
 
       if (daysSince >= 90) {
+        const resetToken = randomBytes(32).toString("hex");
+        const expire = new Date(Date.now() + 1000 * 60 * 5); // 5 דקות
+
+        await db.query(
+          "INSERT INTO password_resets (user_id, reset_token, reset_expires) VALUES (?, ?, ?)",
+          [user.user_id, resetToken, expire]
+        );
         return res.json({
           success: false,
-          mustChangePassword: true, // 👈 פלג ל-Frontend
+          mustChangePassword: true, //
           message: "עברו 90 יום מאז שינוי הסיסמה. יש להגדיר סיסמה חדשה.",
         });
       }
