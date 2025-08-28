@@ -331,10 +331,10 @@ router.put("/change-password/:id", verifyToken, async (req, res) => {
     const newHashedPassword = await bcrypt.hash(newPassword, salt);
 
     // ✅ עדכון סיסמה במסד הנתונים
-    await db.query("UPDATE users SET password = ? WHERE user_id = ?", [
-      newHashedPassword,
-      id,
-    ]);
+    await db.query(
+      "UPDATE users SET password = ?, last_password_change = NOW() WHERE user_id = ?",
+      [newHashedPassword, id]
+    );
 
     logAction(`שינוי סיסמה למשתמש #${id}`)(req, res, () => {});
     res.json({

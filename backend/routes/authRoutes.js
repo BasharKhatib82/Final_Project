@@ -214,10 +214,10 @@ router.post("/reset-password", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // עדכון סיסמה בטבלת users
-    await db.query("UPDATE users SET password = ? WHERE user_id = ?", [
-      hashedPassword,
-      resetData.user_id,
-    ]);
+    await db.query(
+      "UPDATE users SET password = ? last_password_change = NOW() WHERE user_id = ?",
+      [hashedPassword, resetData.user_id]
+    );
 
     // מוחקים את רשומת האיפוס (שימוש חד פעמי)
     await db.query("DELETE FROM password_resets WHERE id = ?", [resetData.id]);
