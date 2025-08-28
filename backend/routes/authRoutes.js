@@ -90,9 +90,10 @@ router.post("/login", async (req, res) => {
     // שמירת הטוקן כ-Cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60, // שעה
-      sameSite: "Lax",
+      secure: true,
+      sameSite: "None",
+      maxAge: 1000 * 60 * 60,
+      domain: ".respondify-crm.co.il",
     });
 
     // ✅ שינוי: מחיקת טוקן קודם ושמירת טוקן חדש באמצעות async/await
