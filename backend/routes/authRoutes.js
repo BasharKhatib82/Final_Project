@@ -136,10 +136,23 @@ router.post("/login", async (req, res) => {
 // ********************************************** /
 //      Promise - בדיקת התחברות - שימוש ב       /
 // ********************************************** /
-router.get("/check", verifyToken, (req, res) => {
-  res.json({
-    loggedIn: true,
-    user: req.user,
+// בדיקת התחברות - מחזיר תמיד 200
+router.get("/check", (req, res) => {
+  const token = req.cookies?.token;
+
+  if (!token) {
+    return res.json({ loggedIn: false });
+  }
+
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.json({ loggedIn: false });
+    }
+
+    res.json({
+      loggedIn: true,
+      user: decoded,
+    });
   });
 });
 
