@@ -9,12 +9,13 @@ const api = process.env.REACT_APP_API_URL;
 
 function Login() {
   const [values, setValues] = useState({ user_id: "", password: "" });
-  const [error, setError] = useState(null);
-  const [showPopup, setShowPopup] = useState(false);
-  const navigate = useNavigate();
   const { setUser } = useUser();
   const [showPwd, setShowPwd] = useState(false);
-
+  const [error, setError] = useState(null);
+  const [showPopupSuccessLogin, setShowPopupSuccessLogin] = useState(false);
+  const [showPopupErrorLogin, setShowPopupErrorLogin] = useState(false);
+  const [showPopupMustChange, setShowPopupMustChange] = useState(false);
+  const navigate = useNavigate();
   // מצב שינוי סיסמה מאולץ
   const [mustChange, setMustChange] = useState(false);
   const [pwdForm, setPwdForm] = useState({
@@ -48,7 +49,7 @@ function Login() {
         userData.full_name = `${userData.first_name} ${userData.last_name}`;
 
         setUser(userData);
-        setShowPopup(true);
+        setShowPopupSuccessLogin(true);
         setError(null);
       } else {
         setError(loginRes.data.message);
@@ -61,7 +62,7 @@ function Login() {
       } else {
         setError("שגיאת שרת, נסה שוב מאוחר יותר");
       }
-      setShowPopup(true);
+      setShowPopupErrorLogin(true);
     }
   };
 
@@ -82,7 +83,7 @@ function Login() {
 
       if (resp.data.success) {
         setMustChange("done");
-        setShowPopup(true);
+        setShowPopupMustChange(true);
       } else {
         setError(resp.data.message);
       }
@@ -252,7 +253,7 @@ function Login() {
       )}
 
       {/* פופאפ התחברות רגילה */}
-      {showPopup && mustChange === false && (
+      {showPopupSuccessLogin && mustChange === false && (
         <Popup
           icon={<FcApproval className="text-5xl" />}
           title="חשבונך זוהה בהצלחה"
@@ -260,12 +261,12 @@ function Login() {
           mode="successMessage"
           autoClose={3000}
           redirectOnClose="/dashboard"
-          onClose={() => setShowPopup(false)}
+          onClose={() => showPopupSuccessLogin(false)}
         />
       )}
 
       {/* פופאפ שינוי סיסמה מאולץ */}
-      {showPopup && mustChange === "done" && (
+      {showPopupMustChange && mustChange === "done" && (
         <Popup
           icon={<FcApproval className="text-5xl" />}
           title="הסיסמה הוחלפה בהצלחה"
@@ -274,23 +275,23 @@ function Login() {
           autoClose={2500}
           redirectOnClose="/userlogin"
           onClose={() => {
-            setShowPopup(false);
+            showPopupMustChange(false);
             navigate("/userlogin");
             setMustChange(false);
           }}
         />
       )}
       {/*  פופאפ שגיאה- סיסמה שגויה או משתמש לא קיים */}
-      {showPopup && error && (
+      {showPopupErrorLogin && error && (
         <Popup
           icon={<FcHighPriority />}
           title="שגיאה בהתחברות"
           message={error}
           mode="warning"
           onClose={() => {
-            setShowPopup(false);
-            navigate("/userlogin");
             setError(null);
+            navigate("/userlogin");
+            setShowPopupErrorLogin(false);
           }}
         />
       )}
