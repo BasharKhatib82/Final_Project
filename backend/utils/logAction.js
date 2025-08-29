@@ -1,5 +1,5 @@
 // utils/logAction.js
-import { db } from "../utils/dbSingleton.js";
+import { db } from "./dbSingleton.js";
 
 /**
  * רישום פעולה ליומן כ־Middleware או כ־פונקציה עצמאית

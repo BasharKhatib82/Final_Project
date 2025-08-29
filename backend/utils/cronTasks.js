@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import checkMissingAttendance from "./checkMissingAttendance.js";
+import { db } from "./dbSingleton.js";
 
 // כל יום ב־23:00 לפי שעון ישראל (ימים ראשון עד חמישי)
 cron.schedule(
