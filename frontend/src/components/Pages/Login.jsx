@@ -259,7 +259,10 @@ function Login() {
           mode="successMessage"
           autoClose={3000}
           redirectOnClose="/dashboard"
-          onClose={() => showPopupSuccessLogin(false)}
+          onClose={() => {
+            showPopupSuccessLogin(false);
+            navigate("/dashboard");
+          }}
         />
       )}
 
