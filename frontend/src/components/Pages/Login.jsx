@@ -287,8 +287,11 @@ function Login() {
           title="שגיאה בהתחברות"
           message={error}
           mode="warning"
-          redirectOnClose="/userlogin"
-          onClose={() => setShowPopup(false)}
+          onClose={() => {
+            setShowPopup(false);
+            navigate("/userlogin");
+            setError(null);
+          }}
         />
       )}
     </div>
