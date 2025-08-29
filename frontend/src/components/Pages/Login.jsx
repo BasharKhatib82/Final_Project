@@ -55,8 +55,6 @@ function Login() {
         setError(loginRes.data.message);
       }
     } catch (err) {
-      console.error("Login error:", err);
-
       if (err.response && err.response.data && err.response.data.message) {
         setError(err.response.data.message); // הודעה מדויקת מהשרת
       } else {
