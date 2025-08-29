@@ -32,14 +32,18 @@ router.post("/login", async (req, res) => {
     const [results] = await db.query(query, [user_id]);
 
     if (results.length === 0) {
-      return res.status(401).json({ success: false, message: "משתמש לא נמצא" });
+      return res
+        .status(401)
+        .json({ success: false, message: "מזהה המשתמש לא רשום במערכת" });
     }
 
     const user = results[0];
     const match = await bcrypt.compare(password, user.password);
 
     if (!match) {
-      return res.status(401).json({ success: false, message: "סיסמה שגויה" });
+      return res
+        .status(401)
+        .json({ success: false, message: "נראה שהסיסמה שהוזנה שגויה" });
     }
 
     // בדיקה אם עברו 90 ימים משינוי סיסמה אחרון
@@ -49,6 +53,7 @@ router.post("/login", async (req, res) => {
           (1000 * 60 * 60 * 24)
       );
 
+      // אם עברו 90 ימים, מחזירים הודעה מיוחדת
       if (daysSince >= 90) {
         const resetToken = randomBytes(32).toString("hex");
         const expire = new Date(Date.now() + 1000 * 60 * 15); // 15 דקות

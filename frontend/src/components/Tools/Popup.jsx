@@ -39,8 +39,9 @@ const Popup = ({
   const getColor = () => {
     switch (mode) {
       case "success":
-      case "successMessage":
         return "bg-green-600 hover:bg-green-700";
+      case "successMessage":
+        return "bg-green-400 hover:bg-green-700";
       case "error":
         return "bg-red-600 hover:bg-red-700";
       case "warning":

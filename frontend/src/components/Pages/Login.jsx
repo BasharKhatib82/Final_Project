@@ -3,7 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../components/Tools/UserContext";
 import Popup from "../../components/Tools/Popup";
-import { FcApproval } from "react-icons/fc";
+import { FcApproval, FcHighPriority } from "react-icons/fc";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -258,7 +258,7 @@ function Login() {
           title="חשבונך זוהה בהצלחה"
           message="כעת נעביר אותך לאזור האישי שלך"
           mode="successMessage"
-          autoClose={2000}
+          autoClose={3000}
           redirectOnClose="/dashboard"
           onClose={() => setShowPopup(false)}
         />
@@ -283,25 +283,10 @@ function Login() {
       {/*  פופאפ שגיאה- סיסמה שגויה או משתמש לא קיים */}
       {showPopup && error && (
         <Popup
-          icon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-10 h-10 text-red-500"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          }
-          title="שגיאה"
+          icon={<FcHighPriority />}
+          title="שגיאה בהתחברות"
           message={error}
-          mode="error"
+          mode="warning"
           redirectOnClose="/userlogin"
           onClose={() => setShowPopup(false)}
         />
