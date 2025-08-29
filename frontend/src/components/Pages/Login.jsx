@@ -258,10 +258,9 @@ function Login() {
           message="כעת נעביר אותך לאזור האישי שלך"
           mode="successMessage"
           autoClose={3000}
-          redirectOnClose="/dashboard"
           onClose={() => {
-            showPopupSuccessLogin(false);
             navigate("/dashboard");
+            showPopupSuccessLogin(false);
           }}
         />
       )}
