@@ -46,7 +46,7 @@ const Sidebar = () => {
         icon: <FaUsers />,
       },
 
-      user.can_view_reports === 1 && {
+      {
         label: "ניהול שעות עבודה",
         to: "/dashboard/attendance",
         icon: <FaClock />,
