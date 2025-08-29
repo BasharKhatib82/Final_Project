@@ -260,7 +260,7 @@ function Login() {
           autoClose={3000}
           onClose={() => {
             navigate("/dashboard");
-            showPopupSuccessLogin(false);
+            setShowPopupSuccessLogin(false);
           }}
         />
       )}
@@ -275,7 +275,7 @@ function Login() {
           autoClose={2500}
           redirectOnClose="/userlogin"
           onClose={() => {
-            showPopupMustChange(false);
+            setShowPopupMustChange(false);
             navigate("/userlogin");
             setMustChange(false);
           }}
