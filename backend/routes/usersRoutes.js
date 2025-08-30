@@ -209,7 +209,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמשים פעילים עם שם תפקיד
+// שליפת משתמשים פעילים עם שם תפקיד (ללא המנכ"ל user_id=1)
 router.get("/active", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query(
@@ -224,7 +224,8 @@ router.get("/active", verifyToken, async (req, res) => {
               u.active
        FROM users u
        LEFT JOIN roles_permissions r ON u.role_id = r.role_id
-       WHERE u.active = 1`
+       WHERE u.active = 1
+         AND u.user_id <> 1`
     );
     res.json({ success: true, Result: results });
   } catch (err) {

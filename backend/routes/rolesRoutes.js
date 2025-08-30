@@ -57,11 +57,11 @@ router.post("/add", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ שליפת תפקידים פעילים
+// ✅ שליפת תפקידים פעילים (ללא תפקיד המנכ"ל role_id=1)
 router.get("/active", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query(
-      "SELECT * FROM roles_permissions WHERE active = 1 ORDER BY role_id ASC"
+      "SELECT * FROM roles_permissions WHERE active = 1 AND role_id <> 1 ORDER BY role_id ASC"
     );
     return res.status(200).json({ Status: true, Roles: results });
   } catch (err) {
