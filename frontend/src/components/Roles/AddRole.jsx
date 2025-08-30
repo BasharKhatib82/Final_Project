@@ -99,7 +99,7 @@ const AddRole = () => {
     <div className="flex justify-center items-center pt-10">
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2"
+        className="w-[80%] max-w-5xl bg-white/85 shadow-md rounded-lg p-8 space-y-6"
       >
         <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
           הוספת תפקיד חדש
@@ -120,29 +120,28 @@ const AddRole = () => {
         </div>
 
         {/* קבוצות הרשאות */}
-        <div className="flex flex-wrap gap-4 items-stretch">
+        <div className="flex flex-wrap gap-4">
           {Object.entries(permissionsSchema).map(([category, perms]) => (
             <div
               key={category}
-              className="min-w-[220px] max-w-[260px] border rounded p-3 bg-white/70 flex flex-col justify-between"
+              className="min-w-[220px] max-w-[260px] border rounded p-3 bg-white/70"
             >
-              <h3 className="font-semibold mb-2 whitespace-nowrap overflow-hidden text-ellipsis">
+              <h3 className="font-semibold mb-2 whitespace-nowrap">
                 {category}
               </h3>
               <div className="space-y-2">
                 {perms.map((perm) => (
                   <label
                     key={perm.key}
-                    className="flex items-center gap-2 cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis"
+                    className="flex items-center gap-2 cursor-pointer whitespace-nowrap"
                   >
                     <input
                       type="checkbox"
+                      className="align-middle"
                       checked={selectedPermissions.includes(perm.key)}
                       onChange={() => togglePermission(perm.key)}
                     />
-                    <span className="overflow-hidden text-ellipsis">
-                      {perm.label}
-                    </span>
+                    <span className="text-sm">{perm.label}</span>
                   </label>
                 ))}
               </div>
@@ -151,7 +150,6 @@ const AddRole = () => {
         </div>
 
         {/* כפתורי פעולה */}
-
         <div className="flex justify-around pt-4">
           <AddSaveButton label="הוסף תפקיד" type="submit" />
           <ExitButton label="ביטול" linkTo="/dashboard/roles" />
