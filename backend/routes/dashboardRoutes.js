@@ -66,12 +66,12 @@ router.get("/", verifyToken, async (req, res) => {
     `,
 
     online_users: `
-  SELECT u.first_name, u.last_name, r.role_name
-  FROM active_tokens t
-  JOIN users u ON t.user_id = u.user_id
-  JOIN roles_permissions r ON u.role_id = r.role_id
-  WHERE u.user_id <> 1 AND u.role_id <> 1
-`,
+      SELECT u.first_name, u.last_name, r.role_name
+      FROM active_tokens t
+      JOIN users u ON t.user_id = u.user_id
+      JOIN roles_permissions r ON u.role_id = r.role_id
+      WHERE u.user_id <> 1 AND u.role_id <> 1
+    `,
 
     leads_by_day: `
       SELECT DATE(created_at) AS date, COUNT(*) AS count
@@ -97,7 +97,6 @@ router.get("/", verifyToken, async (req, res) => {
       ORDER BY count DESC
     `,
 
-    // ✅ לידים לפי סטטוס + משתמש
     leads_by_user_status: `
       SELECT l.user_id, u.first_name, u.last_name, l.status, COUNT(*) AS count
       FROM leads l
@@ -105,7 +104,6 @@ router.get("/", verifyToken, async (req, res) => {
       GROUP BY l.user_id, l.status
     `,
 
-    // ✅ משימות לפי סטטוס + משתמש
     tasks_by_user_status: `
       SELECT t.user_id, u.first_name, u.last_name, t.status, COUNT(*) AS count
       FROM tasks t
@@ -113,7 +111,6 @@ router.get("/", verifyToken, async (req, res) => {
       GROUP BY t.user_id, t.status
     `,
 
-    // ✅ משימות חורגות
     tasks_overdue: `
       SELECT t.user_id, u.first_name, u.last_name, COUNT(*) AS overdue_count
       FROM tasks t
@@ -154,69 +151,73 @@ router.get("/", verifyToken, async (req, res) => {
       tasks_overdue,
     ] = results;
 
-    // 🟢 השמות
-    summary.leads_by_day = leads_by_day[0].map((row) => ({
-      date: row.date,
-      count: row.count,
-    }));
-
-    summary.leads_by_source = leads_by_source[0].map((row) => ({
-      source: row.source,
-      count: row.count,
-    }));
-
-    summary.leads_by_user = leads_by_user[0].map((row) => ({
-      name: row.name,
-      count: row.count,
-    }));
-
-    summary.leads_by_user_status = leads_by_user_status[0];
-    summary.tasks_by_user_status = tasks_by_user_status[0];
-    summary.tasks_overdue = tasks_overdue[0];
-
+    // 🟢
     summary.users = {
-      active: users_active[0][0].count,
-      inactive: users_inactive[0][0].count,
+      active: users_active?.[0]?.[0]?.count ?? 0,
+      inactive: users_inactive?.[0]?.[0]?.count ?? 0,
+      online_list: (online_users?.[0] || []).map((row) => ({
+        name: `${row.first_name} ${row.last_name}`,
+        role: row.role_name,
+      })),
     };
 
     summary.roles = {
-      total: roles_total[0][0].count,
-      active: roles_active[0][0].count,
-      inactive: roles_inactive[0][0].count,
+      total: roles_total?.[0]?.[0]?.count ?? 0,
+      active: roles_active?.[0]?.[0]?.count ?? 0,
+      inactive: roles_inactive?.[0]?.[0]?.count ?? 0,
     };
 
     summary.leads = {
-      new: leads_new[0][0].count,
-      in_progress: leads_in_progress[0][0].count,
-      completed: leads_completed[0][0].count,
+      new: leads_new?.[0]?.[0]?.count ?? 0,
+      in_progress: leads_in_progress?.[0]?.[0]?.count ?? 0,
+      completed: leads_completed?.[0]?.[0]?.count ?? 0,
     };
 
     summary.tasks = {
-      new: tasks_new[0][0].count,
-      in_progress: tasks_in_progress[0][0].count,
-      completed: tasks_completed[0][0].count,
+      new: tasks_new?.[0]?.[0]?.count ?? 0,
+      in_progress: tasks_in_progress?.[0]?.[0]?.count ?? 0,
+      completed: tasks_completed?.[0]?.[0]?.count ?? 0,
     };
 
     summary.projects = {
-      total: projects_total[0][0].count,
-      active: projects_active[0][0].count,
-      inactive: projects_inactive[0][0].count,
+      total: projects_total?.[0]?.[0]?.count ?? 0,
+      active: projects_active?.[0]?.[0]?.count ?? 0,
+      inactive: projects_inactive?.[0]?.[0]?.count ?? 0,
     };
 
-    summary.logs_by_day = logs_by_day[0].map((row) => ({
-      date: row.date,
-      total_logs: row.total_logs,
-    }));
+    summary.logs_by_day =
+      logs_by_day?.[0]?.map((row) => ({
+        date: row.date,
+        total_logs: row.total_logs,
+      })) || [];
 
-    summary.attendance = attendance_by_user[0].map((row) => ({
-      name: `${row.first_name} ${row.last_name}`,
-      total_attendance: row.total_attendance,
-    }));
+    summary.attendance =
+      attendance_by_user?.[0]?.map((row) => ({
+        name: `${row.first_name} ${row.last_name}`,
+        total_attendance: row.total_attendance,
+      })) || [];
 
-    summary.users.online_list = (online_users[0] || []).map((row) => ({
-      name: `${row.first_name} ${row.last_name}`,
-      role: row.role_name,
-    }));
+    summary.leads_by_day =
+      leads_by_day?.[0]?.map((row) => ({
+        date: row.date,
+        count: row.count,
+      })) || [];
+
+    summary.leads_by_source =
+      leads_by_source?.[0]?.map((row) => ({
+        source: row.source,
+        count: row.count,
+      })) || [];
+
+    summary.leads_by_user =
+      leads_by_user?.[0]?.map((row) => ({
+        name: row.name,
+        count: row.count,
+      })) || [];
+
+    summary.leads_by_user_status = leads_by_user_status?.[0] || [];
+    summary.tasks_by_user_status = tasks_by_user_status?.[0] || [];
+    summary.tasks_overdue = tasks_overdue?.[0] || [];
 
     res.json({ success: true, summary });
   } catch (err) {

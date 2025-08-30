@@ -46,30 +46,32 @@ const Home = () => {
 
   return (
     <div className="flex-col flex-grow p-6 font-rubik text-right space-y-6">
-      {/* 🔔 פס התראות  */}
+      {/* 🔔 פס התראות */}
       {(user?.admin_alert_dash === 1 || user?.user_alert_dash === 1) && (
         <div className="flex flex-wrap gap-3">
           {/* פניות חדשות */}
           {((user?.admin_alert_dash === 1 &&
-            stats.leads_by_user_status
-              .filter((l) => l.status === "חדש")
-              .reduce((sum, l) => sum + l.count, 0)) ||
+            stats?.leads_by_user_status
+              ?.filter((l) => l.status === "חדש")
+              ?.reduce((sum, l) => sum + l.count, 0)) ||
             (user?.user_alert_dash === 1 &&
-              stats.leads_by_user_status
-                .filter((l) => l.user_id === user.user_id && l.status === "חדש")
-                .reduce((sum, l) => sum + l.count, 0))) > 0 && (
+              stats?.leads_by_user_status
+                ?.filter(
+                  (l) => l.user_id === user.user_id && l.status === "חדש"
+                )
+                ?.reduce((sum, l) => sum + l.count, 0))) > 0 && (
             <div className="flex items-center bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 text-yellow-700 shadow-sm">
               <span className="text-lg mr-2">📩</span>
               <span className="text-sm font-medium">
                 {user?.admin_alert_dash
-                  ? stats.leads_by_user_status
-                      .filter((l) => l.status === "חדש")
-                      .reduce((sum, l) => sum + l.count, 0)
-                  : stats.leads_by_user_status
-                      .filter(
+                  ? stats?.leads_by_user_status
+                      ?.filter((l) => l.status === "חדש")
+                      ?.reduce((sum, l) => sum + l.count, 0)
+                  : stats?.leads_by_user_status
+                      ?.filter(
                         (l) => l.user_id === user.user_id && l.status === "חדש"
                       )
-                      .reduce((sum, l) => sum + l.count, 0)}{" "}
+                      ?.reduce((sum, l) => sum + l.count, 0)}{" "}
                 פניות חדשות
               </span>
             </div>
@@ -77,25 +79,27 @@ const Home = () => {
 
           {/* משימות חדשות */}
           {((user?.admin_alert_dash === 1 &&
-            stats.tasks_by_user_status
-              .filter((t) => t.status === "חדש")
-              .reduce((sum, t) => sum + t.count, 0)) ||
+            stats?.tasks_by_user_status
+              ?.filter((t) => t.status === "חדש")
+              ?.reduce((sum, t) => sum + t.count, 0)) ||
             (user?.user_alert_dash === 1 &&
-              stats.tasks_by_user_status
-                .filter((t) => t.user_id === user.user_id && t.status === "חדש")
-                .reduce((sum, t) => sum + t.count, 0))) > 0 && (
+              stats?.tasks_by_user_status
+                ?.filter(
+                  (t) => t.user_id === user.user_id && t.status === "חדש"
+                )
+                ?.reduce((sum, t) => sum + t.count, 0))) > 0 && (
             <div className="flex items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-blue-700 shadow-sm">
               <span className="text-lg mr-2">📝</span>
               <span className="text-sm font-medium">
                 {user?.admin_alert_dash
-                  ? stats.tasks_by_user_status
-                      .filter((t) => t.status === "חדש")
-                      .reduce((sum, t) => sum + t.count, 0)
-                  : stats.tasks_by_user_status
-                      .filter(
+                  ? stats?.tasks_by_user_status
+                      ?.filter((t) => t.status === "חדש")
+                      ?.reduce((sum, t) => sum + t.count, 0)
+                  : stats?.tasks_by_user_status
+                      ?.filter(
                         (t) => t.user_id === user.user_id && t.status === "חדש"
                       )
-                      .reduce((sum, t) => sum + t.count, 0)}{" "}
+                      ?.reduce((sum, t) => sum + t.count, 0)}{" "}
                 משימות חדשות
               </span>
             </div>
@@ -103,21 +107,25 @@ const Home = () => {
 
           {/* משימות חורגות */}
           {((user?.admin_alert_dash === 1 &&
-            stats.tasks_overdue.reduce((sum, t) => sum + t.overdue_count, 0)) ||
+            stats?.tasks_overdue?.reduce(
+              (sum, t) => sum + t.overdue_count,
+              0
+            )) ||
             (user?.user_alert_dash === 1 &&
-              (stats.tasks_overdue.find((t) => t.user_id === user.user_id)
+              (stats?.tasks_overdue?.find((t) => t.user_id === user.user_id)
                 ?.overdue_count ||
                 0))) > 0 && (
             <div className="flex items-center bg-red-50 border border-red-200 rounded-lg px-4 py-2 text-red-700 shadow-sm">
               <span className="text-lg mr-2">⏰</span>
               <span className="text-sm font-medium">
                 {user?.admin_alert_dash
-                  ? stats.tasks_overdue.reduce(
+                  ? stats?.tasks_overdue?.reduce(
                       (sum, t) => sum + t.overdue_count,
                       0
                     )
-                  : stats.tasks_overdue.find((t) => t.user_id === user.user_id)
-                      ?.overdue_count || 0}{" "}
+                  : stats?.tasks_overdue?.find(
+                      (t) => t.user_id === user.user_id
+                    )?.overdue_count || 0}{" "}
                 משימות חורגות
               </span>
             </div>
@@ -125,7 +133,7 @@ const Home = () => {
         </div>
       )}
 
-      {/* 📦 כרטיסי סטטיסטיקה - 6 בשורה אחת */}
+      {/* 📦 כרטיסי סטטיסטיקה */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* עובדים */}
         <div
@@ -142,13 +150,13 @@ const Home = () => {
           </h4>
           <ul className="text-sm text-gray-600 text-center">
             <li>
-              פעילים: <strong>{stats.users.active}</strong>
+              פעילים: <strong>{stats?.users?.active ?? 0}</strong>
             </li>
             <li>
-              לא פעילים: <strong>{stats.users.inactive}</strong>
+              לא פעילים: <strong>{stats?.users?.inactive ?? 0}</strong>
             </li>
             <li>
-              מחוברים: <strong>{stats.users.online_list.length}</strong>
+              מחוברים: <strong>{stats?.users?.online_list?.length ?? 0}</strong>
             </li>
           </ul>
         </div>
@@ -167,10 +175,9 @@ const Home = () => {
             מחוברים
           </h4>
           <ul className="text-sm text-gray-600 text-center">
-            {stats.users.online_list.map((user, i) => (
+            {stats?.users?.online_list?.map((u, i) => (
               <li key={i}>
-                <span className="text-green-500">●</span> {user.name} -{" "}
-                {user.role}
+                <span className="text-green-500">●</span> {u.name} - {u.role}
               </li>
             ))}
           </ul>
@@ -191,13 +198,13 @@ const Home = () => {
           </h4>
           <ul className="text-sm text-gray-600 text-center">
             <li>
-              סה"כ: <strong>{stats.roles.total}</strong>
+              סה"כ: <strong>{stats?.roles?.total ?? 0}</strong>
             </li>
             <li>
-              פעילים: <strong>{stats.roles.active}</strong>
+              פעילים: <strong>{stats?.roles?.active ?? 0}</strong>
             </li>
             <li>
-              לא פעילים: <strong>{stats.roles.inactive}</strong>
+              לא פעילים: <strong>{stats?.roles?.inactive ?? 0}</strong>
             </li>
           </ul>
         </div>
@@ -217,13 +224,13 @@ const Home = () => {
           </h4>
           <ul className="text-sm text-gray-600 text-center">
             <li>
-              סה"כ: <strong>{stats.projects.total}</strong>
+              סה"כ: <strong>{stats?.projects?.total ?? 0}</strong>
             </li>
             <li>
-              פעילים: <strong>{stats.projects.active}</strong>
+              פעילים: <strong>{stats?.projects?.active ?? 0}</strong>
             </li>
             <li>
-              לא פעילים: <strong>{stats.projects.inactive}</strong>
+              לא פעילים: <strong>{stats?.projects?.inactive ?? 0}</strong>
             </li>
           </ul>
         </div>
@@ -241,13 +248,13 @@ const Home = () => {
           <h4 className="text-center text-lg font-bold text-gray-700">פניות</h4>
           <ul className="text-sm text-gray-600 text-center">
             <li>
-              חדשות: <strong>{stats.leads.new}</strong>
+              חדשות: <strong>{stats?.leads?.new ?? 0}</strong>
             </li>
             <li>
-              בטיפול: <strong>{stats.leads.in_progress}</strong>
+              בטיפול: <strong>{stats?.leads?.in_progress ?? 0}</strong>
             </li>
             <li>
-              טופלו: <strong>{stats.leads.completed}</strong>
+              טופלו: <strong>{stats?.leads?.completed ?? 0}</strong>
             </li>
           </ul>
         </div>
@@ -267,39 +274,31 @@ const Home = () => {
           </h4>
           <ul className="text-sm text-gray-600 text-center">
             <li>
-              חדשות: <strong>{stats.tasks.new}</strong>
+              חדשות: <strong>{stats?.tasks?.new ?? 0}</strong>
             </li>
             <li>
-              בטיפול: <strong>{stats.tasks.in_progress}</strong>
+              בטיפול: <strong>{stats?.tasks?.in_progress ?? 0}</strong>
             </li>
             <li>
-              טופלו: <strong>{stats.tasks.completed}</strong>
+              טופלו: <strong>{stats?.tasks?.completed ?? 0}</strong>
             </li>
           </ul>
         </div>
       </div>
 
-      {/* 🟦 גרפים - 4 באותו גובה */}
+      {/* 🟦 גרפים */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
         <div className="bg-white rounded-xl shadow p-4 h-80">
-          <div className="w-full h-full">
-            <LeadsStatusPieChart data={stats.leads} />
-          </div>
+          <LeadsStatusPieChart data={stats?.leads || {}} />
         </div>
         <div className="bg-white rounded-xl shadow p-4 h-80">
-          <div className="w-full h-full">
-            <LeadsByDateBarChart dataByDay={stats.leads_by_day} />
-          </div>
+          <LeadsByDateBarChart dataByDay={stats?.leads_by_day || []} />
         </div>
         <div className="bg-white rounded-xl shadow p-4 h-80">
-          <div className="w-full h-full">
-            <LeadsBySourceChart data={stats.leads_by_source} />
-          </div>
+          <LeadsBySourceChart data={stats?.leads_by_source || []} />
         </div>
         <div className="bg-white rounded-xl shadow p-4 h-80">
-          <div className="w-full h-full">
-            <LeadsByUserChart data={stats.leads_by_user} />
-          </div>
+          <LeadsByUserChart data={stats?.leads_by_user || []} />
         </div>
       </div>
 
@@ -322,7 +321,7 @@ const Home = () => {
                 </tr>
               </thead>
               <tbody>
-                {stats.attendance.map((row, i) => (
+                {stats?.attendance?.map((row, i) => (
                   <tr key={i} className="hover:bg-gray-50">
                     <td className="p-2 border-b">{row.name}</td>
                     <td className="p-2 border-b text-center">
@@ -352,13 +351,13 @@ const Home = () => {
                 </tr>
               </thead>
               <tbody>
-                {stats.logs_by_day.map((row, i) => (
+                {stats?.logs_by_day?.map((row, i) => (
                   <tr key={i} className="hover:bg-gray-50">
                     <td className="p-2 border-b text-center">
-                      {row.date ? row.date.slice(0, 10) : "-"}
+                      {row?.date ? row.date.slice(0, 10) : "-"}
                     </td>
                     <td className="p-2 border-b text-center">
-                      {row.total_logs} תיעודים
+                      {row?.total_logs ?? 0} תיעודים
                     </td>
                   </tr>
                 ))}
