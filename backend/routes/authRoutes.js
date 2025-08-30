@@ -1,6 +1,7 @@
 import { db } from "../utils/dbSingleton.js";
 import express from "express";
 import jwt from "jsonwebtoken";
+import { setAuthCookie, clearAuthCookie } from "../utils/authCookies.js";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
 import nodemailer from "nodemailer";
@@ -12,7 +13,6 @@ const router = express.Router();
 // **************************** /
 //        התחברות משתמש        /
 // **************************** /
-
 
 router.post("/login", async (req, res) => {
   const { user_id, password } = req.body;
@@ -80,14 +80,8 @@ router.post("/login", async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "None",
-      maxAge: 1000 * 60 * 60,
-      path: "/",
-      domain: ".respondify-crm.co.il",
-    });
+    // ✅ שימוש בפונקציית עזר ליצירת קוקי מאובטח
+    setAuthCookie(res, token);
 
     await db.query("DELETE FROM active_tokens WHERE user_id = ?", [
       user.user_id,
@@ -119,52 +113,71 @@ router.post("/login", async (req, res) => {
 // ********************************************** /
 //      בדיקת התחברות
 // ********************************************** /
-router.get("/check", (req, res) => {
+
+router.get("/check", async (req, res) => {
   const token = req.cookies?.token;
 
   if (!token) {
     return res.json({ loggedIn: false });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // active_tokens נבדוק אם הטוקן קיים בטבלה
+    const [rows] = await db.query(
+      "SELECT 1 FROM active_tokens WHERE token = ? AND user_id = ?",
+      [token, decoded.user_id]
+    );
+
+    if (rows.length === 0) {
       return res.json({ loggedIn: false });
     }
 
-    res.json({
+    //  אם הכל תקין
+    return res.json({
       loggedIn: true,
       user: decoded,
     });
-  });
+  } catch (err) {
+    console.error("Auth check error:", err);
+    return res.json({ loggedIn: false });
+  }
 });
 
-// ✅ התנתקות
+// ********************************************** /
+//      התנתקות מהמערכת
+// ********************************************** /
+
 router.post("/logout", async (req, res) => {
   const token = req.cookies?.token;
+  const userId = req.body?.user_id;
 
-  if (token) {
-    try {
+  try {
+    if (token) {
       await db.query("DELETE FROM active_tokens WHERE token = ?", [token]);
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       if (decoded?.user_id) {
         logAction("התנתקות מהמערכת", decoded.user_id)(req, res, () => {});
       }
-    } catch (err) {
-      console.error("שגיאה במחיקת טוקן או בפענוח:", err);
+    } else if (userId) {
+      await db.query("DELETE FROM active_tokens WHERE user_id = ?", [userId]);
+      logAction("התנתקות מהמערכת", userId)(req, res, () => {});
     }
+  } catch (err) {
+    console.error("שגיאה במחיקת טוקן או בפענוח:", err);
   }
 
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    path: "/",
-    domain: ".respondify-crm.co.il",
-  });
+  // ✅ שימוש בפונקציית עזר למחיקת הקוקי
+  clearAuthCookie(res);
+
   res.json({ success: true, message: "התנתקת מהמערכת" });
 });
 
-// ✅ איפוס סיסמה - שליחת מייל עם טוקן
+// ********************************************** /
+//      איפוס סיסמה - שליחת מייל עם טוקן
+// ********************************************** /
+
 router.post("/forgot-password", async (req, res) => {
   const { email } = req.body;
   try {
@@ -209,7 +222,10 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-// ✅ איפוס סיסמה בפועל
+// ********************************************** /
+//      איפוס סיסמה בפועל
+// ********************************************** /
+
 router.post("/reset-password", async (req, res) => {
   const { token, password } = req.body;
   try {

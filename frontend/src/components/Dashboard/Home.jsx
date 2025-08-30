@@ -133,7 +133,7 @@ const Home = () => {
         </div>
       )}
 
-      {/* 📦 כרטיסי סטטיסטיקה */}
+      {/* כרטיסי סטטיסטיקה */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* עובדים */}
         <div

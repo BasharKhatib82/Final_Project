@@ -38,7 +38,11 @@ export const UserProvider = ({ children }) => {
 
   const logout = () => {
     axios
-      .post(`${api}/auth/logout`, null, { withCredentials: true })
+      .post(
+        `${api}/auth/logout`,
+        { user_id: user?.user_id },
+        { withCredentials: true }
+      )
       .then(() => {
         setUser(null);
       })

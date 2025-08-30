@@ -8,9 +8,10 @@ router.get("/", verifyToken, async (req, res) => {
   const summary = {
     users: {},
     roles: {},
+    projects: {},
     leads: {},
     tasks: {},
-    projects: {},
+    
     attendance: [],
     logs_by_day: [],
     leads_by_user_status: [],
