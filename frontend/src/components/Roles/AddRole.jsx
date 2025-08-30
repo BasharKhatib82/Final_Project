@@ -119,28 +119,28 @@ const AddRole = () => {
             </div>
 
             {/* קבוצות הרשאות */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="flex flex-wrap gap-4">
               {Object.entries(permissionsSchema).map(([category, perms]) => (
                 <div
                   key={category}
-                  className="border rounded p-3 space-y-2 bg-white/65"
+                  className="flex-1 min-w-[250px] border rounded p-3 bg-white/70"
                 >
-                  <h3 className="font-rubik block mb-0.5 font-medium">
-                    {category}
-                  </h3>
-                  {perms.map((perm) => (
-                    <label
-                      key={perm.key}
-                      className="flex items-center space-x-4 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedPermissions.includes(perm.key)}
-                        onChange={() => togglePermission(perm.key)}
-                      />
-                      <span>{perm.label}</span>
-                    </label>
-                  ))}
+                  <h3 className="font-semibold mb-2">{category}</h3>
+                  <div className="space-y-2">
+                    {perms.map((perm) => (
+                      <label
+                        key={perm.key}
+                        className="flex items-center space-x-2 cursor-pointer whitespace-nowrap"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedPermissions.includes(perm.key)}
+                          onChange={() => togglePermission(perm.key)}
+                        />
+                        <span>{perm.label}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
