@@ -149,30 +149,45 @@ router.get("/check", async (req, res) => {
 //      התנתקות מהמערכת
 // ********************************************** /
 
+// 🔑 logout
 router.post("/logout", async (req, res) => {
   const token = req.cookies?.token;
-  const userId = req.body?.user_id;
+  const userIdFromBody = req.body?.user_id;
 
   try {
     if (token) {
+      // אם יש טוקן בקוקי — מוחקים לפי טוקן
       await db.query("DELETE FROM active_tokens WHERE token = ?", [token]);
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      if (decoded?.user_id) {
-        logAction("התנתקות מהמערכת", decoded.user_id)(req, res, () => {});
+
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded?.user_id) {
+          logAction("התנתקות מהמערכת", decoded.user_id)(req, res, () => {});
+        }
+      } catch {
+        // userIdFromBody הטוקן פג תוקף ־  אם יש
+        if (userIdFromBody) {
+          await db.query("DELETE FROM active_tokens WHERE user_id = ?", [
+            userIdFromBody,
+          ]);
+          logAction("התנתקות מהמערכת", userIdFromBody)(req, res, () => {});
+        }
       }
-    } else if (userId) {
-      await db.query("DELETE FROM active_tokens WHERE user_id = ?", [userId]);
-      logAction("התנתקות מהמערכת", userId)(req, res, () => {});
+    } else if (userIdFromBody) {
+      //user_id אם אין טוקן בכלל (כבר נמחק ע"י הדפדפן) — מוחקים לפי 
+      await db.query("DELETE FROM active_tokens WHERE user_id = ?", [
+        userIdFromBody,
+      ]);
+      logAction("התנתקות מהמערכת", userIdFromBody)(req, res, () => {});
     }
   } catch (err) {
-    console.error("שגיאה במחיקת טוקן או בפענוח:", err);
+    console.error("❌ שגיאה במחיקת טוקן:", err);
   }
 
-  // ✅ שימוש בפונקציית עזר למחיקת הקוקי
-  clearAuthCookie(res);
-
+  clearAuthCookie(res); // ✅ מנקה את הקוקי בכל מקרה
   res.json({ success: true, message: "התנתקת מהמערכת" });
 });
+
 
 // ********************************************** /
 //      איפוס סיסמה - שליחת מייל עם טוקן

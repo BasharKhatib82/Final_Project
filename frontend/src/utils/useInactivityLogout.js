@@ -4,7 +4,7 @@ import { useUser } from "../components/Tools/UserContext";
 
 export default function useInactivityLogout() {
   const navigate = useNavigate();
-  const { user, logout } = useUser(); // 👈 לוקחים את ה־logout מהקונטקסט
+  const { user, logout } = useUser(); 
 
   useEffect(() => {
     if (!user) return;
@@ -14,7 +14,7 @@ export default function useInactivityLogout() {
 
     const handleLogout = () => {
       console.log("משתמש נותק עקב חוסר פעילות");
-      logout(); // 👈 מנקה גם את ה־context
+      logout(); // context מנקה גם את ה ־ 
       navigate("/userlogin");
     };
 
