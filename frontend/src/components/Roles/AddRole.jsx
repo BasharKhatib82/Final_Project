@@ -54,29 +54,44 @@ const AddRole = () => {
       return;
     }
 
-    const newRole = {
+    // הכנה לשדות שהשרת מצפה להם
+    const roleData = {
       role_name: roleName,
-      permissions: selectedPermissions,
+      role_management: 0,
+      can_manage_users: 0,
+      can_view_reports: 0,
+      can_assign_leads: 0,
+      can_edit_courses: 0,
+      can_manage_tasks: 0,
+      can_access_all_data: 0,
+      attendance_clock_self: 0,
+      attendance_add_btn: 0,
+      attendance_edit_btn: 0,
+      attendance_view_team: 0,
+      active: 1,
     };
 
+    // לעדכן 1 לפי הצ'קבוקסים שנבחרו
+    selectedPermissions.forEach((perm) => {
+      roleData[perm] = 1;
+    });
+
     try {
-      await axios.post(`${api}/roles/add`, newRole, { withCredentials: true });
+      await axios.post(`${api}/roles/add`, roleData, { withCredentials: true });
       setPopupData({
         show: true,
         title: "הצלחה",
         message: "התפקיד נוסף בהצלחה",
         mode: "success",
       });
-      setRoleName("");
-      setSelectedPermissions([]);
     } catch (err) {
+      console.error("AddRole error:", err);
       setPopupData({
         show: true,
-        title: "שגיאת שרת",
-        message: "אירעה בעיה בעת שמירת התפקיד",
+        title: "שגיאה",
+        message: "שגיאת שרת - נסה שוב מאוחר יותר",
         mode: "error",
       });
-      console.error("AddRole error:", err);
     }
   };
 
