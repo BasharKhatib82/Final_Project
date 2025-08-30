@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ExitButton from "../Buttons/ExitButton";
+import AddSaveButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup"; // נתיב הפופאפ שלך
 
 const api = process.env.REACT_APP_API_URL;
@@ -58,7 +60,7 @@ const AddRole = () => {
     };
 
     try {
-      await axios.post(`${api}/roles/add`, newRole);
+      await axios.post(`${api}/roles/add`, newRole, { withCredentials: true });
       setPopupData({
         show: true,
         title: "הצלחה",
@@ -95,18 +97,18 @@ const AddRole = () => {
                 value={roleName}
                 onChange={(e) => setRoleName(e.target.value)}
                 className="w-full border rounded px-3 py-2"
-                placeholder="למשל: נציג שיווק"
+                placeholder="הקלד שם תפקיד"
               />
             </div>
 
             {/* קבוצות הרשאות */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-3 gap-4">
               {Object.entries(permissionsSchema).map(([category, perms]) => (
                 <div
                   key={category}
-                  className="border rounded p-3 space-y-2 bg-white/70"
+                  className="border rounded p-3 space-y-2 bg-white/60"
                 >
-                  <h3 className="font-semibold mb-2">{category}</h3>
+                  <h3 className="text-sm font-medium mb-1">{category}</h3>
                   {perms.map((perm) => (
                     <label
                       key={perm.key}
@@ -125,20 +127,10 @@ const AddRole = () => {
             </div>
 
             {/* כפתורי פעולה */}
-            <div className="flex justify-between pt-4">
-              <button
-                type="button"
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                onClick={() => navigate("/dashboard/roles")}
-              >
-                ביטול
-              </button>
-              <button
-                type="submit"
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              >
-                הוסף תפקיד
-              </button>
+
+            <div className="flex justify-around pt-4">
+              <AddSaveButton label="הוסף תפקיד" type="submit" />
+              <ExitButton label="ביטול" linkTo="/dashboard/roles" />
             </div>
           </form>
         </div>
