@@ -14,6 +14,9 @@ router.get("/", verifyToken, async (req, res) => {
     projects: {},
     attendance: [],
     logs_by_day: [],
+    leads_by_user_status: [],
+    tasks_by_user_status: [],
+    tasks_overdue: [],
   };
 
   const queries = {
@@ -65,38 +68,62 @@ router.get("/", verifyToken, async (req, res) => {
       JOIN users u ON t.user_id = u.user_id
       JOIN roles_permissions r ON u.role_id = r.role_id
     `,
+
     leads_by_day: `
-  SELECT DATE(created_at) AS date, COUNT(*) AS count
-  FROM leads
-  WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-  GROUP BY DATE(created_at)
-  ORDER BY date ASC
-`,
+      SELECT DATE(created_at) AS date, COUNT(*) AS count
+      FROM leads
+      WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+      GROUP BY DATE(created_at)
+      ORDER BY date ASC
+    `,
 
     leads_by_source: `
-  SELECT source, COUNT(*) AS count
-  FROM leads
-  WHERE source IS NOT NULL AND source != ''
-  GROUP BY source
-  ORDER BY count DESC
-`,
+      SELECT source, COUNT(*) AS count
+      FROM leads
+      WHERE source IS NOT NULL AND source != ''
+      GROUP BY source
+      ORDER BY count DESC
+    `,
 
     leads_by_user: `
-  SELECT CONCAT(u.first_name, ' ', u.last_name) AS name, COUNT(*) AS count
-  FROM leads l
-  JOIN users u ON l.user_id = u.user_id
-  GROUP BY l.user_id
-  ORDER BY count DESC
-`,
+      SELECT CONCAT(u.first_name, ' ', u.last_name) AS name, COUNT(*) AS count
+      FROM leads l
+      JOIN users u ON l.user_id = u.user_id
+      GROUP BY l.user_id
+      ORDER BY count DESC
+    `,
+
+    // ✅ לידים לפי סטטוס + משתמש
+    leads_by_user_status: `
+      SELECT l.user_id, u.first_name, u.last_name, l.status, COUNT(*) AS count
+      FROM leads l
+      JOIN users u ON l.user_id = u.user_id
+      GROUP BY l.user_id, l.status
+    `,
+
+    // ✅ משימות לפי סטטוס + משתמש
+    tasks_by_user_status: `
+      SELECT t.user_id, u.first_name, u.last_name, t.status, COUNT(*) AS count
+      FROM tasks t
+      JOIN users u ON t.user_id = u.user_id
+      GROUP BY t.user_id, t.status
+    `,
+
+    // ✅ משימות חורגות
+    tasks_overdue: `
+      SELECT t.user_id, u.first_name, u.last_name, COUNT(*) AS overdue_count
+      FROM tasks t
+      JOIN users u ON t.user_id = u.user_id
+      WHERE t.due_date < CURDATE() AND t.status <> 'הושלם'
+      GROUP BY t.user_id
+    `,
   };
 
   try {
-    // ✅ מבצע את כל השאילתות במקביל – יעיל ומהיר יותר
     const results = await Promise.all(
       Object.values(queries).map((q) => db.query(q))
     );
 
-    // 👉 קל לקרוא תוצאות בעזרת destructuring
     const [
       employees_active,
       employees_inactive,
@@ -118,9 +145,12 @@ router.get("/", verifyToken, async (req, res) => {
       leads_by_day,
       leads_by_source,
       leads_by_user,
+      leads_by_user_status,
+      tasks_by_user_status,
+      tasks_overdue,
     ] = results;
 
-    // ✅ השמה מסודרת
+    // 🟢 השמות
     summary.leads_by_day = leads_by_day[0].map((row) => ({
       date: row.date,
       count: row.count,
@@ -135,6 +165,11 @@ router.get("/", verifyToken, async (req, res) => {
       name: row.name,
       count: row.count,
     }));
+
+    summary.leads_by_user_status = leads_by_user_status[0];
+    summary.tasks_by_user_status = tasks_by_user_status[0];
+    summary.tasks_overdue = tasks_overdue[0];
+
     summary.employees = {
       active: employees_active[0][0].count,
       inactive: employees_inactive[0][0].count,
