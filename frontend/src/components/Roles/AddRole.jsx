@@ -80,10 +80,10 @@ const AddRole = () => {
 
   return (
     <>
-      <div className="flex justify-center items-center">
-        <div className="bg-white/90 backdrop-blur-md rounded-lg shadow-lg max-w-2xl w-full p-6">
+      <div className="flex justify-center items-center pt-10">
+        <div className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2">
           <form onSubmit={handleSubmit} className="space-y-6">
-            <h2 className="text-xl font-bold mb-4 text-center">
+            <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
               הוספת תפקיד חדש
             </h2>
 
