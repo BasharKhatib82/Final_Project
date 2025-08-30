@@ -95,6 +95,7 @@ router.post("/login", async (req, res) => {
       secure: true,
       sameSite: "None",
       maxAge: 1000 * 60 * 60,
+      path: "/",
       domain: ".respondify-crm.co.il",
     });
 
@@ -172,7 +173,9 @@ router.post("/logout", async (req, res) => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: true,
-    sameSite: "strict",
+    sameSite: "None",
+    path: "/",
+    domain: ".respondify-crm.co.il",
   });
   res.json({ success: true, message: "התנתקת מהמערכת" });
 });
