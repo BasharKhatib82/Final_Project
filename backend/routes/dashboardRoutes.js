@@ -34,12 +34,16 @@ router.get("/", verifyToken, async (req, res) => {
       "SELECT COUNT(*) AS count FROM leads WHERE status = 'בטיפול'",
     leads_completed:
       "SELECT COUNT(*) AS count FROM leads WHERE status = 'טופל'",
+    leads_canceled:
+      "SELECT COUNT(*) AS count FROM leads WHERE status = 'בוטלה'",
 
     tasks_new: "SELECT COUNT(*) AS count FROM tasks WHERE status = 'חדש'",
     tasks_in_progress:
       "SELECT COUNT(*) AS count FROM tasks WHERE status = 'בתהליך'",
     tasks_completed:
       "SELECT COUNT(*) AS count FROM tasks WHERE status = 'הושלם'",
+    tasks_canceled:
+      "SELECT COUNT(*) AS count FROM tasks WHERE status = 'בוטלה'",
 
     projects_total: "SELECT COUNT(*) AS count FROM projects",
     projects_active: "SELECT COUNT(*) AS count FROM projects WHERE active = 1",
