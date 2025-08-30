@@ -225,7 +225,7 @@ router.get("/active", verifyToken, async (req, res) => {
        FROM users u
        LEFT JOIN roles_permissions r ON u.role_id = r.role_id
        WHERE u.active = 1
-         AND u.user_id <> 1`
+         AND u.user_id <> 315483032`
     );
     res.json({ success: true, Result: results });
   } catch (err) {
