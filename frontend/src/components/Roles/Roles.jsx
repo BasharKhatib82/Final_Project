@@ -52,7 +52,7 @@ export default function Roles() {
     axios
       .get(`${api}/auth/check`, { withCredentials: true })
       .then((res) => {
-        if (res?.data?.loggedIn && res?.data?.user?.role_id === 1) fetchRoles();
+        if (res?.data?.loggedIn) fetchRoles();
         else navigate("/unauthorized");
       })
       .catch(() => navigate("/unauthorized"));

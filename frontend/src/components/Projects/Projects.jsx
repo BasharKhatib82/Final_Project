@@ -18,23 +18,8 @@ const Projects = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    checkPermissions();
     fetchProjects();
   }, []);
-
-  const checkPermissions = async () => {
-    try {
-      const res = await axios.get(`${api}/auth/check`, {
-        withCredentials: true,
-      });
-      if (!res.data.loggedIn || res.data.user.role_id !== 1) {
-        navigate("/unauthorized");
-      }
-    } catch (err) {
-      console.error("שגיאה בבדיקת הרשאות", err);
-      navigate("/unauthorized");
-    }
-  };
 
   const fetchProjects = () => {
     axios

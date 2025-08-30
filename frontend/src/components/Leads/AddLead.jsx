@@ -94,7 +94,7 @@ const AddLead = () => {
   const handleSubmit = async () => {
     const leadData = {
       ...form,
-      user_id: user.role_id === 3 ? user.user_id : form.user_id || null,
+      user_id: form.user_id || null,
     };
 
     try {
@@ -200,23 +200,21 @@ const AddLead = () => {
           </select>
         </div>
 
-        {user.role_id !== 3 && (
-          <div>
-            <label className="block mb-1 font-semibold">נציג מטפל:</label>
-            <select
-              className="w-full border border-gray-300 rounded px-3 py-2"
-              value={form.user_id || ""}
-              onChange={(e) => setForm({ ...form, user_id: e.target.value })}
-            >
-              <option value="">ללא נציג</option>
-              {users.map((u) => (
-                <option key={u.user_id} value={u.user_id}>
-                  {u.first_name} {u.last_name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
+        <div>
+          <label className="block mb-1 font-semibold">נציג מטפל:</label>
+          <select
+            className="w-full border border-gray-300 rounded px-3 py-2"
+            value={form.user_id || ""}
+            onChange={(e) => setForm({ ...form, user_id: e.target.value })}
+          >
+            <option value="">ללא נציג</option>
+            {users.map((u) => (
+              <option key={u.user_id} value={u.user_id}>
+                {u.first_name} {u.last_name}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <div>
           <label className="block mb-1 font-semibold">סטטוס:</label>

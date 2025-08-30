@@ -16,23 +16,9 @@ export default function Attendance() {
   const { user } = useUser();
 
   useEffect(() => {
-    checkPermissions();
     fetchAttendance();
     fetchUsers();
   }, []);
-
-  const checkPermissions = async () => {
-    try {
-      const res = await axios.get(`${api}/auth/check`, {
-        withCredentials: true,
-      });
-      if (!res.data.loggedIn || res.data.user.role_id !== 1) {
-        navigate("/unauthorized");
-      }
-    } catch {
-      navigate("/unauthorized");
-    }
-  };
 
   const fetchAttendance = () => {
     setLoading(true);
