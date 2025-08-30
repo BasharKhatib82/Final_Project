@@ -142,13 +142,13 @@ const Home = () => {
           </h4>
           <ul className="text-sm text-gray-600 text-center">
             <li>
-              פעילים: <strong>{stats.employees.active}</strong>
+              פעילים: <strong>{stats.users.active}</strong>
             </li>
             <li>
-              לא פעילים: <strong>{stats.employees.inactive}</strong>
+              לא פעילים: <strong>{stats.users.inactive}</strong>
             </li>
             <li>
-              מחוברים: <strong>{stats.employees.online_list.length}</strong>
+              מחוברים: <strong>{stats.users.online_list.length}</strong>
             </li>
           </ul>
         </div>
@@ -167,7 +167,7 @@ const Home = () => {
             מחוברים
           </h4>
           <ul className="text-sm text-gray-600 text-center">
-            {stats.employees.online_list.map((user, i) => (
+            {stats.users.online_list.map((user, i) => (
               <li key={i}>
                 <span className="text-green-500">●</span> {user.name} -{" "}
                 {user.role}
