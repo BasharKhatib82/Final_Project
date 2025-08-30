@@ -96,64 +96,65 @@ const AddRole = () => {
   };
 
   return (
-    <>
-      <div className="flex justify-center items-center pt-10">
-        <div className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
-              הוספת תפקיד חדש
-            </h2>
+    <div className="flex justify-center items-center pt-10">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2"
+      >
+        <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
+          הוספת תפקיד חדש
+        </h2>
 
-            {/* שם התפקיד */}
-            <div>
-              <label className="font-rubik block mb-0.5 font-medium">
-                שם תפקיד
-              </label>
-              <input
-                type="text"
-                value={roleName}
-                onChange={(e) => setRoleName(e.target.value)}
-                className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
-                placeholder="הקלד שם תפקיד"
-              />
-            </div>
-
-            {/* קבוצות הרשאות */}
-            <div className="flex flex-wrap gap-4">
-              {Object.entries(permissionsSchema).map(([category, perms]) => (
-                <div
-                  key={category}
-                  className="flex-1 min-w-[250px] border rounded p-3 bg-white/70"
-                >
-                  <h3 className="font-semibold mb-2">{category}</h3>
-                  <div className="space-y-2">
-                    {perms.map((perm) => (
-                      <label
-                        key={perm.key}
-                        className="flex items-center space-x-2 cursor-pointer whitespace-nowrap"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedPermissions.includes(perm.key)}
-                          onChange={() => togglePermission(perm.key)}
-                        />
-                        <span>{perm.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* כפתורי פעולה */}
-
-            <div className="flex justify-around pt-4">
-              <AddSaveButton label="הוסף תפקיד" type="submit" />
-              <ExitButton label="ביטול" linkTo="/dashboard/roles" />
-            </div>
-          </form>
+        {/* שם התפקיד */}
+        <div>
+          <label className="font-rubik block mb-0.5 font-medium">
+            שם תפקיד
+          </label>
+          <input
+            type="text"
+            value={roleName}
+            onChange={(e) => setRoleName(e.target.value)}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            placeholder="הקלד שם תפקיד"
+          />
         </div>
-      </div>
+
+        {/* קבוצות הרשאות */}
+        <div className="flex flex-wrap gap-2">
+          {Object.entries(permissionsSchema).map(([category, perms]) => (
+            <div
+              key={category}
+              className="flex-1 min-w-12 border rounded p-2 bg-white/80"
+            >
+              <h3 className="font-rubik block mb-0.5 font-medium">
+                {category}
+              </h3>
+              <div className="space-y-2">
+                {perms.map((perm) => (
+                  <label
+                    key={perm.key}
+                    className="flex items-center space-x-2 cursor-pointer whitespace-nowrap"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedPermissions.includes(perm.key)}
+                      onChange={() => togglePermission(perm.key)}
+                    />
+                    <span>{perm.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* כפתורי פעולה */}
+
+        <div className="flex justify-around pt-4">
+          <AddSaveButton label="הוסף תפקיד" type="submit" />
+          <ExitButton label="ביטול" linkTo="/dashboard/roles" />
+        </div>
+      </form>
 
       {/* Popup */}
       {popupData.show && (
@@ -174,8 +175,7 @@ const AddRole = () => {
           }}
         />
       )}
-    </>
+    </div>
   );
 };
-
 export default AddRole;
