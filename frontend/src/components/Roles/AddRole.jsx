@@ -8,6 +8,10 @@ import Popup from "../Tools/Popup";
 const api = process.env.REACT_APP_API_URL;
 
 const permissionsSchema = {
+  "לוח בקרה": [
+    { key: "admin_alert_dash", label: "התראות מנהל" },
+    { key: "user_alert_dash", label: "התראות משתמש" },
+  ],
   "ניהול משתמשים": [{ key: "can_manage_users", label: "ניהול משתמשים" }],
   "צפייה בדוחות": [{ key: "can_view_reports", label: "צפייה בדוחות" }],
   "שייך פניות": [
@@ -60,6 +64,8 @@ const AddRole = () => {
     // הכנה לשדות שהשרת מצפה להם
     const roleData = {
       role_name: roleName,
+      admin_alert_dash: 0,
+      user_alert_dash: 0,
       role_management: 0,
       can_manage_users: 0,
       can_view_reports: 0,

@@ -3,6 +3,8 @@
 // רשימת כל השדות של הרשאות כפי שהם מוגדרים ב-DB
 export const roleFields = [
   // הרשאות
+  "admin_alert_dash",
+  "user_alert_dash",
   "role_management",
   "can_manage_users",
   "can_view_reports",

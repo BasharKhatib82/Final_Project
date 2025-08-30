@@ -9,6 +9,10 @@ const api = process.env.REACT_APP_API_URL;
 
 // כמו ב-AddRole
 const permissionsSchema = {
+  "לוח בקרה": [
+    { key: "admin_alert_dash", label: "התראות מנהל" },
+    { key: "user_alert_dash", label: "התראות משתמש" },
+  ],
   "ניהול משתמשים": [{ key: "can_manage_users", label: "ניהול משתמשים" }],
   "צפייה בדוחות": [{ key: "can_view_reports", label: "צפייה בדוחות" }],
   "שייך פניות": [
