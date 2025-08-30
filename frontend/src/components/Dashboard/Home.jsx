@@ -46,73 +46,83 @@ const Home = () => {
 
   return (
     <div className="flex-col flex-grow p-6 font-rubik text-right space-y-6">
-      {/* 🔔 פס התראה עליון */}
-      {user?.admin_alert_dash === 1 && (
-        <>
-          {stats.leads_by_user_status
-            .filter((l) => l.status === "חדש")
-            .reduce((sum, l) => sum + l.count, 0) > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md px-4 py-3 text-center text-sm font-semibold shadow-sm">
-              ⚠️{" "}
-              {stats.leads_by_user_status
-                .filter((l) => l.status === "חדש")
-                .reduce((sum, l) => sum + l.count, 0)}{" "}
-              פניות חדשות ממתינות לטיפול
+      {/* 🔔 פס התראות קומפקטי */}
+      {(user?.admin_alert_dash === 1 || user?.user_alert_dash === 1) && (
+        <div className="flex flex-wrap gap-3">
+          {/* פניות חדשות */}
+          {((user?.admin_alert_dash === 1 &&
+            stats.leads_by_user_status
+              .filter((l) => l.status === "חדש")
+              .reduce((sum, l) => sum + l.count, 0)) ||
+            (user?.user_alert_dash === 1 &&
+              stats.leads_by_user_status
+                .filter((l) => l.user_id === user.user_id && l.status === "חדש")
+                .reduce((sum, l) => sum + l.count, 0))) > 0 && (
+            <div className="flex items-center bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 text-yellow-700 shadow-sm">
+              <span className="text-lg mr-2">📩</span>
+              <span className="text-sm font-medium">
+                {user?.admin_alert_dash
+                  ? stats.leads_by_user_status
+                      .filter((l) => l.status === "חדש")
+                      .reduce((sum, l) => sum + l.count, 0)
+                  : stats.leads_by_user_status
+                      .filter(
+                        (l) => l.user_id === user.user_id && l.status === "חדש"
+                      )
+                      .reduce((sum, l) => sum + l.count, 0)}{" "}
+                פניות חדשות
+              </span>
             </div>
           )}
 
-          {stats.tasks_by_user_status
-            .filter((t) => t.status === "חדש")
-            .reduce((sum, t) => sum + t.count, 0) +
-            stats.tasks_overdue.reduce((sum, t) => sum + t.overdue_count, 0) >
-            0 && (
-            <div className="bg-red-50 border border-red-200 text-red-800 rounded-md px-4 py-3 text-center text-sm font-semibold shadow-sm">
-              🔴{" "}
-              {stats.tasks_by_user_status
-                .filter((t) => t.status === "חדש")
-                .reduce((sum, t) => sum + t.count, 0) +
-                stats.tasks_overdue.reduce(
-                  (sum, t) => sum + t.overdue_count,
-                  0
-                )}{" "}
-              משימות חדשות או חורגות
+          {/* משימות חדשות */}
+          {((user?.admin_alert_dash === 1 &&
+            stats.tasks_by_user_status
+              .filter((t) => t.status === "חדש")
+              .reduce((sum, t) => sum + t.count, 0)) ||
+            (user?.user_alert_dash === 1 &&
+              stats.tasks_by_user_status
+                .filter((t) => t.user_id === user.user_id && t.status === "חדש")
+                .reduce((sum, t) => sum + t.count, 0))) > 0 && (
+            <div className="flex items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-blue-700 shadow-sm">
+              <span className="text-lg mr-2">📝</span>
+              <span className="text-sm font-medium">
+                {user?.admin_alert_dash
+                  ? stats.tasks_by_user_status
+                      .filter((t) => t.status === "חדש")
+                      .reduce((sum, t) => sum + t.count, 0)
+                  : stats.tasks_by_user_status
+                      .filter(
+                        (t) => t.user_id === user.user_id && t.status === "חדש"
+                      )
+                      .reduce((sum, t) => sum + t.count, 0)}{" "}
+                משימות חדשות
+              </span>
             </div>
           )}
-        </>
-      )}
 
-      {user?.user_alert_dash === 1 && (
-        <>
-          {stats.leads_by_user_status
-            .filter((l) => l.user_id === user.user_id && l.status === "חדש")
-            .map((l) => (
-              <div
-                key="user-leads"
-                className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md px-4 py-3 text-center text-sm font-semibold shadow-sm"
-              >
-                ⚠️ יש לך {l.count} פניות חדשות
-              </div>
-            ))}
-
-          {(() => {
-            const myNewTasks = stats.tasks_by_user_status
-              .filter((t) => t.user_id === user.user_id && t.status === "חדש")
-              .reduce((sum, t) => sum + t.count, 0);
-
-            const myOverdue =
-              stats.tasks_overdue.find((t) => t.user_id === user.user_id)
-                ?.overdue_count || 0;
-
-            if (myNewTasks + myOverdue > 0) {
-              return (
-                <div className="bg-red-50 border border-red-200 text-red-800 rounded-md px-4 py-3 text-center text-sm font-semibold shadow-sm">
-                  🔴 יש לך {myNewTasks} משימות חדשות ו־{myOverdue} משימות חורגות
-                </div>
-              );
-            }
-            return null;
-          })()}
-        </>
+          {/* משימות חורגות */}
+          {((user?.admin_alert_dash === 1 &&
+            stats.tasks_overdue.reduce((sum, t) => sum + t.overdue_count, 0)) ||
+            (user?.user_alert_dash === 1 &&
+              (stats.tasks_overdue.find((t) => t.user_id === user.user_id)
+                ?.overdue_count ||
+                0))) > 0 && (
+            <div className="flex items-center bg-red-50 border border-red-200 rounded-lg px-4 py-2 text-red-700 shadow-sm">
+              <span className="text-lg mr-2">⏰</span>
+              <span className="text-sm font-medium">
+                {user?.admin_alert_dash
+                  ? stats.tasks_overdue.reduce(
+                      (sum, t) => sum + t.overdue_count,
+                      0
+                    )
+                  : stats.tasks_overdue.find((t) => t.user_id === user.user_id)
+                      ?.overdue_count || 0}{" "}
+                משימות חורגות
+              </span>
+            </div>
+          )}
+        </div>
       )}
 
       {/* 📦 כרטיסי סטטיסטיקה - 6 בשורה אחת */}
