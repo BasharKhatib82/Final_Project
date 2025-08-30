@@ -11,7 +11,10 @@ const api = process.env.REACT_APP_API_URL;
 const permissionsSchema = {
   "ניהול משתמשים": [{ key: "can_manage_users", label: "ניהול משתמשים" }],
   "צפייה בדוחות": [{ key: "can_view_reports", label: "צפייה בדוחות" }],
-  "שייך פניות": [{ key: "can_assign_leads", label: "שייך פניות" }],
+  "שייך פניות": [
+    { key: "can_assign_leads", label: "שייך פניות" },
+    { key: "lead_add_btn", label: "הוספת פנייה ידנית" },
+  ],
   "עריכת קורסים": [{ key: "can_edit_courses", label: "עריכת קורסים" }],
   "ניהול משימות": [{ key: "can_manage_tasks", label: "ניהול משימות" }],
   "גישה לכל הנתונים": [

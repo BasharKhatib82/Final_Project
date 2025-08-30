@@ -2,22 +2,22 @@
 
 // רשימת כל השדות של הרשאות כפי שהם מוגדרים ב-DB
 export const roleFields = [
-  // הרשאות  
+  // הרשאות
   "role_management",
   "can_manage_users",
   "can_view_reports",
   "can_assign_leads",
+  "lead_add_btn",
   "can_edit_courses",
   "can_manage_tasks",
   "can_access_all_data",
-  "attendance_clock_self", 
-  "attendance_add_btn", 
-  "attendance_edit_btn", 
-  "attendance_view_team", 
-  
+  "attendance_clock_self",
+  "attendance_add_btn",
+  "attendance_edit_btn",
+  "attendance_view_team",
 ];
 
-// SELECT SQL פונקציה : מייצרת 
+// SELECT SQL פונקציה : מייצרת
 export const roleFieldsSQL = roleFields.join(", ");
 
 // פונקציה : אובייקט עם כל ההרשאות מאותחל ל-0

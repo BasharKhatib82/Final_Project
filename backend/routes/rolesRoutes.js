@@ -2,6 +2,7 @@ import express from "express";
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import verifyToken from "../utils/verifyToken.js";
+import { roleFields } from "../utils/permissions.js"; // 👈 שימוש בקובץ העזר
 
 const router = express.Router();
 
@@ -10,21 +11,7 @@ const toBit = (v) => (v === true || v === 1 || v === "1" ? 1 : 0);
 
 // ✅ הוספת תפקיד חדש
 router.post("/add", verifyToken, async (req, res) => {
-  const {
-    role_name,
-    role_management = 0,
-    can_manage_users = 0,
-    can_view_reports = 0,
-    can_assign_leads = 0,
-    can_edit_courses = 0,
-    can_manage_tasks = 0,
-    can_access_all_data = 0,
-    attendance_clock_self = 0,
-    attendance_add_btn = 0,
-    attendance_edit_btn = 0,
-    attendance_view_team = 0,
-    active = 1,
-  } = req.body;
+  const { role_name, active = 1 } = req.body;
 
   if (!role_name || typeof role_name !== "string" || role_name.trim() === "") {
     return res
@@ -43,27 +30,21 @@ router.post("/add", verifyToken, async (req, res) => {
         .json({ Status: false, Error: "שם תפקיד כבר קיים" });
     }
 
+    // נבנה דינמית את רשימת השדות והערכים
+    const fields = ["role_name", ...roleFields, "active"];
+    const placeholders = fields.map(() => "?").join(", ");
+
+    const values = [
+      role_name.trim(),
+      ...roleFields.map((f) => toBit(req.body[f] || 0)),
+      toBit(active),
+    ];
+
     const [result] = await db.query(
-      `INSERT INTO roles_permissions (
-        role_name, role_management, can_manage_users, can_view_reports,
-        can_assign_leads, can_edit_courses, can_manage_tasks,
-        can_access_all_data,attendance_clock_self,attendance_add_btn,attendance_edit_btn,attendance_view_team, active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        role_name.trim(),
-        toBit(role_management),
-        toBit(can_manage_users),
-        toBit(can_view_reports),
-        toBit(can_assign_leads),
-        toBit(can_edit_courses),
-        toBit(can_manage_tasks),
-        toBit(can_access_all_data),
-        toBit(attendance_clock_self),
-        toBit(attendance_add_btn),
-        toBit(attendance_edit_btn),
-        toBit(attendance_view_team),
-        toBit(active),
-      ]
+      `INSERT INTO roles_permissions (${fields.join(
+        ", "
+      )}) VALUES (${placeholders})`,
+      values
     );
 
     await logAction("הוספת תפקיד חדש");
@@ -77,40 +58,30 @@ router.post("/add", verifyToken, async (req, res) => {
 });
 
 // ✅ שליפת תפקידים פעילים
-router.get(
-  "/active",
-  verifyToken,
-
-  async (req, res) => {
-    try {
-      const [results] = await db.query(
-        "SELECT * FROM roles_permissions WHERE active = 1 ORDER BY role_id ASC"
-      );
-      return res.status(200).json({ Status: true, Roles: results });
-    } catch (err) {
-      console.error("שגיאת שליפת תפקידים פעילים:", err);
-      return res.status(500).json({ Status: false, Error: "שגיאת שליפה" });
-    }
+router.get("/active", verifyToken, async (req, res) => {
+  try {
+    const [results] = await db.query(
+      "SELECT * FROM roles_permissions WHERE active = 1 ORDER BY role_id ASC"
+    );
+    return res.status(200).json({ Status: true, Roles: results });
+  } catch (err) {
+    console.error("שגיאת שליפת תפקידים פעילים:", err);
+    return res.status(500).json({ Status: false, Error: "שגיאת שליפה" });
   }
-);
+});
 
 // ✅ שליפת תפקידים לא פעילים
-router.get(
-  "/inactive",
-  verifyToken,
-
-  async (req, res) => {
-    try {
-      const [results] = await db.query(
-        "SELECT * FROM roles_permissions WHERE active = 0 ORDER BY role_id ASC"
-      );
-      return res.status(200).json({ Status: true, Roles: results });
-    } catch (err) {
-      console.error("שגיאת שליפת תפקידים לא פעילים:", err);
-      return res.status(500).json({ Status: false, Error: "שגיאת שליפה" });
-    }
+router.get("/inactive", verifyToken, async (req, res) => {
+  try {
+    const [results] = await db.query(
+      "SELECT * FROM roles_permissions WHERE active = 0 ORDER BY role_id ASC"
+    );
+    return res.status(200).json({ Status: true, Roles: results });
+  } catch (err) {
+    console.error("שגיאת שליפת תפקידים לא פעילים:", err);
+    return res.status(500).json({ Status: false, Error: "שגיאת שליפה" });
   }
-);
+});
 
 // ✅ שליפת כל התפקידים
 router.get("/", verifyToken, async (req, res) => {
@@ -118,7 +89,6 @@ router.get("/", verifyToken, async (req, res) => {
     const [results] = await db.query(
       "SELECT * FROM roles_permissions ORDER BY role_id ASC"
     );
-
     return res.status(200).json({ Status: true, Roles: results });
   } catch (err) {
     console.error("שגיאת שליפת תפקידים:", err);
@@ -145,24 +115,10 @@ router.get("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ עדכון תפקיד לפי מזהה (כולל role_management)
+// ✅ עדכון תפקיד לפי מזהה
 router.put("/:id", verifyToken, async (req, res) => {
   const role_id = req.params.id;
-  const {
-    role_name,
-    role_management,
-    can_manage_users,
-    can_view_reports,
-    can_assign_leads,
-    can_edit_courses,
-    can_manage_tasks,
-    can_access_all_data,
-    attendance_clock_self,
-    attendance_add_btn,
-    attendance_edit_btn,
-    attendance_view_team,
-    active,
-  } = req.body;
+  const { role_name, active } = req.body;
 
   if (!role_name || typeof role_name !== "string" || role_name.trim() === "") {
     return res.status(400).json({ Status: false, Error: "שם תפקיד לא תקין" });
@@ -180,28 +136,23 @@ router.put("/:id", verifyToken, async (req, res) => {
         .json({ Status: false, Error: "שם תפקיד כבר קיים" });
     }
 
+    // נבנה דינמית SET
+    const setClause = [
+      "role_name = ?",
+      ...roleFields.map((f) => `${f} = ?`),
+      "active = ?",
+    ].join(", ");
+
+    const values = [
+      role_name.trim(),
+      ...roleFields.map((f) => toBit(req.body[f] || 0)),
+      toBit(active),
+      role_id,
+    ];
+
     const [result] = await db.query(
-      `UPDATE roles_permissions SET
-        role_name = ?, role_management = ?, can_manage_users = ?, can_view_reports = ?,
-        can_assign_leads = ?, can_edit_courses = ?, can_manage_tasks = ?,
-        can_access_all_data = ?,attendance_clock_self=?,attendance_add_btn=?,attendance_edit_btn=?,attendance_view_team=?, active = ?
-       WHERE role_id = ?`,
-      [
-        role_name.trim(),
-        toBit(role_management),
-        toBit(can_manage_users),
-        toBit(can_view_reports),
-        toBit(can_assign_leads),
-        toBit(can_edit_courses),
-        toBit(can_manage_tasks),
-        toBit(can_access_all_data),
-        toBit(attendance_clock_self),
-        toBit(attendance_add_btn),
-        toBit(attendance_edit_btn),
-        toBit(attendance_view_team),
-        toBit(active),
-        role_id,
-      ]
+      `UPDATE roles_permissions SET ${setClause} WHERE role_id = ?`,
+      values
     );
 
     if (result.affectedRows === 0) {
