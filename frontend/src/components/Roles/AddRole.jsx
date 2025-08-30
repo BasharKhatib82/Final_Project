@@ -68,63 +68,69 @@ const AddRole = ({ onSave }) => {
 
   return (
     <>
-      <form
-        onSubmit={handleSubmit}
-        className="p-6 bg-white shadow-md rounded space-y-6"
-      >
-        <h2 className="text-xl font-bold mb-4">הוספת תפקיד חדש</h2>
+      <div className="flex justify-center items-center">
+        <div className="bg-white/90 backdrop-blur-md rounded-lg shadow-lg max-w-2xl w-full p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <h2 className="text-xl font-bold mb-4 text-center">
+              הוספת תפקיד חדש
+            </h2>
 
-        {/* שם התפקיד */}
-        <div>
-          <label className="block text-sm font-medium mb-1">שם תפקיד</label>
-          <input
-            type="text"
-            value={roleName}
-            onChange={(e) => setRoleName(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-            placeholder="למשל: נציג שיווק"
-          />
-        </div>
+            {/* שם התפקיד */}
+            <div>
+              <label className="block text-sm font-medium mb-1">שם תפקיד</label>
+              <input
+                type="text"
+                value={roleName}
+                onChange={(e) => setRoleName(e.target.value)}
+                className="w-full border rounded px-3 py-2"
+                placeholder="למשל: נציג שיווק"
+              />
+            </div>
 
-        {/* קבוצות הרשאות */}
-        <div className="grid grid-cols-2 gap-6">
-          {Object.entries(permissionsSchema).map(([category, perms]) => (
-            <div key={category} className="border rounded p-3 space-y-2">
-              <h3 className="font-semibold mb-2">{category}</h3>
-              {perms.map((perm) => (
-                <label
-                  key={perm.key}
-                  className="flex items-center space-x-2 cursor-pointer"
+            {/* קבוצות הרשאות */}
+            <div className="grid grid-cols-2 gap-6">
+              {Object.entries(permissionsSchema).map(([category, perms]) => (
+                <div
+                  key={category}
+                  className="border rounded p-3 space-y-2 bg-white/70"
                 >
-                  <input
-                    type="checkbox"
-                    checked={selectedPermissions.includes(perm.key)}
-                    onChange={() => togglePermission(perm.key)}
-                  />
-                  <span>{perm.label}</span>
-                </label>
+                  <h3 className="font-semibold mb-2">{category}</h3>
+                  {perms.map((perm) => (
+                    <label
+                      key={perm.key}
+                      className="flex items-center space-x-2 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedPermissions.includes(perm.key)}
+                        onChange={() => togglePermission(perm.key)}
+                      />
+                      <span>{perm.label}</span>
+                    </label>
+                  ))}
+                </div>
               ))}
             </div>
-          ))}
-        </div>
 
-        {/* כפתורי פעולה */}
-        <div className="flex justify-between pt-4">
-          <button
-            type="button"
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-            onClick={() => navigate("/dashboard/roles")}
-          >
-            ביטול
-          </button>
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-          >
-            הוסף תפקיד
-          </button>
+            {/* כפתורי פעולה */}
+            <div className="flex justify-between pt-4">
+              <button
+                type="button"
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                onClick={() => navigate("/dashboard/roles")}
+              >
+                ביטול
+              </button>
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              >
+                הוסף תפקיד
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
 
       {/* Popup */}
       {popupData.show && (
