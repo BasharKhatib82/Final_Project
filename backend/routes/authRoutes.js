@@ -12,7 +12,7 @@ const router = express.Router();
 // **************************** /
 //        התחברות משתמש        /
 // **************************** /
-import { roleFields, roleFieldsSQL } from "../utils/permissions.js";
+
 
 router.post("/login", async (req, res) => {
   const { user_id, password } = req.body;
