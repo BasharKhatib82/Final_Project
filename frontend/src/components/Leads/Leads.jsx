@@ -7,6 +7,7 @@ import Popup from "../Tools/Popup";
 import { ReportProvider } from "../Reports/ReportContext";
 import ReportExport from "../Reports/ReportExport";
 import ReportEmail from "../Reports/ReportEmail";
+import { useUser } from "../Tools/UserContext";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -339,6 +340,8 @@ const Leads = () => {
     { key: "status", label: "סטטוס", export: (r) => r.status },
   ];
 
+  const { user } = useUser();
+
   return (
     <>
       <div className="p-4 text-right">
@@ -347,14 +350,16 @@ const Leads = () => {
             רשימת פניות
           </h2>
         </header>
-        <div className="flex justify-start mb-2">
-          <div className="inline-flex">
-            <NavigationButton
-              linkTo="/dashboard/add_lead"
-              label="הוספת פנייה חדשה"
-            />
+        {user.lead_add_btn === 1 && (
+          <div className="flex justify-start mb-2">
+            <div className="inline-flex">
+              <NavigationButton
+                linkTo="/dashboard/add_lead"
+                label="הוספת פנייה חדשה"
+              />
+            </div>
           </div>
-        </div>
+        )}
         <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 ">
           <select
             value={statusFilter}
