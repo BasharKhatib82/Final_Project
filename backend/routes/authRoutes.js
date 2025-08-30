@@ -169,7 +169,11 @@ router.post("/logout", async (req, res) => {
     }
   }
 
-  res.clearCookie("token");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict",
+  });
   res.json({ success: true, message: "התנתקת מהמערכת" });
 });
 
