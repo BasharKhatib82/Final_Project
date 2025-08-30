@@ -355,7 +355,7 @@ const Home = () => {
                 {stats.logs_by_day.map((row, i) => (
                   <tr key={i} className="hover:bg-gray-50">
                     <td className="p-2 border-b text-center">
-                      {row.date.slice(0, 10)}
+                      {row.date ? row.date.slice(0, 10) : "-"}
                     </td>
                     <td className="p-2 border-b text-center">
                       {row.total_logs} תיעודים
