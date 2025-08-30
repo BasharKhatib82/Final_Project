@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../Tools/UserContext";
 import LeadsStatusPieChart from "../charts/LeadsStatusPieChart";
 import LeadsByDateBarChart from "../charts/LeadsByDateBarChart";
 import LeadsBySourceChart from "../charts/LeadsBySourceChart";
@@ -10,6 +11,7 @@ const api = process.env.REACT_APP_API_URL;
 
 const Home = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
@@ -45,10 +47,72 @@ const Home = () => {
   return (
     <div className="flex-col flex-grow p-6 font-rubik text-right space-y-6">
       {/* 🔔 פס התראה עליון */}
-      {stats.leads.new > 0 && (
-        <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md px-4 py-3 text-center text-sm font-semibold shadow-sm">
-          ⚠️ {stats.leads.new} פניות חדשות ממתינות לטיפול
-        </div>
+      {user?.admin_alert_dash === 1 && (
+        <>
+          {stats.leads_by_user_status
+            .filter((l) => l.status === "חדש")
+            .reduce((sum, l) => sum + l.count, 0) > 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md px-4 py-3 text-center text-sm font-semibold shadow-sm">
+              ⚠️{" "}
+              {stats.leads_by_user_status
+                .filter((l) => l.status === "חדש")
+                .reduce((sum, l) => sum + l.count, 0)}{" "}
+              פניות חדשות ממתינות לטיפול
+            </div>
+          )}
+
+          {stats.tasks_by_user_status
+            .filter((t) => t.status === "חדש")
+            .reduce((sum, t) => sum + t.count, 0) +
+            stats.tasks_overdue.reduce((sum, t) => sum + t.overdue_count, 0) >
+            0 && (
+            <div className="bg-red-50 border border-red-200 text-red-800 rounded-md px-4 py-3 text-center text-sm font-semibold shadow-sm">
+              🔴{" "}
+              {stats.tasks_by_user_status
+                .filter((t) => t.status === "חדש")
+                .reduce((sum, t) => sum + t.count, 0) +
+                stats.tasks_overdue.reduce(
+                  (sum, t) => sum + t.overdue_count,
+                  0
+                )}{" "}
+              משימות חדשות או חורגות
+            </div>
+          )}
+        </>
+      )}
+
+      {user?.user_alert_dash === 1 && (
+        <>
+          {stats.leads_by_user_status
+            .filter((l) => l.user_id === user.user_id && l.status === "חדש")
+            .map((l) => (
+              <div
+                key="user-leads"
+                className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-md px-4 py-3 text-center text-sm font-semibold shadow-sm"
+              >
+                ⚠️ יש לך {l.count} פניות חדשות
+              </div>
+            ))}
+
+          {(() => {
+            const myNewTasks = stats.tasks_by_user_status
+              .filter((t) => t.user_id === user.user_id && t.status === "חדש")
+              .reduce((sum, t) => sum + t.count, 0);
+
+            const myOverdue =
+              stats.tasks_overdue.find((t) => t.user_id === user.user_id)
+                ?.overdue_count || 0;
+
+            if (myNewTasks + myOverdue > 0) {
+              return (
+                <div className="bg-red-50 border border-red-200 text-red-800 rounded-md px-4 py-3 text-center text-sm font-semibold shadow-sm">
+                  🔴 יש לך {myNewTasks} משימות חדשות ו־{myOverdue} משימות חורגות
+                </div>
+              );
+            }
+            return null;
+          })()}
+        </>
       )}
 
       {/* 📦 כרטיסי סטטיסטיקה - 6 בשורה אחת */}
