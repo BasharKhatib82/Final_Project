@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Popup from "../Tools/Popup"; // נתיב הקומפוננטה Popup שלך
+import axios from "axios";
+import Popup from "../Tools/Popup"; // נתיב הפופאפ שלך
+
+const api = process.env.REACT_APP_API_URL;
 
 const permissionsSchema = {
   "ניהול משתמשים": [{ key: "can_manage_users", label: "ניהול משתמשים" }],
@@ -19,7 +22,7 @@ const permissionsSchema = {
   ],
 };
 
-const AddRole = ({ onSave }) => {
+const AddRole = () => {
   const [roleName, setRoleName] = useState("");
   const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [popupData, setPopupData] = useState({
@@ -36,8 +39,9 @@ const AddRole = ({ onSave }) => {
     );
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!roleName) {
       setPopupData({
         show: true,
@@ -49,21 +53,29 @@ const AddRole = ({ onSave }) => {
     }
 
     const newRole = {
-      name: roleName,
+      role_name: roleName,
       permissions: selectedPermissions,
     };
 
-    onSave(newRole);
-
-    setPopupData({
-      show: true,
-      title: "הצלחה",
-      message: "התפקיד נוסף בהצלחה",
-      mode: "success",
-    });
-
-    setRoleName("");
-    setSelectedPermissions([]);
+    try {
+      await axios.post(`${api}/roles/add`, newRole);
+      setPopupData({
+        show: true,
+        title: "הצלחה",
+        message: "התפקיד נוסף בהצלחה",
+        mode: "success",
+      });
+      setRoleName("");
+      setSelectedPermissions([]);
+    } catch (err) {
+      setPopupData({
+        show: true,
+        title: "שגיאת שרת",
+        message: "אירעה בעיה בעת שמירת התפקיד",
+        mode: "error",
+      });
+      console.error("AddRole error:", err);
+    }
   };
 
   return (
