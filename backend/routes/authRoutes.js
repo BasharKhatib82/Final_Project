@@ -5,26 +5,21 @@ import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
 import nodemailer from "nodemailer";
 import logAction from "../utils/logAction.js";
+import { roleFields, roleFieldsSQL } from "../utils/permissions.js";
 
 const router = express.Router();
 
 // **************************** /
 //        התחברות משתמש        /
 // **************************** /
+import { roleFields, roleFieldsSQL } from "../utils/permissions.js";
+
 router.post("/login", async (req, res) => {
   const { user_id, password } = req.body;
 
   try {
     const query = `
-      SELECT u.*, 
-            r.role_name,
-            r.role_management,
-            r.can_manage_users, 
-            r.can_view_reports, 
-            r.can_assign_leads, 
-            r.can_edit_courses, 
-            r.can_manage_tasks, 
-            r.can_access_all_data
+      SELECT u.*, r.role_name, ${roleFieldsSQL}
       FROM users u
       JOIN roles_permissions r ON u.role_id = r.role_id
       WHERE u.user_id = ?
@@ -53,10 +48,9 @@ router.post("/login", async (req, res) => {
           (1000 * 60 * 60 * 24)
       );
 
-      // אם עברו 90 ימים, מחזירים הודעה מיוחדת
       if (daysSince >= 90) {
         const resetToken = randomBytes(32).toString("hex");
-        const expire = new Date(Date.now() + 1000 * 60 * 15); // 15 דקות
+        const expire = new Date(Date.now() + 1000 * 60 * 15);
 
         await db.query(
           "INSERT INTO password_resets (user_id, reset_token, reset_expires) VALUES (?, ?, ?)",
@@ -66,29 +60,25 @@ router.post("/login", async (req, res) => {
         return res.json({
           success: false,
           mustChangePassword: true,
-          resetToken, // 👈 מחזירים לפרונט
+          resetToken,
           message: "עברו 90 יום מאז שינוי הסיסמה. יש להגדיר סיסמה חדשה.",
         });
       }
     }
 
-    // יצירת טוקן — כולל ההרשאות !
-    const token = jwt.sign(
-      {
-        user_id: user.user_id,
-        role_id: user.role_id,
-        full_name: `${user.first_name} ${user.last_name}`,
-        role_management: user.role_management,
-        can_manage_users: user.can_manage_users,
-        can_view_reports: user.can_view_reports,
-        can_assign_leads: user.can_assign_leads,
-        can_edit_courses: user.can_edit_courses,
-        can_manage_tasks: user.can_manage_tasks,
-        can_access_all_data: user.can_access_all_data,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    // יצירת Payload לטוקן כולל כל ההרשאות
+    const tokenPayload = {
+      user_id: user.user_id,
+      role_id: user.role_id,
+      full_name: `${user.first_name} ${user.last_name}`,
+    };
+    roleFields.forEach((f) => {
+      tokenPayload[f] = user[f];
+    });
+
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     res.cookie("token", token, {
       httpOnly: true,
@@ -117,13 +107,7 @@ router.post("/login", async (req, res) => {
         first_name: user.first_name,
         last_name: user.last_name,
         role_name: user.role_name,
-        role_management: user.role_management,
-        can_manage_users: user.can_manage_users,
-        can_view_reports: user.can_view_reports,
-        can_assign_leads: user.can_assign_leads,
-        can_edit_courses: user.can_edit_courses,
-        can_manage_tasks: user.can_manage_tasks,
-        can_access_all_data: user.can_access_all_data,
+        ...roleFields.reduce((acc, f) => ({ ...acc, [f]: user[f] }), {}),
       },
     });
   } catch (err) {

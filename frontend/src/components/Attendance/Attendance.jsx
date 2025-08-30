@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import NavigationButton from "../Buttons/NavigationButton";
 import ReportView from "../Reports/ReportView";
+import { useUser } from "../context/UserContext";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -11,6 +12,8 @@ export default function Attendance() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  const { user } = useUser();
 
   useEffect(() => {
     checkPermissions();
@@ -179,10 +182,12 @@ export default function Attendance() {
           pageSize={25}
           emailApiBase={api}
           addButton={
-            <NavigationButton
-              linkTo="/dashboard/add_attendance"
-              label="הוספת נוכחות חדשה"
-            />
+            user?.attendance_add_btn === 1 ? (
+              <NavigationButton
+                linkTo="/dashboard/add_attendance"
+                label="הוספת נוכחות חדשה"
+              />
+            ) : null
           }
           defaultFilters={{}}
           searchPlaceholder="חיפוש לפי שם או סטטוס..."
