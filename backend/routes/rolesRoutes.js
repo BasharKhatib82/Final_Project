@@ -157,6 +157,10 @@ router.put("/:id", verifyToken, async (req, res) => {
     can_edit_courses,
     can_manage_tasks,
     can_access_all_data,
+    attendance_clock_self,
+    attendance_add_btn,
+    attendance_edit_btn,
+    attendance_view_team,
     active,
   } = req.body;
 
@@ -180,7 +184,7 @@ router.put("/:id", verifyToken, async (req, res) => {
       `UPDATE roles_permissions SET
         role_name = ?, role_management = ?, can_manage_users = ?, can_view_reports = ?,
         can_assign_leads = ?, can_edit_courses = ?, can_manage_tasks = ?,
-        can_access_all_data = ?, active = ?
+        can_access_all_data = ?,attendance_clock_self=?,attendance_add_btn=?,attendance_edit_btn=?,attendance_view_team=?, active = ?
        WHERE role_id = ?`,
       [
         role_name.trim(),
@@ -191,6 +195,10 @@ router.put("/:id", verifyToken, async (req, res) => {
         toBit(can_edit_courses),
         toBit(can_manage_tasks),
         toBit(can_access_all_data),
+        toBit(attendance_clock_self),
+        toBit(attendance_add_btn),
+        toBit(attendance_edit_btn),
+        toBit(attendance_view_team),
         toBit(active),
         role_id,
       ]
