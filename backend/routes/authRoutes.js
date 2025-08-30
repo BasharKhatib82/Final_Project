@@ -66,7 +66,7 @@ router.post("/login", async (req, res) => {
       }
     }
 
-    // יצירת Payload לטוקן כולל כל ההרשאות
+    // לטוקן כולל כל ההרשאות Payload יצירת
     const tokenPayload = {
       user_id: user.user_id,
       role_id: user.role_id,

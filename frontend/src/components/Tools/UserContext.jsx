@@ -10,7 +10,7 @@ export const useUser = () => useContext(UserContext);
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
-  const [loading, setLoading] = useState(true); // 🔄 מצב טעינה
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = async () => {
