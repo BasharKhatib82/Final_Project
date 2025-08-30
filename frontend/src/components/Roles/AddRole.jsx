@@ -120,27 +120,29 @@ const AddRole = () => {
         </div>
 
         {/* קבוצות הרשאות */}
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-4 items-stretch">
           {Object.entries(permissionsSchema).map(([category, perms]) => (
             <div
               key={category}
-              className="min-w-[180px] max-w-[200px] border rounded p-3 bg-white/70"
+              className="min-w-[220px] max-w-[260px] border rounded p-3 bg-white/70 flex flex-col justify-between"
             >
-              <h3 className="font-semibold mb-2 whitespace-nowrap">
+              <h3 className="font-semibold mb-2 whitespace-nowrap overflow-hidden text-ellipsis">
                 {category}
               </h3>
               <div className="space-y-2">
                 {perms.map((perm) => (
                   <label
                     key={perm.key}
-                    className="flex items-center gap-2 cursor-pointer whitespace-nowrap"
+                    className="flex items-center gap-2 cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis"
                   >
                     <input
                       type="checkbox"
                       checked={selectedPermissions.includes(perm.key)}
                       onChange={() => togglePermission(perm.key)}
                     />
-                    <span>{perm.label}</span>
+                    <span className="overflow-hidden text-ellipsis">
+                      {perm.label}
+                    </span>
                   </label>
                 ))}
               </div>
