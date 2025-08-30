@@ -5,8 +5,6 @@ import Sidebar from "./Sidebar";
 const Dashboard = () => {
   return (
     <div className="flex min-h-[calc(100vh-124px)]">
-      {" "}
-      {/*   ההדר גובהו 80 px */}
       {/* Sidebar בצד */}
       <aside className=" bg-gray-800 text-white">
         <Sidebar />
