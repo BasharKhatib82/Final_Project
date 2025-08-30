@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
-import Popup from "../Tools/Popup"; // נתיב הפופאפ שלך
+import Popup from "../Tools/Popup";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -106,28 +106,32 @@ const AddRole = () => {
 
             {/* שם התפקיד */}
             <div>
-              <label className="block text-sm font-medium mb-1">שם תפקיד</label>
+              <label className="font-rubik block mb-0.5 font-medium">
+                שם תפקיד
+              </label>
               <input
                 type="text"
                 value={roleName}
                 onChange={(e) => setRoleName(e.target.value)}
-                className="w-full border rounded px-3 py-2"
+                className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
                 placeholder="הקלד שם תפקיד"
               />
             </div>
 
             {/* קבוצות הרשאות */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-3">
               {Object.entries(permissionsSchema).map(([category, perms]) => (
                 <div
                   key={category}
-                  className="border rounded p-3 space-y-2 bg-white/60"
+                  className="border rounded p-3 space-y-2 bg-white/65"
                 >
-                  <h3 className="text-sm font-medium mb-1">{category}</h3>
+                  <h3 className="font-rubik block mb-0.5 font-medium">
+                    {category}
+                  </h3>
                   {perms.map((perm) => (
                     <label
                       key={perm.key}
-                      className="flex items-center space-x-2 cursor-pointer"
+                      className="flex items-center space-x-4 cursor-pointer"
                     >
                       <input
                         type="checkbox"
