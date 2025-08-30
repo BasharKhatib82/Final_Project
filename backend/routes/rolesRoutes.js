@@ -19,6 +19,10 @@ router.post("/add", verifyToken, async (req, res) => {
     can_edit_courses = 0,
     can_manage_tasks = 0,
     can_access_all_data = 0,
+    attendance_clock_self = 0,
+    attendance_add_btn = 0,
+    attendance_edit_btn = 0,
+    attendance_view_team = 0,
     active = 1,
   } = req.body;
 
@@ -43,8 +47,8 @@ router.post("/add", verifyToken, async (req, res) => {
       `INSERT INTO roles_permissions (
         role_name, role_management, can_manage_users, can_view_reports,
         can_assign_leads, can_edit_courses, can_manage_tasks,
-        can_access_all_data, active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        can_access_all_data,attendance_clock_self,attendance_add_btn,attendance_edit_btn,attendance_view_team, active
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         role_name.trim(),
         toBit(role_management),
@@ -54,6 +58,10 @@ router.post("/add", verifyToken, async (req, res) => {
         toBit(can_edit_courses),
         toBit(can_manage_tasks),
         toBit(can_access_all_data),
+        toBit(attendance_clock_self),
+        toBit(attendance_add_btn),
+        toBit(attendance_edit_btn),
+        toBit(attendance_view_team),
         toBit(active),
       ]
     );
@@ -72,7 +80,7 @@ router.post("/add", verifyToken, async (req, res) => {
 router.get(
   "/active",
   verifyToken,
-  
+
   async (req, res) => {
     try {
       const [results] = await db.query(
@@ -110,7 +118,7 @@ router.get("/", verifyToken, async (req, res) => {
     const [results] = await db.query(
       "SELECT * FROM roles_permissions ORDER BY role_id ASC"
     );
-    
+
     return res.status(200).json({ Status: true, Roles: results });
   } catch (err) {
     console.error("שגיאת שליפת תפקידים:", err);
@@ -129,7 +137,7 @@ router.get("/:id", verifyToken, async (req, res) => {
     if (results.length === 0) {
       return res.status(404).json({ Status: false, Error: "תפקיד לא נמצא" });
     }
-   
+
     return res.status(200).json({ Status: true, Role: results[0] });
   } catch (err) {
     console.error("שגיאת שליפת תפקיד לפי מזהה:", err);

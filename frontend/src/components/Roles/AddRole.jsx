@@ -1,127 +1,128 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import ExitButton from "../Buttons/ExitButton";
-import AddSaveButton from "../Buttons/AddSaveButton";
-import Popup from "../Tools/Popup";
+import Popup from "../Tools/Popup"; // נתיב הקומפוננטה Popup שלך
 
-const api = process.env.REACT_APP_API_URL;
+const permissionsSchema = {
+  "ניהול משתמשים": [{ key: "can_manage_users", label: "ניהול משתמשים" }],
+  "צפייה בדוחות": [{ key: "can_view_reports", label: "צפייה בדוחות" }],
+  "שייך פניות": [{ key: "can_assign_leads", label: "שייך פניות" }],
+  "עריכת קורסים": [{ key: "can_edit_courses", label: "עריכת קורסים" }],
+  "ניהול משימות": [{ key: "can_manage_tasks", label: "ניהול משימות" }],
+  "גישה לכל הנתונים": [
+    { key: "can_access_all_data", label: "גישה לכל הנתונים" },
+  ],
+  "נוכחות ושעות עבודה": [
+    { key: "attendance_clock_self", label: "כניסה / יציאה" },
+    { key: "attendance_add_btn", label: "הוספת נוכחות ידנית" },
+    { key: "attendance_edit_btn", label: "עריכת נוכחות" },
+    { key: "attendance_view_team", label: "צפייה בנוכחות של כל העובדים" },
+  ],
+};
 
-const AddRole = () => {
-  const [formData, setFormData] = useState({
-    role_name: "",
-    can_manage_users: 0,
-    can_view_reports: 0,
-    can_assign_leads: 0,
-    can_edit_courses: 0,
-    can_manage_tasks: 0,
-    can_access_all_data: 0,
-  });
-
+const AddRole = ({ onSave }) => {
+  const [roleName, setRoleName] = useState("");
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [popupData, setPopupData] = useState({
     show: false,
     title: "",
     message: "",
     mode: "info",
   });
-
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const togglePermission = (key) => {
+    setSelectedPermissions((prev) =>
+      prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]
+    );
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!roleName) {
+      setPopupData({
+        show: true,
+        title: "שגיאה",
+        message: "שם התפקיד הוא שדה חובה",
+        mode: "warning",
+      });
+      return;
+    }
 
-    // נפתח קודם popup אישור
+    const newRole = {
+      name: roleName,
+      permissions: selectedPermissions,
+    };
+
+    onSave(newRole);
+
     setPopupData({
       show: true,
-      title: "אישור הוספה",
-      message: "⚠️ האם אתה בטוח שברצונך להוסיף תפקיד חדש?",
-      mode: "confirm",
+      title: "הצלחה",
+      message: "התפקיד נוסף בהצלחה",
+      mode: "success",
     });
-  };
 
-  const confirmAdd = () => {
-    axios
-      .post(`${api}/roles/add`, formData, {
-        withCredentials: true,
-      })
-      .then(() => {
-        setPopupData({
-          show: true,
-          title: "הצלחה",
-          message: "התפקיד נוסף בהצלחה!",
-          mode: "success",
-        });
-      })
-      .catch((err) => {
-        setPopupData({
-          show: true,
-          title: "שגיאה",
-          message: "אירעה שגיאה בהוספת התפקיד",
-          mode: "error",
-        });
-        console.error(err);
-      });
+    setRoleName("");
+    setSelectedPermissions([]);
   };
 
   return (
-    <div className="flex justify-center items-center pt-10">
+    <>
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2"
+        className="p-6 bg-white shadow-md rounded space-y-6"
       >
-        <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
-          הוספת תפקיד חדש
-        </h2>
+        <h2 className="text-xl font-bold mb-4">הוספת תפקיד חדש</h2>
 
+        {/* שם התפקיד */}
         <div>
-          <label className="font-rubik block mb-0.5 font-medium">
-            שם תפקיד
-          </label>
+          <label className="block text-sm font-medium mb-1">שם תפקיד</label>
           <input
             type="text"
-            name="role_name"
-            value={formData.role_name}
-            onChange={handleChange}
-            required
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            value={roleName}
+            onChange={(e) => setRoleName(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+            placeholder="למשל: נציג שיווק"
           />
         </div>
 
-        {[
-          { name: "can_manage_users", label: "ניהול משתמשים" },
-          { name: "can_view_reports", label: "צפייה בדוחות" },
-          { name: "can_assign_leads", label: "שייך פניות" },
-          { name: "can_edit_courses", label: "עריכת קורסים" },
-          { name: "can_manage_tasks", label: "ניהול משימות" },
-          { name: "can_access_all_data", label: "גישה לכל הנתונים" },
-        ].map((field) => (
-          <div key={field.name}>
-            <label className="font-rubik block mb-0.5 font-medium">
-              {field.label}
-            </label>
-            <select
-              name={field.name}
-              value={formData[field.name]}
-              onChange={handleChange}
-              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
-            >
-              <option value="1">✓ כן</option>
-              <option value="0">✗ לא</option>
-            </select>
-          </div>
-        ))}
+        {/* קבוצות הרשאות */}
+        <div className="grid grid-cols-2 gap-6">
+          {Object.entries(permissionsSchema).map(([category, perms]) => (
+            <div key={category} className="border rounded p-3 space-y-2">
+              <h3 className="font-semibold mb-2">{category}</h3>
+              {perms.map((perm) => (
+                <label
+                  key={perm.key}
+                  className="flex items-center space-x-2 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedPermissions.includes(perm.key)}
+                    onChange={() => togglePermission(perm.key)}
+                  />
+                  <span>{perm.label}</span>
+                </label>
+              ))}
+            </div>
+          ))}
+        </div>
 
-        <div className="flex justify-around pt-4">
-          <AddSaveButton label="הוסף תפקיד" type="submit" />
-          <ExitButton label="ביטול" linkTo="/dashboard/roles" />
+        {/* כפתורי פעולה */}
+        <div className="flex justify-between pt-4">
+          <button
+            type="button"
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            onClick={() => navigate("/dashboard/roles")}
+          >
+            ביטול
+          </button>
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            הוסף תפקיד
+          </button>
         </div>
       </form>
 
@@ -142,16 +143,9 @@ const AddRole = () => {
               navigate("/dashboard/roles");
             }
           }}
-          onConfirm={
-            popupData.mode === "confirm"
-              ? popupData.title === "אישור הוספה"
-                ? confirmAdd
-                : () => navigate("/dashboard/roles")
-              : undefined
-          }
         />
       )}
-    </div>
+    </>
   );
 };
 
