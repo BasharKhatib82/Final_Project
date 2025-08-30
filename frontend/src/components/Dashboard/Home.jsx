@@ -46,7 +46,7 @@ const Home = () => {
 
   return (
     <div className="flex-col flex-grow p-6 font-rubik text-right space-y-6">
-      {/* 🔔 פס התראות קומפקטי */}
+      {/* 🔔 פס התראות  */}
       {(user?.admin_alert_dash === 1 || user?.user_alert_dash === 1) && (
         <div className="flex flex-wrap gap-3">
           {/* פניות חדשות */}

@@ -1,13 +1,12 @@
 import express from "express";
 import { db } from "../utils/dbSingleton.js";
-import logAction from "../utils/logAction.js";
 import verifyToken from "../utils/verifyToken.js";
 
 const router = express.Router();
 
 router.get("/", verifyToken, async (req, res) => {
   const summary = {
-    employees: {},
+    users: {},
     roles: {},
     leads: {},
     tasks: {},
@@ -20,8 +19,8 @@ router.get("/", verifyToken, async (req, res) => {
   };
 
   const queries = {
-    employees_active: "SELECT COUNT(*) AS count FROM users WHERE active = 1",
-    employees_inactive: "SELECT COUNT(*) AS count FROM users WHERE active = 0",
+    users_active: "SELECT COUNT(*) AS count FROM users WHERE active = 1",
+    users_inactive: "SELECT COUNT(*) AS count FROM users WHERE active = 0",
 
     roles_total: "SELECT COUNT(*) AS count FROM roles_permissions",
     roles_active:
@@ -67,11 +66,12 @@ router.get("/", verifyToken, async (req, res) => {
     `,
 
     online_users: `
-      SELECT u.first_name, u.last_name, r.role_name
-      FROM active_tokens t
-      JOIN users u ON t.user_id = u.user_id
-      JOIN roles_permissions r ON u.role_id = r.role_id
-    `,
+  SELECT u.first_name, u.last_name, r.role_name
+  FROM active_tokens t
+  JOIN users u ON t.user_id = u.user_id
+  JOIN roles_permissions r ON u.role_id = r.role_id
+  WHERE u.user_id <> 1 AND u.role_id <> 1
+`,
 
     leads_by_day: `
       SELECT DATE(created_at) AS date, COUNT(*) AS count
@@ -129,8 +129,8 @@ router.get("/", verifyToken, async (req, res) => {
     );
 
     const [
-      employees_active,
-      employees_inactive,
+      users_active,
+      users_inactive,
       roles_total,
       roles_active,
       roles_inactive,
@@ -174,9 +174,9 @@ router.get("/", verifyToken, async (req, res) => {
     summary.tasks_by_user_status = tasks_by_user_status[0];
     summary.tasks_overdue = tasks_overdue[0];
 
-    summary.employees = {
-      active: employees_active[0][0].count,
-      inactive: employees_inactive[0][0].count,
+    summary.users = {
+      active: users_active[0][0].count,
+      inactive: users_inactive[0][0].count,
     };
 
     summary.roles = {
@@ -213,7 +213,7 @@ router.get("/", verifyToken, async (req, res) => {
       total_attendance: row.total_attendance,
     }));
 
-    summary.employees.online_list = online_users[0].map((row) => ({
+    summary.users.online_list = (online_users[0] || []).map((row) => ({
       name: `${row.first_name} ${row.last_name}`,
       role: row.role_name,
     }));
