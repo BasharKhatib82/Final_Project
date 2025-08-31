@@ -4,7 +4,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
-import { permissionsSchema, roleDataTemplate } from "../constants/permissions";
+import {
+  permissionsSchema,
+  roleDataTemplate,
+} from "../../constants/permissions";
 
 const api = process.env.REACT_APP_API_URL;
 

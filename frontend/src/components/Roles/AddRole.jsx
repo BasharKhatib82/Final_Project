@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
-import { permissionsSchema, roleDataTemplate } from "../constants/permissions";
+import {
+  permissionsSchema,
+  roleDataTemplate,
+} from "../../constants/permissions";
 import Popup from "../Tools/Popup";
 
 const api = process.env.REACT_APP_API_URL;
