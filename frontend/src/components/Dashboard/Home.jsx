@@ -7,7 +7,7 @@ import LeadsStatusPieChart from "../charts/LeadsStatusPieChart";
 import LeadsByDateBarChart from "../charts/LeadsByDateBarChart";
 import LeadsBySourceChart from "../charts/LeadsBySourceChart";
 import LeadsByUserChart from "../charts/LeadsByUserChart";
-import { FcRules } from "react-icons/fc";
+import { FcRules, FcAlarmClock ,FcInspection} from "react-icons/fc";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -59,7 +59,7 @@ const Home = () => {
             return (
               leadsCount > 0 && (
                 <AlertBar
-                  icon={<FcRules className="text-2xl" />}
+                  icon={<FcRules />}
                   count={leadsCount}
                   text="פניות חדשות לטיפול"
                   color="yellow"
@@ -86,7 +86,7 @@ const Home = () => {
               tasksCount > 0 && (
                 <AlertBar
                   icon="📝"
-                  count={tasksCount}
+                  count={<FcInspection />}
                   text="משימות חדשות לטיפול"
                   color="blue"
                   onClick={() => navigate("/dashboard/tasks")}
@@ -110,7 +110,7 @@ const Home = () => {
             return (
               overdueCount > 0 && (
                 <AlertBar
-                  icon="⏰"
+                  icon={<FcAlarmClock />}
                   count={overdueCount}
                   text="משימות חורגות מטיפול !!"
                   color="red"
