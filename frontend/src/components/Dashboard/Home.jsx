@@ -131,84 +131,167 @@ const Home = () => {
 
       {/* כרטיסי סטטיסטיקה */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
-        {/* עובדים */}
-        <StatCard
-          icon={<FcAssistant />}
-          iconColor="bg-blue-100 text-blue-600"
-          title="עובדים"
-          items={[
-            { label: "פעילים", value: stats?.users?.active ?? 0 },
-            { label: "לא פעילים", value: stats?.users?.inactive ?? 0 },
-            { label: "מחוברים", value: stats?.users?.online_list?.length ?? 0 },
-          ]}
-          onClick={() => navigate("/dashboard/users")}
-        />
+        {/* 👥 עובדים */}
+        {user?.admin_status_dash === 1 && (
+          <StatCard
+            icon={<FcAssistant />}
+            iconColor="bg-blue-100 text-blue-600"
+            title="עובדים"
+            items={[
+              { label: "פעילים", value: stats?.users?.active ?? 0 },
+              { label: "לא פעילים", value: stats?.users?.inactive ?? 0 },
+              {
+                label: "מחוברים",
+                value: stats?.users?.online_list?.length ?? 0,
+              },
+            ]}
+            onClick={() => navigate("/dashboard/users")}
+          />
+        )}
 
-        {/* מחוברים */}
-        <StatCard
-          icon="🟢"
-          iconColor="bg-green-100 text-green-600"
-          title="מחוברים"
-          items={
-            stats?.users?.online_list?.map((u) => ({
-              label: `${u.name} - ${u.role}`,
-              value: "●",
-            })) || [{ label: "אין משתמשים מחוברים", value: "" }]
-          }
-          onClick={() => navigate("/dashboard/users")}
-        />
+        {/* 🟢 מחוברים */}
+        {user?.admin_status_dash === 1 && (
+          <StatCard
+            icon="🟢"
+            iconColor="bg-green-100 text-green-600"
+            title="מחוברים"
+            items={
+              stats?.users?.online_list?.length > 0
+                ? stats.users.online_list.map((u) => ({
+                    label: `${u.name} - ${u.role}`,
+                    value: "●",
+                  }))
+                : [{ label: "אין משתמשים מחוברים", value: "" }]
+            }
+            onClick={() => navigate("/dashboard/users")}
+          />
+        )}
 
-        {/* תפקידים */}
-        <StatCard
-          icon="🛡️"
-          iconColor="bg-purple-100 text-purple-600"
-          title="תפקידים"
-          items={[
-            { label: 'סה"כ', value: stats?.roles?.total ?? 0 },
-            { label: "פעילים", value: stats?.roles?.active ?? 0 },
-            { label: "לא פעילים", value: stats?.roles?.inactive ?? 0 },
-          ]}
-          onClick={() => navigate("/dashboard/roles")}
-        />
+        {/* 🛡️ תפקידים */}
+        {user?.admin_status_dash === 1 && (
+          <StatCard
+            icon="🛡️"
+            iconColor="bg-purple-100 text-purple-600"
+            title="תפקידים"
+            items={[
+              { label: 'סה"כ', value: stats?.roles?.total ?? 0 },
+              { label: "פעילים", value: stats?.roles?.active ?? 0 },
+              { label: "לא פעילים", value: stats?.roles?.inactive ?? 0 },
+            ]}
+            onClick={() => navigate("/dashboard/roles")}
+          />
+        )}
 
-        {/* פרויקטים */}
-        <StatCard
-          icon={<FcBriefcase />}
-          iconColor="bg-indigo-100 text-indigo-600"
-          title="פרויקטים"
-          items={[
-            { label: 'סה"כ', value: stats?.projects?.total ?? 0 },
-            { label: "פעילים", value: stats?.projects?.active ?? 0 },
-            { label: "לא פעילים", value: stats?.projects?.inactive ?? 0 },
-          ]}
-          onClick={() => navigate("/dashboard/projects")}
-        />
+        {/* 💼 פרויקטים */}
+        {user?.admin_status_dash === 1 && (
+          <StatCard
+            icon={<FcBriefcase />}
+            iconColor="bg-indigo-100 text-indigo-600"
+            title="פרויקטים"
+            items={[
+              { label: 'סה"כ', value: stats?.projects?.total ?? 0 },
+              { label: "פעילים", value: stats?.projects?.active ?? 0 },
+              { label: "לא פעילים", value: stats?.projects?.inactive ?? 0 },
+            ]}
+            onClick={() => navigate("/dashboard/projects")}
+          />
+        )}
 
-        {/* פניות */}
-        <StatCard
-          icon={<FcRules />}
-          iconColor="bg-yellow-100 text-yellow-600"
-          title="פניות"
-          items={[
-            { label: "חדשות", value: stats?.leads?.new ?? 0 },
-            { label: "בטיפול", value: stats?.leads?.in_progress ?? 0 },
-            { label: "טופלו", value: stats?.leads?.completed ?? 0 },
-          ]}
-          onClick={() => navigate("/dashboard/leads")}
-        />
+        {/* 📩 פניות */}
+        {(user?.admin_status_dash === 1 || user?.user_status_dash === 1) && (
+          <StatCard
+            icon={<FcRules />}
+            iconColor="bg-yellow-100 text-yellow-600"
+            title="פניות"
+            items={[
+              {
+                label: "חדשות",
+                value:
+                  user?.admin_status_dash === 1
+                    ? stats?.leads?.new ?? 0
+                    : stats?.leads_by_user_status
+                        ?.filter(
+                          (l) =>
+                            l.user_id === user.user_id && l.status === "חדש"
+                        )
+                        ?.reduce((sum, l) => sum + l.count, 0) ?? 0,
+              },
+              {
+                label: "בטיפול",
+                value:
+                  user?.admin_status_dash === 1
+                    ? stats?.leads?.in_progress ?? 0
+                    : stats?.leads_by_user_status
+                        ?.filter(
+                          (l) =>
+                            l.user_id === user.user_id && l.status === "בטיפול"
+                        )
+                        ?.reduce((sum, l) => sum + l.count, 0) ?? 0,
+              },
+              {
+                label: "טופלו",
+                value:
+                  user?.admin_status_dash === 1
+                    ? stats?.leads?.completed ?? 0
+                    : stats?.leads_by_user_status
+                        ?.filter(
+                          (l) =>
+                            l.user_id === user.user_id && l.status === "טופל"
+                        )
+                        ?.reduce((sum, l) => sum + l.count, 0) ?? 0,
+              },
+            ]}
+            onClick={() => navigate("/dashboard/leads")}
+          />
+        )}
 
-        {/* משימות */}
-        <StatCard
-          icon={<FcSurvey />}
-          iconColor="bg-slate-100 text-yellow-600"
-          title="משימות"
-          items={[
-            { label: "חדשות", value: stats?.tasks?.new ?? 0 },
-            { label: "בטיפול", value: stats?.tasks?.in_progress ?? 0 },
-            { label: "טופלו", value: stats?.tasks?.completed ?? 0 },
-          ]}
-          onClick={() => navigate("/dashboard/tasks")}
-        />
+        {/* 🔄 משימות */}
+        {(user?.admin_status_dash === 1 || user?.user_status_dash === 1) && (
+          <StatCard
+            icon={<FcSurvey />}
+            iconColor="bg-slate-100 text-yellow-600"
+            title="משימות"
+            items={[
+              {
+                label: "חדשות",
+                value:
+                  user?.admin_status_dash === 1
+                    ? stats?.tasks?.new ?? 0
+                    : stats?.tasks_by_user_status
+                        ?.filter(
+                          (t) =>
+                            t.user_id === user.user_id && t.status === "חדש"
+                        )
+                        ?.reduce((sum, t) => sum + t.count, 0) ?? 0,
+              },
+              {
+                label: "בטיפול",
+                value:
+                  user?.admin_status_dash === 1
+                    ? stats?.tasks?.in_progress ?? 0
+                    : stats?.tasks_by_user_status
+                        ?.filter(
+                          (t) =>
+                            t.user_id === user.user_id && t.status === "בתהליך"
+                        )
+                        ?.reduce((sum, t) => sum + t.count, 0) ?? 0,
+              },
+              {
+                label: "טופלו",
+                value:
+                  user?.admin_status_dash === 1
+                    ? stats?.tasks?.completed ?? 0
+                    : stats?.tasks_by_user_status
+                        ?.filter(
+                          (t) =>
+                            t.user_id === user.user_id && t.status === "הושלם"
+                        )
+                        ?.reduce((sum, t) => sum + t.count, 0) ?? 0,
+              },
+            ]}
+            onClick={() => navigate("/dashboard/tasks")}
+          />
+        )}
       </div>
 
       {/* 🟦 גרפים */}
