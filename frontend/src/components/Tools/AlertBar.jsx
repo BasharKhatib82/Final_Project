@@ -25,6 +25,9 @@ export default function AlertBar({
       {/* אייקון */}
       <span className="text-lg ml-2">{icon}</span>
 
+      {/* מפריד */}
+      <span className="w-px h-5 bg-gray-300 mx-2"></span>
+
       {/* מספר */}
       <span className="text-lg font-bold ml-2">{count}</span>
 
