@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../Tools/UserContext";
+import AlertBar from "../Tools/AlertBar";
 import LeadsStatusPieChart from "../charts/LeadsStatusPieChart";
 import LeadsByDateBarChart from "../charts/LeadsByDateBarChart";
 import LeadsBySourceChart from "../charts/LeadsBySourceChart";
@@ -36,109 +37,87 @@ const Home = () => {
       </div>
     );
 
-  const handleClickUsers = () => navigate("/dashboard/users");
-  const handleClickRoles = () => navigate("/dashboard/roles");
-  const handleClickProjects = () => navigate("/dashboard/projects");
-  const handleClickLeads = () => navigate("/dashboard/leads");
-  const handleClickTasks = () => navigate("/dashboard/tasks");
-  const handleClickAttendance = () => navigate("/dashboard/attendance");
-  const handleClickActivityLog = () => navigate("/dashboard/logs");
-
   return (
     <div className="flex-col flex-grow p-6 font-rubik text-right space-y-6">
       {/* 🔔 פס התראות */}
       {(user?.admin_alert_dash === 1 || user?.user_alert_dash === 1) && (
         <div className="flex flex-wrap justify-center gap-3 max-w-5xl mx-auto text-center">
           {/* פניות חדשות */}
-          {((user?.admin_alert_dash === 1 &&
-            stats?.leads_by_user_status
-              ?.filter((l) => l.status === "חדש")
-              ?.reduce((sum, l) => sum + l.count, 0)) ||
-            (user?.user_alert_dash === 1 &&
-              stats?.leads_by_user_status
-                ?.filter(
-                  (l) => l.user_id === user.user_id && l.status === "חדש"
-                )
-                ?.reduce((sum, l) => sum + l.count, 0))) > 0 && (
-            <div
-              onClick={() => navigate("/dashboard/leads")}
-              className="flex items-center bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 text-yellow-700 shadow-sm"
-            >
-              <span className="text-lg mr-2">📩</span>
-              <span className="text-base font-medium">
-                {user?.admin_alert_dash
-                  ? stats?.leads_by_user_status
-                      ?.filter((l) => l.status === "חדש")
-                      ?.reduce((sum, l) => sum + l.count, 0)
-                  : stats?.leads_by_user_status
-                      ?.filter(
-                        (l) => l.user_id === user.user_id && l.status === "חדש"
-                      )
-                      ?.reduce((sum, l) => sum + l.count, 0)}{" "}
-                פניות חדשות לטיפול
-              </span>
-            </div>
-          )}
+          {(() => {
+            const leadsCount =
+              (user?.admin_alert_dash === 1 &&
+                stats?.leads_by_user_status
+                  ?.filter((l) => l.status === "חדש")
+                  ?.reduce((sum, l) => sum + l.count, 0)) ||
+              (user?.user_alert_dash === 1 &&
+                stats?.leads_by_user_status
+                  ?.filter(
+                    (l) => l.user_id === user.user_id && l.status === "חדש"
+                  )
+                  ?.reduce((sum, l) => sum + l.count, 0));
+            return (
+              leadsCount > 0 && (
+                <AlertBar
+                  icon="📩"
+                  count={leadsCount}
+                  text="פניות חדשות לטיפול"
+                  color="yellow"
+                  onClick={() => navigate("/dashboard/leads")}
+                />
+              )
+            );
+          })()}
 
           {/* משימות חדשות */}
-          {((user?.admin_alert_dash === 1 &&
-            stats?.tasks_by_user_status
-              ?.filter((t) => t.status === "חדש")
-              ?.reduce((sum, t) => sum + t.count, 0)) ||
-            (user?.user_alert_dash === 1 &&
-              stats?.tasks_by_user_status
-                ?.filter(
-                  (t) => t.user_id === user.user_id && t.status === "חדש"
-                )
-                ?.reduce((sum, t) => sum + t.count, 0))) > 0 && (
-            <div
-              onClick={() => navigate("/dashboard/tasks")}
-              className="flex items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-blue-700 shadow-sm"
-            >
-              <span className="text-lg mr-2">📝</span>
-              <span className="text-base font-medium">
-                {user?.admin_alert_dash
-                  ? stats?.tasks_by_user_status
-                      ?.filter((t) => t.status === "חדש")
-                      ?.reduce((sum, t) => sum + t.count, 0)
-                  : stats?.tasks_by_user_status
-                      ?.filter(
-                        (t) => t.user_id === user.user_id && t.status === "חדש"
-                      )
-                      ?.reduce((sum, t) => sum + t.count, 0)}{" "}
-                משימות חדשות לטיפול
-              </span>
-            </div>
-          )}
+          {(() => {
+            const tasksCount =
+              (user?.admin_alert_dash === 1 &&
+                stats?.tasks_by_user_status
+                  ?.filter((t) => t.status === "חדש")
+                  ?.reduce((sum, t) => sum + t.count, 0)) ||
+              (user?.user_alert_dash === 1 &&
+                stats?.tasks_by_user_status
+                  ?.filter(
+                    (t) => t.user_id === user.user_id && t.status === "חדש"
+                  )
+                  ?.reduce((sum, t) => sum + t.count, 0));
+            return (
+              tasksCount > 0 && (
+                <AlertBar
+                  icon="📝"
+                  count={tasksCount}
+                  text="משימות חדשות לטיפול"
+                  color="blue"
+                  onClick={() => navigate("/dashboard/tasks")}
+                />
+              )
+            );
+          })()}
 
           {/* משימות חורגות */}
-          {((user?.admin_alert_dash === 1 &&
-            stats?.tasks_overdue?.reduce(
-              (sum, t) => sum + t.overdue_count,
-              0
-            )) ||
-            (user?.user_alert_dash === 1 &&
-              (stats?.tasks_overdue?.find((t) => t.user_id === user.user_id)
-                ?.overdue_count ||
-                0))) > 0 && (
-            <div
-              onClick={() => navigate("/dashboard/tasks")}
-              className="flex items-center bg-red-50 border border-red-200 rounded-lg px-4 py-2 text-red-700 shadow-sm"
-            >
-              <span className="text-lg mr-2">⏰</span>
-              <span className="text-base font-medium">
-                {user?.admin_alert_dash
-                  ? stats?.tasks_overdue?.reduce(
-                      (sum, t) => sum + t.overdue_count,
-                      0
-                    )
-                  : stats?.tasks_overdue?.find(
-                      (t) => t.user_id === user.user_id
-                    )?.overdue_count || 0}{" "}
-                משימות חורגות מטיפול !!
-              </span>
-            </div>
-          )}
+          {(() => {
+            const overdueCount =
+              (user?.admin_alert_dash === 1 &&
+                stats?.tasks_overdue?.reduce(
+                  (sum, t) => sum + t.overdue_count,
+                  0
+                )) ||
+              (user?.user_alert_dash === 1 &&
+                (stats?.tasks_overdue?.find((t) => t.user_id === user.user_id)
+                  ?.overdue_count ||
+                  0));
+            return (
+              overdueCount > 0 && (
+                <AlertBar
+                  icon="⏰"
+                  count={overdueCount}
+                  text="משימות חורגות מטיפול !!"
+                  color="red"
+                  onClick={() => navigate("/dashboard/tasks")}
+                />
+              )
+            );
+          })()}
         </div>
       )}
 
@@ -315,7 +294,7 @@ const Home = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* נוכחות */}
         <div
-          onClick={handleClickAttendance}
+          onClick={() => navigate("/dashboard/attendance")}
           className="bg-white rounded-xl shadow p-6 cursor-pointer"
         >
           <h3 className="text-center text-lg font-bold text-gray-700 mb-4">
@@ -345,7 +324,7 @@ const Home = () => {
 
         {/* לוגים */}
         <div
-          onClick={handleClickActivityLog}
+          onClick={() => navigate("/dashboard/logs")}
           className="bg-white rounded-xl shadow p-6 cursor-pointer"
         >
           <h3 className="text-center text-lg font-bold text-gray-700 mb-4">
