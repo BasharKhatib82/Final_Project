@@ -104,10 +104,10 @@ const EditRole = () => {
   };
 
   return (
-    <div className="flex justify-center items-center pt-10">
+    <div className="flex justify-center items-center pt-6">
       <form
         onSubmit={handleSubmit}
-        className="w-[90%] max-w-5xl bg-white/85 shadow-md rounded-lg p-8 space-y-6"
+        className="w-[90%] max-w-5xl bg-white/85 shadow-md rounded-lg p-8 space-y-4"
       >
         <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
           עדכון פרטי תפקיד
@@ -155,19 +155,6 @@ const EditRole = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* סטטוס */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">סטטוס</label>
-          <select
-            value={active}
-            onChange={(e) => setActive(Number(e.target.value))}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
-          >
-            <option value={1}>פעיל</option>
-            <option value={0}>לא פעיל</option>
-          </select>
         </div>
 
         {/* כפתורים */}
