@@ -1,7 +1,7 @@
 import { db } from "../utils/dbSingleton.js";
 import express from "express";
 import jwt from "jsonwebtoken";
-import { verifyToken } from "../utils/verifyToken.js";
+import verifyToken from "../utils/verifyToken.js";
 import { setAuthCookie, clearAuthCookie } from "../utils/authCookies.js";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
