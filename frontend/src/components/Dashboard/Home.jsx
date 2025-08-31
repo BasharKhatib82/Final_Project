@@ -158,10 +158,10 @@ const Home = () => {
             items={
               stats?.users?.online_list?.length > 0
                 ? stats.users.online_list.map((u) => ({
-                    label: `${u.name} - ${u.role}`,
-                    value: "●",
+                    label: "🟢",
+                    value: `${u.name} - ${u.role}`,
                   }))
-                : [{ label: "אין משתמשים מחוברים", value: "" }]
+                : [{ label: "אין משתמשים מחוברים", value: null }]
             }
             onClick={() => navigate("/dashboard/users")}
           />
