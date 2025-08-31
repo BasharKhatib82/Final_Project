@@ -10,10 +10,17 @@ const api = process.env.REACT_APP_API_URL;
 // כמו ב-AddRole
 const permissionsSchema = {
   "לוח בקרה": [
+    { key: "dashboard_access", label: "גישה ל-דשבורד" },
     { key: "admin_alert_dash", label: "התראות מנהל" },
     { key: "user_alert_dash", label: "התראות משתמש" },
-    { key: "admin_status_dash", label: "סטטוס מנהל" },
-    { key: "user_status_dash", label: "סטטוס משתמש" },
+    { key: "admin_status_dash", label: "סטטוסים מנהל" },
+    { key: "user_status_dash", label: "סטטוסים משתמש" },
+  ],
+  "ניהול תפקידים": [
+    { key: "roles_page_access", label: "גישה לדף התפקידים" },
+    { key: "permission_add_role", label: "יצירת תפקיד חדש" },
+    { key: "permission_edit_role", label: "עריכת תפקיד קיים" },
+    { key: "permission_delete_role", label: "עדכון פרטי תפקיד" },
   ],
   "ניהול משתמשים": [{ key: "can_manage_users", label: "ניהול משתמשים" }],
   "צפייה בדוחות": [{ key: "can_view_reports", label: "צפייה בדוחות" }],

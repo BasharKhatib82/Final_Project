@@ -3,35 +3,10 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
+import { permissionsSchema, roleDataTemplate } from "../constants/permissions";
 import Popup from "../Tools/Popup";
 
 const api = process.env.REACT_APP_API_URL;
-
-const permissionsSchema = {
-  "לוח בקרה": [
-    { key: "admin_alert_dash", label: "התראות מנהל" },
-    { key: "user_alert_dash", label: "התראות משתמש" },
-    { key: "admin_status_dash", label: "סטטוס מנהל" },
-    { key: "user_status_dash", label: "סטטוס משתמש" },
-  ],
-  "ניהול משתמשים": [{ key: "can_manage_users", label: "ניהול משתמשים" }],
-  "צפייה בדוחות": [{ key: "can_view_reports", label: "צפייה בדוחות" }],
-  "שייך פניות": [
-    { key: "can_assign_leads", label: "שייך פניות" },
-    { key: "lead_add_btn", label: "הוספת פנייה ידנית" },
-  ],
-  "עריכת קורסים": [{ key: "can_edit_courses", label: "עריכת קורסים" }],
-  "ניהול משימות": [{ key: "can_manage_tasks", label: "ניהול משימות" }],
-  "גישה לכל הנתונים": [
-    { key: "can_access_all_data", label: "גישה לכל הנתונים" },
-  ],
-  "נוכחות ושעות עבודה": [
-    { key: "attendance_clock_self", label: "כניסה / יציאה" },
-    { key: "attendance_add_btn", label: "הוספת נוכחות ידנית" },
-    { key: "attendance_edit_btn", label: "עריכת נוכחות" },
-    { key: "attendance_view_team", label: "צפייה בנוכחות של כל העובדים" },
-  ],
-};
 
 const AddRole = () => {
   const [roleName, setRoleName] = useState("");
@@ -63,27 +38,8 @@ const AddRole = () => {
       return;
     }
 
-    // הכנה לשדות שהשרת מצפה להם
-    const roleData = {
-      role_name: roleName,
-      admin_alert_dash: 0,
-      user_alert_dash: 0,
-      admin_status_dash: 0,
-      user_status_dash: 0,
-      role_management: 0,
-      can_manage_users: 0,
-      can_view_reports: 0,
-      can_assign_leads: 0,
-      lead_add_btn: 0,
-      can_edit_courses: 0,
-      can_manage_tasks: 0,
-      can_access_all_data: 0,
-      attendance_clock_self: 0,
-      attendance_add_btn: 0,
-      attendance_edit_btn: 0,
-      attendance_view_team: 0,
-      active: 1,
-    };
+    // יוצרים עותק מהתבנית ומוסיפים את שם התפקיד
+    const roleData = { ...roleDataTemplate, role_name: roleName };
 
     // לעדכן 1 לפי הצ'קבוקסים שנבחרו
     selectedPermissions.forEach((perm) => {
