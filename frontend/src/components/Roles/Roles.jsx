@@ -9,8 +9,6 @@ import { permissionsSchema } from "../../constants/permissions";
 
 const api = process.env.REACT_APP_API_URL;
 
-const user = useUser.user;
-
 const isActive = (el) => el === true || el === 1 || el === "1";
 
 const mapRole = (r) => ({
@@ -36,6 +34,7 @@ export default function Roles() {
     role_id: null,
   });
   const navigate = useNavigate();
+  const { user } = useUser();
 
   useEffect(() => {
     fetchRoles();
