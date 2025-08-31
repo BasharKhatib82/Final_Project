@@ -5,7 +5,10 @@ const verifyToken = (req, res, next) => {
   try {
     //  נבדוק קודם אם יש טוקן בעוגיה או בכותרת Authorization
     const token =
-      req.cookies?.token || req.headers["authorization"]?.split(" ")[1];
+      req.cookies?.token ||
+      (req.headers["authorization"]?.startsWith("Bearer ")
+        ? req.headers["authorization"].split(" ")[1]
+        : null);
 
     if (!token) {
       return res
