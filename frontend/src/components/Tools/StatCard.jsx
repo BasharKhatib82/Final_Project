@@ -1,3 +1,4 @@
+// StatCard.jsx
 import React from "react";
 
 export default function StatCard({
@@ -10,7 +11,10 @@ export default function StatCard({
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 w-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+      className="bg-white rounded-xl shadow hover:shadow-lg 
+                 p-4 h-56 w-64 flex flex-col 
+                 cursor-pointer transition-transform 
+                 duration-200 hover:-translate-y-1"
     >
       {/* אייקון */}
       <div className="flex justify-center items-center">
@@ -21,12 +25,22 @@ export default function StatCard({
       <h4 className="text-center text-lg font-bold text-gray-700">{title}</h4>
 
       {/* פריטים */}
-      <ul className="text-sm text-gray-600 text-center">
-        {items.map((item, i) => (
-          <li key={i}>
-            {item.label} {item.value}
-          </li>
-        ))}
+      <ul className="text-sm text-gray-600 text-center flex-grow flex flex-col justify-center">
+        {items.length > 0 ? (
+          items.map((item, i) => (
+            <li
+              key={i}
+              className="truncate flex justify-center items-center gap-2"
+            >
+              {item.value && (
+                <span className="font-bold text-gray-800">{item.value}</span>
+              )}
+              <span>{item.label}</span>
+            </li>
+          ))
+        ) : (
+          <li className="text-gray-400 italic">אין נתונים</li>
+        )}
       </ul>
     </div>
   );

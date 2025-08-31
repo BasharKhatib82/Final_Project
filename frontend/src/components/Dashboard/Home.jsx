@@ -131,7 +131,7 @@ const Home = () => {
 
       {/* כרטיסי סטטיסטיקה */}
       <div className="flex justify-center">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
           {/* 👥 עובדים */}
           {user?.admin_status_dash === 1 && (
             <StatCard
@@ -159,10 +159,10 @@ const Home = () => {
               items={
                 stats?.users?.online_list?.length > 0
                   ? stats.users.online_list.map((u) => ({
-                      label: "🟢",
-                      value: `${u.name} - ${u.role}`,
+                      label: `${u.name} - ${u.role}`,
+                      value: "●",
                     }))
-                  : [{ label: "אין משתמשים מחוברים", value: null }]
+                  : []
               }
               onClick={() => navigate("/dashboard/users")}
             />
