@@ -4,42 +4,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import ExitButton from "../Buttons/ExitButton";
 import AddSaveButton from "../Buttons/AddSaveButton";
 import Popup from "../Tools/Popup";
+import { permissionsSchema, roleDataTemplate } from "../constants/permissions";
 
 const api = process.env.REACT_APP_API_URL;
-
-// כמו ב-AddRole
-const permissionsSchema = {
-  "לוח בקרה": [
-    { key: "dashboard_access", label: "גישה ל-דשבורד" },
-    { key: "admin_alert_dash", label: "התראות מנהל" },
-    { key: "user_alert_dash", label: "התראות משתמש" },
-    { key: "admin_status_dash", label: "סטטוסים מנהל" },
-    { key: "user_status_dash", label: "סטטוסים משתמש" },
-  ],
-  "ניהול תפקידים": [
-    { key: "roles_page_access", label: "גישה לדף התפקידים" },
-    { key: "permission_add_role", label: "יצירת תפקיד חדש" },
-    { key: "permission_edit_role", label: "עריכת תפקיד קיים" },
-    { key: "permission_delete_role", label: "עדכון פרטי תפקיד" },
-  ],
-  "ניהול משתמשים": [{ key: "can_manage_users", label: "ניהול משתמשים" }],
-  "צפייה בדוחות": [{ key: "can_view_reports", label: "צפייה בדוחות" }],
-  "שייך פניות": [
-    { key: "can_assign_leads", label: "שייך פניות" },
-    { key: "lead_add_btn", label: "הוספת פנייה ידנית" },
-  ],
-  "עריכת קורסים": [{ key: "can_edit_courses", label: "עריכת קורסים" }],
-  "ניהול משימות": [{ key: "can_manage_tasks", label: "ניהול משימות" }],
-  "גישה לכל הנתונים": [
-    { key: "can_access_all_data", label: "גישה לכל הנתונים" },
-  ],
-  "נוכחות ושעות עבודה": [
-    { key: "attendance_clock_self", label: "כניסה / יציאה" },
-    { key: "attendance_add_btn", label: "הוספת נוכחות ידנית" },
-    { key: "attendance_edit_btn", label: "עריכת נוכחות" },
-    { key: "attendance_view_team", label: "צפייה בנוכחות של כל העובדים" },
-  ],
-};
 
 const EditRole = () => {
   const { id } = useParams();
@@ -101,16 +68,15 @@ const EditRole = () => {
 
   const confirmUpdate = () => {
     // נכין את הנתונים כמו שהשרת מצפה (0/1)
-    const roleData = {
-      role_name: roleName,
-      active,
-    };
+    const roleData = { ...roleDataTemplate, role_name: roleName, active };
 
-    // נאפס את כל המפתחות ל-0
+    // לעדכן לפי ה־checkboxים
     Object.values(permissionsSchema)
       .flat()
       .forEach((perm) => {
-        roleData[perm.key] = selectedPermissions.includes(perm.key) ? 1 : 0;
+        if (perm.key) {
+          roleData[perm.key] = selectedPermissions.includes(perm.key) ? 1 : 0;
+        }
       });
 
     axios
