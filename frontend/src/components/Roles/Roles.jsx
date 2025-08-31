@@ -21,7 +21,7 @@ const mapRole = (r) => ({
   active: isActive(r.active),
 
   // 👇 ניצור שדה ידידותי בעברית — ישמש גם לייצוא
-  status_human: isActive(r.active) ? "פעיל" : "לא פעיל",
+  status_human: isActive(r.active) ? "תפקיד פעיל" : "תפקיד לא פעיל",
 });
 
 const renderCheck = (v) => (
@@ -32,7 +32,7 @@ const renderCheck = (v) => (
 
 const renderCheckActive = (v) => (
   <span className={v ? "text-green-600" : "text-red-500"}>
-    {v ? "פעיל" : "לא פעיל"}
+    {v ? "תפקיד פעיל" : "תפקיד לא פעיל"}
   </span>
 );
 
@@ -185,9 +185,9 @@ export default function Roles() {
       label: "סטטוס",
       type: "select",
       options: [
-        { value: "true", label: "פעיל" },
-        { value: "false", label: "לא פעיל" },
-        { value: "", label: "כל הסטטוסים" },
+        { value: "true", label: "תפקידים פעילים" },
+        { value: "false", label: "תפקידים לא פעיל" },
+        { value: "", label: "כל התפקידים" },
       ],
     },
   ];
