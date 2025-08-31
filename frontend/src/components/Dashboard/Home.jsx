@@ -48,7 +48,7 @@ const Home = () => {
     <div className="flex-col flex-grow p-6 font-rubik text-right space-y-6">
       {/* 🔔 פס התראות */}
       {(user?.admin_alert_dash === 1 || user?.user_alert_dash === 1) && (
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap justify-center gap-3 max-w-5xl mx-auto text-center">
           {/* פניות חדשות */}
           {((user?.admin_alert_dash === 1 &&
             stats?.leads_by_user_status
@@ -60,9 +60,12 @@ const Home = () => {
                   (l) => l.user_id === user.user_id && l.status === "חדש"
                 )
                 ?.reduce((sum, l) => sum + l.count, 0))) > 0 && (
-            <div className="flex items-center bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 text-yellow-700 shadow-sm">
+            <div
+              onClick={() => navigate("/dashboard/leads")}
+              className="flex items-center bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2 text-yellow-700 shadow-sm"
+            >
               <span className="text-lg mr-2">📩</span>
-              <span className="text-sm font-medium">
+              <span className="text-base font-medium">
                 {user?.admin_alert_dash
                   ? stats?.leads_by_user_status
                       ?.filter((l) => l.status === "חדש")
@@ -72,7 +75,7 @@ const Home = () => {
                         (l) => l.user_id === user.user_id && l.status === "חדש"
                       )
                       ?.reduce((sum, l) => sum + l.count, 0)}{" "}
-                פניות חדשות
+                פניות חדשות לטיפול
               </span>
             </div>
           )}
@@ -88,9 +91,12 @@ const Home = () => {
                   (t) => t.user_id === user.user_id && t.status === "חדש"
                 )
                 ?.reduce((sum, t) => sum + t.count, 0))) > 0 && (
-            <div className="flex items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-blue-700 shadow-sm">
+            <div
+              onClick={() => navigate("/dashboard/tasks")}
+              className="flex items-center bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 text-blue-700 shadow-sm"
+            >
               <span className="text-lg mr-2">📝</span>
-              <span className="text-sm font-medium">
+              <span className="text-base font-medium">
                 {user?.admin_alert_dash
                   ? stats?.tasks_by_user_status
                       ?.filter((t) => t.status === "חדש")
@@ -100,7 +106,7 @@ const Home = () => {
                         (t) => t.user_id === user.user_id && t.status === "חדש"
                       )
                       ?.reduce((sum, t) => sum + t.count, 0)}{" "}
-                משימות חדשות
+                משימות חדשות לטיפול
               </span>
             </div>
           )}
@@ -115,9 +121,12 @@ const Home = () => {
               (stats?.tasks_overdue?.find((t) => t.user_id === user.user_id)
                 ?.overdue_count ||
                 0))) > 0 && (
-            <div className="flex items-center bg-red-50 border border-red-200 rounded-lg px-4 py-2 text-red-700 shadow-sm">
+            <div
+              onClick={() => navigate("/dashboard/tasks")}
+              className="flex items-center bg-red-50 border border-red-200 rounded-lg px-4 py-2 text-red-700 shadow-sm"
+            >
               <span className="text-lg mr-2">⏰</span>
-              <span className="text-sm font-medium">
+              <span className="text-base font-medium">
                 {user?.admin_alert_dash
                   ? stats?.tasks_overdue?.reduce(
                       (sum, t) => sum + t.overdue_count,
@@ -126,7 +135,7 @@ const Home = () => {
                   : stats?.tasks_overdue?.find(
                       (t) => t.user_id === user.user_id
                     )?.overdue_count || 0}{" "}
-                משימות חורגות
+                משימות חורגות מטיפול !!
               </span>
             </div>
           )}
@@ -137,7 +146,7 @@ const Home = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* עובדים */}
         <div
-          onClick={handleClickUsers}
+          onClick={() => navigate("/dashboard/users")}
           className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center">
@@ -163,7 +172,7 @@ const Home = () => {
 
         {/* מחוברים */}
         <div
-          onClick={handleClickUsers}
+          onClick={() => navigate("/dashboard/users")}
           className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center">
@@ -185,7 +194,7 @@ const Home = () => {
 
         {/* תפקידים */}
         <div
-          onClick={handleClickRoles}
+          onClick={() => navigate("/dashboard/roles")}
           className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center">
@@ -211,7 +220,7 @@ const Home = () => {
 
         {/* פרויקטים */}
         <div
-          onClick={handleClickProjects}
+          onClick={() => navigate("/dashboard/projects")}
           className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center">
@@ -237,7 +246,7 @@ const Home = () => {
 
         {/* פניות */}
         <div
-          onClick={handleClickLeads}
+          onClick={() => navigate("/dashboard/leads")}
           className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center">
@@ -261,7 +270,7 @@ const Home = () => {
 
         {/* משימות */}
         <div
-          onClick={handleClickTasks}
+          onClick={() => navigate("/dashboard/tasks")}
           className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
         >
           <div className="flex justify-center items-center">
