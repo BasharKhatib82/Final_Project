@@ -12,7 +12,7 @@ import {
   FcRules,
   FcAlarmClock,
   FcSurvey,
-  ImUsers,
+  FcAssistant,
   FcBriefcase,
 } from "react-icons/fc";
 
@@ -133,7 +133,7 @@ const Home = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* עובדים */}
         <StatCard
-          icon={<ImUsers />}
+          icon={<FcAssistant />}
           iconColor="bg-blue-100 text-blue-600"
           title="עובדים"
           items={[
