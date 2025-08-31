@@ -57,11 +57,11 @@ router.post("/add", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ שליפת תפקידים פעילים (ללא תפקיד המנכ"ל role_id=1)
+// ✅ שליפת תפקידים פעילים (כולל מנכ"ל)
 router.get("/active", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query(
-      "SELECT * FROM roles_permissions WHERE active = 1 AND role_id <> 1 ORDER BY role_id ASC"
+      "SELECT * FROM roles_permissions WHERE active = 1 ORDER BY role_id ASC"
     );
     return res.status(200).json({ Status: true, Roles: results });
   } catch (err) {
@@ -115,9 +115,16 @@ router.get("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ עדכון תפקיד לפי מזהה
+// ✅ עדכון תפקיד לפי מזהה (מנכ"ל חסום)
 router.put("/:id", verifyToken, async (req, res) => {
-  const role_id = req.params.id;
+  const role_id = parseInt(req.params.id, 10);
+
+  if (role_id === 1) {
+    return res
+      .status(403)
+      .json({ Status: false, Error: 'לא ניתן לערוך את תפקיד המנכ"ל' });
+  }
+
   const { role_name, active } = req.body;
 
   if (!role_name || typeof role_name !== "string" || role_name.trim() === "") {
@@ -169,9 +176,16 @@ router.put("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ מחיקה לוגית של תפקיד (active=0)
+// ✅ מחיקה לוגית של תפקיד (active=0, מנכ"ל חסום)
 router.put("/delete/:id", verifyToken, async (req, res) => {
-  const roleId = req.params.id;
+  const roleId = parseInt(req.params.id, 10);
+
+  if (roleId === 1) {
+    return res
+      .status(403)
+      .json({ Status: false, Error: 'לא ניתן למחוק את תפקיד המנכ"ל' });
+  }
+
   try {
     const [result] = await db.query(
       "UPDATE roles_permissions SET active = 0 WHERE role_id = ?",

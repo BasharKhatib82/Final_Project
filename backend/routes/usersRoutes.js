@@ -100,12 +100,12 @@ router.post("/add", verifyToken, async (req, res) => {
   } = req.body;
 
   if (
+    !user_id ||
     !first_name ||
     !last_name ||
     !email ||
     !role_id ||
-    !password ||
-    !user_id
+    !password
   ) {
     return res.status(400).json({ success: false, message: "שדות חובה חסרים" });
   }
@@ -146,9 +146,17 @@ router.post("/add", verifyToken, async (req, res) => {
   }
 });
 
-// עדכון משתמש
+// עדכון משתמש (🛑 לא כולל user_id=1)
 router.put("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
+
+  if (parseInt(id, 10) === 1) {
+    return res.status(403).json({
+      success: false,
+      message: 'לא ניתן לערוך את משתמש המנכ"ל',
+    });
+  }
+
   const { first_name, last_name, phone_number, email, role_id, notes, active } =
     req.body;
 
@@ -187,9 +195,16 @@ router.put("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// מחיקה לוגית (השבתה)
+// מחיקה לוגית (🛑 לא כולל user_id=1)
 router.put("/delete/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
+
+  if (parseInt(id, 10) === 1) {
+    return res.status(403).json({
+      success: false,
+      message: 'לא ניתן למחוק את משתמש המנכ"ל',
+    });
+  }
 
   try {
     const [result] = await db.query(
@@ -209,7 +224,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמשים פעילים עם שם תפקיד (ללא המנכ"ל user_id=1)
+// שליפת משתמשים פעילים עם שם תפקיד (🛑 ללא user_id=1)
 router.get("/active", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query(
@@ -225,7 +240,7 @@ router.get("/active", verifyToken, async (req, res) => {
        FROM users u
        LEFT JOIN roles_permissions r ON u.role_id = r.role_id
        WHERE u.active = 1
-         AND u.user_id <> 315483032`
+         AND u.user_id <> 1`
     );
     res.json({ success: true, Result: results });
   } catch (err) {
@@ -234,7 +249,7 @@ router.get("/active", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמשים לא פעילים עם שם תפקיד
+// שליפת משתמשים לא פעילים (🛑 גם כאן לא כולל user_id=1)
 router.get("/inactive", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query(
@@ -249,7 +264,8 @@ router.get("/inactive", verifyToken, async (req, res) => {
               u.active
        FROM users u
        LEFT JOIN roles_permissions r ON u.role_id = r.role_id
-       WHERE u.active = 0`
+       WHERE u.active = 0
+         AND u.user_id <> 1`
     );
     res.json({ success: true, Result: results });
   } catch (err) {
@@ -258,7 +274,7 @@ router.get("/inactive", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמש בודד לפי מזהה עם שם תפקיד
+// שליפת משתמש בודד לפי מזהה (כולל מנכ"ל אם צריך פרופיל אישי)
 router.get("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
 
@@ -290,7 +306,7 @@ router.get("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ שינוי סיסמה
+// ✅ שינוי סיסמה (מותר גם למנכ"ל)
 router.put("/change-password/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { currentPassword, newPassword } = req.body;
@@ -303,22 +319,17 @@ router.put("/change-password/:id", verifyToken, async (req, res) => {
   }
 
   try {
-    // שליפת סיסמה מוצפנת מה־DB
     const [rows] = await db.query(
       "SELECT password FROM users WHERE user_id = ?",
       [id]
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "משתמש לא נמצא",
-      });
+      return res.status(404).json({ success: false, message: "משתמש לא נמצא" });
     }
 
     const hashedPassword = rows[0].password;
 
-    // ✅ בדיקת סיסמה נוכחית
     const isMatch = await bcrypt.compare(currentPassword, hashedPassword);
     if (!isMatch) {
       return res.status(401).json({
@@ -327,27 +338,20 @@ router.put("/change-password/:id", verifyToken, async (req, res) => {
       });
     }
 
-    // ✅ הצפנת סיסמה חדשה
     const salt = await bcrypt.genSalt(10);
     const newHashedPassword = await bcrypt.hash(newPassword, salt);
 
-    // ✅ עדכון סיסמה במסד הנתונים
     await db.query(
       "UPDATE users SET password = ?, last_password_change = NOW() WHERE user_id = ?",
       [newHashedPassword, id]
     );
 
     logAction(`שינוי סיסמה למשתמש #${id}`)(req, res, () => {});
-    res.json({
-      success: true,
-      message: "הסיסמה עודכנה בהצלחה",
-    });
+    res.json({ success: true, message: "הסיסמה עודכנה בהצלחה" });
   } catch (err) {
     console.error("❌ שגיאה בשינוי סיסמה:", err);
-    res.status(500).json({
-      success: false,
-      message: "שגיאת שרת בשינוי סיסמה",
-    });
+    res.status(500).json({ success: false, message: "שגיאת שרת בשינוי סיסמה" });
   }
 });
+
 export default router;

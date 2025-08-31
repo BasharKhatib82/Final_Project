@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 const verifyToken = (req, res, next) => {
   try {
-    // 🔑 נבדוק קודם אם יש טוקן בעוגיה או בכותרת Authorization
+    //  נבדוק קודם אם יש טוקן בעוגיה או בכותרת Authorization
     const token =
       req.cookies?.token || req.headers["authorization"]?.split(" ")[1];
 
