@@ -85,10 +85,10 @@ const Home = () => {
             return (
               tasksCount > 0 && (
                 <AlertBar
-                  icon="📝"
-                  count={<FcInspection />}
+                  icon={<FcInspection />}
+                  count={tasksCount}
                   text="משימות חדשות לטיפול"
-                  color="blue"
+                  color="yellow"
                   onClick={() => navigate("/dashboard/tasks")}
                 />
               )
