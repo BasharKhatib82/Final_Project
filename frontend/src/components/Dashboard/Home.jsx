@@ -153,7 +153,7 @@ const Home = () => {
             stats?.users?.online_list?.map((u) => ({
               label: `${u.name} - ${u.role}`,
               value: "●",
-            })) || []
+            })) || [{ label: "אין משתמשים מחוברים", value: "" }]
           }
           onClick={() => navigate("/dashboard/users")}
         />
