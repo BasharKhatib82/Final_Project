@@ -27,15 +27,8 @@ export default function Users() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get(`${api}/auth/check`, { withCredentials: true })
-      .then((res) => {
-        if (res?.data?.loggedIn) {
-          fetchUsers();
-        } else navigate("/unauthorized");
-      })
-      .catch(() => navigate("/unauthorized"));
-  }, [navigate]);
+    fetchUsers();
+  }, []);
 
   const fetchUsers = () => {
     setLoading(true);

@@ -3,8 +3,6 @@ import axios from "axios";
 
 const UserContext = createContext();
 
-const api = process.env.REACT_APP_API_URL;
-
 export const useUser = () => useContext(UserContext);
 
 export const UserProvider = ({ children }) => {
@@ -13,19 +11,18 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const fetchUser = async () => {
       try {
-        const res = await axios.get(`${api}/auth/check`, {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          `${process.env.REACT_APP_API_URL}/auth/me`,
+          {
+            withCredentials: true, // ⬅️ חובה כדי לשלוח את ה-cookie
+          }
+        );
 
-        if (res.data.loggedIn) {
-          setUser(res.data.user);
-        } else {
-          setUser(null);
-        }
+        setUser(res.data.user);
       } catch (err) {
-        console.error("Auth Check Failed:", err);
+        console.error("Auth check failed:", err);
         setUser(null);
       } finally {
         setAuthChecked(true);
@@ -33,20 +30,18 @@ export const UserProvider = ({ children }) => {
       }
     };
 
-    checkAuth();
+    fetchUser();
   }, []);
 
   const logout = () => {
     axios
       .post(
-        `${api}/auth/logout`,
-        { user_id: user?.user_id },
+        `${process.env.REACT_APP_API_URL}/auth/logout`,
+        {},
         { withCredentials: true }
       )
-      .then(() => {
-        setUser(null);
-      })
-      .catch((err) => console.error("Logout Error:", err));
+      .then(() => setUser(null))
+      .catch((err) => console.error("Logout error:", err));
   };
 
   return (

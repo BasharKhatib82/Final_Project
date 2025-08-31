@@ -1,6 +1,7 @@
 import { db } from "../utils/dbSingleton.js";
 import express from "express";
 import jwt from "jsonwebtoken";
+import { verifyToken } from "../utils/verifyToken.js";
 import { setAuthCookie, clearAuthCookie } from "../utils/authCookies.js";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
@@ -114,35 +115,8 @@ router.post("/login", async (req, res) => {
 //      בדיקת התחברות
 // ********************************************** /
 
-router.get("/check", async (req, res) => {
-  const token = req.cookies?.token;
-
-  if (!token) {
-    return res.json({ loggedIn: false });
-  }
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // active_tokens נבדוק אם הטוקן קיים בטבלה
-    const [rows] = await db.query(
-      "SELECT 1 FROM active_tokens WHERE token = ? AND user_id = ?",
-      [token, decoded.user_id]
-    );
-
-    if (rows.length === 0) {
-      return res.json({ loggedIn: false });
-    }
-
-    //  אם הכל תקין
-    return res.json({
-      loggedIn: true,
-      user: decoded,
-    });
-  } catch (err) {
-    console.error("Auth check error:", err);
-    return res.json({ loggedIn: false });
-  }
+router.get("/me", verifyToken, (req, res) => {
+  res.json({ user: req.user });
 });
 
 // ********************************************** /

@@ -49,14 +49,8 @@ export default function Roles() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get(`${api}/auth/check`, { withCredentials: true })
-      .then((res) => {
-        if (res?.data?.loggedIn) fetchRoles();
-        else navigate("/unauthorized");
-      })
-      .catch(() => navigate("/unauthorized"));
-  }, [navigate]);
+    fetchRoles();
+  }, []);
 
   const fetchRoles = () => {
     setLoading(true);
