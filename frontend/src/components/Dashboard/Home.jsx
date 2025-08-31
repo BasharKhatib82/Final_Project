@@ -3,11 +3,18 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../Tools/UserContext";
 import AlertBar from "../Tools/AlertBar";
+import StatCard from "../Tools/StatCard";
 import LeadsStatusPieChart from "../charts/LeadsStatusPieChart";
 import LeadsByDateBarChart from "../charts/LeadsByDateBarChart";
 import LeadsBySourceChart from "../charts/LeadsBySourceChart";
 import LeadsByUserChart from "../charts/LeadsByUserChart";
-import { FcRules, FcAlarmClock ,FcInspection} from "react-icons/fc";
+import {
+  FcRules,
+  FcAlarmClock,
+  FcSurvey,
+  ImUsers,
+  FcBriefcase,
+} from "react-icons/fc";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -85,7 +92,7 @@ const Home = () => {
             return (
               tasksCount > 0 && (
                 <AlertBar
-                  icon={<FcInspection />}
+                  icon={<FcSurvey />}
                   count={tasksCount}
                   text="משימות חדשות לטיפול"
                   color="yellow"
@@ -125,154 +132,83 @@ const Home = () => {
       {/* כרטיסי סטטיסטיקה */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
         {/* עובדים */}
-        <div
+        <StatCard
+          icon={<ImUsers />}
+          iconColor="bg-blue-100 text-blue-600"
+          title="עובדים"
+          items={[
+            { label: "פעילים", value: stats?.users?.active ?? 0 },
+            { label: "לא פעילים", value: stats?.users?.inactive ?? 0 },
+            { label: "מחוברים", value: stats?.users?.online_list?.length ?? 0 },
+          ]}
           onClick={() => navigate("/dashboard/users")}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
-        >
-          <div className="flex justify-center items-center">
-            <div className="bg-blue-100 text-blue-600 rounded-full p-3 text-2xl">
-              👥
-            </div>
-          </div>
-          <h4 className="text-center text-lg font-bold text-gray-700">
-            עובדים
-          </h4>
-          <ul className="text-sm text-gray-600 text-center">
-            <li>
-              פעילים: <strong>{stats?.users?.active ?? 0}</strong>
-            </li>
-            <li>
-              לא פעילים: <strong>{stats?.users?.inactive ?? 0}</strong>
-            </li>
-            <li>
-              מחוברים: <strong>{stats?.users?.online_list?.length ?? 0}</strong>
-            </li>
-          </ul>
-        </div>
+        />
 
         {/* מחוברים */}
-        <div
+        <StatCard
+          icon="🟢"
+          iconColor="bg-green-100 text-green-600"
+          title="מחוברים"
+          items={
+            stats?.users?.online_list?.map((u) => ({
+              label: `${u.name} - ${u.role}`,
+              value: "●",
+            })) || []
+          }
           onClick={() => navigate("/dashboard/users")}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
-        >
-          <div className="flex justify-center items-center">
-            <div className="bg-green-100 text-green-600 rounded-full p-3 text-2xl">
-              🟢
-            </div>
-          </div>
-          <h4 className="text-center text-lg font-bold text-gray-700">
-            מחוברים
-          </h4>
-          <ul className="text-sm text-gray-600 text-center">
-            {stats?.users?.online_list?.map((u, i) => (
-              <li key={i}>
-                <span className="text-green-500">●</span> {u.name} - {u.role}
-              </li>
-            ))}
-          </ul>
-        </div>
+        />
 
         {/* תפקידים */}
-        <div
+        <StatCard
+          icon="🛡️"
+          iconColor="bg-purple-100 text-purple-600"
+          title="תפקידים"
+          items={[
+            { label: 'סה"כ', value: stats?.roles?.total ?? 0 },
+            { label: "פעילים", value: stats?.roles?.active ?? 0 },
+            { label: "לא פעילים", value: stats?.roles?.inactive ?? 0 },
+          ]}
           onClick={() => navigate("/dashboard/roles")}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
-        >
-          <div className="flex justify-center items-center">
-            <div className="bg-purple-100 text-purple-600 rounded-full p-3 text-2xl">
-              🛡️
-            </div>
-          </div>
-          <h4 className="text-center text-lg font-bold text-gray-700">
-            תפקידים
-          </h4>
-          <ul className="text-sm text-gray-600 text-center">
-            <li>
-              סה"כ: <strong>{stats?.roles?.total ?? 0}</strong>
-            </li>
-            <li>
-              פעילים: <strong>{stats?.roles?.active ?? 0}</strong>
-            </li>
-            <li>
-              לא פעילים: <strong>{stats?.roles?.inactive ?? 0}</strong>
-            </li>
-          </ul>
-        </div>
+        />
 
         {/* פרויקטים */}
-        <div
+        <StatCard
+          icon={<FcBriefcase />}
+          iconColor="bg-indigo-100 text-indigo-600"
+          title="פרויקטים"
+          items={[
+            { label: 'סה"כ', value: stats?.projects?.total ?? 0 },
+            { label: "פעילים", value: stats?.projects?.active ?? 0 },
+            { label: "לא פעילים", value: stats?.projects?.inactive ?? 0 },
+          ]}
           onClick={() => navigate("/dashboard/projects")}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
-        >
-          <div className="flex justify-center items-center">
-            <div className="bg-indigo-100 text-indigo-600 rounded-full p-3 text-2xl">
-              💼
-            </div>
-          </div>
-          <h4 className="text-center text-lg font-bold text-gray-700">
-            פרויקטים
-          </h4>
-          <ul className="text-sm text-gray-600 text-center">
-            <li>
-              סה"כ: <strong>{stats?.projects?.total ?? 0}</strong>
-            </li>
-            <li>
-              פעילים: <strong>{stats?.projects?.active ?? 0}</strong>
-            </li>
-            <li>
-              לא פעילים: <strong>{stats?.projects?.inactive ?? 0}</strong>
-            </li>
-          </ul>
-        </div>
+        />
 
         {/* פניות */}
-        <div
+        <StatCard
+          icon={<FcRules />}
+          iconColor="bg-yellow-100 text-yellow-600"
+          title="פניות"
+          items={[
+            { label: "חדשות", value: stats?.leads?.new ?? 0 },
+            { label: "בטיפול", value: stats?.leads?.in_progress ?? 0 },
+            { label: "טופלו", value: stats?.leads?.completed ?? 0 },
+          ]}
           onClick={() => navigate("/dashboard/leads")}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
-        >
-          <div className="flex justify-center items-center">
-            <div className="bg-yellow-100 text-yellow-600 rounded-full p-3 text-2xl">
-              📩
-            </div>
-          </div>
-          <h4 className="text-center text-lg font-bold text-gray-700">פניות</h4>
-          <ul className="text-sm text-gray-600 text-center">
-            <li>
-              חדשות: <strong>{stats?.leads?.new ?? 0}</strong>
-            </li>
-            <li>
-              בטיפול: <strong>{stats?.leads?.in_progress ?? 0}</strong>
-            </li>
-            <li>
-              טופלו: <strong>{stats?.leads?.completed ?? 0}</strong>
-            </li>
-          </ul>
-        </div>
+        />
 
         {/* משימות */}
-        <div
+        <StatCard
+          icon={<FcSurvey />}
+          iconColor="bg-slate-100 text-yellow-600"
+          title="משימות"
+          items={[
+            { label: "חדשות", value: stats?.tasks?.new ?? 0 },
+            { label: "בטיפול", value: stats?.tasks?.in_progress ?? 0 },
+            { label: "טופלו", value: stats?.tasks?.completed ?? 0 },
+          ]}
           onClick={() => navigate("/dashboard/tasks")}
-          className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
-        >
-          <div className="flex justify-center items-center">
-            <div className="bg-slate-100 text-yellow-600 rounded-full p-3 text-2xl">
-              🔄
-            </div>
-          </div>
-          <h4 className="text-center text-lg font-bold text-gray-700">
-            משימות
-          </h4>
-          <ul className="text-sm text-gray-600 text-center">
-            <li>
-              חדשות: <strong>{stats?.tasks?.new ?? 0}</strong>
-            </li>
-            <li>
-              בטיפול: <strong>{stats?.tasks?.in_progress ?? 0}</strong>
-            </li>
-            <li>
-              טופלו: <strong>{stats?.tasks?.completed ?? 0}</strong>
-            </li>
-          </ul>
-        </div>
+        />
       </div>
 
       {/* 🟦 גרפים */}
