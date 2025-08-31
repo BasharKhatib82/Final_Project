@@ -24,7 +24,7 @@ export default function StatCard({
       <ul className="text-sm text-gray-600 text-center">
         {items.map((item, i) => (
           <li key={i}>
-            {item.label}: <strong>{item.value}</strong>
+            {item.label} {item.value}
           </li>
         ))}
       </ul>
