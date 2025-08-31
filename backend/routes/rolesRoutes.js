@@ -57,7 +57,7 @@ router.post("/add", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ שליפת תפקידים פעילים (כולל מנכ"ל)
+// ✅ שליפת תפקידים פעילים
 router.get("/active", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query(
@@ -115,7 +115,7 @@ router.get("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ עדכון תפקיד לפי מזהה (מנכ"ל חסום)
+// ✅ עדכון תפקיד לפי מזהה (מנהל כללי חסום)
 router.put("/:id", verifyToken, async (req, res) => {
   const role_id = parseInt(req.params.id, 10);
 
@@ -132,7 +132,7 @@ router.put("/:id", verifyToken, async (req, res) => {
   }
 
   try {
-    // מניעת כפילות שם (מלבד התפקיד עצמו)
+    // מניעת כפילות שם תפקיד (למעט התפקיד הנוכחי)
     const [dup] = await db.query(
       "SELECT 1 FROM roles_permissions WHERE role_name=? AND role_id<>?",
       [role_name.trim(), role_id]

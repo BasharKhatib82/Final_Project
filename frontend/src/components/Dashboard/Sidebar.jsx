@@ -38,7 +38,7 @@ const Sidebar = () => {
         icon: <FaHome />,
       },
 
-      user.role_management === 1 && {
+      user.roles_page_access === 1 && {
         label: "ניהול תפקידים",
         to: "/dashboard/roles",
         icon: <FaUserShield />,
