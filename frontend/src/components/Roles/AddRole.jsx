@@ -11,6 +11,8 @@ const permissionsSchema = {
   "לוח בקרה": [
     { key: "admin_alert_dash", label: "התראות מנהל" },
     { key: "user_alert_dash", label: "התראות משתמש" },
+    { key: "admin_status_dash", label: "סטטוס מנהל" },
+    { key: "user_status_dash", label: "סטטוס משתמש" },
   ],
   "ניהול משתמשים": [{ key: "can_manage_users", label: "ניהול משתמשים" }],
   "צפייה בדוחות": [{ key: "can_view_reports", label: "צפייה בדוחות" }],
@@ -66,6 +68,8 @@ const AddRole = () => {
       role_name: roleName,
       admin_alert_dash: 0,
       user_alert_dash: 0,
+      admin_status_dash: 0,
+      user_status_dash: 0,
       role_management: 0,
       can_manage_users: 0,
       can_view_reports: 0,

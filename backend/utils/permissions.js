@@ -5,6 +5,8 @@ export const roleFields = [
   // הרשאות
   "admin_alert_dash",
   "user_alert_dash",
+  "admin_status_dash",
+  "user_status_dash",
   "role_management",
   "can_manage_users",
   "can_view_reports",
