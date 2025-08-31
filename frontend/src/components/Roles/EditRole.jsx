@@ -155,6 +155,18 @@ const EditRole = () => {
               </div>
             </div>
           ))}
+          {/* סטטוס */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">סטטוס</label>
+            <select
+              value={active}
+              onChange={(e) => setActive(Number(e.target.value))}
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
+            >
+              <option value={1}>תפקיד פעיל</option>
+              <option value={0}>תפקיד לא פעיל</option>
+            </select>
+          </div>
         </div>
 
         {/* כפתורים */}

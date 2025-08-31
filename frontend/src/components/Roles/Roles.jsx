@@ -4,31 +4,16 @@ import { useNavigate } from "react-router-dom";
 import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
 import ReportView from "../Reports/ReportView";
+import { permissionsSchema } from "../../constants/permissions";
 
 const api = process.env.REACT_APP_API_URL;
-const asBool = (v) => v === true || v === 1 || v === "1";
 const isActive = (el) => el === true || el === 1 || el === "1";
 
 const mapRole = (r) => ({
   ...r,
-  role_management: asBool(r.role_management),
-  can_manage_users: asBool(r.can_manage_users),
-  can_view_reports: asBool(r.can_view_reports),
-  can_assign_leads: asBool(r.can_assign_leads),
-  can_edit_courses: asBool(r.can_edit_courses),
-  can_manage_tasks: asBool(r.can_manage_tasks),
-  can_access_all_data: asBool(r.can_access_all_data),
   active: isActive(r.active),
-
-  // 👇 ניצור שדה ידידותי בעברית — ישמש גם לייצוא
   status_human: isActive(r.active) ? "תפקיד פעיל" : "תפקיד לא פעיל",
 });
-
-const renderCheck = (v) => (
-  <span className={v ? "text-green-600 font-bold" : "text-red-500 font-bold"}>
-    {v ? "✓" : "✗"}
-  </span>
-);
 
 const renderCheckActive = (v) => (
   <span className={v ? "text-green-600" : "text-red-500"}>
@@ -98,48 +83,49 @@ export default function Roles() {
   };
 
   const columns = [
-    {
-      key: "role_id",
-      label: "מזהה",
-      export: (r) => String(r.role_id),
-    },
+    { key: "role_id", label: "מזהה", export: (r) => String(r.role_id) },
     { key: "role_name", label: "שם תפקיד", export: (r) => String(r.role_name) },
+
     {
-      key: "can_manage_users",
-      label: "ניהול משתמשים",
-      render: (r) => renderCheck(r.can_manage_users),
-      export: (r) => (r.can_manage_users ? "✓" : "✗"),
+      key: "permissions",
+      label: "הרשאות",
+      render: (r) => (
+        <button
+          onClick={() =>
+            setPopup({
+              show: true,
+              title: `הרשאות עבור ${r.role_name}`,
+              message: (
+                <div className="text-right space-y-3 max-h-[60vh] overflow-y-auto">
+                  {Object.entries(permissionsSchema).map(
+                    ([category, perms]) => (
+                      <div key={category} className="border-b pb-2">
+                        <h4 className="font-semibold text-blue-700">
+                          {category}
+                        </h4>
+                        <ul className="text-sm pl-2">
+                          {perms.map((perm) => (
+                            <li key={perm.key}>
+                              {r[perm.key] ? "🟢" : "🔴"} {perm.label}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )
+                  )}
+                </div>
+              ),
+              mode: "info",
+            })
+          }
+          className="bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"
+        >
+          צפייה
+        </button>
+      ),
+      export: () => null,
     },
-    {
-      key: "can_view_reports",
-      label: "צפייה בדוחות",
-      render: (r) => renderCheck(r.can_view_reports),
-      export: (r) => (r.can_view_reports ? "✓" : "✗"),
-    },
-    {
-      key: "can_assign_leads",
-      label: "שייך פניות",
-      render: (r) => renderCheck(r.can_assign_leads),
-      export: (r) => (r.can_assign_leads ? "✓" : "✗"),
-    },
-    {
-      key: "can_edit_courses",
-      label: "עריכת קורסים",
-      render: (r) => renderCheck(r.can_edit_courses),
-      export: (r) => (r.can_edit_courses ? "✓" : "✗"),
-    },
-    {
-      key: "can_manage_tasks",
-      label: "ניהול משימות",
-      render: (r) => renderCheck(r.can_manage_tasks),
-      export: (r) => (r.can_manage_tasks ? "✓" : "✗"),
-    },
-    {
-      key: "can_access_all_data",
-      label: "גישה לנתונים",
-      render: (r) => renderCheck(r.can_access_all_data),
-      export: (r) => (r.can_access_all_data ? "✓" : "✗"),
-    },
+
     {
       key: "active",
       label: "סטטוס",
@@ -186,7 +172,7 @@ export default function Roles() {
       type: "select",
       options: [
         { value: "true", label: "תפקידים פעילים" },
-        { value: "false", label: "תפקידים לא פעיל" },
+        { value: "false", label: "תפקידים לא פעילים" },
         { value: "", label: "כל התפקידים" },
       ],
     },
