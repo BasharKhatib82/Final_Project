@@ -38,11 +38,12 @@ export const UserProvider = ({ children }) => {
     axios
       .post(
         `${process.env.REACT_APP_API_URL}/auth/logout`,
-        {},
+        { user_id: user?.user_id },
         { withCredentials: true }
       )
       .then(() => setUser(null))
-      .catch((err) => console.error("Logout error:", err));
+      .catch((err) => console.error("Logout error:", err))
+      .finally(() => setUser(null));
   };
 
   return (

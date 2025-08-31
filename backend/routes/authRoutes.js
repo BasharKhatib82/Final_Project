@@ -116,7 +116,7 @@ router.post("/login", async (req, res) => {
 // ********************************************** /
 
 router.get("/me", verifyToken, (req, res) => {
-  res.status(200).json({ user: req.user }); 
+  res.status(200).json({ user: req.user });
 });
 
 // ********************************************** /
@@ -126,43 +126,50 @@ router.get("/me", verifyToken, (req, res) => {
 router.post("/logout", async (req, res) => {
   const token = req.cookies?.token;
   const userIdFromBody = req.body?.user_id;
+  let decodedUserId = null;
 
   try {
     if (token) {
-      //  מחיקה לפי טוקן
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        decodedUserId = decoded?.user_id || null;
+      } catch {
+        // ignore
+      }
+
+      // מחיקה לפי טוקן
       const [result] = await db.query(
         "DELETE FROM active_tokens WHERE token = ?",
         [token]
       );
 
-      // user_id אם לא נמצא לפי טוקן —  למחיקה לפי
-      if (result.affectedRows === 0 && userIdFromBody) {
+      //  ( decoded -או מה body - מה)  user_id אם לא נמחק לפי טוקן – מחיקה לפי
+      const fallbackUserId = userIdFromBody || decodedUserId;
+      if (result.affectedRows === 0 && fallbackUserId) {
         await db.query("DELETE FROM active_tokens WHERE user_id = ?", [
-          userIdFromBody,
+          fallbackUserId,
         ]);
       }
 
-      try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (decoded?.user_id) {
-          logAction("התנתקות מהמערכת", decoded.user_id)(req, res, () => {});
-        }
-      } catch {
-        if (userIdFromBody) {
-          logAction("התנתקות מהמערכת", userIdFromBody)(req, res, () => {});
-        }
+      // רישום לוג – משתמש שיצא מהמערכת
+      const uidForLog = decodedUserId || userIdFromBody || null;
+      if (uidForLog) {
+        logAction("התנתקות מהמערכת", uidForLog)(req, res, () => {});
       }
-    } else if (userIdFromBody) {
-      await db.query("DELETE FROM active_tokens WHERE user_id = ?", [
-        userIdFromBody,
-      ]);
-      logAction("התנתקות מהמערכת", userIdFromBody)(req, res, () => {});
+    } else {
+      //  body - מה user_id אין טוקן בקוקי – בכל זאת ננסה למחוק לפי
+      if (userIdFromBody) {
+        await db.query("DELETE FROM active_tokens WHERE user_id = ?", [
+          userIdFromBody,
+        ]);
+        logAction("התנתקות מהמערכת", userIdFromBody)(req, res, () => {});
+      }
     }
   } catch (err) {
     console.error("❌ שגיאה במחיקת טוקן:", err);
   }
 
-  clearAuthCookie(res); //  מנקה את הקוקי בכל מקרה
+  clearAuthCookie(res);
   res.json({ success: true, message: "התנתקת מהמערכת" });
 });
 
