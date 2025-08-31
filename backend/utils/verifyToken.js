@@ -3,33 +3,30 @@ import jwt from "jsonwebtoken";
 
 const verifyToken = (req, res, next) => {
   try {
-    //  נבדוק קודם אם יש טוקן בעוגיה או בכותרת Authorization
     const token =
       req.cookies?.token ||
       (req.headers["authorization"]?.startsWith("Bearer ")
         ? req.headers["authorization"].split(" ")[1]
         : null);
 
+    // אם אין טוקן בכלל – נמשיך בלי שגיאה
     if (!token) {
-      return res
-        .status(403)
-        .json({ Status: false, Error: "אין טוקן — גישה אסורה" });
+      req.user = null;
+      return next();
     }
 
-    // ✅ אימות מול הסוד
+    // אימות טוקן
     jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
       if (err) {
-        return res
-          .status(401)
-          .json({ Status: false, Error: "טוקן לא תקין או פג תוקף" });
+        req.user = null; // טוקן לא תקין – גם ממשיכים
+        return next();
       }
 
-      // 📌 שמירה ל־req.user כך שכל ראוטר יוכל להשתמש בו
       req.user = decoded;
       next();
     });
   } catch (err) {
-    console.error("שגיאה ב־verifyToken:", err);
+    console.error("שגיאה ב אימות :", err);
     return res.status(500).json({ Status: false, Error: "שגיאת אימות בשרת" });
   }
 };

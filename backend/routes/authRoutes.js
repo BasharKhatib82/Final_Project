@@ -116,7 +116,7 @@ router.post("/login", async (req, res) => {
 // ********************************************** /
 
 router.get("/me", verifyToken, (req, res) => {
-  res.json({ user: req.user });
+  res.status(200).json({ user: req.user }); 
 });
 
 // ********************************************** /
