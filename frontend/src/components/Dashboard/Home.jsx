@@ -131,7 +131,7 @@ const Home = () => {
 
       {/* כרטיסי סטטיסטיקה */}
 
-      <div className="flex flex-wrap justify-around gap-6 ">
+      <div className="flex flex-wrap justify-evenly">
         {/* 👥 עובדים */}
         {user?.admin_status_dash === 1 && (
           <StatCard
