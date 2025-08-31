@@ -168,7 +168,7 @@ router.put("/:id", verifyToken, async (req, res) => {
         .json({ Status: false, Error: "תפקיד לא נמצא לעדכון" });
     }
 
-    await logAction(`עדכון תפקיד מס : ${role_id}`);
+    await logAction(`עדכון תפקיד : ${role_name}`);
     return res.status(200).json({ Status: true, Message: "עודכן בהצלחה" });
   } catch (err) {
     console.error("שגיאת עדכון תפקיד:", err);
@@ -183,7 +183,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
   if (roleId === 1) {
     return res
       .status(403)
-      .json({ Status: false, Error: 'לא ניתן למחוק את תפקיד המנכ"ל' });
+      .json({ Status: false, Error: "לא ניתן למחוק את תפקיד מנהל כללי" });
   }
 
   try {
@@ -198,7 +198,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
         .json({ Status: false, Error: "תפקיד לא נמצא למחיקה" });
     }
 
-    await logAction(`מחיקת תפקיד מס : ${roleId}`);
+    await logAction(`מחיקת תפקיד : ${role_name}`);
     return res
       .status(200)
       .json({ Status: true, Message: "התפקיד הוסר בהצלחה (מחיקה לוגית)" });

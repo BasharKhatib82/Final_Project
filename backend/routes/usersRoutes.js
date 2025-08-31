@@ -202,7 +202,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
   if (parseInt(id, 10) === 1) {
     return res.status(403).json({
       success: false,
-      message: 'לא ניתן למחוק את משתמש המנכ"ל',
+      message: "לא ניתן למחוק את משתמש מנהל כללי",
     });
   }
 
@@ -224,7 +224,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמשים פעילים עם שם תפקיד (🛑 ללא user_id=1)
+// שליפת משתמשים פעילים עם שם תפקיד
 router.get("/active", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query(
@@ -239,8 +239,7 @@ router.get("/active", verifyToken, async (req, res) => {
               u.active
        FROM users u
        LEFT JOIN roles_permissions r ON u.role_id = r.role_id
-       WHERE u.active = 1
-         AND u.user_id <> 1`
+       WHERE u.active = 1`
     );
     res.json({ success: true, Result: results });
   } catch (err) {
@@ -264,8 +263,7 @@ router.get("/inactive", verifyToken, async (req, res) => {
               u.active
        FROM users u
        LEFT JOIN roles_permissions r ON u.role_id = r.role_id
-       WHERE u.active = 0
-         AND u.user_id <> 1`
+       WHERE u.active = 0`
     );
     res.json({ success: true, Result: results });
   } catch (err) {
