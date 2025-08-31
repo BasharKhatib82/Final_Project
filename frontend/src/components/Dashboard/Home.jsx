@@ -7,6 +7,7 @@ import LeadsStatusPieChart from "../charts/LeadsStatusPieChart";
 import LeadsByDateBarChart from "../charts/LeadsByDateBarChart";
 import LeadsBySourceChart from "../charts/LeadsBySourceChart";
 import LeadsByUserChart from "../charts/LeadsByUserChart";
+import { FcRules } from "react-icons/fc";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -58,7 +59,7 @@ const Home = () => {
             return (
               leadsCount > 0 && (
                 <AlertBar
-                  icon="📩"
+                  icon={<FcRules className="text-2xl" />}
                   count={leadsCount}
                   text="פניות חדשות לטיפול"
                   color="yellow"
