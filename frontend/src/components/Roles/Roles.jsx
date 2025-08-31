@@ -1,12 +1,16 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../Tools/UserContext";
 import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
 import ReportView from "../Reports/ReportView";
 import { permissionsSchema } from "../../constants/permissions";
 
 const api = process.env.REACT_APP_API_URL;
+
+const user = useUser.user;
+
 const isActive = (el) => el === true || el === 1 || el === "1";
 
 const mapRole = (r) => ({
@@ -85,7 +89,6 @@ export default function Roles() {
   const columns = [
     { key: "role_id", label: "מזהה", export: (r) => String(r.role_id) },
     { key: "role_name", label: "שם תפקיד", export: (r) => String(r.role_name) },
-
     {
       key: "permissions",
       label: "הרשאות",
@@ -125,25 +128,30 @@ export default function Roles() {
       ),
       export: () => null,
     },
-
     {
       key: "active",
       label: "סטטוס",
       render: (r) => renderCheckActive(r.active),
       export: (r) => r.status_human,
     },
-    {
+  ];
+
+  // ✨ הוספת עמודת פעולות רק אם למשתמש יש אחת מההרשאות
+  if (user.permission_edit_role === 1 || user?.permission_delete_role === 1) {
+    columns.push({
       key: "actions",
       label: "פעולות",
       render: (r) => (
         <div className="text-center">
-          <button
-            onClick={() => handleEdit(r.role_id)}
-            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
-          >
-            עריכה
-          </button>
-          {r.active && (
+          {user?.permission_edit_role === 1 && (
+            <button
+              onClick={() => handleEdit(r.role_id)}
+              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+            >
+              עריכה
+            </button>
+          )}
+          {user?.permission_delete_role === 1 && r.active && (
             <button
               onClick={() =>
                 setPopup({
@@ -162,8 +170,8 @@ export default function Roles() {
         </div>
       ),
       export: () => null,
-    },
-  ];
+    });
+  }
 
   const filtersDef = [
     {
@@ -194,10 +202,12 @@ export default function Roles() {
           pageSize={25}
           emailApiBase={api}
           addButton={
-            <NavigationButton
-              linkTo="/dashboard/add_role"
-              label="הוספת תפקיד חדש"
-            />
+            user?.permission_add_role === 1 && (
+              <NavigationButton
+                linkTo="/dashboard/add_role"
+                label="הוספת תפקיד חדש"
+              />
+            )
           }
           defaultFilters={defaultFilters}
           searchPlaceholder="שם תפקיד..."
