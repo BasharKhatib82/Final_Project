@@ -11,7 +11,7 @@ router.get("/", verifyToken, async (req, res) => {
     projects: {},
     leads: {},
     tasks: {},
-    
+
     attendance: [],
     logs_by_day: [],
     leads_by_user_status: [],
@@ -135,9 +135,11 @@ router.get("/", verifyToken, async (req, res) => {
       leads_new,
       leads_in_progress,
       leads_completed,
+      leads_canceled,
       tasks_new,
       tasks_in_progress,
       tasks_completed,
+      tasks_canceled,
       projects_total,
       projects_active,
       projects_inactive,
@@ -152,7 +154,7 @@ router.get("/", verifyToken, async (req, res) => {
       tasks_overdue,
     ] = results;
 
-    // 🟢
+    // 🟢 משתמשים
     summary.users = {
       active: users_active?.[0]?.[0]?.count ?? 0,
       inactive: users_inactive?.[0]?.[0]?.count ?? 0,
@@ -162,62 +164,78 @@ router.get("/", verifyToken, async (req, res) => {
       })),
     };
 
+    // 🛡️ תפקידים
     summary.roles = {
       total: roles_total?.[0]?.[0]?.count ?? 0,
       active: roles_active?.[0]?.[0]?.count ?? 0,
       inactive: roles_inactive?.[0]?.[0]?.count ?? 0,
     };
 
+    // 📩 פניות
     summary.leads = {
       new: leads_new?.[0]?.[0]?.count ?? 0,
       in_progress: leads_in_progress?.[0]?.[0]?.count ?? 0,
       completed: leads_completed?.[0]?.[0]?.count ?? 0,
+      canceled: leads_canceled?.[0]?.[0]?.count ?? 0, // ⬅️ נוסף
     };
 
+    // 🔄 משימות
     summary.tasks = {
       new: tasks_new?.[0]?.[0]?.count ?? 0,
       in_progress: tasks_in_progress?.[0]?.[0]?.count ?? 0,
       completed: tasks_completed?.[0]?.[0]?.count ?? 0,
+      canceled: tasks_canceled?.[0]?.[0]?.count ?? 0, // ⬅️ נוסף
     };
 
+    // 💼 פרויקטים
     summary.projects = {
       total: projects_total?.[0]?.[0]?.count ?? 0,
       active: projects_active?.[0]?.[0]?.count ?? 0,
       inactive: projects_inactive?.[0]?.[0]?.count ?? 0,
     };
 
+    // 📋 לוגים
     summary.logs_by_day =
       logs_by_day?.[0]?.map((row) => ({
         date: row.date,
         total_logs: row.total_logs,
       })) || [];
 
+    // ⏱️ נוכחות
     summary.attendance =
       attendance_by_user?.[0]?.map((row) => ({
         name: `${row.first_name} ${row.last_name}`,
         total_attendance: row.total_attendance,
       })) || [];
 
+    // 📈 פניות לפי יום
     summary.leads_by_day =
       leads_by_day?.[0]?.map((row) => ({
         date: row.date,
         count: row.count,
       })) || [];
 
+    // 📊 פניות לפי מקור
     summary.leads_by_source =
       leads_by_source?.[0]?.map((row) => ({
         source: row.source,
         count: row.count,
       })) || [];
 
+    // 👤 פניות לפי משתמש
     summary.leads_by_user =
       leads_by_user?.[0]?.map((row) => ({
         name: row.name,
         count: row.count,
       })) || [];
 
+    // 🔍 פניות לפי סטטוס-משתמש
     summary.leads_by_user_status = leads_by_user_status?.[0] || [];
+
+    // 📝 משימות לפי סטטוס-משתמש
     summary.tasks_by_user_status = tasks_by_user_status?.[0] || [];
+
+    // ⏰ משימות חורגות
     summary.tasks_overdue = tasks_overdue?.[0] || [];
 
     res.json({ success: true, summary });
