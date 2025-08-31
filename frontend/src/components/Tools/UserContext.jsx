@@ -16,14 +16,15 @@ export const UserProvider = ({ children }) => {
         const res = await axios.get(
           `${process.env.REACT_APP_API_URL}/auth/me`,
           {
-            withCredentials: true, // ⬅️ חובה כדי לשלוח את ה-cookie
+            withCredentials: true,
           }
         );
-
         setUser(res.data.user);
       } catch (err) {
-        console.error("Auth check failed:", err);
-        setUser(null);
+        if (err.response?.status !== 403) {
+          console.error("Auth check failed:", err); // רק אם זו שגיאה לא צפויה
+        }
+        setUser(null); //null אם אין התחברות, נוודא שהמשתמש הוא
       } finally {
         setAuthChecked(true);
         setLoading(false);
