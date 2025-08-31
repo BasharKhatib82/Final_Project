@@ -125,7 +125,7 @@ export default function Roles() {
           צפייה
         </button>
       ),
-      export: () => null,
+      export: () => false,
     },
     {
       key: "active",
@@ -135,7 +135,7 @@ export default function Roles() {
     },
   ];
 
-  // ✨ הוספת עמודת פעולות רק אם למשתמש יש אחת מההרשאות
+  //  הוספת עמודת פעולות רק אם למשתמש יש אחת מההרשאות
   if (user.permission_edit_role === 1 || user?.permission_delete_role === 1) {
     columns.push({
       key: "actions",
