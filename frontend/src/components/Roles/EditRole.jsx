@@ -107,7 +107,7 @@ const EditRole = () => {
     <div className="flex justify-center items-center pt-10">
       <form
         onSubmit={handleSubmit}
-        className="w-[80%] max-w-5xl bg-white/85 shadow-md rounded-lg p-8 space-y-6"
+        className="w-[90%] max-w-5xl bg-white/85 shadow-md rounded-lg p-8 space-y-6"
       >
         <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
           עדכון פרטי תפקיד
