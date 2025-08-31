@@ -10,7 +10,7 @@ export default function StatCard({
   return (
     <div
       onClick={onClick}
-      className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
+      className="bg-white rounded-xl shadow hover:shadow-lg p-4 h-48 w-48 flex flex-col justify-between cursor-pointer transition-transform duration-200 hover:-translate-y-1"
     >
       {/* אייקון */}
       <div className="flex justify-center items-center">
