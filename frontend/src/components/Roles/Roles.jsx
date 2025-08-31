@@ -125,7 +125,7 @@ export default function Roles() {
           צפייה
         </button>
       ),
-      export: () => false,
+      export: () => "פירוט לא זמין בהדפסה",
     },
     {
       key: "active",
