@@ -131,7 +131,7 @@ const Home = () => {
 
       {/* כרטיסי סטטיסטיקה */}
 
-      <div className="grid auto-cols-max grid-flow-cols gap-3 justify-items-center">
+      <div className="grid grid-flow-col justify-items-stretch gap-5">
         {/* 👥 עובדים */}
         {user?.admin_status_dash === 1 && (
           <StatCard
