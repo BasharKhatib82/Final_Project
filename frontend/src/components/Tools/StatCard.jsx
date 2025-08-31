@@ -12,7 +12,7 @@ export default function StatCard({
     <div
       onClick={onClick}
       className="bg-white rounded-xl shadow hover:shadow-lg 
-                 p-4 flex flex-col min-w-52 max-w-70
+                 p-4 flex flex-col min-w-56 max-w-70
                  cursor-pointer transition-transform 
                  duration-200 hover:-translate-y-1"
     >
