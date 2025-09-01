@@ -153,7 +153,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
 
       <button
         onClick={() => download("xlsx")}
-        className="px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1"
+        className="flex flex-row-reverse items-center gap-2 bg-white border border-gray-300 text-green-700 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm transition"
       >
         <Icon
           icon="vscode-icons:file-type-excel"
@@ -165,7 +165,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
 
       <button
         onClick={() => download("pdf")}
-        className="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 inline-flex items-center gap-1"
+        className="flex flex-row-reverse items-center gap-2 bg-white border border-gray-300 text-red-600 hover:bg-gray-50 px-4 py-2 rounded-lg shadow-sm transition"
       >
         <Icon
           icon="vscode-icons:file-type-pdf2"
@@ -177,7 +177,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
 
       <button
         onClick={previewPdf}
-        className="px-3 py-1 rounded bg-orange-600 text-white hover:bg-orange-700 inline-flex items-center gap-1"
+        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-2 rounded-lg shadow-sm transition"
       >
         <Icon icon="flat-color-icons:print" width="1.2em" height="1.2em" />{" "}
         הדפסה
