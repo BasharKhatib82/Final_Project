@@ -93,39 +93,42 @@ export default function Roles() {
       key: "permissions",
       label: "הרשאות",
       render: (r) => (
-        <button
-          onClick={() =>
-            setPopup({
-              show: true,
-              title: `הרשאות עבור ${r.role_name}`,
-              message: (
-                <div className="text-right space-y-3 max-h-[60vh] overflow-y-auto">
-                  {Object.entries(permissionsSchema).map(
-                    ([category, perms]) => (
-                      <div key={category} className="border-b pb-2">
-                        <h4 className="font-semibold text-blue-700">
-                          {category}
-                        </h4>
-                        <ul className="text-sm pl-2">
-                          {perms.map((perm) => (
-                            <li key={perm.key}>
-                              {r[perm.key] ? "🟢" : "🔴"} {perm.label}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )
-                  )}
-                </div>
-              ),
-              mode: "info",
-            })
-          }
-          className="flex items-center gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded hover:cursor-pointer"
-        >
-          <Icon icon="emojione-v1:eye" width="1.2rem" height="1.2rem" />
-          צפייה בהרשאות
-        </button>
+        <div className="flex justify-center">
+          <button
+            onClick={() =>
+              setPopup({
+                show: true,
+                title: `הרשאות עבור ${r.role_name}`,
+                message: (
+                  <div className="text-right space-y-3 max-h-[60vh] overflow-y-auto">
+                    {Object.entries(permissionsSchema).map(
+                      ([category, perms]) => (
+                        <div key={category} className="border-b pb-2">
+                          <h4 className="font-semibold text-blue-700">
+                            {category}
+                          </h4>
+                          <ul className="text-sm pl-2">
+                            {perms.map((perm) => (
+                              <li key={perm.key}>
+                                {r[perm.key] ? "🟢" : "🔴"} {perm.label}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )
+                    )}
+                  </div>
+                ),
+                mode: "info",
+              })
+            }
+            className="flex items-center gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded hover:cursor-pointer"
+          >
+            {" "}
+            צפייה בהרשאות
+            <Icon icon="emojione-v1:eye" width="1.2rem" height="1.2rem" />
+          </button>
+        </div>
       ),
       export: () => "פירוט לא זמין בהדפסה",
     },

@@ -190,12 +190,14 @@ const Sidebar = () => {
               icon="streamline-color:button-fast-forward-2"
               width="1.5em"
               height="1.5em"
+              color="white"
             />
           ) : (
             <Icon
               icon="streamline-color:button-rewind-2"
               width="1.5em"
               height="1.5em"
+              color="white"
             />
           )}
         </button>
