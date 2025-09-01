@@ -72,7 +72,11 @@ function Navbar() {
             to="/dashboard"
             className="flex items-center gap-2 text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
           >
-            <FiUserCheck size={20} />
+            <Icon
+              icon="streamline-ultimate-color:laptop-user"
+              width="1.7em"
+              height="1.7em"
+            />
             <span className="font-rubik">{user.full_name}</span>
           </Link>
         )}
@@ -82,12 +86,12 @@ function Navbar() {
             onClick={handleLogout}
             className="flex items-center gap-2 font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition"
           >
-            התנתקות
             <Icon
               icon="streamline-cyber-color:door-exit"
               width="1.7em"
               height="1.7em"
             />
+            התנתקות
           </button>
         ) : (
           <NavLink
