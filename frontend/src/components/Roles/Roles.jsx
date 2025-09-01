@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { FaEye } from "react-icons/fa";
 import { useUser } from "../Tools/UserContext";
 import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
@@ -123,6 +124,7 @@ export default function Roles() {
           className="bg-gray-200 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"
         >
           צפייה
+          {<FaEye />}
         </button>
       ),
       export: () => "פירוט לא זמין בהדפסה",
