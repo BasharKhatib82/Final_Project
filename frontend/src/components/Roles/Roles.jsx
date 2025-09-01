@@ -1,7 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEye } from "react-icons/fa";
+import { Icon } from "@iconify/react";
 import { useUser } from "../Tools/UserContext";
 import Popup from "../Tools/Popup";
 import NavigationButton from "../Buttons/NavigationButton";
@@ -121,9 +121,9 @@ export default function Roles() {
               mode: "info",
             })
           }
-          className="flex gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded hover:cursor-pointer"
+          className="flex items-center gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded hover:cursor-pointer"
         >
-          {<FaEye />}
+          <Icon icon="emojione-v1:eye" width="4rem" height="4rem" />
           צפייה בהרשאות
         </button>
       ),

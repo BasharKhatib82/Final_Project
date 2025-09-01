@@ -1,6 +1,5 @@
 import React from "react";
 import { NavLink, useNavigate, Link } from "react-router-dom";
-import { FiUserCheck } from "react-icons/fi";
 import { Icon } from "@iconify/react";
 import logo from "../../assets/img/logo.png";
 import { useUser } from "../../components/Tools/UserContext";

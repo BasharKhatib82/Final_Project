@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import { useUser } from "../../components/Tools/UserContext";
-import { IoCloseSharp } from "react-icons/io5";
+
 import { Icon } from "@iconify/react";
-import { FaBars, FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
+import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // mobile
