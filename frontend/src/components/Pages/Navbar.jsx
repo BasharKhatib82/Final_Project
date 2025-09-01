@@ -56,7 +56,7 @@ function Navbar() {
         </NavLink>
       </div>
 
-      {/* לוגו */}
+      {/* לוגו  */}
       <Link to="/">
         <img
           src={logo}
