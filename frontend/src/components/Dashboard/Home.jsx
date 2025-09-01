@@ -66,7 +66,7 @@ const Home = () => {
             return (
               leadsCount > 0 && (
                 <AlertBar
-                  icon={<FcRules />}
+                  icon={<FcRules className="text-4xl" />}
                   count={leadsCount}
                   text="פניות חדשות לטיפול"
                   color="yellow"
@@ -92,7 +92,7 @@ const Home = () => {
             return (
               tasksCount > 0 && (
                 <AlertBar
-                  icon={<FcSurvey />}
+                  icon={<FcSurvey className="text-4xl" />}
                   count={tasksCount}
                   text="משימות חדשות לטיפול"
                   color="yellow"
@@ -117,7 +117,7 @@ const Home = () => {
             return (
               overdueCount > 0 && (
                 <AlertBar
-                  icon={<FcAlarmClock />}
+                  icon={<FcAlarmClock className="text-4xl" />}
                   count={overdueCount}
                   text="משימות חורגות מטיפול !!"
                   color="red"

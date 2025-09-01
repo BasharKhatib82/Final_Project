@@ -121,7 +121,7 @@ export default function Roles() {
               mode: "info",
             })
           }
-          className="flex items-center gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded hover:cursor-pointer"
+          className="flex gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded hover:cursor-pointer"
         >
           {<FaEye />}
           צפייה בהרשאות

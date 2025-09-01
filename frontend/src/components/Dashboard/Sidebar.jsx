@@ -32,7 +32,7 @@ const Sidebar = () => {
     if (!user) return [];
 
     return [
-      {
+      user.dashboard_access === 1 && {
         label: "לוח בקרה",
         to: "/dashboard",
         icon: <FaHome />,
@@ -44,36 +44,40 @@ const Sidebar = () => {
         icon: <FaUserShield />,
       },
 
-      {
+      user.users_page_access === 1 && {
         label: "ניהול עובדים",
         to: "/dashboard/users",
         icon: <FaUsers />,
       },
-
-      {
+      user.reports_page_access === 1 && {
+        label: "ניהול דוחות",
+        to: "/dashboard/reports",
+        icon: <FaClock />,
+      },
+      user.attendance_page_access === 1 && {
         label: "ניהול שעות עבודה",
         to: "/dashboard/attendance",
         icon: <FaClock />,
       },
 
-      {
+      user.leads_page_access === 1 && {
         label: "ניהול פניות",
         to: "/dashboard/leads",
         icon: <FaPhone />,
       },
-      {
+      user.projects_page_access === 1 && {
         label: "ניהול פרויקטים",
         to: "/dashboard/projects",
         icon: <FaBook />,
       },
 
-      {
+      user.tasks_page_access === 1 && {
         label: "ניהול משימות",
         to: "/dashboard/tasks",
         icon: <FaTasks />,
       },
 
-      {
+      user.logs_page_access === 1 && {
         label: "לוג פעילות",
         to: "/dashboard/logs",
         icon: <FaHistory />,
