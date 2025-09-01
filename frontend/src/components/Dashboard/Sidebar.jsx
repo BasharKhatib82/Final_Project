@@ -5,14 +5,7 @@ import { useUser } from "../../components/Tools/UserContext";
 import { IoCloseSharp } from "react-icons/io5";
 import { Icon } from "@iconify/react";
 import {
-  FaUsers,
-  FaClock,
-  FaPhone,
-  FaBook,
-  FaTasks,
-  FaHistory,
-  FaCog,
-  FaSignOutAlt,
+
   FaBars,
   FaAngleDoubleLeft,
   FaAngleDoubleRight,
@@ -40,54 +33,110 @@ const Sidebar = () => {
       user.roles_page_access === 1 && {
         label: "ניהול תפקידים",
         to: "/dashboard/roles",
-        icon: <Icon icon="fluent-color:home-48" width="1.5em" height="1.5em" />,
+        icon: (
+          <Icon icon="fluent-color:shield-48" width="1.5em" height="1.5em" />
+        ),
       },
 
       user.users_page_access === 1 && {
         label: "ניהול עובדים",
         to: "/dashboard/users",
-        icon: <FaUsers />,
+        icon: (
+          <Icon
+            icon="fluent-color:people-community-48"
+            width="1.5em"
+            height="1.5em"
+          />
+        ),
       },
       user.reports_page_access === 1 && {
         label: "ניהול דוחות",
         to: "/dashboard/reports",
-        icon: <FaClock />,
+        icon: (
+          <Icon
+            icon="streamline-plump-color:file-report-flat"
+            width="1.5em"
+            height="1.5em"
+          />
+        ),
       },
       user.attendance_page_access === 1 && {
         label: "ניהול שעות עבודה",
         to: "/dashboard/attendance",
-        icon: <FaClock />,
+        icon: (
+          <Icon
+            icon="streamline-ultimate-color:time-clock-hand-1"
+            width="1.5em"
+            height="1.5em"
+          />
+        ),
       },
 
       user.leads_page_access === 1 && {
         label: "ניהול פניות",
         to: "/dashboard/leads",
-        icon: <FaPhone />,
+        icon: (
+          <Icon
+            icon="fluent-color:text-bullet-list-square-sparkle-32"
+            width="1.5em"
+            height="1.5em"
+          />
+        ),
       },
       user.projects_page_access === 1 && {
         label: "ניהול פרויקטים",
         to: "/dashboard/projects",
-        icon: <FaBook />,
+        icon: (
+          <Icon icon="fluent-color:briefcase-48" width="1.5em" height="1.5em" />
+        ),
       },
 
       user.tasks_page_access === 1 && {
         label: "ניהול משימות",
         to: "/dashboard/tasks",
-        icon: <FaTasks />,
+        icon: (
+          <Icon
+            icon="fluent-color:clipboard-task-24"
+            width="1.5em"
+            height="1.5em"
+          />
+        ),
       },
 
       user.logs_page_access === 1 && {
         label: "לוג פעילות",
         to: "/dashboard/logs",
-        icon: <FaHistory />,
+        icon: (
+          <Icon
+            icon="material-icon-theme:changelog"
+            width="1.5em"
+            height="1.5em"
+          />
+        ),
       },
 
-      { label: "הגדרות חשבון", to: "/dashboard/profile", icon: <FaCog /> },
+      {
+        label: "הגדרות חשבון",
+        to: "/dashboard/profile",
+        icon: (
+          <Icon
+            icon="flat-color-icons:engineering"
+            width="1.5em"
+            height="1.5em"
+          />
+        ),
+      },
 
       {
         label: "יציאה",
         to: "/userlogin",
-        icon: <FaSignOutAlt />,
+        icon: (
+          <Icon
+            icon="streamline-flex-color:logout-1-flat"
+            width="1.5em"
+            height="1.5em"
+          />
+        ),
         onClick: handleLogout,
       },
     ].filter(Boolean);
