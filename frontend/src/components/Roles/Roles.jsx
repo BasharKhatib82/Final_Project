@@ -121,9 +121,10 @@ export default function Roles() {
               mode: "info",
             })
           }
-          className="bg-cyan-100 text-gray-700 px-2 py-1 rounded hover:bg-gray-300"
+          className="flex items-center gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded hover:cursor-pointer"
         >
-          {<FaEye />} רשימת הרשאות מפורטת
+          {<FaEye />}
+          צפייה בהרשאות
         </button>
       ),
       export: () => "פירוט לא זמין בהדפסה",
