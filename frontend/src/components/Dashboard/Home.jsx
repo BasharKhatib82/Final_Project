@@ -9,13 +9,7 @@ import LeadsByDateBarChart from "../charts/LeadsByDateBarChart";
 import LeadsBySourceChart from "../charts/LeadsBySourceChart";
 import LeadsByUserChart from "../charts/LeadsByUserChart";
 import { Icon } from "@iconify/react";
-import {
-  FcRules,
-  FcAlarmClock,
-  FcSurvey,
-  FcAssistant,
-  FcBriefcase,
-} from "react-icons/fc";
+import { FcRules, FcSurvey, FcAssistant, FcBriefcase } from "react-icons/fc";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -99,7 +93,13 @@ const Home = () => {
             return (
               tasksCount > 0 && (
                 <AlertBar
-                  icon={<FcSurvey className="text-4xl" />}
+                  icon={
+                    <Icon
+                      icon="fluent-color:clipboard-task-24"
+                      width="2em"
+                      height="2em"
+                    />
+                  }
                   count={tasksCount}
                   text="משימות חדשות לטיפול"
                   color="yellow"
@@ -124,7 +124,9 @@ const Home = () => {
             return (
               overdueCount > 0 && (
                 <AlertBar
-                  icon={<FcAlarmClock className="text-4xl" />}
+                  icon={
+                    <Icon icon="noto:alarm-clock" width="2em" height="2em" />
+                  }
                   count={overdueCount}
                   text="משימות חורגות מטיפול !!"
                   color="red"
@@ -142,8 +144,13 @@ const Home = () => {
         {/* 👥 עובדים */}
         {user?.admin_status_dash === 1 && (
           <StatCard
-            icon={<FcAssistant />}
-            iconColor="bg-blue-100 text-blue-600"
+            icon={
+              <Icon
+                icon="fluent-color:people-community-48"
+                width="2em"
+                height="2em"
+              />
+            }
             title="עובדים"
             items={[
               { label: "פעילים", value: stats?.users?.active ?? 0 },
