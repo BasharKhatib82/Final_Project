@@ -80,13 +80,13 @@ function Navbar() {
         {user ? (
           <button
             onClick={handleLogout}
-            className="font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition"
+            className="flex items-center gap-2 font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition"
           >
             התנתקות
             <Icon
               icon="streamline-cyber-color:door-exit"
-              width="2em"
-              height="2em"
+              width="1.7em"
+              height="1.7em"
             />
           </button>
         ) : (

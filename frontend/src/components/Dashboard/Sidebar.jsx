@@ -34,13 +34,13 @@ const Sidebar = () => {
       user.dashboard_access === 1 && {
         label: "לוח בקרה",
         to: "/dashboard",
-        icon: <Icon icon="fluent-color:home-48" width="2em" height="2em" />,
+        icon: <Icon icon="fluent-color:home-48" width="1.5em" height="1.5em" />,
       },
 
       user.roles_page_access === 1 && {
         label: "ניהול תפקידים",
         to: "/dashboard/roles",
-        icon: <Icon icon="fluent-color:home-48" width="2em" height="2em" />,
+        icon: <Icon icon="fluent-color:home-48" width="1.5em" height="1.5em" />,
       },
 
       user.users_page_access === 1 && {
