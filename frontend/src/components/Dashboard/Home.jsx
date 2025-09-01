@@ -8,6 +8,7 @@ import LeadsStatusPieChart from "../charts/LeadsStatusPieChart";
 import LeadsByDateBarChart from "../charts/LeadsByDateBarChart";
 import LeadsBySourceChart from "../charts/LeadsBySourceChart";
 import LeadsByUserChart from "../charts/LeadsByUserChart";
+import { Icon } from "@iconify/react";
 import {
   FcRules,
   FcAlarmClock,
@@ -66,7 +67,13 @@ const Home = () => {
             return (
               leadsCount > 0 && (
                 <AlertBar
-                  icon={<FcRules className="text-4xl" />}
+                  icon={
+                    <Icon
+                      icon="fluent-color:text-bullet-list-square-sparkle-32"
+                      width="2em"
+                      height="2em"
+                    />
+                  }
                   count={leadsCount}
                   text="פניות חדשות לטיפול"
                   color="yellow"
