@@ -123,7 +123,7 @@ export default function Roles() {
           }
           className="flex items-center gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded hover:cursor-pointer"
         >
-          <Icon icon="emojione-v1:eye" width="4rem" height="4rem" />
+          <Icon icon="emojione-v1:eye" width="1.2rem" height="1.2rem" />
           צפייה בהרשאות
         </button>
       ),

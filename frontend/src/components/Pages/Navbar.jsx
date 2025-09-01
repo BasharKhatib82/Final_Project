@@ -86,21 +86,23 @@ function Navbar() {
             className="flex items-center gap-2 font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition"
           >
             <Icon
-              icon="streamline-flex-color:logout-1-flat"
-              width="1.7em"
-              height="1.7em"
+              icon="lets-icons:sign-out-circle-duotone-line"
+              width="1.5em"
+              height="1.5em"
+              color="white"
             />
             התנתקות
           </button>
         ) : (
           <NavLink
             to="/userlogin"
-            className="font-rubik text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
+            className="flex items-center gap-2 font-rubik text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
           >
             <Icon
-              icon="streamline-plump-color:login-1-flat"
-              width="1.7em"
-              height="1.7em"
+              icon="lets-icons:sign-in-circle-duotone-line"
+              width="1.5em"
+              height="1.5em"
+              color="white"
             />
             התחברות
           </NavLink>

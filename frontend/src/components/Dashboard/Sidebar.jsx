@@ -127,9 +127,10 @@ const Sidebar = () => {
         to: "/userlogin",
         icon: (
           <Icon
-            icon="streamline-flex-color:logout-1-flat"
+            icon="lets-icons:sign-out-circle-duotone-line"
             width="1.5em"
             height="1.5em"
+            color="white "
           />
         ),
         onClick: handleLogout,
@@ -141,7 +142,7 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`bg-gray-800 text-white transition-all duration-300
+      className={`bg-gray-800  text-white transition-all duration-300
         ${isCollapsed ? "w-16" : "w-60"} 
         ${isOpen ? "block" : "hidden md:block"}
       `}
@@ -162,7 +163,21 @@ const Sidebar = () => {
           onClick={() => setIsCollapsed(!isCollapsed)}
           title={isCollapsed ? "פתח תפריט" : "כווץ תפריט"}
         >
-          {isCollapsed ? <FaAngleDoubleLeft /> : <FaAngleDoubleRight />}
+          {isCollapsed ? (
+            <Icon
+              icon="streamline-color:button-rewind-2"
+              width="1.5em"
+              height="1.5em"
+              color="white"
+            />
+          ) : (
+            <Icon
+              icon="streamline-color:button-fast-forward-2"
+              width="1.5em"
+              height="1.5em"
+              color="white"
+            />
+          )}
         </button>
 
         {/* כפתור ☰ למובייל */}
