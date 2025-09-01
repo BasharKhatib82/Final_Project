@@ -168,7 +168,6 @@ const Home = () => {
         {user?.admin_status_dash === 1 && (
           <StatCard
             icon="🟢"
-            iconColor="bg-green-100 text-green-600"
             title="מחוברים"
             items={
               stats?.users?.online_list?.length > 0
@@ -185,8 +184,9 @@ const Home = () => {
         {/* 🛡️ תפקידים */}
         {user?.admin_status_dash === 1 && (
           <StatCard
-            icon="🛡️"
-            iconColor="bg-purple-100 text-purple-600"
+            icon={
+              <Icon icon="fluent-color:shield-48" width="2em" height="2em" />
+            }
             title="תפקידים"
             items={[
               { label: 'סה"כ', value: stats?.roles?.total ?? 0 },
@@ -200,8 +200,9 @@ const Home = () => {
         {/* 💼 פרויקטים */}
         {user?.admin_status_dash === 1 && (
           <StatCard
-            icon={<FcBriefcase />}
-            iconColor="bg-indigo-100 text-indigo-600"
+            icon={
+              <Icon icon="fluent-color:briefcase-48" width="2em" height="2em" />
+            }
             title="פרויקטים"
             items={[
               { label: 'סה"כ', value: stats?.projects?.total ?? 0 },
@@ -215,8 +216,13 @@ const Home = () => {
         {/* 📩 פניות */}
         {(user?.admin_status_dash === 1 || user?.user_status_dash === 1) && (
           <StatCard
-            icon={<FcRules />}
-            iconColor="bg-yellow-100 text-yellow-600"
+            icon={
+              <Icon
+                icon="fluent-color:text-bullet-list-square-sparkle-32"
+                width="2em"
+                height="2em"
+              />
+            }
             title="פניות"
             items={[
               {
@@ -263,8 +269,13 @@ const Home = () => {
         {/* 🔄 משימות */}
         {(user?.admin_status_dash === 1 || user?.user_status_dash === 1) && (
           <StatCard
-            icon={<FcSurvey />}
-            iconColor="bg-slate-100 text-yellow-600"
+            icon={
+              <Icon
+                icon="fluent-color:clipboard-task-24"
+                width="2em"
+                height="2em"
+              />
+            }
             title="משימות"
             items={[
               {
