@@ -40,7 +40,7 @@ const Sidebar = () => {
       user.roles_page_access === 1 && {
         label: "ניהול תפקידים",
         to: "/dashboard/roles",
-        icon: ,
+        icon: <Icon icon="fluent-color:home-48" width="2em" height="2em" />,
       },
 
       user.users_page_access === 1 && {
