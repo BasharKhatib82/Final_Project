@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink, useNavigate, Link } from "react-router-dom";
 import { FiUserCheck } from "react-icons/fi";
+import { Icon } from "@iconify/react";
 import logo from "../../assets/img/logo.png";
 import { useUser } from "../../components/Tools/UserContext";
 
@@ -82,6 +83,11 @@ function Navbar() {
             className="font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition"
           >
             התנתקות
+            <Icon
+              icon="streamline-cyber-color:door-exit"
+              width="2em"
+              height="2em"
+            />
           </button>
         ) : (
           <NavLink

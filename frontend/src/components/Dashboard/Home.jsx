@@ -9,7 +9,6 @@ import LeadsByDateBarChart from "../charts/LeadsByDateBarChart";
 import LeadsBySourceChart from "../charts/LeadsBySourceChart";
 import LeadsByUserChart from "../charts/LeadsByUserChart";
 import { Icon } from "@iconify/react";
-import { FcRules, FcSurvey, FcAssistant, FcBriefcase } from "react-icons/fc";
 
 const api = process.env.REACT_APP_API_URL;
 

@@ -3,9 +3,8 @@ import { Link } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import { useUser } from "../../components/Tools/UserContext";
 import { IoCloseSharp } from "react-icons/io5";
+import { Icon } from "@iconify/react";
 import {
-  FaHome,
-  FaUserShield,
   FaUsers,
   FaClock,
   FaPhone,
@@ -35,13 +34,13 @@ const Sidebar = () => {
       user.dashboard_access === 1 && {
         label: "לוח בקרה",
         to: "/dashboard",
-        icon: <FaHome />,
+        icon: <Icon icon="fluent-color:home-48" width="2em" height="2em" />,
       },
 
       user.roles_page_access === 1 && {
         label: "ניהול תפקידים",
         to: "/dashboard/roles",
-        icon: <FaUserShield />,
+        icon: ,
       },
 
       user.users_page_access === 1 && {
