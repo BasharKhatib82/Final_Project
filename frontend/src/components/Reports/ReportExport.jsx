@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import { FileSpreadsheet, FileText, Printer } from "lucide-react";
+import { Icon } from "@iconify/react";
 import axios from "axios";
 import Popup from "../Tools/Popup";
 
@@ -154,21 +155,32 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
         onClick={() => download("xlsx")}
         className="px-3 py-1 rounded bg-emerald-600 text-white hover:bg-emerald-700 inline-flex items-center gap-1"
       >
-        <FileSpreadsheet size={16} /> Excel
+        <Icon
+          icon="vscode-icons:file-type-excel"
+          width="1.2em"
+          height="1.2em"
+        />{" "}
+        Excel
       </button>
 
       <button
         onClick={() => download("pdf")}
         className="px-3 py-1 rounded bg-indigo-600 text-white hover:bg-indigo-700 inline-flex items-center gap-1"
       >
-        <FileText size={16} /> PDF
+        <Icon
+          icon="vscode-icons:file-type-pdf2"
+          width="1.2rem"
+          height="1.2rem"
+        />{" "}
+        PDF
       </button>
 
       <button
         onClick={previewPdf}
         className="px-3 py-1 rounded bg-orange-600 text-white hover:bg-orange-700 inline-flex items-center gap-1"
       >
-        <Printer size={16} /> הדפסה
+        <Icon icon="flat-color-icons:print" width="1.2em" height="1.2em" />{" "}
+        הדפסה
       </button>
 
       {popup.show && (

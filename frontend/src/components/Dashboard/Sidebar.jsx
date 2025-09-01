@@ -165,14 +165,14 @@ const Sidebar = () => {
         >
           {isCollapsed ? (
             <Icon
-              icon="streamline-color:button-rewind-2"
+              icon="ion:arrow-back-circle-outline"
               width="1.5em"
               height="1.5em"
               color="white"
             />
           ) : (
             <Icon
-              icon="streamline-color:button-fast-forward-2"
+              icon="ion:arrow-forward-circle-outline"
               width="1.5em"
               height="1.5em"
               color="white"
@@ -187,14 +187,14 @@ const Sidebar = () => {
         >
           {isOpen ? (
             <Icon
-              icon="streamline-color:button-fast-forward-2"
+              icon="ion:arrow-forward-circle-outline"
               width="1.5em"
               height="1.5em"
               color="white"
             />
           ) : (
             <Icon
-              icon="streamline-color:button-rewind-2"
+              icon="ion:arrow-back-circle-outline"
               width="1.5em"
               height="1.5em"
               color="white"
