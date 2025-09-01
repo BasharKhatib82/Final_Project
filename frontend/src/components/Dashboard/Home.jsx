@@ -125,7 +125,11 @@ const Home = () => {
               overdueCount > 0 && (
                 <AlertBar
                   icon={
-                    <Icon icon="noto:alarm-clock" width="2em" height="2em" />
+                    <Icon
+                      icon="noto:alarm-clock"
+                      width="1.5em"
+                      height="1.5em"
+                    />
                   }
                   count={overdueCount}
                   text="משימות חורגות מטיפול !!"
@@ -164,10 +168,10 @@ const Home = () => {
           />
         )}
 
-        {/* 🟢 מחוברים */}
+        {/*  מחוברים */}
         {user?.admin_status_dash === 1 && (
           <StatCard
-            icon="🟢"
+            icon={<Icon icon="unjs:h3" width="2em" height="2em" />}
             title="מחוברים"
             items={
               stats?.users?.online_list?.length > 0
