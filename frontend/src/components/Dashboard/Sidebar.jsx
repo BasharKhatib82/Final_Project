@@ -4,12 +4,7 @@ import Tooltip from "../Tools/Tooltip";
 import { useUser } from "../../components/Tools/UserContext";
 import { IoCloseSharp } from "react-icons/io5";
 import { Icon } from "@iconify/react";
-import {
-
-  FaBars,
-  FaAngleDoubleLeft,
-  FaAngleDoubleRight,
-} from "react-icons/fa";
+import { FaBars, FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // mobile
@@ -175,7 +170,19 @@ const Sidebar = () => {
           className="block md:hidden text-white "
           onClick={() => setIsOpen(!isOpen)}
         >
-          {isOpen ? <IoCloseSharp size={24} /> : <FaBars size={24} />}
+          {isOpen ? (
+            <Icon
+              icon="streamline-color:button-fast-forward-2"
+              width="1.5em"
+              height="1.5em"
+            />
+          ) : (
+            <Icon
+              icon="streamline-color:button-rewind-2"
+              width="1.5em"
+              height="1.5em"
+            />
+          )}
         </button>
       </div>
 
