@@ -64,8 +64,8 @@ const Home = () => {
                   icon={
                     <Icon
                       icon="fluent-color:text-bullet-list-square-sparkle-32"
-                      width="2em"
-                      height="2em"
+                      width="1.5em"
+                      height="1.5em"
                     />
                   }
                   count={leadsCount}
@@ -96,8 +96,8 @@ const Home = () => {
                   icon={
                     <Icon
                       icon="fluent-color:clipboard-task-24"
-                      width="2em"
-                      height="2em"
+                      width="1.5em"
+                      height="1.5em"
                     />
                   }
                   count={tasksCount}
