@@ -94,8 +94,8 @@ function Navbar() {
             התנתקות
           </button>
         ) : (
-          <button
-            onClick={navigate("/dashboard")}
+          <NavLink
+            to="/userlogin"
             className="flex items-center gap-2 font-rubik text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
           >
             <Icon
@@ -105,7 +105,7 @@ function Navbar() {
               color="white"
             />
             התחברות
-          </button>
+          </NavLink>
         )}
       </div>
     </nav>
