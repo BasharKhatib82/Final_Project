@@ -155,8 +155,8 @@ export default function Roles() {
               >
                 <Icon
                   icon="fluent-color:edit-32"
-                  width="1.5rem"
-                  height="1.5rem"
+                  width="1.2rem"
+                  height="1.2rem"
                 />{" "}
                 עריכה
               </button>
@@ -176,8 +176,8 @@ export default function Roles() {
               >
                 <Icon
                   icon="streamline-color:recycle-bin-2-flat"
-                  width="1.5em"
-                  height="1.5em"
+                  width="1.2em"
+                  height="1.2em"
                 />
                 מחיקה
               </button>
