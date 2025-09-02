@@ -11,7 +11,7 @@
 import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import axios from "axios";
-import { Mail, FileSpreadsheet, FileText } from "lucide-react";
+import { Icon } from "@iconify/react";
 import { validateAndSanitizeEmail } from "../../utils/validateAndSanitizeEmail";
 import Popup from "../Tools/Popup";
 
@@ -74,7 +74,8 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-slate-700 inline-flex items-center gap-1">
-        <Mail size={16} /> שליחה למייל
+        <Icon icon="fxemoji:flyingenvelope" width="1.2rem" height="1.2rem" />{" "}
+        שליחה למייל
       </span>
       <input
         className="border rounded px-2 py-1 text-sm"
@@ -83,16 +84,26 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
         onChange={(e) => setTo(e.target.value)}
       />
       <button
-        className="px-3 py-1 rounded bg-sky-600 text-white hover:bg-sky-700 inline-flex items-center gap-1"
+        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded-lg shadow-sm transition"
         onClick={() => send("xlsx")}
       >
-        <FileSpreadsheet size={16} /> Excel
+        <Icon
+          icon="vscode-icons:file-type-excel"
+          width="1.2em"
+          height="1.2em"
+        />{" "}
+        Excel
       </button>
       <button
-        className="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700 inline-flex items-center gap-1"
+        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded-lg shadow-sm transition"
         onClick={() => send("pdf")}
       >
-        <FileText size={16} /> PDF
+        <Icon
+          icon="vscode-icons:file-type-pdf2"
+          width="1.2rem"
+          height="1.2rem"
+        />{" "}
+        PDF
       </button>
 
       {/* ✅ חלון פופאפ */}
