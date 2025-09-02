@@ -83,7 +83,7 @@ function Navbar() {
         {user ? (
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition"
+            className="flex items-center gap-2 font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded transition"
           >
             <Icon
               icon="lets-icons:sign-out-circle-duotone-line"
@@ -96,7 +96,7 @@ function Navbar() {
         ) : (
           <NavLink
             to="/userlogin"
-            className="flex items-center gap-2 font-rubik text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
+            className="flex items-center gap-2 font-rubik text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition"
           >
             <Icon
               icon="lets-icons:sign-in-circle-duotone-line"

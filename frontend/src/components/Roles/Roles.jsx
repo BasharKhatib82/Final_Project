@@ -122,7 +122,7 @@ export default function Roles() {
                 mode: "info",
               })
             }
-            className="flex items-center gap-2 bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded hover:cursor-pointer"
+            className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
           >
             {" "}
             צפייה בהרשאות

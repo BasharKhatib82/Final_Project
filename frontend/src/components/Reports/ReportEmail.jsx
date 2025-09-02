@@ -74,7 +74,7 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-slate-700 inline-flex items-center gap-1">
-        <Icon icon="fxemoji:flyingenvelope" width="1.2rem" height="1.2rem" />{" "}
+        <Icon icon="fxemoji:flyingenvelope" width="1.5rem" height="1.5rem" />{" "}
         שליחה למייל
       </span>
       <input
@@ -84,7 +84,7 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
         onChange={(e) => setTo(e.target.value)}
       />
       <button
-        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded-lg shadow-sm transition"
+        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
         onClick={() => send("xlsx")}
       >
         <Icon
@@ -95,7 +95,7 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
         Excel
       </button>
       <button
-        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded-lg shadow-sm transition"
+        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
         onClick={() => send("pdf")}
       >
         <Icon

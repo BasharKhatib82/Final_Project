@@ -152,7 +152,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
 
       <button
         onClick={() => download("xlsx")}
-        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded-lg shadow-sm transition"
+        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
       >
         <Icon
           icon="vscode-icons:file-type-excel"
@@ -164,7 +164,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
 
       <button
         onClick={() => download("pdf")}
-        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded-lg shadow-sm transition"
+        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
       >
         <Icon
           icon="vscode-icons:file-type-pdf2"
@@ -176,7 +176,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
 
       <button
         onClick={previewPdf}
-        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded-lg shadow-sm transition"
+        className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
       >
         <Icon icon="flat-color-icons:print" width="1.2em" height="1.2em" />{" "}
         הדפסה
