@@ -1,7 +1,7 @@
 // src/components/Reports/ReportSearch.jsx
 import React from "react";
 import { useReport } from "./ReportContext";
-import { Search } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 export default function ReportSearch({
   label = "חיפוש :",
@@ -19,10 +19,7 @@ export default function ReportSearch({
     <div className="flex items-center gap-2" dir="rtl">
       <span className="text-sm text-slate-700">{label}</span>
       <div className="relative">
-        <Search
-          size={16}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-        />
+        <Icon icon="flat-color-icons:search" width="1.5em" height="1.5em" />
         <input
           dir="rtl"
           type="text"

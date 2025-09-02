@@ -73,6 +73,8 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
 
   return (
     <div className="flex items-center gap-2">
+      {/* מפריד */}
+      <span className="w-px h-6 bg-gray-300 ml-2"></span>
       <span className="text-sm text-slate-700 inline-flex items-center gap-1">
         <Icon icon="fxemoji:flyingenvelope" width="1.5rem" height="1.5rem" />{" "}
         שליחה למייל
