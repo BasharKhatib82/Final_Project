@@ -95,7 +95,7 @@ function Navbar() {
           </button>
         ) : (
           <button
-            onClick={navigate("/userlogin")}
+            onClick={navigate("/dashboard")}
             className="flex items-center gap-2 font-rubik text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
           >
             <Icon
