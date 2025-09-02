@@ -72,9 +72,10 @@ function Navbar() {
             className="flex items-center gap-2 text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
           >
             <Icon
-              icon="streamline-ultimate-color:laptop-user"
+              icon="mdi:user-check"
               width="1.7em"
               height="1.7em"
+              color="white"
             />
             <span className="font-rubik">{user.full_name}</span>
           </Link>
@@ -86,7 +87,7 @@ function Navbar() {
             className="flex items-center gap-2 font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded transition"
           >
             <Icon
-              icon="lets-icons:sign-out-circle-duotone-line"
+              icon="streamline-cyber:door-exit"
               width="1.5em"
               height="1.5em"
               color="white"
@@ -98,12 +99,7 @@ function Navbar() {
             to="/userlogin"
             className="flex items-center gap-2 font-rubik text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
           >
-            <Icon
-              icon="lets-icons:sign-in-circle-duotone-line"
-              width="1.5em"
-              height="1.5em"
-              color="white"
-            />
+            <Icon icon="ix:log-in" width="1.5em" height="1.5em" color="white" />{" "}
             התחברות
           </NavLink>
         )}

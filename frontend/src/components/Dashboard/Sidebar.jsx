@@ -127,7 +127,7 @@ const Sidebar = () => {
         to: "/userlogin",
         icon: (
           <Icon
-            icon="lets-icons:sign-out-circle-duotone-line"
+            icon="streamline-cyber:door-exit"
             width="1.5em"
             height="1.5em"
             color="white "
