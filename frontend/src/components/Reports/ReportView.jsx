@@ -50,6 +50,7 @@ export default function ReportView({
                 icon="fluent:remix-add-32-filled"
                 width="1.5em"
                 height="1.5em"
+                color="white"
               />
               {addButton}
             </div>
