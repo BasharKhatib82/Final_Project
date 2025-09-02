@@ -108,15 +108,23 @@ export default function Attendance() {
       key: "actions",
       label: "פעולות",
       render: (r) => (
-        <button
-          onClick={() =>
-            navigate(`/dashboard/edit_attendance/${r.attendance_id}`)
-          }
-          className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
-        >
-          <Icon icon="fluent-color:edit-32" width="1.2rem" height="1.2rem" />{" "}
-          עריכה
-        </button>
+        <div className="flex justify-center">
+          {user?.permission_edit_attendance === 1 && (
+            <button
+              onClick={() =>
+                navigate(`/dashboard/edit_attendance/${r.attendance_id}`)
+              }
+              className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+            >
+              <Icon
+                icon="fluent-color:edit-32"
+                width="1.2rem"
+                height="1.2rem"
+              />{" "}
+              עריכה
+            </button>
+          )}
+        </div>
       ),
       export: () => null,
     },
@@ -170,7 +178,7 @@ export default function Attendance() {
           pageSize={25}
           emailApiBase={api}
           addButton={
-            user?.attendance_add_btn === 1 ? (
+            user?.permission_add_attendance === 1 ? (
               <NavigationButton
                 linkTo="/dashboard/add_attendance"
                 label="הוספת נוכחות חדשה"
