@@ -4,9 +4,9 @@ import { useReport } from "./ReportContext";
 import { Icon } from "@iconify/react";
 
 export default function ReportSearch({
-  label = "חיפוש :",
+  label = "חיפוש",
   placeholder = "חיפוש...",
-  size = "sm", // אפשרות לשלוט בגודל (sm/md)
+  size = "sm", // (sm/md) אפשרות לשלוט בגודל
 }) {
   const { search, setSearch, setPage } = useReport();
 
@@ -17,10 +17,14 @@ export default function ReportSearch({
 
   return (
     <div className="flex items-center gap-2" dir="rtl">
+      <Icon
+        icon="flat-color-icons:search"
+        absolute
+        width="1.5em"
+        height="1.5em"
+      />
       <span className="text-sm text-slate-700">{label}</span>
       <div className="relative">
-        <Icon icon="flat-color-icons:search" absolute width="1.5em" height="1.5em" />
-        
         <input
           dir="rtl"
           type="text"
