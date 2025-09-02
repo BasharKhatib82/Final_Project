@@ -1,7 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useUser } from "../Tools/UserContext";
 import { useNavigate } from "react-router-dom";
 import Popup from "../Tools/Popup";
+import { Icon } from "@iconify/react";
 import NavigationButton from "../Buttons/NavigationButton";
 import ReportView from "../Reports/ReportView";
 
@@ -25,6 +27,7 @@ export default function Users() {
     user_id: null,
   });
   const navigate = useNavigate();
+  const { user } = useUser();
 
   useEffect(() => {
     fetchUsers();
@@ -103,29 +106,41 @@ export default function Users() {
       key: "actions",
       label: "פעולות",
       render: (u) => (
-        <div className="text-center">
-          <button
-            onClick={() => handleEdit(u.user_id)}
-            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
-          >
-            עריכה
-          </button>
-          {u.active && (
+        <div className="flex justify-center">
+          <div className="flex items-center gap-1 text-center">
             <button
-              onClick={() =>
-                setPopup({
-                  show: true,
-                  title: "אישור מחיקה",
-                  message: "⚠️ להפוך את המשתמש ללא פעיל?",
-                  mode: "confirm",
-                  user_id: u.user_id,
-                })
-              }
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              onClick={() => handleEdit(u.user_id)}
+              className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
             >
-              מחיקה
+              <Icon
+                icon="fluent-color:edit-32"
+                width="1.2rem"
+                height="1.2rem"
+              />{" "}
+              עריכה
             </button>
-          )}
+            {user?.permission_delete_role === 1 && u.active && (
+              <button
+                onClick={() =>
+                  setPopup({
+                    show: true,
+                    title: "אישור מחיקה",
+                    message: "⚠️ להפוך את המשתמש ללא פעיל?",
+                    mode: "confirm",
+                    user_id: u.user_id,
+                  })
+                }
+                className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              >
+                <Icon
+                  icon="streamline-color:recycle-bin-2-flat"
+                  width="1.2em"
+                  height="1.2em"
+                />
+                מחיקה
+              </button>
+            )}
+          </div>
         </div>
       ),
       export: () => null,
