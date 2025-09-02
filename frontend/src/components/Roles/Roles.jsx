@@ -146,7 +146,7 @@ export default function Roles() {
       key: "actions",
       label: "פעולות",
       render: (r) => (
-        <div className="text-center">
+        <div className="flex items-center gap-1 text-center">
           {user?.permission_edit_role === 1 && (
             <button
               onClick={() => handleEdit(r.role_id)}
