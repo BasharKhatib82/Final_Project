@@ -1,7 +1,7 @@
 // src/components/Reports/ReportFilters.jsx
 import React, { useMemo } from "react";
 import { useReport } from "./ReportContext";
-import { Filter as FilterIcon } from "lucide-react";
+import { Icon } from "@iconify/react";
 
 export default function ReportFilters({ variant = "block", showTotal = true }) {
   const { filtersDef, filters, setFilter, total, filteredRows } = useReport();
@@ -39,7 +39,11 @@ function Filter({ def, value, onChange, inline, filteredRows }) {
   const renderLabel = () =>
     inline && (
       <span className="text-sm text-slate-700 inline-flex items-center gap-1">
-        <FilterIcon size={16} className="text-slate-500" />
+        <Icon
+          icon="streamline-ultimate-color:filter-1"
+          width="1.5em"
+          height="1.5em"
+        />
         {def.labelPrefix || def.label}
       </span>
     );

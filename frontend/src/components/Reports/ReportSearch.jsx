@@ -19,7 +19,8 @@ export default function ReportSearch({
     <div className="flex items-center gap-2" dir="rtl">
       <span className="text-sm text-slate-700">{label}</span>
       <div className="relative">
-        <Icon icon="flat-color-icons:search" width="1.5em" height="1.5em" />
+        <Icon icon="flat-color-icons:search" absolute width="1.5em" height="1.5em" />
+        
         <input
           dir="rtl"
           type="text"
