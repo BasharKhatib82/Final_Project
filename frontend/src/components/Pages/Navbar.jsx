@@ -69,7 +69,7 @@ function Navbar() {
         {user && (
           <Link
             to="/dashboard"
-            className="flex items-center gap-2 text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition"
+            className="flex items-center gap-2 text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
           >
             <Icon
               icon="streamline-ultimate-color:laptop-user"
@@ -96,7 +96,7 @@ function Navbar() {
         ) : (
           <NavLink
             to="/userlogin"
-            className="flex items-center gap-2 font-rubik text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded transition"
+            className="flex items-center gap-2 font-rubik text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
           >
             <Icon
               icon="lets-icons:sign-in-circle-duotone-line"
