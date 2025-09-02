@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import NavigationButton from "../Buttons/NavigationButton";
 import ReportView from "../Reports/ReportView";
@@ -111,8 +112,9 @@ export default function Attendance() {
           onClick={() =>
             navigate(`/dashboard/edit_attendance/${r.attendance_id}`)
           }
-          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+          className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
         >
+          <Icon icon="fluent-color:edit-32" width="1.2rem" height="1.2rem" />{" "}
           עריכה
         </button>
       ),
