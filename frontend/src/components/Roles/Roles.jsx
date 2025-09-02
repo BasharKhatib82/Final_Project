@@ -150,7 +150,7 @@ export default function Roles() {
           {user?.permission_edit_role === 1 && (
             <button
               onClick={() => handleEdit(r.role_id)}
-              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+              className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
             >
               <Icon
                 icon="fluent-color:drafts-24"
@@ -171,7 +171,7 @@ export default function Roles() {
                   role_id: r.role_id,
                 })
               }
-              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
             >
               <Icon icon="noto:wastebasket" width="1.5em" height="1.5em" />
               מחיקה
