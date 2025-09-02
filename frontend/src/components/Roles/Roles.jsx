@@ -154,10 +154,10 @@ export default function Roles() {
                 className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
               >
                 <Icon
-                  icon="fluent-color:drafts-24"
+                  icon="fluent-color:edit-32"
                   width="1.5rem"
                   height="1.5rem"
-                />
+                />{" "}
                 עריכה
               </button>
             )}
@@ -174,7 +174,11 @@ export default function Roles() {
                 }
                 className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
               >
-                <Icon icon="noto:wastebasket" width="1.5em" height="1.5em" />
+                <Icon
+                  icon="streamline-color:recycle-bin-2-flat"
+                  width="1.5em"
+                  height="1.5em"
+                />
                 מחיקה
               </button>
             )}
