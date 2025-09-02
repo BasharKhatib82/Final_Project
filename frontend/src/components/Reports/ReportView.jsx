@@ -6,6 +6,7 @@ import ReportExport from "./ReportExport";
 import ReportEmail from "./ReportEmail";
 import ReportTable from "./ReportTable";
 import ReportPagination from "./ReportPagination";
+import { Icon } from "@iconify/react";
 
 const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 
@@ -44,7 +45,14 @@ export default function ReportView({
 
         {addButton && (
           <div className="flex justify-start">
-            <div className="inline-flex">{addButton}</div>
+            <div className="inline-flex">
+              <Icon
+                icon="fluent:remix-add-32-filled"
+                width="1.5em"
+                height="1.5em"
+              />
+              {addButton}
+            </div>
           </div>
         )}
 
@@ -55,7 +63,7 @@ export default function ReportView({
               {filtersDef.length > 0 && (
                 <ReportFilters variant={filtersVariant} showTotal={false} />
               )}
-              <ReportSearch label="חיפוש :" placeholder={searchPlaceholder} />
+              <ReportSearch label="חיפוש" placeholder={searchPlaceholder} />
             </div>
 
             {/* 🔹 שורה שנייה: יצוא + שליחה למייל */}
