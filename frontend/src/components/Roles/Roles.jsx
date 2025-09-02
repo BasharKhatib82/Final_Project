@@ -152,6 +152,11 @@ export default function Roles() {
               onClick={() => handleEdit(r.role_id)}
               className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
             >
+              <Icon
+                icon="fluent-color:drafts-24"
+                width="1.5rem"
+                height="1.5rem"
+              />
               עריכה
             </button>
           )}
@@ -168,6 +173,7 @@ export default function Roles() {
               }
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
             >
+              <Icon icon="noto:wastebasket" width="1.5em" height="1.5em" />
               מחיקה
             </button>
           )}
