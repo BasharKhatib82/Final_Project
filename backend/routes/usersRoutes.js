@@ -1,7 +1,4 @@
 import express from "express";
-import path from "path";
-import fs from "fs/promises";
-import multer from "multer";
 import bcrypt from "bcryptjs";
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
@@ -9,84 +6,9 @@ import verifyToken from "../utils/verifyToken.js";
 
 const router = express.Router();
 
-const LOGO_UPLOAD_DIR = "./uploads/logos";
-const BUSINESS_JSON = "./data/business.json";
-
-// === Multer config ===
-const storage = multer.diskStorage({
-  destination: async (req, file, cb) => {
-    try {
-      await fs.mkdir(LOGO_UPLOAD_DIR, { recursive: true });
-      cb(null, LOGO_UPLOAD_DIR);
-    } catch (err) {
-      cb(err, null);
-    }
-  },
-  filename: (req, file, cb) => {
-    const uniqueName = "logo_" + Date.now() + path.extname(file.originalname);
-    cb(null, uniqueName);
-  },
-});
-
-const upload = multer({ storage });
-
 /* ============================
-   פרטי עסק (Business Info)
+        הוספת משתמש חדש
    ============================ */
-
-// שליפת פרטי עסק
-router.get("/business", verifyToken, async (req, res) => {
-  try {
-    const data = await fs.readFile(BUSINESS_JSON, "utf-8");
-    res.json({ success: true, data: JSON.parse(data) });
-  } catch (err) {
-    console.error("❌ שגיאה בשליפת נתוני עסק:", err);
-    res.status(500).json({ success: false, message: "שגיאה בשליפת נתוני עסק" });
-  }
-});
-
-// עדכון פרטי עסק כולל לוגו
-router.put(
-  "/business",
-  verifyToken,
-  upload.single("logo"),
-  async (req, res) => {
-    try {
-      let data = JSON.parse(await fs.readFile(BUSINESS_JSON, "utf-8"));
-
-      data.business_name = req.body.business_name || data.business_name;
-      data.address = req.body.address || data.address;
-      data.phone = req.body.phone || data.phone;
-
-      if (req.file) {
-        if (data.logo && data.logo !== "/uploads/logos/default.png") {
-          const oldPath = "." + data.logo;
-          if (oldPath.startsWith("./uploads/logos")) {
-            try {
-              await fs.unlink(oldPath);
-            } catch (e) {
-              console.warn("⚠️ לא ניתן למחוק לוגו קודם:", e.message);
-            }
-          }
-        }
-        data.logo = "/uploads/logos/" + req.file.filename;
-      }
-
-      await fs.writeFile(BUSINESS_JSON, JSON.stringify(data, null, 2));
-      logAction("עדכון פרטי עסק")(req, res, () => {});
-      res.json({ success: true, data, message: "עודכן בהצלחה" });
-    } catch (err) {
-      console.error("❌ שגיאה בעדכון עסק:", err);
-      res.status(500).json({ success: false, message: "שגיאה בעדכון נתונים" });
-    }
-  }
-);
-
-/* ============================
-   ניהול משתמשים
-   ============================ */
-
-// הוספת משתמש חדש
 router.post("/add", verifyToken, async (req, res) => {
   const {
     user_id,
@@ -146,14 +68,16 @@ router.post("/add", verifyToken, async (req, res) => {
   }
 });
 
-// עדכון משתמש (🛑 לא כולל user_id=1)
+/* ===========================================
+      עדכון משתמש ( לא כולל מנהל כללי )
+   =========================================== */
 router.put("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
 
   if (parseInt(id, 10) === 1) {
     return res.status(403).json({
       success: false,
-      message: 'לא ניתן לערוך את משתמש המנכ"ל',
+      message: "עריכת פרטי מנהל כללי חסומה",
     });
   }
 
@@ -195,14 +119,16 @@ router.put("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// מחיקה לוגית (🛑 לא כולל user_id=1)
+/* ===========================================
+      מחיקה לוגית ( לא כולל מנהל כללי )
+   =========================================== */
 router.put("/delete/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
 
   if (parseInt(id, 10) === 1) {
     return res.status(403).json({
       success: false,
-      message: "לא ניתן למחוק את משתמש מנהל כללי",
+      message: "מחיקת מנהל כללי חסומה",
     });
   }
 
@@ -224,7 +150,9 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמשים פעילים עם שם תפקיד
+/* ===========================================
+      שליפת משתמשים פעילים כולל שם תפקיד
+   =========================================== */
 router.get("/active", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query(
@@ -248,7 +176,9 @@ router.get("/active", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמשים לא פעילים (🛑 גם כאן לא כולל user_id=1)
+/* ================================================
+      שליפת משתמשים לא פעילים כולל שם תפקיד
+   ================================================ */
 router.get("/inactive", verifyToken, async (req, res) => {
   try {
     const [results] = await db.query(
@@ -272,7 +202,9 @@ router.get("/inactive", verifyToken, async (req, res) => {
   }
 });
 
-// שליפת משתמש בודד לפי מזהה (כולל מנכ"ל אם צריך פרופיל אישי)
+/* ========================================
+      שליפת משתמש בודד לפי מזהה 
+   ======================================== */
 router.get("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
 
@@ -304,7 +236,9 @@ router.get("/:id", verifyToken, async (req, res) => {
   }
 });
 
-// ✅ שינוי סיסמה (מותר גם למנכ"ל)
+/* ==========================
+      שינוי סיסמה למשתמש
+   ========================== */
 router.put("/change-password/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   const { currentPassword, newPassword } = req.body;
