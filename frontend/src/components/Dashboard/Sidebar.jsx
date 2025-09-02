@@ -2,9 +2,7 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import { useUser } from "../../components/Tools/UserContext";
-
 import { Icon } from "@iconify/react";
-import { FaAngleDoubleLeft, FaAngleDoubleRight } from "react-icons/fa";
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // mobile
@@ -204,14 +202,14 @@ const Sidebar = () => {
       </div>
 
       {/* תפריט */}
-      <nav className="mt-4 ">
+      <nav className="mt-3 ">
         <ul className="space-y-1 ">
           {navItems.map(({ label, to, icon, onClick }, index) => (
             <li key={index} className="p-2 cursor-pointer">
               <Link
                 to={to}
                 onClick={onClick}
-                className="relative flex items-center justify-center md:justify-start gap-3 p-2 rounded-md group transition-all duration-200 "
+                className="relative flex items-center justify-center md:justify-start gap-2 p-2 rounded-md group transition-all duration-200 "
               >
                 {/* אייקון */}
                 {isCollapsed ? (
