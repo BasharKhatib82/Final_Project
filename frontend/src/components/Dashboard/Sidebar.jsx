@@ -202,7 +202,7 @@ const Sidebar = () => {
       </div>
 
       {/* תפריט */}
-      <nav className="mt-3 ">
+      <nav className="mt-4 ">
         <ul className="space-y-1 ">
           {navItems.map(({ label, to, icon, onClick }, index) => (
             <li key={index} className="p-2 cursor-pointer">
