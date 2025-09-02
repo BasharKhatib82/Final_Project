@@ -6,7 +6,6 @@ import ReportExport from "./ReportExport";
 import ReportEmail from "./ReportEmail";
 import ReportTable from "./ReportTable";
 import ReportPagination from "./ReportPagination";
-import { Icon } from "@iconify/react";
 
 const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 
@@ -45,15 +44,7 @@ export default function ReportView({
 
         {addButton && (
           <div className="flex justify-start">
-            <div className="inline-flex">
-              <Icon
-                icon="fluent:remix-add-32-filled"
-                width="1.5em"
-                height="1.5em"
-                color="white"
-              />
-              {addButton}
-            </div>
+            <div className="inline-flex">{addButton}</div>
           </div>
         )}
 
