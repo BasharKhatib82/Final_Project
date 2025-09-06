@@ -15,9 +15,9 @@ const router = express.Router();
 //        התחברות משתמש        /
 // **************************** /
 /**
- * מה עושה: מבצע התחברות, מאמת סיסמה, יוצר JWT ושומר אותו כקוקי מאובטח.
- * מה מקבל (Body): { user_id, password }
- * מה מחזיר: { success, message, data:user } או דרישת החלפת סיסמה.
+ * מה עושה: מבצע התחברות, מאמת סיסמה, יוצר טוקן ושומר אותו כקוקי מאובטח.
+ *   (Body) מה { user_id, password }  מקבל
+ *  מחזיר: { success, message, data:user } או דרישת החלפת סיסמה.
  */
 router.post("/login", async (req, res) => {
   const { user_id, password } = req.body;
@@ -49,7 +49,7 @@ router.post("/login", async (req, res) => {
     const user = usersList[0];
 
     /**
-     * bcrypt.compare – פונקציה שמשווה סיסמה גולמית ל־hash שמור.
+     * bcrypt.compare – פונקציה שמשווה סיסמה  ל־ hash שמור.
      * מחזירה boolean המייצג האם יש התאמה.
      */
     const isMatch = await bcrypt.compare(password, user.password);
@@ -70,8 +70,8 @@ router.post("/login", async (req, res) => {
 
       if (daysSince >= 90) {
         /**
-         * randomBytes – פונקציה מ־crypto ליצירת טוקן אקראי מאובטח.
-         * toString("hex") – המרה להקסה עבור שימוש נוח ב־URL/DB.
+         * randomBytes – פונקציה מ־ crypto ליצירת טוקן אקראי מאובטח.
+         * toString("hex") – המרה להקסה עבור שימוש נוח ב־ .
          */
         const resetToken = randomBytes(32).toString("hex");
         const resetExpireAt = new Date(Date.now() + 1000 * 60 * 15); // 15 דקות
@@ -81,7 +81,7 @@ router.post("/login", async (req, res) => {
           [user.user_id, resetToken, resetExpireAt]
         );
 
-        // affectedRows – כמה שורות הושפעו מה־INSERT (בדרך כלל 1 אם הצליח)
+        // affectedRows – כמה שורות הושפעו מה־ INSERT
         if (insertReset.affectedRows !== 1) {
           return res.status(500).json({
             success: false,
@@ -113,7 +113,7 @@ router.post("/login", async (req, res) => {
       expiresIn: "1h",
     });
 
-    // כתיבת הטוקן כ־HttpOnly Cookie מאובטח
+    // כתיבת הטוקן כ־ HttpOnly Cookie מאובטח
     setAuthCookie(res, token);
 
     // מחיקת טוקנים קודמים למשתמש וכתיבת הפעיל
@@ -172,8 +172,8 @@ router.get("/me", verifyToken, (req, res) => {
 //              התנתקות מהמערכת                  /
 // ********************************************** /
 /**
- * מה עושה: מוחק טוקן פעיל מה־DB ומנקה קוקי.
- * מה מקבל (Body): { user_id? } (רק fallback)
+ * מה עושה: מוחק טוקן פעיל מה־ DB ומנקה קוקי.
+ * מה מקבל (Body): { user_id? }
  * מה מחזיר: { success, message }
  */
 router.post("/logout", async (req, res) => {
@@ -186,7 +186,7 @@ router.post("/logout", async (req, res) => {
       try {
         /**
          * jwt.verify – מאמת ומפענח JWT. אם הטוקן לא תקף תיזרק שגיאה.
-         * כאן עוטפים ב־try/catch כדי לא להפיל את הראוט.
+         * כאן עוטפים ב־ try/catch כדי לא להפיל את הראוט.
          */
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         decodedUserId = decoded?.user_id || null;
