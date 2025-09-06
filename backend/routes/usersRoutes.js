@@ -155,7 +155,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
    =========================================== */
 router.get("/active", verifyToken, async (req, res) => {
   try {
-    const [results] = await db.query(
+    const [usersList] = await db.query(
       `SELECT u.user_id,
               u.first_name,
               u.last_name,
@@ -169,7 +169,7 @@ router.get("/active", verifyToken, async (req, res) => {
        LEFT JOIN roles_permissions r ON u.role_id = r.role_id
        WHERE u.active = 1`
     );
-    res.json({ success: true, Result: results });
+    res.json({ success: true, data: usersList });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמשים פעילים:", err);
     res.status(500).json({ success: false, message: "שגיאת שרת" });
@@ -181,7 +181,7 @@ router.get("/active", verifyToken, async (req, res) => {
    ================================================ */
 router.get("/inactive", verifyToken, async (req, res) => {
   try {
-    const [results] = await db.query(
+    const [usersList] = await db.query(
       `SELECT u.user_id,
               u.first_name,
               u.last_name,
@@ -195,7 +195,7 @@ router.get("/inactive", verifyToken, async (req, res) => {
        LEFT JOIN roles_permissions r ON u.role_id = r.role_id
        WHERE u.active = 0`
     );
-    res.json({ success: true, Result: results });
+    res.json({ success: true, data: usersList });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמשים לא פעילים:", err);
     res.status(500).json({ success: false, message: "שגיאת שרת" });
@@ -209,7 +209,7 @@ router.get("/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [results] = await db.query(
+    const [user] = await db.query(
       `SELECT u.user_id,
               u.first_name,
               u.last_name,
@@ -229,7 +229,7 @@ router.get("/:id", verifyToken, async (req, res) => {
       return res.status(404).json({ success: false, message: "משתמש לא נמצא" });
     }
 
-    res.json({ success: true, data: results[0] });
+    res.json({ success: true, data: user[0] });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמש:", err);
     res.status(500).json({ success: false, message: "שגיאת שרת" });
