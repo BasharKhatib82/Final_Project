@@ -7,7 +7,6 @@ import "./utils/cronTasks.js";
 import { testDbConnection } from "./utils/dbSingleton.js";
 
 // ✅ ראוטים
-import adminRoutes from "./routes/adminRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import projectsRoutes from "./routes/projectsRoutes.js";
 import leadsRoutes from "./routes/leadsRoutes.js";
@@ -21,7 +20,6 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import logsRoutes from "./routes/logsRoutes.js";
 import reportsRouter from "./routes/reportsRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
-
 
 dotenv.config();
 const app = express();
@@ -41,7 +39,6 @@ app.use(cookieParser());
 app.use("/fonts", express.static(path.join(process.cwd(), "public/fonts")));
 
 // ✅ ראוטים
-app.use("/admin", adminRoutes);
 app.use("/auth", authRoutes);
 app.use("/leads", leadsRoutes);
 app.use("/leads/progress", leadProgressRoutes);
