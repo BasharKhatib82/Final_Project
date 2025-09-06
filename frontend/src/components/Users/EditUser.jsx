@@ -35,7 +35,7 @@ const EditUser = () => {
       const rolesRes = await axios.get(`${api}/roles/active`, {
         withCredentials: true,
       });
-      let activeRoles = rolesRes.data.Roles.map((role) => ({
+      let activeRoles = rolesRes.data.data.map((role) => ({
         ...role,
         active: true,
       }));
@@ -49,8 +49,8 @@ const EditUser = () => {
           withCredentials: true,
         });
 
-        if (roleRes.data.Role) {
-          const roleNotActive = { ...roleRes.data.Role, active: false };
+        if (roleRes.data.data) {
+          const roleNotActive = { ...roleRes.data.data, active: false };
           activeRoles.push(roleNotActive);
         }
       }
@@ -91,7 +91,7 @@ const EditUser = () => {
     axios
       .put(`${api}/users/${id}`, user, { withCredentials: true })
       .then((res) => {
-        if (res.data.Status) {
+        if (res.data.success) {
           setPopupData({
             show: true,
             title: "הצלחה",
