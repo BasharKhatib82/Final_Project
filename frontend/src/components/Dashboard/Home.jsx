@@ -26,7 +26,7 @@ const Home = () => {
       const res = await axios.get(`${api}/dashboard`, {
         withCredentials: true,
       });
-      setStats(res.data.summary);
+      setStats(res.data.data);
     } catch (err) {
       console.error("Error loading dashboard:", err);
     }
