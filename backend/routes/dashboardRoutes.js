@@ -1,10 +1,18 @@
+// backend\routes\dashboardRoutes.js
 import express from "express";
 import { db } from "../utils/dbSingleton.js";
 import verifyToken from "../utils/verifyToken.js";
 
 const router = express.Router();
 
-router.get("/", verifyToken, async (req, res) => {
+// החלת אימות טוקן על כל הראוטים
+router.use(verifyToken);
+
+/**
+ * מה עושה: מחזיר סיכומי דשבורד (סטטיסטיקות + גרפים).
+ * מה מחזיר: { success, data: summary } או שגיאת שרת.
+ */
+router.get("/", async (_req, res) => {
   const summary = {
     users: {},
     roles: {},
@@ -122,8 +130,14 @@ router.get("/", verifyToken, async (req, res) => {
   };
 
   try {
+    /**
+     * Promise.all – מריץ את כל השאילתות במקביל ומחזיר מערך תוצאות
+     * באותו סדר של המערך שקיבל (כאן: Object.values(queries)).
+     *
+     * Array.map – יוצר מערך חדש ע"י הרצת פונקציה על כל איבר (כאן db.query(sql)).
+     */
     const results = await Promise.all(
-      Object.values(queries).map((q) => db.query(q))
+      Object.values(queries).map((sql) => db.query(sql))
     );
 
     const [
@@ -176,7 +190,7 @@ router.get("/", verifyToken, async (req, res) => {
       new: leads_new?.[0]?.[0]?.count ?? 0,
       in_progress: leads_in_progress?.[0]?.[0]?.count ?? 0,
       completed: leads_completed?.[0]?.[0]?.count ?? 0,
-      canceled: leads_canceled?.[0]?.[0]?.count ?? 0, // ⬅️ נוסף
+      canceled: leads_canceled?.[0]?.[0]?.count ?? 0,
     };
 
     // 🔄 משימות
@@ -184,7 +198,7 @@ router.get("/", verifyToken, async (req, res) => {
       new: tasks_new?.[0]?.[0]?.count ?? 0,
       in_progress: tasks_in_progress?.[0]?.[0]?.count ?? 0,
       completed: tasks_completed?.[0]?.[0]?.count ?? 0,
-      canceled: tasks_canceled?.[0]?.[0]?.count ?? 0, // ⬅️ נוסף
+      canceled: tasks_canceled?.[0]?.[0]?.count ?? 0,
     };
 
     // 💼 פרויקטים
@@ -238,10 +252,11 @@ router.get("/", verifyToken, async (req, res) => {
     // ⏰ משימות חורגות
     summary.tasks_overdue = tasks_overdue?.[0] || [];
 
-    res.json({ success: true, summary });
+    // ✅ החזרה אחידה: success + data
+    return res.json({ success: true, data: summary });
   } catch (err) {
     console.error("❌ שגיאה בשליפת דשבורד:", err);
-    res.status(500).json({ success: false, error: "שגיאת שרת" });
+    return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
 
