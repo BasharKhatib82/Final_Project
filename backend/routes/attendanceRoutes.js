@@ -26,8 +26,8 @@ router.post("/add", async (req, res) => {
 
   if (!user_id || !date || !status) {
     return res.status(400).json({
-      Status: false,
-      Error: "נא למלא את כל שדות החובה",
+      success: false,
+      message: "נא למלא את כל שדות החובה",
     });
   }
 
@@ -43,8 +43,8 @@ router.post("/add", async (req, res) => {
 
     if (hasSameSpecial) {
       return res.json({
-        Status: false,
-        Error: `כבר קיימת נוכחות עם סטטוס "${status}" בתאריך זה.`,
+        success: false,
+        message: `כבר קיימת נוכחות עם סטטוס "${status}" בתאריך זה.`,
       });
     }
 
@@ -54,15 +54,15 @@ router.post("/add", async (req, res) => {
 
     if (hasTimeEntry) {
       return res.json({
-        Status: false,
-        Error: "כבר קיימת נוכחות עם שעות לאותו עובד בתאריך זה.",
+        success: false,
+        message: "כבר קיימת נוכחות עם שעות לאותו עובד בתאריך זה.",
       });
     }
 
     if (existingAttendances.length > 0) {
       return res.json({
-        Status: false,
-        Error: "כבר קיימת רשומת נוכחות לעובד זה בתאריך זה.",
+        success: false,
+        message: "כבר קיימת רשומת נוכחות לעובד זה בתאריך זה.",
       });
     }
 
@@ -81,20 +81,20 @@ router.post("/add", async (req, res) => {
 
     if (insertResponse.affectedRows === 1) {
       return res.json({
-        Status: true,
-        Message: "הנוכחות נוספה בהצלחה",
+        success: true,
+        message: "הנוכחות נוספה בהצלחה",
       });
     }
 
     return res.status(500).json({
-      Status: false,
-      Error: "הכנסת הנוכחות נכשלה",
+      success: false,
+      message: "הכנסת הנוכחות נכשלה",
     });
   } catch (err) {
     console.error("❌ [POST /add] שגיאה:", err);
     return res.status(500).json({
-      Status: false,
-      Error: "שגיאת שרת",
+      success: false,
+      message: "שגיאת שרת",
     });
   }
 });
@@ -113,14 +113,14 @@ router.get("/", async (_req, res) => {
     );
 
     return res.json({
-      Status: true,
-      Result: attendancesList,
+      success: true,
+      data: attendancesList,
     });
   } catch (err) {
     console.error("❌ [GET /] שגיאה:", err);
     return res.status(500).json({
-      Status: false,
-      Error: "שגיאת שרת",
+      success: false,
+      message: "שגיאת שרת",
     });
   }
 });
@@ -139,22 +139,22 @@ router.get("/:id", async (req, res) => {
 
     if (attendanceResult.length === 0) {
       return res.status(404).json({
-        Status: false,
-        Error: "לא נמצאה רשומת נוכחות עם מזהה זה",
+        success: false,
+        message: "לא נמצאה רשומת נוכחות עם מזהה זה",
       });
     }
 
     const attendance = attendanceResult[0];
 
     return res.json({
-      Status: true,
-      Result: attendance,
+      success: true,
+      data: attendance,
     });
   } catch (err) {
     console.error("❌ [GET /:id] שגיאה:", err);
     return res.status(500).json({
-      Status: false,
-      Error: "שגיאת שרת",
+      success: false,
+      message: "שגיאת שרת",
     });
   }
 });
@@ -168,8 +168,8 @@ router.put("/edit/:id", async (req, res) => {
 
   if (!user_id || !date || !status) {
     return res.status(400).json({
-      Status: false,
-      Error: "נא למלא את כל שדות החובה",
+      success: false,
+      message: "נא למלא את כל שדות החובה",
     });
   }
 
@@ -191,20 +191,20 @@ router.put("/edit/:id", async (req, res) => {
 
     if (updateResponse.affectedRows === 0) {
       return res.status(404).json({
-        Status: false,
-        Error: "הרשומה לא נמצאה לעדכון",
+        success: false,
+        message: "הרשומה לא נמצאה לעדכון",
       });
     }
 
     return res.json({
-      Status: true,
-      Message: "הנוכחות עודכנה בהצלחה",
+      success: true,
+      message: "הנוכחות עודכנה בהצלחה",
     });
   } catch (err) {
     console.error("❌ [PUT /edit/:id] שגיאה:", err);
     return res.status(500).json({
-      Status: false,
-      Error: "שגיאת שרת",
+      success: false,
+      message: "שגיאת שרת",
     });
   }
 });
@@ -224,23 +224,19 @@ router.get("/generate-absence-report", async (_req, res) => {
       [today]
     );
 
-    if (usersList.length === 0) {
-      return res.json({
-        Status: true,
-        Message: "כל העובדים רשמו נוכחות היום.",
-      });
-    }
-
     return res.json({
-      Status: true,
-      Missing: usersList,
-      Message: `${usersList.length} עובדים ללא נוכחות בתאריך ${today}`,
+      success: true,
+      data: usersList,
+      message:
+        usersList.length === 0
+          ? "כל העובדים רשמו נוכחות היום."
+          : `${usersList.length} עובדים ללא נוכחות בתאריך ${today}`,
     });
   } catch (err) {
     console.error("❌ [GET /generate-absence-report] שגיאה:", err);
     return res.status(500).json({
-      Status: false,
-      Error: "שגיאת שרת",
+      success: false,
+      message: "שגיאת שרת",
     });
   }
 });
@@ -253,8 +249,8 @@ router.post("/check-in", async (req, res) => {
 
   if (!user_id) {
     return res.status(400).json({
-      Status: false,
-      Error: "חסר מזהה משתמש",
+      success: false,
+      message: "חסר מזהה משתמש",
     });
   }
 
@@ -268,8 +264,8 @@ router.post("/check-in", async (req, res) => {
 
     if (existingAttendances.length > 0) {
       return res.status(400).json({
-        Status: false,
-        Error: "כבר קיימת נוכחות עבור היום",
+        success: false,
+        message: "כבר קיימת נוכחות עבור היום",
       });
     }
 
@@ -281,20 +277,20 @@ router.post("/check-in", async (req, res) => {
 
     if (insertResponse.affectedRows === 1) {
       return res.json({
-        Status: true,
-        Message: "שעת כניסה נרשמה בהצלחה",
+        success: true,
+        message: "שעת כניסה נרשמה בהצלחה",
       });
     }
 
     return res.status(500).json({
-      Status: false,
-      Error: "החתמת כניסה נכשלה",
+      success: false,
+      message: "החתמת כניסה נכשלה",
     });
   } catch (err) {
     console.error("❌ [POST /check-in] שגיאה:", err);
     return res.status(500).json({
-      Status: false,
-      Error: "שגיאת שרת",
+      success: false,
+      message: "שגיאת שרת",
     });
   }
 });
@@ -307,8 +303,8 @@ router.post("/check-out", async (req, res) => {
 
   if (!user_id) {
     return res.status(400).json({
-      Status: false,
-      Error: "חסר מזהה משתמש",
+      success: false,
+      message: "חסר מזהה משתמש",
     });
   }
 
@@ -323,8 +319,8 @@ router.post("/check-out", async (req, res) => {
 
     if (attendancesList.length === 0) {
       return res.status(400).json({
-        Status: false,
-        Error: "לא קיימת נוכחות להיום – יש להחתים כניסה קודם",
+        success: false,
+        message: "לא קיימת נוכחות להיום – יש להחתים כניסה קודם",
       });
     }
 
@@ -332,8 +328,8 @@ router.post("/check-out", async (req, res) => {
 
     if (attendance.check_out) {
       return res.status(400).json({
-        Status: false,
-        Error: "כבר בוצעה החתמת יציאה להיום",
+        success: false,
+        message: "כבר בוצעה החתמת יציאה להיום",
       });
     }
 
@@ -346,20 +342,20 @@ router.post("/check-out", async (req, res) => {
 
     if (updateResponse.affectedRows === 1) {
       return res.json({
-        Status: true,
-        Message: "שעת יציאה נרשמה בהצלחה",
+        success: true,
+        message: "שעת יציאה נרשמה בהצלחה",
       });
     }
 
     return res.status(500).json({
-      Status: false,
-      Error: "החתמת יציאה נכשלה",
+      success: false,
+      message: "החתמת יציאה נכשלה",
     });
   } catch (err) {
     console.error("❌ [POST /check-out] שגיאה:", err);
     return res.status(500).json({
-      Status: false,
-      Error: "שגיאת שרת",
+      success: false,
+      message: "שגיאת שרת",
     });
   }
 });
