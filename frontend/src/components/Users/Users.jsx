@@ -40,12 +40,12 @@ export default function Users() {
       axios.get(`${api}/users/inactive`, { withCredentials: true }),
     ])
       .then(([activeRes, inactiveRes]) => {
-        const active = (activeRes?.data?.Result || []).map((u) => ({
+        const active = (activeRes?.data?.data || []).map((u) => ({
           ...u,
           active: isActive(u.active),
           status_human: isActive(u.active) ? "פעיל" : "לא פעיל",
         }));
-        const inactive = (inactiveRes?.data?.Result || []).map((u) => ({
+        const inactive = (inactiveRes?.data?.data || []).map((u) => ({
           ...u,
           active: isActive(u.active),
           status_human: isActive(u.active) ? "פעיל" : "לא פעיל",

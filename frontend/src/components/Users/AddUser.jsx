@@ -41,7 +41,7 @@ const AddUser = () => {
       .get(`${api}/roles/active`, { withCredentials: true })
       .then((res) => {
         // ✅ עדכון לפי ה־API שלך
-        if (res.data.Status && Array.isArray(res.data.Roles)) {
+        if (res.data.success && Array.isArray(res.data.Roles)) {
           setRoles(res.data.Roles);
         } else {
           setPopupData({

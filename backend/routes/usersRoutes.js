@@ -3,14 +3,18 @@ import bcrypt from "bcryptjs";
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import verifyToken from "../utils/verifyToken.js";
+import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
 
 const router = express.Router();
+
+// החלת אימות טוקן על כל הראוטים
+router.use(verifyToken);
 
 /* ============================
         הוספת משתמש חדש
    ============================ */
-router.post("/add", verifyToken, async (req, res) => {
-  const {
+router.post("/add", async (req, res) => {
+  let {
     user_id,
     first_name,
     last_name,
@@ -32,7 +36,20 @@ router.post("/add", verifyToken, async (req, res) => {
     return res.status(400).json({ success: false, message: "שדות חובה חסרים" });
   }
 
+  // ✅ ולידציה + ניקוי אימייל
   try {
+    email = validateAndSanitizeEmail(email);
+  } catch (e) {
+    return res
+      .status(400)
+      .json({ success: false, message: e?.message || "אימייל לא תקין" });
+  }
+
+  try {
+    /**
+     * bcrypt.hash – יוצר Hash מסיסמה גולמית.
+     * הפרמטר השני (10) הוא מספר סבבי salt.
+     */
     const hash = await bcrypt.hash(password, 10);
 
     const sql = `
@@ -41,37 +58,46 @@ router.post("/add", verifyToken, async (req, res) => {
       VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), ?, 1)
     `;
 
-    await db.query(sql, [
+    const [insertResult] = await db.query(sql, [
       user_id,
       first_name,
       last_name,
-      phone_number,
+      phone_number || null,
       email,
       role_id,
       hash,
-      notes,
+      notes || null,
     ]);
 
-    logAction("הוספת משתמש חדש")(req, res, () => {});
-    res.json({ success: true, message: "המשתמש נוסף בהצלחה" });
+    /**
+     * affectedRows – מספר השורות שהושפעו מה־INSERT. ציפייה: 1.
+     */
+    if (insertResult.affectedRows !== 1) {
+      return res
+        .status(500)
+        .json({ success: false, message: "הוספת המשתמש נכשלה" });
+    }
+
+    logAction("הוספת משתמש חדש", req.user?.user_id)(req, res, () => {});
+    return res.json({ success: true, message: "המשתמש נוסף בהצלחה" });
   } catch (err) {
     console.error("❌ שגיאה בהוספת משתמש:", err);
 
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(409).json({
         success: false,
-        message: "❌ המשתמש כבר קיים במערכת (ת.ז כפולה)",
+        message: "❌ המשתמש כבר קיים במערכת (ת.ז/אימייל כפולים)",
       });
     }
 
-    res.status(500).json({ success: false, message: "שגיאת שרת" });
+    return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
 
 /* ===========================================
       עדכון משתמש ( לא כולל מנהל כללי )
    =========================================== */
-router.put("/:id", verifyToken, async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { id } = req.params;
 
   if (parseInt(id, 10) === 1) {
@@ -81,11 +107,20 @@ router.put("/:id", verifyToken, async (req, res) => {
     });
   }
 
-  const { first_name, last_name, phone_number, email, role_id, notes, active } =
+  let { first_name, last_name, phone_number, email, role_id, notes, active } =
     req.body;
 
   if (!first_name || !last_name || !email || !role_id) {
     return res.status(400).json({ success: false, message: "שדות חובה חסרים" });
+  }
+
+  // ✅ ולידציה + ניקוי אימייל
+  try {
+    email = validateAndSanitizeEmail(email);
+  } catch (e) {
+    return res
+      .status(400)
+      .json({ success: false, message: e?.message || "אימייל לא תקין" });
   }
 
   try {
@@ -96,33 +131,36 @@ router.put("/:id", verifyToken, async (req, res) => {
       WHERE user_id = ?
     `;
 
-    const [result] = await db.query(sql, [
+    const [updateResult] = await db.query(sql, [
       first_name,
       last_name,
       phone_number || null,
       email,
       role_id,
       notes || null,
-      active,
+      active ?? 1,
       id,
     ]);
 
-    if (result.affectedRows === 0) {
+    /**
+     * affectedRows – עבור UPDATE: אם 0 → לא נמצא משתמש/אין שינוי.
+     */
+    if (updateResult.affectedRows === 0) {
       return res.status(404).json({ success: false, message: "משתמש לא נמצא" });
     }
 
-    logAction(`עדכון משתמש #${id}`)(req, res, () => {});
-    res.json({ success: true, message: "המשתמש עודכן בהצלחה" });
+    logAction(`עדכון משתמש #${id}`, req.user?.user_id)(req, res, () => {});
+    return res.json({ success: true, message: "המשתמש עודכן בהצלחה" });
   } catch (err) {
     console.error("❌ שגיאה בעדכון משתמש:", err);
-    res.status(500).json({ success: false, message: "שגיאת שרת" });
+    return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
 
 /* ===========================================
       מחיקה לוגית ( לא כולל מנהל כללי )
    =========================================== */
-router.put("/delete/:id", verifyToken, async (req, res) => {
+router.put("/delete/:id", async (req, res) => {
   const { id } = req.params;
 
   if (parseInt(id, 10) === 1) {
@@ -142,18 +180,18 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
       return res.status(404).json({ success: false, message: "משתמש לא נמצא" });
     }
 
-    logAction(`השבתת משתמש #${id}`)(req, res, () => {});
-    res.json({ success: true, message: "המשתמש הושבת בהצלחה" });
+    logAction(`השבתת משתמש #${id}`, req.user?.user_id)(req, res, () => {});
+    return res.json({ success: true, message: "המשתמש הושבת בהצלחה" });
   } catch (err) {
     console.error("❌ שגיאה בהשבתת משתמש:", err);
-    res.status(500).json({ success: false, message: "שגיאת שרת" });
+    return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
 
 /* ===========================================
       שליפת משתמשים פעילים כולל שם תפקיד
    =========================================== */
-router.get("/active", verifyToken, async (req, res) => {
+router.get("/active", async (_req, res) => {
   try {
     const [usersList] = await db.query(
       `SELECT u.user_id,
@@ -169,17 +207,17 @@ router.get("/active", verifyToken, async (req, res) => {
        LEFT JOIN roles_permissions r ON u.role_id = r.role_id
        WHERE u.active = 1`
     );
-    res.json({ success: true, data: usersList });
+    return res.json({ success: true, data: usersList });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמשים פעילים:", err);
-    res.status(500).json({ success: false, message: "שגיאת שרת" });
+    return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
 
 /* ================================================
       שליפת משתמשים לא פעילים כולל שם תפקיד
    ================================================ */
-router.get("/inactive", verifyToken, async (req, res) => {
+router.get("/inactive", async (_req, res) => {
   try {
     const [usersList] = await db.query(
       `SELECT u.user_id,
@@ -195,21 +233,21 @@ router.get("/inactive", verifyToken, async (req, res) => {
        LEFT JOIN roles_permissions r ON u.role_id = r.role_id
        WHERE u.active = 0`
     );
-    res.json({ success: true, data: usersList });
+    return res.json({ success: true, data: usersList });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמשים לא פעילים:", err);
-    res.status(500).json({ success: false, message: "שגיאת שרת" });
+    return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
 
 /* ========================================
       שליפת משתמש בודד לפי מזהה 
    ======================================== */
-router.get("/:id", verifyToken, async (req, res) => {
+router.get("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-    const [user] = await db.query(
+    const [userRows] = await db.query(
       `SELECT u.user_id,
               u.first_name,
               u.last_name,
@@ -225,21 +263,21 @@ router.get("/:id", verifyToken, async (req, res) => {
       [id]
     );
 
-    if (results.length === 0) {
+    if (userRows.length === 0) {
       return res.status(404).json({ success: false, message: "משתמש לא נמצא" });
     }
 
-    res.json({ success: true, data: user[0] });
+    return res.json({ success: true, data: userRows[0] });
   } catch (err) {
     console.error("❌ שגיאה בשליפת משתמש:", err);
-    res.status(500).json({ success: false, message: "שגיאת שרת" });
+    return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 });
 
 /* ==========================
       שינוי סיסמה למשתמש
    ========================== */
-router.put("/change-password/:id", verifyToken, async (req, res) => {
+router.put("/change-password/:id", async (req, res) => {
   const { id } = req.params;
   const { currentPassword, newPassword } = req.body;
 
@@ -262,6 +300,10 @@ router.put("/change-password/:id", verifyToken, async (req, res) => {
 
     const hashedPassword = rows[0].password;
 
+    /**
+     * bcrypt.compare – משווה סיסמה שהוזנה ל־hash שמור.
+     * מחזיר true/false.
+     */
     const isMatch = await bcrypt.compare(currentPassword, hashedPassword);
     if (!isMatch) {
       return res.status(401).json({
@@ -270,19 +312,33 @@ router.put("/change-password/:id", verifyToken, async (req, res) => {
       });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const newHashedPassword = await bcrypt.hash(newPassword, salt);
+    const newHashedPassword = await bcrypt.hash(newPassword, 10);
 
-    await db.query(
+    const [updateResult] = await db.query(
       "UPDATE users SET password = ?, last_password_change = NOW() WHERE user_id = ?",
       [newHashedPassword, id]
     );
 
-    logAction(`שינוי סיסמה למשתמש #${id}`)(req, res, () => {});
-    res.json({ success: true, message: "הסיסמה עודכנה בהצלחה" });
+    /**
+     * affectedRows – עבור UPDATE: אם 0 → לא בוצע עדכון (לא נמצא משתמש).
+     */
+    if (updateResult.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "משתמש לא נמצא לעדכון" });
+    }
+
+    logAction(`שינוי סיסמה למשתמש #${id}`, req.user?.user_id)(
+      req,
+      res,
+      () => {}
+    );
+    return res.json({ success: true, message: "הסיסמה עודכנה בהצלחה" });
   } catch (err) {
     console.error("❌ שגיאה בשינוי סיסמה:", err);
-    res.status(500).json({ success: false, message: "שגיאת שרת בשינוי סיסמה" });
+    return res
+      .status(500)
+      .json({ success: false, message: "שגיאת שרת בשינוי סיסמה" });
   }
 });
 

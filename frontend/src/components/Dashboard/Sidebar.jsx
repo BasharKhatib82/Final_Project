@@ -42,17 +42,6 @@ const Sidebar = () => {
           />
         ),
       },
-      user.reports_page_access === 1 && {
-        label: "ניהול דוחות",
-        to: "/dashboard/reports",
-        icon: (
-          <Icon
-            icon="streamline-plump-color:file-report-flat"
-            width="1.5em"
-            height="1.5em"
-          />
-        ),
-      },
       user.attendance_page_access === 1 && {
         label: "ניהול שעות עבודה",
         to: "/dashboard/attendance",
