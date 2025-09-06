@@ -110,14 +110,14 @@ const AddAttendance = () => {
           setPopupData({
             show: true,
             title: "הצלחה",
-            message: res.data.Message || "הנוכחות נוספה בהצלחה",
+            message: res.data.message || "הנוכחות נוספה בהצלחה",
             mode: "success",
           });
         } else {
           setPopupData({
             show: true,
             title: "שגיאה",
-            message: res.data.Error || "שגיאה בשמירה",
+            message: res.data.message || "שגיאה בשמירה",
             mode: "error",
           });
         }
