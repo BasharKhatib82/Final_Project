@@ -13,7 +13,6 @@ export default function Attendance() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
   const { user } = useUser();
 
   useEffect(() => {
@@ -21,11 +20,23 @@ export default function Attendance() {
     fetchUsers();
   }, []);
 
+  // 🟢 1) בעת טעינת הנוכחות – הוסף full_name (אם מגיע מה־API זה קל; אם לא, נשלים אחר כך)
   const fetchAttendance = () => {
     setLoading(true);
     axios
       .get(`${api}/attendance`, { withCredentials: true })
-      .then((res) => setAttendance(res.data.data || []))
+      .then((res) => {
+        const rows = res.data?.data || [];
+        const withNames = rows.map((r) => ({
+          ...r,
+          // אם השרת מחזיר first_name/last_name נשתמש בהם; אחרת נעדכן מאוחר יותר אחרי users
+          full_name: [r.first_name, r.last_name]
+            .filter(Boolean)
+            .join(" ")
+            .trim(),
+        }));
+        setAttendance(withNames);
+      })
       .catch((err) => console.error("שגיאה בטעינת נוכחות:", err))
       .finally(() => setLoading(false));
   };
@@ -48,6 +59,22 @@ export default function Attendance() {
       })
       .catch((err) => console.error("שגיאה בטעינת עובדים:", err));
   };
+
+  // 🟢 2) אם ה־API לא מחזיר first_name/last_name, נבנה full_name מתוך users אחרי שנטענו
+  useEffect(() => {
+    if (users.length === 0 || attendance.length === 0) return;
+
+    setAttendance((prev) =>
+      prev.map((r) => {
+        if (r.full_name) return r; // כבר קיים
+        const u = users.find((x) => x.user_id === r.user_id);
+        return {
+          ...r,
+          full_name: u ? `${u.first_name} ${u.last_name}` : "",
+        };
+      })
+    );
+  }, [users]); // מריץ כשמשתמשים נטענים
 
   const formatDate = (dateStr) =>
     dateStr ? new Date(dateStr).toISOString().split("T")[0] : "-";
@@ -72,10 +99,13 @@ export default function Attendance() {
       key: "user_id",
       label: "שם עובד",
       render: (r) => {
+        // 🟢 3) נעדיף full_name אם קיים
+        if (r.full_name) return r.full_name;
         const u = users.find((x) => x.user_id === r.user_id);
         return u ? `${u.first_name} ${u.last_name}` : "לא ידוע";
       },
       export: (r) => {
+        if (r.full_name) return r.full_name;
         const u = users.find((x) => x.user_id === r.user_id);
         return u ? `${u.first_name} ${u.last_name}` : "לא ידוע";
       },
@@ -120,7 +150,7 @@ export default function Attendance() {
                 icon="fluent-color:edit-32"
                 width="1.2rem"
                 height="1.2rem"
-              />{" "}
+              />
               עריכה
             </button>
           )}
@@ -174,7 +204,8 @@ export default function Attendance() {
           columns={columns}
           rows={attendance}
           filtersDef={filtersDef}
-          searchableKeys={["status", "notes", "user_id"]}
+          // 🟢 4) נחליף את מפתחות החיפוש כך שיחפש בשם העובד
+          searchableKeys={["status", "notes", "full_name"]}
           pageSize={25}
           emailApiBase={api}
           addButton={
