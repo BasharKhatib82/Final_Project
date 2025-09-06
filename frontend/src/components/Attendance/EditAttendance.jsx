@@ -45,11 +45,11 @@ const EditAttendance = () => {
       axios.get(`${api}/users/inactive`, { withCredentials: true }),
     ])
       .then(([activeRes, inactiveRes]) => {
-        const active = (activeRes.data.Result || []).map((user) => ({
+        const active = (activeRes.data.data || []).map((user) => ({
           ...user,
           active: true,
         }));
-        const inactive = (inactiveRes.data.Result || []).map((user) => ({
+        const inactive = (inactiveRes.data.data || []).map((user) => ({
           ...user,
           active: false,
         }));
@@ -66,21 +66,21 @@ const EditAttendance = () => {
       });
   };
 
-  // ✅ שליפת נתוני נוכחות קיימת
+  //  שליפת נתוני נוכחות קיימת
   const fetchAttendance = () => {
     axios
       .get(`${api}/attendance/${id}`, { withCredentials: true })
       .then((res) => {
-        if (res.data.Status) {
-          const data = res.data.Result;
-          const formattedDate = data.date?.split("T")[0] || "";
+        if (res.data.success) {
+          const attendance = res.data.data;
+          const formattedDate = attendance.date?.split("T")[0] || "";
           setForm({
-            user_id: data.user_id,
+            user_id: attendance.user_id,
             date: formattedDate,
-            check_in: data.check_in || "",
-            check_out: data.check_out || "",
-            status: data.status,
-            notes: data.notes || "",
+            check_in: attendance.check_in || "",
+            check_out: attendance.check_out || "",
+            status: attendance.status,
+            notes: attendance.notes || "",
           });
         } else {
           setPopup({
