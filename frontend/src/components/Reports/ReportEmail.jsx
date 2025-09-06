@@ -50,9 +50,20 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
       // ✅ ולידציה + ניקוי מקומי
       const safeEmail = validateAndSanitizeEmail(to);
 
+      // 🛠️ עיבוד שורות לפני שליחה לשרת
+      const processedRows = filteredRows.map((row) =>
+        Object.fromEntries(
+          columns
+            .filter((col) => col.export !== false)
+            .map((col) => [
+              col.key,
+              typeof col.export === "function" ? col.export(row) : row[col.key],
+            ])
+        )
+      );
       await axios.post(
         `${apiBase}/reports/send-email`,
-        { title, columns, rows: filteredRows, to: safeEmail, format },
+        { title, columns, rows: processedRows, to: safeEmail, format },
         { withCredentials: true }
       );
 
