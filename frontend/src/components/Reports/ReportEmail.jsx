@@ -13,7 +13,6 @@ import { useReport } from "./ReportContext";
 import axios from "axios";
 import { Icon } from "@iconify/react";
 import { validateAndSanitizeEmail } from "../../utils/validateAndSanitizeEmail";
-import { buildExportTable } from "../../utils/exportUtils";
 import Popup from "../Tools/Popup";
 
 const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
@@ -51,11 +50,9 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
       // ✅ ולידציה + ניקוי מקומי
       const safeEmail = validateAndSanitizeEmail(to);
 
-      // ⬅️ בניית טבלת הייצוא בדיוק כמו בקבצים (תאריך YYYY-MM-DD, שעה HH:MM, שם מלא, "-" לשדות ריקים)
-      const { headers, rows } = buildExportTable(filteredRows, columns, "-");
       await axios.post(
         `${apiBase}/reports/send-email`,
-        { title, headers, rows, to: safeEmail, format }, // שלח טקסט נקי בלבד
+        { title, columns, rows: filteredRows, to: safeEmail, format },
         { withCredentials: true }
       );
 
