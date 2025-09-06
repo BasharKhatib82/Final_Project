@@ -25,7 +25,7 @@ export default function Attendance() {
     setLoading(true);
     axios
       .get(`${api}/attendance`, { withCredentials: true })
-      .then((res) => setAttendance(res.data.Result || []))
+      .then((res) => setAttendance(res.data.data || []))
       .catch((err) => console.error("שגיאה בטעינת נוכחות:", err))
       .finally(() => setLoading(false));
   };
@@ -36,11 +36,11 @@ export default function Attendance() {
       axios.get(`${api}/users/inactive`, { withCredentials: true }),
     ])
       .then(([activeRes, inactiveRes]) => {
-        const active = (activeRes.data.Result || []).map((u) => ({
+        const active = (activeRes.data.data || []).map((u) => ({
           ...u,
           active: true,
         }));
-        const inactive = (inactiveRes.data.Result || []).map((u) => ({
+        const inactive = (inactiveRes.data.data || []).map((u) => ({
           ...u,
           active: false,
         }));
