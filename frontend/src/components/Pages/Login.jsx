@@ -45,7 +45,7 @@ function Login() {
       }
 
       if (loginRes.data.success) {
-        const userData = loginRes.data.user;
+        const userData = loginRes.data.data;
         userData.full_name = `${userData.first_name} ${userData.last_name}`;
 
         setUser(userData);
