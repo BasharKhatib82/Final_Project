@@ -34,11 +34,11 @@ export function ReportProvider({
       if (f.type === "select") {
         data = data.filter((r) => String(r[f.name]) === String(v));
       } else if (f.type === "date") {
-        // 🔒 השוואה טקסטואלית "YYYY-MM-DD" → כולל קצה
-        const target = dateOnlyFromValue(v); // כבר אמור להיות YYYY-MM-DD אבל נשמור עקביות
+        // השוואה טקסטואלית "YYYY-MM-DD" → כולל קצה
+        const target = dateOnlyFromValue(v);
         data = data.filter((r) => dateOnlyFromValue(r[f.name]) === target);
       } else if (f.type === "daterange" && Array.isArray(v)) {
-        // 🔒 השוואה טקסטואלית "YYYY-MM-DD" → כולל from/to
+        // השוואה טקסטואלית "YYYY-MM-DD" → כולל from/to
         const [fromRaw, toRaw] = v;
         const from = fromRaw ? dateOnlyFromValue(fromRaw) : "";
         const to = toRaw ? dateOnlyFromValue(toRaw) : "";
@@ -109,24 +109,23 @@ export function ReportProvider({
 }
 
 /**
- * מחזיר תאריך כ־"YYYY-MM-DD" ללא תלות באזור־זמן.
- * תומך בשלושה מצבים:
- * 1) אם הערך כבר מחרוזת שמתחילה ב־YYYY-MM-DD → לוקחים את 10 התווים הראשונים.
- * 2) אם זה Date/מספר/מחרוזת אחרת → נמיר ל־Date מקומי ונחזיר YYYY-MM-DD.
- * 3) אם לא ניתן לפרש → מחזיר מחרוזת ריקה.
+ * מחזיר תאריך כ־"YYYY-MM-DD" באופן יציב:
+ * 1) אם זו מחרוזת שמתחילה ב־YYYY-MM-DD → לוקחים את החלק לפני ה־T (אם קיים).
+ * 2) אם זה Date/מספר/מחרוזת אחרת → ממירים ל־Date ומשתמשים ב־UTC כדי להימנע מהסטות אזור זמן.
+ * 3) אם לא ניתן לפרש → "".
  */
 function dateOnlyFromValue(val) {
   try {
     if (typeof val === "string") {
-      const m = val.match(/^(\d{4}-\d{2}-\d{2})/);
-      if (m) return m[1]; // כבר בפורמט תקני
+      const match = val.match(/^(\d{4}-\d{2}-\d{2})(?:T.*)?$/);
+      if (match) return match[1]; // לוקחים רק את YYYY-MM-DD
     }
-    const d = new Date(val);
-    if (isNaN(d)) return "";
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${y}-${m}-${day}`;
+    const d = val instanceof Date ? val : new Date(val);
+    if (Number.isNaN(d.getTime())) return "";
+    const y = d.getUTCFullYear();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+    const dd = String(d.getUTCDate()).padStart(2, "0");
+    return `${y}-${mm}-${dd}`;
   } catch {
     return "";
   }
