@@ -102,7 +102,7 @@ const EditUser = () => {
           setPopupData({
             show: true,
             title: "שגיאה",
-            message: res.data.Error || "אירעה שגיאה בעדכון המשתמש",
+            message: res.data.message || "אירעה שגיאה בעדכון המשתמש",
             mode: "error",
           });
         }

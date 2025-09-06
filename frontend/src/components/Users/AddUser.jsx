@@ -41,8 +41,8 @@ const AddUser = () => {
       .get(`${api}/roles/active`, { withCredentials: true })
       .then((res) => {
         // ✅ עדכון לפי ה־API שלך
-        if (res.data.success && Array.isArray(res.data.Roles)) {
-          setRoles(res.data.Roles);
+        if (res.data.success && Array.isArray(res.data.data)) {
+          setRoles(res.data.data);
         } else {
           setPopupData({
             show: true,
@@ -94,14 +94,14 @@ const AddUser = () => {
           setPopupData({
             show: true,
             title: "הצלחה",
-            message: res.data.Message || "המשתמש נוסף בהצלחה",
+            message: res.data.message || "המשתמש נוסף בהצלחה",
             mode: "success",
           });
         } else {
           setPopupData({
             show: true,
             title: "שגיאה",
-            message: res.data.Error || "שגיאה בהוספת המשתמש",
+            message: res.data.message || "שגיאה בהוספת המשתמש",
             mode: "error",
           });
         }
