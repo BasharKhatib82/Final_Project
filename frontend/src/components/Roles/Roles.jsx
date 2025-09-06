@@ -48,8 +48,8 @@ export default function Roles() {
       axios.get(`${api}/roles/inactive`, { withCredentials: true }),
     ])
       .then(([activeRes, inactiveRes]) => {
-        const active = (activeRes?.data?.Roles || []).map(mapRole);
-        const inactive = (inactiveRes?.data?.Roles || []).map(mapRole);
+        const active = (activeRes?.data?.data || []).map(mapRole);
+        const inactive = (inactiveRes?.data?.data || []).map(mapRole);
         setAllRoles([...active, ...inactive]);
       })
       .catch(() => {
