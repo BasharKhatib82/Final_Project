@@ -84,11 +84,7 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
   /** שליחת דוח לשרת לצורך יצירת קובץ ושליחתו במייל */
   const send = async (format = "xlsx") => {
     if (!to) {
-      return showPopup(
-        "שדה דואר אלקטרוני חובה",
-        'נא להזין כתובת דוא"ל',
-        "warning"
-      );
+      return showPopup("שדה דואר אלקטרוני חובה", 'נא להזין כתובת דוא"ל', "warning");
     }
 
     try {
@@ -135,22 +131,14 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
         className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
         onClick={() => send("xlsx")}
       >
-        <Icon
-          icon="vscode-icons:file-type-excel"
-          width="1.2em"
-          height="1.2em"
-        />
+        <Icon icon="vscode-icons:file-type-excel" width="1.2em" height="1.2em" />
         Excel
       </button>
       <button
         className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
         onClick={() => send("pdf")}
       >
-        <Icon
-          icon="vscode-icons:file-type-pdf2"
-          width="1.2rem"
-          height="1.2rem"
-        />
+        <Icon icon="vscode-icons:file-type-pdf2" width="1.2rem" height="1.2rem" />
         PDF
       </button>
 
