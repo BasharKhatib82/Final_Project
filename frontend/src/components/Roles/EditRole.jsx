@@ -30,7 +30,7 @@ const EditRole = () => {
     axios
       .get(`${api}/roles/${id}`, { withCredentials: true })
       .then((res) => {
-        const role = res.data.Role;
+        const role = res.data.data;
         setRoleName(role.role_name);
         setActive(role.active);
 
