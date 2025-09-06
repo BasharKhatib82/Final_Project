@@ -66,7 +66,7 @@ router.get("/active", verifyToken, async (req, res) => {
     return res.status(200).json({ success: true, data: results });
   } catch (err) {
     console.error("שגיאת שליפת תפקידים פעילים:", err);
-    return res.status(500).json({ success: false, Error: "שגיאת שליפה" });
+    return res.status(500).json({ success: false, massage: "שגיאת שליפה" });
   }
 });
 
@@ -79,7 +79,7 @@ router.get("/inactive", verifyToken, async (req, res) => {
     return res.status(200).json({ success: true, data: results });
   } catch (err) {
     console.error("שגיאת שליפת תפקידים לא פעילים:", err);
-    return res.status(500).json({ success: false, Error: "שגיאת שליפה" });
+    return res.status(500).json({ success: false, massage: "שגיאת שליפה" });
   }
 });
 
@@ -92,7 +92,7 @@ router.get("/", verifyToken, async (req, res) => {
     return res.status(200).json({ success: true, data: results });
   } catch (err) {
     console.error("שגיאת שליפת תפקידים:", err);
-    return res.status(500).json({ success: false, Error: "שגיאת שליפה" });
+    return res.status(500).json({ success: false, massage: "שגיאת שליפה" });
   }
 });
 
@@ -105,13 +105,13 @@ router.get("/:id", verifyToken, async (req, res) => {
       [roleId]
     );
     if (results.length === 0) {
-      return res.status(404).json({ success: false, Error: "תפקיד לא נמצא" });
+      return res.status(404).json({ success: false, massage: "תפקיד לא נמצא" });
     }
 
-    return res.status(200).json({ success: true, Role: results[0] });
+    return res.status(200).json({ success: true, data: results[0] });
   } catch (err) {
     console.error("שגיאת שליפת תפקיד לפי מזהה:", err);
-    return res.status(500).json({ success: false, Error: "שגיאת שליפה מהשרת" });
+    return res.status(500).json({ success: false, massage: "שגיאת שליפה מהשרת" });
   }
 });
 
@@ -122,13 +122,13 @@ router.put("/:id", verifyToken, async (req, res) => {
   if (role_id === 1) {
     return res
       .status(403)
-      .json({ success: false, Error: 'לא ניתן לערוך את תפקיד המנכ"ל' });
+      .json({ success: false, massage: 'לא ניתן לערוך את תפקיד המנכ"ל' });
   }
 
   const { role_name, active } = req.body;
 
   if (!role_name || typeof role_name !== "string" || role_name.trim() === "") {
-    return res.status(400).json({ success: false, Error: "שם תפקיד לא תקין" });
+    return res.status(400).json({ success: false, massage: "שם תפקיד לא תקין" });
   }
 
   try {
@@ -140,7 +140,7 @@ router.put("/:id", verifyToken, async (req, res) => {
     if (dup.length > 0) {
       return res
         .status(409)
-        .json({ Status: false, Error: "שם תפקיד כבר קיים" });
+        .json({ success: false, massage: "שם תפקיד כבר קיים" });
     }
 
     // נבנה דינמית SET
@@ -165,14 +165,14 @@ router.put("/:id", verifyToken, async (req, res) => {
     if (result.affectedRows === 0) {
       return res
         .status(404)
-        .json({ success: false, Error: "תפקיד לא נמצא לעדכון" });
+        .json({ success: false, massage: "תפקיד לא נמצא לעדכון" });
     }
 
     await logAction(`עדכון תפקיד : ${role_name}`);
-    return res.status(200).json({ success: true, Message: "עודכן בהצלחה" });
+    return res.status(200).json({ success: true, massage: "עודכן בהצלחה" });
   } catch (err) {
     console.error("שגיאת עדכון תפקיד:", err);
-    return res.status(500).json({ success: false, Error: "שגיאת עדכון תפקיד" });
+    return res.status(500).json({ success: false, massage: "שגיאת עדכון תפקיד" });
   }
 });
 
@@ -183,7 +183,7 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
   if (roleId === 1) {
     return res
       .status(403)
-      .json({ success: false, Error: "לא ניתן למחוק את תפקיד מנהל כללי" });
+      .json({ success: false, massage: "לא ניתן למחוק את תפקיד מנהל כללי" });
   }
 
   try {
@@ -195,16 +195,16 @@ router.put("/delete/:id", verifyToken, async (req, res) => {
     if (result.affectedRows === 0) {
       return res
         .status(404)
-        .json({ success: false, Error: "תפקיד לא נמצא למחיקה" });
+        .json({ success: false, massage: "תפקיד לא נמצא למחיקה" });
     }
 
     await logAction(`מחיקת תפקיד : ${role_name}`);
     return res
       .status(200)
-      .json({ success: true, Message: "התפקיד הוסר בהצלחה (מחיקה לוגית)" });
+      .json({ success: true, massage: "התפקיד הוסר בהצלחה (מחיקה לוגית)" });
   } catch (err) {
     console.error("שגיאת מחיקה:", err);
-    return res.status(500).json({ success: false, Error: "שגיאת מחיקה מהשרת" });
+    return res.status(500).json({ success: false, massage: "שגיאת מחיקה מהשרת" });
   }
 });
 
