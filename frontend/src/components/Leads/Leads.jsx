@@ -42,7 +42,7 @@ const Leads = () => {
         withCredentials: true,
       });
       if (res.data.success) {
-        setUsers(res.data.Result);
+        setUsers(res.data.data);
       }
     } catch (err) {
       console.error("שגיאה בטעינת עובדים:", err);
@@ -67,8 +67,8 @@ const Leads = () => {
       const res = await axios.get(`${api}/leads`, {
         withCredentials: true,
       });
-      if (res.data.Status) {
-        const updatedLeads = res.data.Result.map((lead) => ({
+      if (res.data.success) {
+        const updatedLeads = res.data.data.map((lead) => ({
           ...lead,
           selectedRepId: lead.user_id || "",
           selectedStatus: lead.status,
@@ -93,7 +93,7 @@ const Leads = () => {
         { withCredentials: true }
       );
 
-      if (res.data.Status) {
+      if (res.data.success) {
         setLeads((prevLeads) =>
           prevLeads.map((lead) =>
             lead.lead_id === leadId
@@ -142,7 +142,7 @@ const Leads = () => {
         { withCredentials: true }
       );
 
-      if (res.data.Status) {
+      if (res.data.success) {
         setLeads((prevLeads) =>
           prevLeads.map((lead) =>
             lead.lead_id === leadId
@@ -188,7 +188,7 @@ const Leads = () => {
       const res = await axios.delete(`${api}/leads/delete/${leadToDelete}`, {
         withCredentials: true,
       });
-      if (res.data.Status) {
+      if (res.data.success) {
         setLeads((prevLeads) =>
           prevLeads.map((lead) =>
             lead.lead_id === leadToDelete
@@ -258,7 +258,7 @@ const Leads = () => {
         { withCredentials: true }
       );
 
-      if (res.data.Status) {
+      if (res.data.success) {
         fetchLeads();
         setSelectedLeads([]);
         setBulkUserId("");

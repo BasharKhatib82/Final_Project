@@ -31,9 +31,9 @@ const LeadDetails = () => {
       const res = await axios.get(`${api}/leads/${id}`, {
         withCredentials: true,
       });
-      if (res.data.Status) {
-        setLead(res.data.Result);
-        setNewStatus(res.data.Result.status); // ✅ נעדכן גם את סטטוס הפנייה
+      if (res.data.success) {
+        setLead(res.data.data);
+        setNewStatus(res.data.data.status); // ✅ נעדכן גם את סטטוס הפנייה
       } else {
         console.error("שגיאה בטעינת הפנייה:", res.data.Error);
       }
@@ -47,10 +47,10 @@ const LeadDetails = () => {
       const res = await axios.get(`${api}/leads/progress/${id}`, {
         withCredentials: true,
       });
-      if (res.data.Status) {
-        setProgress(res.data.Result);
+      if (res.data.success) {
+        setProgress(res.data.data);
       } else {
-        console.error("שגיאה בטעינת התקדמות:", res.data.Error);
+        console.error("שגיאה בטעינת התקדמות:", res.data.message);
       }
     } catch (err) {
       console.error("שגיאה בטעינת התקדמות:", err);
@@ -80,7 +80,7 @@ const LeadDetails = () => {
         { withCredentials: true }
       );
 
-      if (res.data.Status) {
+      if (res.data.success) {
         setNewNote("");
         await fetchProgress(); // ✅ נטען מחדש את התיעודים
         await fetchLead(); // ✅ נטען מחדש את הפנייה (סטטוס למעלה)
@@ -92,7 +92,7 @@ const LeadDetails = () => {
       } else {
         setPopupData({
           title: "שגיאה",
-          message: res.data.Error || "שגיאה בשמירת התיעוד",
+          message: res.data.message || "שגיאה בשמירת התיעוד",
           mode: "error",
         });
       }

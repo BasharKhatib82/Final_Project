@@ -38,8 +38,8 @@ const EditLead = () => {
       const res = await axios.get(`${api}/leads/${id}`, {
         withCredentials: true,
       });
-      if (res.data.Status) {
-        setForm(res.data.Result);
+      if (res.data.success) {
+        setForm(res.data.data);
       } else {
         console.error("שגיאה בטעינת הפנייה:", res.data.Error);
       }
@@ -53,7 +53,7 @@ const EditLead = () => {
       const res = await axios.get(`${api}/projects/active`, {
         withCredentials: true,
       });
-      setProjects(res.data.Result);
+      setProjects(res.data.data);
     } catch (err) {
       console.error("שגיאה בטעינת פרויקטים:", err);
     }
@@ -64,7 +64,7 @@ const EditLead = () => {
       const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
-      setUsers(res.data.Result);
+      setUsers(res.data.data);
     } catch (err) {
       console.error("שגיאה בטעינת עובדים:", err);
     }
@@ -89,7 +89,7 @@ const EditLead = () => {
       const res = await axios.put(`${api}/leads/edit/${id}`, form, {
         withCredentials: true,
       });
-      if (res.data.Status) {
+      if (res.data.success) {
         setShowConfirmPopup(false);
         setSuccessPopup(true);
       } else {

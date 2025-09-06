@@ -40,7 +40,7 @@ const AddLead = () => {
       const res = await axios.get(`${api}/projects/active`, {
         withCredentials: true,
       });
-      setProjects(res.data.Result);
+      setProjects(res.data.data);
     } catch (err) {
       console.error("Error loading projects:", err);
     }
@@ -51,7 +51,7 @@ const AddLead = () => {
       const res = await axios.get(`${api}/users/active`, {
         withCredentials: true,
       });
-      setUsers(res.data.Result);
+      setUsers(res.data.data);
     } catch (err) {
       console.error("Error loading users:", err);
     }
@@ -63,8 +63,8 @@ const AddLead = () => {
         `${api}/clients/by-phone/${form.phone_number}`,
         { withCredentials: true }
       );
-      if (res.data.Status) {
-        const c = res.data.Result;
+      if (res.data.success) {
+        const c = res.data.data;
         setForm((prev) => ({
           ...prev,
           first_name: c.first_name,
@@ -101,11 +101,11 @@ const AddLead = () => {
       const res = await axios.post(`${api}/leads/add`, leadData, {
         withCredentials: true,
       });
-      if (res.data.Status) {
+      if (res.data.success) {
         setShowConfirmPopup(false);
         setSuccessPopup(true);
       } else {
-        setError(res.data.Error || "שגיאה בשמירת פנייה");
+        setError(res.data.message || "שגיאה בשמירת פנייה");
         setShowConfirmPopup(false);
       }
     } catch (err) {
