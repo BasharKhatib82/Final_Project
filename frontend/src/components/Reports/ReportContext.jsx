@@ -34,18 +34,21 @@ export function ReportProvider({
       if (f.type === "select") {
         data = data.filter((r) => String(r[f.name]) === String(v));
       } else if (f.type === "date") {
-        data = data.filter((r) => formatDateOnly(r[f.name]) === v);
+        // 🔒 השוואה טקסטואלית "YYYY-MM-DD" → כולל קצה
+        const target = dateOnlyFromValue(v); // כבר אמור להיות YYYY-MM-DD אבל נשמור עקביות
+        data = data.filter((r) => dateOnlyFromValue(r[f.name]) === target);
       } else if (f.type === "daterange" && Array.isArray(v)) {
+        // 🔒 השוואה טקסטואלית "YYYY-MM-DD" → כולל from/to
         const [fromRaw, toRaw] = v;
-        const from = fromRaw ? new Date(fromRaw) : null;
-        const to = toRaw ? new Date(toRaw) : null;
+        const from = fromRaw ? dateOnlyFromValue(fromRaw) : "";
+        const to = toRaw ? dateOnlyFromValue(toRaw) : "";
 
         data = data.filter((r) => {
-          const d = new Date(r[f.name]);
-          if (isNaN(d)) return false;
-          const ge = from ? d >= from : true;
-          const le = to ? d <= to : true;
-          return ge && le;
+          const rowDateStr = dateOnlyFromValue(r[f.name]);
+          if (!rowDateStr) return false;
+          if (from && rowDateStr < from) return false; // כולל from
+          if (to && rowDateStr > to) return false; // כולל to
+          return true;
         });
       } else if (f.type === "text") {
         data = data.filter((r) =>
@@ -78,7 +81,7 @@ export function ReportProvider({
 
   const total = filteredRows.length;
   const pages = Math.max(1, Math.ceil(total / pageSize));
-  const safePage = Math.min(page, pages); // 🔒 אם עברנו עמוד מעל המותר
+  const safePage = Math.min(page, pages);
   const pageRows = filteredRows.slice(
     (safePage - 1) * pageSize,
     safePage * pageSize
@@ -105,8 +108,19 @@ export function ReportProvider({
   return <ReportCtx.Provider value={value}>{children}</ReportCtx.Provider>;
 }
 
-function formatDateOnly(val) {
+/**
+ * מחזיר תאריך כ־"YYYY-MM-DD" ללא תלות באזור־זמן.
+ * תומך בשלושה מצבים:
+ * 1) אם הערך כבר מחרוזת שמתחילה ב־YYYY-MM-DD → לוקחים את 10 התווים הראשונים.
+ * 2) אם זה Date/מספר/מחרוזת אחרת → נמיר ל־Date מקומי ונחזיר YYYY-MM-DD.
+ * 3) אם לא ניתן לפרש → מחזיר מחרוזת ריקה.
+ */
+function dateOnlyFromValue(val) {
   try {
+    if (typeof val === "string") {
+      const m = val.match(/^(\d{4}-\d{2}-\d{2})/);
+      if (m) return m[1]; // כבר בפורמט תקני
+    }
     const d = new Date(val);
     if (isNaN(d)) return "";
     const y = d.getFullYear();

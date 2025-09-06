@@ -9,7 +9,7 @@ export default function useInactivityLogout() {
   useEffect(() => {
     if (!user) return;
 
-    const timeoutDuration = 5 * 60 * 1000;
+    const timeoutDuration = 60 * 60 * 1000;
     let timeout;
 
     const handleLogout = () => {

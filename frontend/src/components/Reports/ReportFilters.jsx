@@ -91,7 +91,7 @@ function Filter({ def, value, onChange, inline, filteredRows }) {
     );
   }
 
-  // 🔹 תאריך יחיד
+  //  תאריך יחיד
   if (def.type === "date") {
     return (
       <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ function Filter({ def, value, onChange, inline, filteredRows }) {
     );
   }
 
-  // 🔹 טווח תאריכים
+  // טווח תאריכים
   if (def.type === "daterange") {
     const [from = "", to = ""] = value || [];
 
