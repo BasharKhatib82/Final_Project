@@ -17,55 +17,6 @@ import Popup from "../Tools/Popup";
 
 const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 
-/** ממיר ערך ריק ל־"-" */
-const normalizeCell = (val, emptyDash = "-") => {
-  if (val === null || val === undefined) return emptyDash;
-  const s = String(val).trim();
-  return s === "" ? emptyDash : s;
-};
-
-/**
- * בונה headers + rows “מוכנים לדוח” על בסיס columns.export (אם קיים) אחרת raw.
- * מדלג על עמודות ש-export שלהן מחזיר null לכל השורות (למשל עמודת actions).
- */
-const buildExportTable = (rows, columns, emptyDash = "-") => {
-  // אם אין שורות, נקבע כותרות לפי עמודות שאינן "actions"
-  if (!Array.isArray(rows)) rows = [];
-  const safeRows = rows;
-
-  let exportableCols = columns;
-
-  if (safeRows.length > 0) {
-    exportableCols = columns.filter((col) => {
-      if (typeof col.export !== "function") return true;
-      try {
-        // אם יש אפילו שורה אחת שבה export לא מחזיר null/undefined → נייצא את העמודה
-        return safeRows.some((r) => {
-          const v = col.export(r);
-          return v !== null && v !== undefined;
-        });
-      } catch {
-        return false;
-      }
-    });
-  } else {
-    // בלי שורות: מדלגים על עמודות ידועות שלא רלוונטיות לייצוא (actions)
-    exportableCols = columns.filter((c) => c.key !== "actions");
-  }
-
-  const headers = exportableCols.map((c) => c.label || c.key);
-
-  const tableRows = safeRows.map((r) =>
-    exportableCols.map((col) => {
-      const value =
-        typeof col.export === "function" ? col.export(r) : r[col.key];
-      return normalizeCell(value, emptyDash);
-    })
-  );
-
-  return { headers, rows: tableRows };
-};
-
 export default function ReportEmail({ apiBase = ENV_API_BASE }) {
   const { title, columns, filteredRows } = useReport();
   const [to, setTo] = useState("");
@@ -76,39 +27,46 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
     mode: "",
   });
 
-  /** הצגת הודעה בפופאפ */
+  /**
+   * הצגת הודעה בפופאפ
+   */
   const showPopup = (title, message, mode) => {
     setPopup({ show: true, title, message, mode });
   };
 
-  /** שליחת דוח לשרת לצורך יצירת קובץ ושליחתו במייל */
+  /**
+   * שליחת דוח לשרת לצורך יצירת קובץ ושליחתו במייל
+   */
   const send = async (format = "xlsx") => {
     if (!to) {
-      return showPopup("שדה דואר אלקטרוני חובה", 'נא להזין כתובת דוא"ל', "warning");
+      return showPopup(
+        "שדה דואר אלקטרוני חובה",
+        'נא להזין כתובת דוא"ל',
+        "warning"
+      );
     }
 
     try {
-      // ✅ ניקוי/ולידציית המייל
+      // ✅ ולידציה + ניקוי מקומי
       const safeEmail = validateAndSanitizeEmail(to);
 
-      // ✅ בניית טבלת ייצוא מוכנה (כולל פורמטים: תאריך YYYY-MM-DD, שעה HH:MM, שם מלא, "-" לשדות ריקים)
-      const { headers, rows } = buildExportTable(filteredRows, columns, "-");
-
-      // ✅ שליחה לשרת אך ורק מידע טקסטואלי (בלי פונקציות מה-columns)
       await axios.post(
         `${apiBase}/reports/send-email`,
-        { title, headers, rows, to: safeEmail, format }, // <— זה מה שהשרת צריך
+        { title, columns, rows: filteredRows, to: safeEmail, format },
         { withCredentials: true }
       );
 
       showPopup("הצלחה", "✅ הדוח נשלח בהצלחה למייל", "success");
     } catch (e) {
       console.error("Email send failed:", e?.response?.data || e.message);
+
+      // נעדיף שגיאת שרת אמיתית אם קיימת
       const msg =
         e?.response?.data?.error ||
         e?.response?.data?.message ||
         e.message ||
         "אירעה שגיאה בשליחה";
+
       showPopup("שגיאה", msg, "error");
     }
   };
@@ -131,14 +89,22 @@ export default function ReportEmail({ apiBase = ENV_API_BASE }) {
         className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
         onClick={() => send("xlsx")}
       >
-        <Icon icon="vscode-icons:file-type-excel" width="1.2em" height="1.2em" />
+        <Icon
+          icon="vscode-icons:file-type-excel"
+          width="1.2em"
+          height="1.2em"
+        />{" "}
         Excel
       </button>
       <button
         className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
         onClick={() => send("pdf")}
       >
-        <Icon icon="vscode-icons:file-type-pdf2" width="1.2rem" height="1.2rem" />
+        <Icon
+          icon="vscode-icons:file-type-pdf2"
+          width="1.2rem"
+          height="1.2rem"
+        />{" "}
         PDF
       </button>
 
