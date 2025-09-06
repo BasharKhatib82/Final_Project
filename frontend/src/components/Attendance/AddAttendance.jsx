@@ -106,7 +106,7 @@ const AddAttendance = () => {
     axios
       .post(`${api}/attendance/add`, form, { withCredentials: true })
       .then((res) => {
-        if (res.data.Status) {
+        if (res.data.success) {
           setPopupData({
             show: true,
             title: "הצלחה",
