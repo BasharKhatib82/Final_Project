@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import NavigationButton from "../Buttons/NavigationButton";
 import ReportView from "../Reports/ReportView";
 import { useUser } from "../Tools/UserContext";
+import { formatDate, formatTime } from "../../utils/dateTimeHelpers";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -60,7 +61,7 @@ export default function Attendance() {
       .catch((err) => console.error("שגיאה בטעינת עובדים:", err));
   };
 
-  // 🟢 2) אם ה־API לא מחזיר first_name/last_name, נבנה full_name מתוך users אחרי שנטענו
+  // 🟢 2) אם ה־ API לא מחזיר first_name/last_name, נבנה full_name מתוך users אחרי שנטענו
   useEffect(() => {
     if (users.length === 0 || attendance.length === 0) return;
 
@@ -75,11 +76,6 @@ export default function Attendance() {
       })
     );
   }, [users]); // מריץ כשמשתמשים נטענים
-
-  const formatDate = (dateStr) =>
-    dateStr ? new Date(dateStr).toISOString().split("T")[0] : "-";
-
-  const formatTime = (timeStr) => (timeStr ? timeStr.slice(0, 5) : "-");
 
   const renderStatus = (status) => {
     let color = "text-blue-800";
