@@ -3,6 +3,11 @@
 import bcrypt from "bcryptjs";
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
+import {
+  isNineDigitId,
+  isILPhone10,
+  isPositiveInt,
+} from "../utils/fieldValidators.js";
 import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
 
 /**
@@ -34,19 +39,26 @@ export async function addUser(req, res) {
     return res.status(400).json({ success: false, message: "שדות חובה חסרים" });
   }
 
-  // בדיוק 9 ספרות (יכול להתחיל ב 0) = role_id ולידציה ל
-  if (!/^\d{9}$/.test(String(role_id))) {
+  // תעודת זהות – 9 ספרות
+  if (!isNineDigitId(user_id)) {
     return res.status(400).json({
       success: false,
       message: "תעודת זהות חייבת להיות מספר בן 9 ספרות בדיוק",
     });
   }
 
-  // ולידציה למספר טלפון : אם נשלח 10 ספרות שמתחילות ב 05
+  // מזהה תפקיד – מספר שלם חיובי (יכול להגיע כמחרוזת, לכן בדיקת טקסט)
+  if (!isPositiveInt(role_id)) {
+    return res
+      .status(400)
+      .json({ success: false, message: "מזהה תפקיד חייב להיות מספר חיובי" });
+  }
+
+  // מספר טלפון – אם נשלח, חייב להיות 10 ספרות בדיוק ויתחיל ב 05
   if (
     phone_number != null &&
     phone_number !== "" &&
-    !/^05\d{8}$/.test(String(phone_number))
+    !isILPhone10(phone_number)
   ) {
     return res.status(400).json({
       success: false,
@@ -54,7 +66,7 @@ export async function addUser(req, res) {
     });
   }
 
-  // ניקוי / אימות אימייל
+  // אימייל
   try {
     email = validateAndSanitizeEmail(email);
   } catch (e) {
@@ -64,7 +76,7 @@ export async function addUser(req, res) {
   }
 
   try {
-    // ✅ בדיקת כפילות מקדימה (ת.ז, אימייל, טלפון)
+    // בדיקת כפילויות
     const [existing] = await db.query(
       "SELECT user_id FROM users WHERE user_id = ? OR email = ? OR phone_number = ?",
       [user_id, email, phone_number || null]
@@ -91,7 +103,7 @@ export async function addUser(req, res) {
       last_name,
       phone_number || null,
       email,
-      role_id, // יישמר כמספר/מחרוזת : הוולידציה כבר הבטיחה 9 ספרות
+      Number(role_id), // שמירה כמספר
       hash,
       notes || null,
     ]);
@@ -110,7 +122,7 @@ export async function addUser(req, res) {
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(409).json({
         success: false,
-        message: "המשתמש כבר קיים במערכת לפי : ת.ז / אימייל / טלפון כפולים",
+        message: "המשתמש כבר קיים במערכת לפי : ת.ז / אימייל / טלפון",
       });
     }
 
@@ -124,10 +136,18 @@ export async function addUser(req, res) {
  * מחזיר: הצלחה או שגיאה
  */
 export async function updateUser(req, res) {
-  const userId = parseInt(req.params.id, 10);
+  const userId = req.params.id;
+
+  // תעודת זהות חייבת להיות 9 ספרות
+  if (!isNineDigitId(userId)) {
+    return res.status(400).json({
+      success: false,
+      message: "תעודת זהות חייב להיות מספר בן 9 ספרות",
+    });
+  }
 
   // חסימת עדכון למשתמש-על
-  if (userId === 1) {
+  if (Number(userId) === 1) {
     return res
       .status(403)
       .json({ success: false, message: "עריכת פרטי מנהל כללי חסומה" });
@@ -137,23 +157,22 @@ export async function updateUser(req, res) {
     req.body;
 
   // שדות חובה
-  if (!first_name || !last_name || !email || !role_id) {
+  if (!first_name || !last_name || !email || role_id == null) {
     return res.status(400).json({ success: false, message: "שדות חובה חסרים" });
   }
 
-  // ✅ ולידציה לתעודת זהות : בדיוק 9 ספרות
-  if (!/^\d{9}$/.test(String(role_id))) {
-    return res.status(400).json({
-      success: false,
-      message: "תעודת זהות חייבת להיות מספר בן 9 ספרות בדיוק",
-    });
+  // מזהה תפקיד – מספר חיובי
+  if (!isPositiveInt(role_id)) {
+    return res
+      .status(400)
+      .json({ success: false, message: "מזהה תפקיד חייב להיות מספר חיובי" });
   }
 
-  // ✅ ולידציה למספר טלפון : אם נשלח — 10 ספרות שמתחילות ב-05
+  // מספר טלפון חייב להיות 10 ספרות ולהתחיל ב 05
   if (
     phone_number != null &&
     phone_number !== "" &&
-    !/^05\d{8}$/.test(String(phone_number))
+    !isILPhone10(phone_number)
   ) {
     return res.status(400).json({
       success: false,
@@ -161,7 +180,7 @@ export async function updateUser(req, res) {
     });
   }
 
-  // ניקוי / אימות אימייל
+  // אימייל
   try {
     email = validateAndSanitizeEmail(email);
   } catch (e) {
@@ -171,7 +190,7 @@ export async function updateUser(req, res) {
   }
 
   try {
-    // ✅ בדיקת כפילות (אימייל/טלפון) למשתמש אחר
+    // בדיקת כפילות : אימייל ו טלפון למשתמש אחר
     const [dups] = await db.query(
       `
         SELECT user_id
@@ -184,7 +203,7 @@ export async function updateUser(req, res) {
     if (dups.length > 0) {
       return res.status(409).json({
         success: false,
-        message: "❌ פרטי משתמש מתנגשים (אימייל או טלפון שייכים למשתמש אחר)",
+        message: " פרטי משתמש מתנגשים : אימייל או טלפון שייכים למשתמש אחר)",
       });
     }
 
@@ -206,7 +225,7 @@ export async function updateUser(req, res) {
         last_name,
         phone_number || null,
         email,
-        role_id, // עבר ולידציה של 9 ספרות
+        Number(role_id),
         notes || null,
         active ?? 1,
         userId,
@@ -225,7 +244,7 @@ export async function updateUser(req, res) {
     if (err.code === "ER_DUP_ENTRY") {
       return res.status(409).json({
         success: false,
-        message: "פרטי משתמש מתנגשים (אימייל או טלפון כפולים)",
+        message: "פרטי משתמש מתנגשים : אימייל או טלפון כפולים)",
       });
     }
 
