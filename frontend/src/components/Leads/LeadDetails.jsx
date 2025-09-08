@@ -10,7 +10,6 @@ const api = process.env.REACT_APP_API_URL;
 
 const LeadDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { user } = useUser();
 
   const [lead, setLead] = useState(null);
