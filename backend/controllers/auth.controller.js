@@ -3,11 +3,11 @@
 import { db } from "../utils/dbSingleton.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { randomBytes } from "crypto";
 import { setAuthCookie, clearAuthCookie } from "../utils/authCookies.js";
 import logAction from "../utils/logAction.js";
 import { roleFields, roleFieldsSQL } from "../utils/permissions.js";
 import { sendResetPasswordEmail } from "../services/email.service.js";
+import { getDaysSince, generateResetToken } from "../utils/passwordHelpers.js";
 
 /**
  * התחברות משתמש
@@ -29,26 +29,24 @@ export async function login(req, res) {
       JOIN roles_permissions r ON u.role_id = r.role_id
       WHERE u.user_id = ?
     `;
-    const [usersList] = await db.query(query, [user_id]);
-    if (usersList.length === 0) {
+    const [users] = await db.query(query, [user_id]);
+    if (users.length === 0) {
       return res.status(401).json({ success: false, message: "מזהה לא קיים" });
     }
 
-    const user = usersList[0];
+    const user = users[0];
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
       return res.status(401).json({ success: false, message: "סיסמה שגויה" });
 
     // דרישת החלפת סיסמה אם עברו 90 יום
     const daysSince = user.last_password_change
-      ? Math.floor(
-          (Date.now() - new Date(user.last_password_change).getTime()) /
-            (1000 * 60 * 60 * 24)
-        )
+      ? getDaysSince(user.last_password_change)
       : 0;
     if (daysSince >= 90) {
-      const resetToken = randomBytes(32).toString("hex");
-      const resetExpireAt = new Date(Date.now() + 1000 * 60 * 15);
+      const { token: resetToken, expires: resetExpireAt } =
+        generateResetToken();
+
       const [insertReset] = await db.query(
         "INSERT INTO password_resets (user_id, reset_token, reset_expires) VALUES (?, ?, ?)",
         [user.user_id, resetToken, resetExpireAt]
@@ -58,10 +56,10 @@ export async function login(req, res) {
           .status(500)
           .json({ success: false, message: "שגיאה ביצירת טוקן" });
       }
+
       return res.json({ success: false, mustChangePassword: true, resetToken });
     }
 
-    // JWT יצירת טוקן
     const tokenPayload = {
       user_id: user.user_id,
       role_id: user.role_id,
@@ -74,7 +72,6 @@ export async function login(req, res) {
     });
     setAuthCookie(res, token);
 
-    // שמירת טוקן פעיל במסד הנתונים
     await db.query("DELETE FROM active_tokens WHERE user_id = ?", [
       user.user_id,
     ]);
@@ -88,10 +85,8 @@ export async function login(req, res) {
         .json({ success: false, message: "שגיאה בשמירת הטוקן" });
     }
 
-    // רישום לוג התחברות
     logAction("התחברות למערכת", user.user_id)(req, res, () => {});
 
-    // שליחת פרטי משתמש
     return res.json({
       success: true,
       message: "התחברת בהצלחה",
@@ -105,14 +100,14 @@ export async function login(req, res) {
       },
     });
   } catch (err) {
-    console.error("שגיאת התחברות", err);
+    console.error("שגיאה בהתחברות :", err);
     return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 }
 
 /**
  * התנתקות מהמערכת
- * מגוף הבקשה user_id  מקבל: טוקן מהקוקי או
+ * מגוף הבקשה user_id מקבל: טוקן מהקוקי או
  * מחזיר: מחיקת טוקן מבסיס הנתונים וניקוי הקוקי
  */
 export async function logout(req, res) {
@@ -129,12 +124,10 @@ export async function logout(req, res) {
 
       await db.query("DELETE FROM active_tokens WHERE token = ?", [token]);
 
-      const fallbackUserId = userIdFromBody || decodedUserId;
-      if (fallbackUserId) {
-        await db.query("DELETE FROM active_tokens WHERE user_id = ?", [
-          fallbackUserId,
-        ]);
-        logAction("התנתקות מהמערכת", fallbackUserId)(req, res, () => {});
+      const userId = userIdFromBody || decodedUserId;
+      if (userId) {
+        await db.query("DELETE FROM active_tokens WHERE user_id = ?", [userId]);
+        logAction("התנתקות מהמערכת", userId)(req, res, () => {});
       }
     } else if (userIdFromBody) {
       await db.query("DELETE FROM active_tokens WHERE user_id = ?", [
@@ -143,7 +136,7 @@ export async function logout(req, res) {
       logAction("התנתקות מהמערכת", userIdFromBody)(req, res, () => {});
     }
   } catch (err) {
-    console.error("שגיאה ב־logout:", err);
+    console.error("שגיאה בהתנתקות :", err);
   }
 
   clearAuthCookie(res);
@@ -152,7 +145,7 @@ export async function logout(req, res) {
 
 /**
  * JWT קבלת משתמש נוכחי לפי
- * (middleware) מקבל: טוקן מאומת
+ * מקבל: טוקן מאומת
  * מחזיר: פרטי המשתמש כפי שמקודדים בטוקן
  */
 export function getCurrentUser(req, res) {
@@ -173,17 +166,16 @@ export async function forgotPassword(req, res) {
     return res.status(400).json({ success: false, message: "יש להזין אימייל" });
 
   try {
-    const [usersList] = await db.query("SELECT * FROM users WHERE email = ?", [
+    const [users] = await db.query("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
-    if (!usersList.length)
+    if (!users.length)
       return res
         .status(404)
         .json({ success: false, message: "לא נמצא משתמש עם האימייל הזה" });
 
-    const user = usersList[0];
-    const resetToken = randomBytes(32).toString("hex");
-    const resetExpireAt = new Date(Date.now() + 1000 * 60 * 15);
+    const user = users[0];
+    const { token: resetToken, expires: resetExpireAt } = generateResetToken();
 
     const [insertReset] = await db.query(
       "INSERT INTO password_resets (user_id, reset_token, reset_expires) VALUES (?, ?, ?)",
