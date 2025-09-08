@@ -38,7 +38,7 @@ const Logs = () => {
       })
       .then((res) => {
         if (res.data.success) {
-          setLogs(res.data.Result);
+          setLogs(res.data.data);
           setTotal(res.data.total);
         }
       })
