@@ -1,363 +1,41 @@
 // backend\routes\attendanceRoutes.js
+
 import express from "express";
-import { db } from "../utils/dbSingleton.js";
 import verifyToken from "../utils/verifyToken.js";
+import {
+  addAttendance,
+  listAttendances,
+  getAttendanceById,
+  updateAttendance,
+  generateAbsenceReport,
+  checkIn,
+  checkOut,
+} from "../controllers/attendance.controller.js";
 
 const router = express.Router();
 
-// סטטוסים מיוחדים שלא נדרשת  עבורם שעת כניסה/יציאה
-const SPECIAL_STATUSES = ["חופשה", "מחלה", "היעדרות"];
-
-/**
- * פונקציית עזר שבודקת האם סטטוס נחשב מיוחד
- * @param {string} status - הסטטוס לבדיקה
- * @returns {boolean}
- */
-const isSpecialStatus = (status) => SPECIAL_STATUSES.includes(status);
-
-// החלת אימות טוקן על כל הראוטים
+// אימות טוקן לכל הראוטים
 router.use(verifyToken);
 
-/*****************************
- *       הוספת נוכחות       *
- *****************************/
-router.post("/add", async (req, res) => {
-  const { user_id, date, check_in, check_out, status, notes } = req.body;
+/** POST /attendance/add – הוספת נוכחות */
+router.post("/add", addAttendance);
 
-  if (!user_id || !date || !status) {
-    return res.status(400).json({
-      success: false,
-      message: "נא למלא את כל שדות החובה",
-    });
-  }
+/** GET /attendance – שליפת כל הנוכחויות (עם פרטי עובדים) */
+router.get("/", listAttendances);
 
-  try {
-    const [existingAttendances] = await db.query(
-      "SELECT * FROM attendance WHERE user_id = ? AND date = ?",
-      [user_id, date]
-    );
+/** GET /attendance/:id – שליפת נוכחות לפי מזהה */
+router.get("/:id", getAttendanceById);
 
-    const hasSameSpecial =
-      isSpecialStatus(status) &&
-      existingAttendances.filter((a) => a.status === status).length > 0;
+/** PUT /attendance/edit/:id – עדכון רשומת נוכחות */
+router.put("/edit/:id", updateAttendance);
 
-    if (hasSameSpecial) {
-      return res.json({
-        success: false,
-        message: `כבר קיימת נוכחות עם סטטוס "${status}" בתאריך זה.`,
-      });
-    }
+/** GET /attendance/generate-absence-report – דוח היעדרויות להיום */
+router.get("/generate-absence-report", generateAbsenceReport);
 
-    const hasTimeEntry =
-      !isSpecialStatus(status) &&
-      existingAttendances.filter((a) => a.check_in || a.check_out).length > 0;
+/** POST /attendance/check-in – החתמת כניסה להיום */
+router.post("/check-in", checkIn);
 
-    if (hasTimeEntry) {
-      return res.json({
-        success: false,
-        message: "כבר קיימת נוכחות עם שעות לאותו עובד בתאריך זה.",
-      });
-    }
-
-    if (existingAttendances.length > 0) {
-      return res.json({
-        success: false,
-        message: "כבר קיימת רשומת נוכחות לעובד זה בתאריך זה.",
-      });
-    }
-
-    const [insertResponse] = await db.query(
-      `INSERT INTO attendance (user_id, date, check_in, check_out, status, notes)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [
-        user_id,
-        date,
-        isSpecialStatus(status) ? null : check_in,
-        isSpecialStatus(status) ? null : check_out,
-        status,
-        notes || null,
-      ]
-    );
-
-    if (insertResponse.affectedRows === 1) {
-      return res.json({
-        success: true,
-        message: "הנוכחות נוספה בהצלחה",
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: "הכנסת הנוכחות נכשלה",
-    });
-  } catch (err) {
-    console.error("❌ [POST /add] שגיאה:", err);
-    return res.status(500).json({
-      success: false,
-      message: "שגיאת שרת",
-    });
-  }
-});
-
-/*******************************************************
- *       שליפת כל הנוכחויות כולל פרטי העובדים       *
- *******************************************************/
-router.get("/", async (_req, res) => {
-  try {
-    const [attendancesList] = await db.query(
-      `SELECT a.attendance_id, a.user_id, u.first_name, u.last_name,
-              a.date, a.check_in, a.check_out, a.status, a.notes
-       FROM attendance a
-       LEFT JOIN users u ON a.user_id = u.user_id
-       ORDER BY a.date DESC`
-    );
-
-    return res.json({
-      success: true,
-      data: attendancesList,
-    });
-  } catch (err) {
-    console.error("❌ [GET /] שגיאה:", err);
-    return res.status(500).json({
-      success: false,
-      message: "שגיאת שרת",
-    });
-  }
-});
-
-/***************************************
- *       שליפת נוכחות לפי מזהה       *
- ***************************************/
-router.get("/:id", async (req, res) => {
-  const attendanceId = req.params.id;
-
-  try {
-    const [attendanceResult] = await db.query(
-      "SELECT * FROM attendance WHERE attendance_id = ?",
-      [attendanceId]
-    );
-
-    if (attendanceResult.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "לא נמצאה רשומת נוכחות עם מזהה זה",
-      });
-    }
-
-    const attendance = attendanceResult[0];
-
-    return res.json({
-      success: true,
-      data: attendance,
-    });
-  } catch (err) {
-    console.error("❌ [GET /:id] שגיאה:", err);
-    return res.status(500).json({
-      success: false,
-      message: "שגיאת שרת",
-    });
-  }
-});
-
-/***********************************
- *       עדכון רשומת נוכחות       *
- ***********************************/
-router.put("/edit/:id", async (req, res) => {
-  const { user_id, date, check_in, check_out, status, notes } = req.body;
-  const attendanceId = req.params.id;
-
-  if (!user_id || !date || !status) {
-    return res.status(400).json({
-      success: false,
-      message: "נא למלא את כל שדות החובה",
-    });
-  }
-
-  try {
-    const [updateResponse] = await db.query(
-      `UPDATE attendance
-       SET user_id = ?, date = ?, check_in = ?, check_out = ?, status = ?, notes = ?
-       WHERE attendance_id = ?`,
-      [
-        user_id,
-        date,
-        isSpecialStatus(status) ? null : check_in,
-        isSpecialStatus(status) ? null : check_out,
-        status,
-        notes || null,
-        attendanceId,
-      ]
-    );
-
-    if (updateResponse.affectedRows === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "הרשומה לא נמצאה לעדכון",
-      });
-    }
-
-    return res.json({
-      success: true,
-      message: "הנוכחות עודכנה בהצלחה",
-    });
-  } catch (err) {
-    console.error("❌ [PUT /edit/:id] שגיאה:", err);
-    return res.status(500).json({
-      success: false,
-      message: "שגיאת שרת",
-    });
-  }
-});
-
-/*******************************************
- *       דוח היעדרויות ליום הנוכחי       *
- *******************************************/
-router.get("/generate-absence-report", async (_req, res) => {
-  const today = new Date().toISOString().split("T")[0];
-
-  try {
-    const [usersList] = await db.query(
-      `SELECT u.user_id, u.first_name, u.last_name
-       FROM users u
-       LEFT JOIN attendance a ON u.user_id = a.user_id AND a.date = ?
-       WHERE a.attendance_id IS NULL AND u.active = 1`,
-      [today]
-    );
-
-    return res.json({
-      success: true,
-      data: usersList,
-      message:
-        usersList.length === 0
-          ? "כל העובדים רשמו נוכחות היום."
-          : `${usersList.length} עובדים ללא נוכחות בתאריך ${today}`,
-    });
-  } catch (err) {
-    console.error("❌ [GET /generate-absence-report] שגיאה:", err);
-    return res.status(500).json({
-      success: false,
-      message: "שגיאת שרת",
-    });
-  }
-});
-
-/***************************************************************
- *       החתמת כניסה – יצירת נוכחות עם שעת כניסה בלבד       *
- ***************************************************************/
-router.post("/check-in", async (req, res) => {
-  const { user_id } = req.body;
-
-  if (!user_id) {
-    return res.status(400).json({
-      success: false,
-      message: "חסר מזהה משתמש",
-    });
-  }
-
-  const today = new Date().toISOString().split("T")[0];
-
-  try {
-    const [existingAttendances] = await db.query(
-      "SELECT * FROM attendance WHERE user_id = ? AND date = ?",
-      [user_id, today]
-    );
-
-    if (existingAttendances.length > 0) {
-      return res.status(400).json({
-        success: false,
-        message: "כבר קיימת נוכחות עבור היום",
-      });
-    }
-
-    const [insertResponse] = await db.query(
-      `INSERT INTO attendance (user_id, date, check_in, status)
-       VALUES (?, ?, NOW(), ?)`,
-      [user_id, today, "עובד"]
-    );
-
-    if (insertResponse.affectedRows === 1) {
-      return res.json({
-        success: true,
-        message: "שעת כניסה נרשמה בהצלחה",
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: "החתמת כניסה נכשלה",
-    });
-  } catch (err) {
-    console.error("❌ [POST /check-in] שגיאה:", err);
-    return res.status(500).json({
-      success: false,
-      message: "שגיאת שרת",
-    });
-  }
-});
-
-/*******************************************************************
- *    החתמת יציאה – עדכון שעת יציאה לרשומת הנוכחות של היום     *
- *******************************************************************/
-router.post("/check-out", async (req, res) => {
-  const { user_id } = req.body;
-
-  if (!user_id) {
-    return res.status(400).json({
-      success: false,
-      message: "חסר מזהה משתמש",
-    });
-  }
-
-  const today = new Date().toISOString().split("T")[0];
-
-  try {
-    const [attendancesList] = await db.query(
-      `SELECT * FROM attendance
-       WHERE user_id = ? AND date = ?`,
-      [user_id, today]
-    );
-
-    if (attendancesList.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "לא קיימת נוכחות להיום – יש להחתים כניסה קודם",
-      });
-    }
-
-    const attendance = attendancesList[0];
-
-    if (attendance.check_out) {
-      return res.status(400).json({
-        success: false,
-        message: "כבר בוצעה החתמת יציאה להיום",
-      });
-    }
-
-    const [updateResponse] = await db.query(
-      `UPDATE attendance
-       SET check_out = NOW()
-       WHERE attendance_id = ?`,
-      [attendance.attendance_id]
-    );
-
-    if (updateResponse.affectedRows === 1) {
-      return res.json({
-        success: true,
-        message: "שעת יציאה נרשמה בהצלחה",
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: "החתמת יציאה נכשלה",
-    });
-  } catch (err) {
-    console.error("❌ [POST /check-out] שגיאה:", err);
-    return res.status(500).json({
-      success: false,
-      message: "שגיאת שרת",
-    });
-  }
-});
+/** POST /attendance/check-out – החתמת יציאה להיום */
+router.post("/check-out", checkOut);
 
 export default router;
