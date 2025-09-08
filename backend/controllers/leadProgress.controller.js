@@ -1,7 +1,6 @@
 // controllers/leadProgress.controller.js
 
 import { db } from "../utils/dbSingleton.js";
-import verifyToken from "../utils/verifyToken.js"; // רק כדי להזכיר שתלוי middleware (מוקצה בראוטר)
 import logAction from "../utils/logAction.js";
 import { isValidLeadStatus } from "../utils/leadsHelpers.js";
 import { isPositiveInt } from "../utils/fieldValidators.js";
