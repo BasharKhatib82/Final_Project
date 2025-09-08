@@ -12,34 +12,19 @@ import {
 
 const router = express.Router();
 
-/**
- * התחברות משתמש
- * POST /auth/login
- */
+/** התחברות משתמש ==> POST /auth/login */
 router.post("/login", login);
 
-/**
- * התנתקות משתמש
- * POST /auth/logout
- */
+/** התנתקות משתמש ==> POST /auth/logout */
 router.post("/logout", logout);
 
-/**
- * בדיקת משתמש מחובר לפי JWT
- * GET /auth/me
- */
+/** JWT בדיקת משתמש מחובר לפי ==> GET /auth/me */
 router.get("/me", verifyToken, getCurrentUser);
 
-/**
- * שליחת טוקן איפוס סיסמה למייל
- * POST /auth/forgot-password
- */
+/** שליחת טוקן איפוס סיסמה למייל ==> POST /auth/forgot-password */
 router.post("/forgot-password", forgotPassword);
 
-/**
- * הגדרת סיסמה חדשה לפי טוקן
- * POST /auth/reset-password
- */
+/**הגדרת סיסמה חדשה לפי טוקן ==> POST /auth/reset-password */
 router.post("/reset-password", resetPassword);
 
 export default router;
