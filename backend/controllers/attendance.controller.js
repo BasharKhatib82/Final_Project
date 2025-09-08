@@ -205,7 +205,7 @@ export async function generateAbsenceReport(_req, res) {
           : `${rows.length} עובדים ללא נוכחות בתאריך ${today}`,
     });
   } catch (err) {
-    console.error("❌ generateAbsenceReport:", err);
+    console.error("generateAbsenceReport:", err);
     return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 }
