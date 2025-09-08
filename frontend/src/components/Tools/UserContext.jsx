@@ -19,7 +19,7 @@ export const UserProvider = ({ children }) => {
             withCredentials: true,
           }
         );
-        setUser(res.data.user);
+        setUser(res.data.data);
       } catch (err) {
         if (err.response?.status !== 403) {
           console.error("Auth check failed:", err); // רק אם זו שגיאה לא צפויה

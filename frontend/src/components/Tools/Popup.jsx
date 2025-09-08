@@ -1,30 +1,58 @@
+// frontend\src\components\Tools\Popup.jsx
+
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * מה עושה: מציג חלונית קופצת (מודאל) עם כותרת, הודעה וכפתורי פעולה בהתאם למצב.
+ * מה מקבל (Props):
+ *  - icon?: ReactNode            – אייקון להצגה מעל הכותרת (לא חובה)
+ *  - title: string               – כותרת
+ *  - message: string             – טקסט ההודעה (נתמך ריבוי שורות)
+ *  - mode: "info"|"success"|"error"|"warning"|"confirm"|"successMessage"
+ *  - onClose?: () => void        – נקרא בלחיצה על סגירה/ביטול/ESC/סגירת-רקע
+ *  - onConfirm?: () => void      – נקרא בלחיצה על אישור (במצב confirm)
+ *  - redirectOnConfirm?: string  – ניתוב אחרי אישור (לא חובה)
+ *  - redirectOnClose?: string    – ניתוב אחרי סגירה/ביטול (לא חובה)
+ *  - autoClose?: number          – זמן מ״ש לסגירה אוטומטית (לא חובה)
+ *  - closeOnOverlay?: boolean    – סגירת המודאל בלחיצה על הרקע (ברירת מחדל: true)
+ * מה מחזיר: JSX .
+ */
 const Popup = ({
-  icon, // אופציונלי: אייקון להצגה מעל הכותרת
-  title,
-  message,
-  mode, // info / success / error / warning / confirm
+  icon,
+  title = "",
+  message = "",
+  mode = "info",
   onClose,
   onConfirm,
-  redirectOnConfirm, // אופציונלי: קישור לעבור אליו אחרי אישור
-  redirectOnClose, // אופציונלי: קישור לעבור אליו אחרי סגירה/ביטול
-  autoClose, // ⏳ מספר מילישניות לסגירה אוטומטית
+  redirectOnConfirm,
+  redirectOnClose,
+  autoClose,
+  closeOnOverlay = true,
 }) => {
   const navigate = useNavigate();
 
-  // ✅ סגירה אוטומטית אם הועבר autoClose
+  // autoClose סגירה אוטומטית אם הועבר
   useEffect(() => {
-    if (autoClose) {
-      const timer = setTimeout(() => {
+    if (!autoClose) return;
+    const timer = setTimeout(() => {
+      if (onClose) onClose();
+      if (redirectOnClose) navigate(redirectOnClose);
+    }, autoClose);
+    return () => clearTimeout(timer);
+  }, [autoClose, onClose, redirectOnClose, navigate]);
+
+  // ESC סגירה עם מקש
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
         if (onClose) onClose();
         if (redirectOnClose) navigate(redirectOnClose);
-      }, autoClose);
-
-      return () => clearTimeout(timer);
-    }
-  }, [autoClose, onClose, redirectOnClose, navigate]);
+      }
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [onClose, redirectOnClose, navigate]);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -34,6 +62,13 @@ const Popup = ({
   const handleConfirm = () => {
     if (onConfirm) onConfirm();
     if (redirectOnConfirm) navigate(redirectOnConfirm);
+  };
+
+  // סגירת רקע (לא במצב confirm אם רוצים לחייב בחירה)
+  const handleOverlayClick = () => {
+    if (mode !== "confirm" && closeOnOverlay) {
+      handleClose();
+    }
   };
 
   const getColor = () => {
@@ -56,8 +91,17 @@ const Popup = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-      <div className="bg-white w-full max-w-md rounded-lg border shadow-md p-6 text-center space-y-4">
+    <div
+      className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+      onClick={handleOverlayClick}
+      role="dialog"
+      aria-modal="true"
+      aria-label={title || "הודעה"}
+    >
+      <div
+        className="bg-white w-full max-w-md rounded-lg border shadow-md p-6 text-center space-y-4"
+        onClick={(e) => e.stopPropagation()} // לא להעביר קליק לרקע
+      >
         {icon && (
           <div className="text-4xl mb-2 flex justify-center">{icon}</div>
         )}
@@ -66,13 +110,17 @@ const Popup = ({
           {title}
         </h2>
 
-        <p className="text-base text-gray-700 leading-relaxed">{message}</p>
+        {/* white-space:pre-line כדי לתמוך בשורות מרובות/שגיאות שרת מרובדות */}
+        <p className="text-base text-gray-700 leading-relaxed whitespace-pre-line">
+          {message}
+        </p>
 
         {mode === "confirm" ? (
           <div className="flex justify-center gap-4 pt-2">
             <button
               onClick={handleConfirm}
               className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition"
+              autoFocus
             >
               אישור
             </button>
@@ -87,6 +135,7 @@ const Popup = ({
           <button
             onClick={handleClose}
             className={`text-white px-6 py-2 rounded transition ${getColor()}`}
+            autoFocus
           >
             סגור
           </button>
