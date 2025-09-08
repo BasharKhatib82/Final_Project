@@ -1,4 +1,4 @@
-// routes/logsRoutes.js
+// backend\routes\logsRoutes.js
 
 import express from "express";
 import verifyToken from "../utils/verifyToken.js";
