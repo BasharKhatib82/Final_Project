@@ -1,4 +1,4 @@
-// controllers/attendance.controller.js
+// backend\controllers\attendance.controller.js
 
 import { db } from "../utils/dbSingleton.js";
 import { isSpecialStatus, isValidDate } from "../utils/attendanceHelpers.js";
@@ -18,12 +18,10 @@ export async function addAttendance(req, res) {
       .json({ success: false, message: "נא למלא את כל שדות החובה" });
   }
   if (!isNineDigitId(user_id)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
+    });
   }
   if (!isValidDate(date)) {
     return res.status(400).json({ success: false, message: "תאריך לא תקין" });
@@ -127,12 +125,10 @@ export async function updateAttendance(req, res) {
       .json({ success: false, message: "נא למלא את כל שדות החובה" });
   }
   if (!isNineDigitId(user_id)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "תעודת זהות חייב להיות מספר בן 9 ספרות",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "תעודת זהות חייב להיות מספר בן 9 ספרות",
+    });
   }
   if (!isValidDate(date)) {
     return res.status(400).json({ success: false, message: "תאריך לא תקין" });
@@ -221,12 +217,10 @@ export async function checkIn(req, res) {
     return res.status(400).json({ success: false, message: "חסר מזהה משתמש" });
   }
   if (!isNineDigitId(user_id)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
+    });
   }
 
   const today = new Date().toISOString().split("T")[0];
@@ -271,12 +265,10 @@ export async function checkOut(req, res) {
     return res.status(400).json({ success: false, message: "חסר מזהה משתמש" });
   }
   if (!isNineDigitId(user_id)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "מספר תעודת זהות חייבת להיות מספר בן 9 ספרות",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "מספר תעודת זהות חייבת להיות מספר בן 9 ספרות",
+    });
   }
 
   const today = new Date().toISOString().split("T")[0];

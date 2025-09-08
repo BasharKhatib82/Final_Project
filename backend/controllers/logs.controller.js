@@ -1,4 +1,4 @@
-// controllers/logs.controller.js
+// backend\controllers\logs.controller.js
 
 import { db } from "../utils/dbSingleton.js";
 import ExcelJS from "exceljs";

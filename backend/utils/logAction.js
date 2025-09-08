@@ -1,53 +1,51 @@
-// utils/logAction.js
+// backend\utils\logAction.js
+
 import { db } from "./dbSingleton.js";
 
 /**
- * רישום פעולה ליומן כ־Middleware או כ־פונקציה עצמאית
- * @param {string} actionName - שם הפעולה לתיעוד
- * @param {number|null} forcedUserId - מזהה משתמש (אם לא סופק, יילקח מ־req.user)
+ *  user_activity_log רושם לוג פעולה לטבלת
  */
-function logAction(actionName, forcedUserId = null) {
-  return async (req = {}, res = {}, next) => {
+export default function logAction(actionName, forcedUserId = null) {
+  const name = String(actionName || "")
+    .trim()
+    .slice(0, 255);
+
+  return async function _log(req, res, next) {
     try {
-      const userId = forcedUserId || req.user?.user_id;
-      if (!userId || !actionName) {
-        console.warn("⚠️ logAction skipped – missing userId or actionName");
-        if (typeof next === "function") return next();
-        return;
-      }
+      const userId = forcedUserId || req?.user?.user_id;
+      if (!userId || !name) return next?.();
 
-      const now = new Date();
-      const query = `
-        INSERT INTO user_activity_log (user_id, action_name, time_date)
-        VALUES (?, ?, ?)
-      `;
-      await db.query(query, [userId, actionName, now]);
-
-      console.log(`✅ "${actionName}" נרשמה ללוג עבור משתמש ${userId}`);
+      await db.query(
+        "INSERT INTO user_activity_log (user_id, action_name, time_date) VALUES (?, ?, NOW())",
+        [userId, name]
+      );
     } catch (err) {
-      console.error("❌ שגיאה ברישום ללוג:", err.message);
+      // לא מפיל את הבקשה
+      console.error("logAction error:", err?.message || err);
+    } finally {
+      return next?.();
     }
-
-    if (typeof next === "function") return next();
   };
 }
 
 /**
- * שימוש חופשי בלי middleware:
- * await logAction.now("התחברות למערכת", userId)
+ *  middleware שימוש ישיר בלי :
+ *  await logActionNow("שם פעולה", userId)
  */
-logAction.now = async (actionName, userId) => {
+export async function logActionNow(actionName, userId) {
   try {
-    if (!userId || !actionName) return;
-    const now = new Date();
-    await db.query(
-      `INSERT INTO user_activity_log (user_id, action_name, time_date) VALUES (?, ?, ?)`,
-      [userId, actionName, now]
-    );
-    console.log(`✅ "${actionName}" נרשמה ללוג עבור משתמש ${userId}`);
-  } catch (err) {
-    console.error("❌ שגיאה ברישום ללוג:", err.message);
-  }
-};
+    const name = String(actionName || "")
+      .trim()
+      .slice(0, 255);
+    if (!userId || !name) return;
 
-export default logAction;
+    await db.query(
+      "INSERT INTO user_activity_log (user_id, action_name, time_date) VALUES (?, ?, NOW())",
+      [userId, name]
+    );
+  } catch (err) {
+    console.error("logActionNow error:", err?.message || err);
+  }
+}
+
+logAction.now = logActionNow;

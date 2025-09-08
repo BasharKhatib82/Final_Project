@@ -1,9 +1,9 @@
-// utils/permissions.js
+// backend/utils/permissions.js
 
-// רשימת כל השדות של הרשאות כפי שהם מוגדרים ב-DB
+// DB רשימת כל השדות של הרשאות כפי שהם מוגדרים ב
 export const roleFields = [
   // הרשאות
-  // דשבורד
+  // לוח בקרה
   "dashboard_access",
   "admin_alert_dash",
   "user_alert_dash",
@@ -50,6 +50,7 @@ export const roleFields = [
 ];
 
 // SELECT SQL פונקציה : מייצרת
+// SQL לשימוש ב SELECT יוצר מחרוזת 
 export const roleFieldsSQL = roleFields.join(", ");
 
 // פונקציה : אובייקט עם כל ההרשאות מאותחל ל-0

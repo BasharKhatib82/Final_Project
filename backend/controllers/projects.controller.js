@@ -1,4 +1,4 @@
-// controllers/projects.controller.js
+// backend\controllers\projects.controller.js
 
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";

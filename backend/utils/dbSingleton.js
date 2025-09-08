@@ -1,32 +1,44 @@
-// utils/dbSingleton.js
+// backend\utils\dbSingleton.js
 import mysql from "mysql2/promise";
 
-// ✅ יצירת Connection Pool עם Promise API
-const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASS,
-  database: process.env.DB_NAME,
+/**
+ *  UTC עם תמיכה בעברית MySQL (Promise API) יחיד ל Pool
+ */
+const {
+  DB_HOST,
+  DB_USER,
+  DB_PASS,
+  DB_NAME,
+  DB_PORT = 3306,
+  DB_CONN_LIMIT = 10,
+} = process.env;
+
+export const db = mysql.createPool({
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASS,
+  database: DB_NAME,
+  port: Number(DB_PORT),
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: Number(DB_CONN_LIMIT),
   queueLimit: 0,
-  charset: "utf8mb4_general_ci", // ✅ תמיכה בעברית ואמוג'י
+  charset: "utf8mb4_general_ci",
+  multipleStatements: false,
+  timezone: "Z", //  UTC (מונע הפרשי אזורי זמן)
 });
 
-// ✅ מאזין לשגיאות מה-Pool
-db.on("error", (err) => {
-  console.error("❌ Unexpected DB error:", err);
-});
-
-// ✅ פונקציה לבדיקת חיבור – להריץ פעם אחת בעת עליית השרת
-export const testDbConnection = async () => {
+/**
+ * בדיקת חיבור מהירה — להריץ עם עליית השרת.
+ */
+export async function testDbConnection() {
   try {
-    const conn = await db.getConnection();
-    console.log("✅ Connected to MySQL (Promise Pool)!");
-    conn.release();
+    const [rows] = await db.query("SELECT 1 AS ok");
+    if (rows?.[0]?.ok === 1) {
+      console.log("Connected to MySQL (Promise Pool, UTC timezone)");
+    } else {
+      console.warn("Unexpected test result:", rows);
+    }
   } catch (err) {
-    console.error("❌ DB connection failed:", err.message);
+    console.error("DB connection failed:", err?.message || err);
   }
-};
-
-export { db };
+}

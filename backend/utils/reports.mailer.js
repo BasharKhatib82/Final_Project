@@ -1,29 +1,61 @@
 // backend/utils/reports.mailer.js
+
 import nodemailer from "nodemailer";
 import fs from "fs";
-import path from "path";
-import os from "os";
 import { generateExcel, generatePdf } from "./reports.generator.js";
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 465,
-  secure: process.env.SMTP_SECURE === "true", // true: 465 (SSL), false: 587 (STARTTLS)
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const SMTP_SECURE = String(process.env.SMTP_SECURE || "false") === "true";
+const SMTP_PORT = Number(process.env.SMTP_PORT) || (SMTP_SECURE ? 465 : 587);
+const SMTP_HOST = process.env.SMTP_HOST;
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
+const FROM_NAME = process.env.EMAIL_FROM_NAME || "מערכת CRM";
 
-// 📡 בדיקת SMTP עם עליית השרת
-export function verifySmtp() {
-  transporter.verify((err, ok) => {
-    if (err) console.error("❌ SMTP verify failed:", err.message);
-    else console.log("✅ SMTP server is ready to send emails");
-  });
+let transporter;
+
+/**
+ *  יחיד לשליחת מיילים SMTP : יוצר / מאחזר טרנספורטר
+ * מה מקבל: —
+ * מה מחזיר: nodemailer.Transporter
+ */
+function getTransporter() {
+  if (!transporter) {
+    transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: SMTP_SECURE,
+      auth: { user: SMTP_USER, pass: SMTP_PASS },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
+  }
+  return transporter;
 }
 
-// 📨 שליחת דוח במייל
+/**
+ * בזמן עליית השרת SMTP בדיקת
+ * מה מקבל: —
+ *  מחזיר: Promise<boolean> (true אם תקין)
+ */
+export async function verifySmtp() {
+  try {
+    await getTransporter().verify();
+    console.log("✅ SMTP server is ready to send emails");
+    return true;
+  } catch (err) {
+    console.error("SMTP verify failed:", err?.message || err);
+    return false;
+  }
+}
+
+/**
+ * ושולח במייל ליעד (Excel/PDF) יוצר דוח
+ * מה מקבל (Body):
+ *   { title, columns, rows, to, format='xlsx' }
+ *   - format: 'xlsx' | 'pdf'
+ *  מחזיר: { success: true, filename } או זורק שגיאה במקרה כשל.
+ */
 export async function sendReportEmail({
   title,
   columns,
@@ -31,41 +63,55 @@ export async function sendReportEmail({
   to,
   format = "xlsx",
 }) {
-  if (!to) throw new Error("missing 'to'");
+  if (!to) throw new Error("חסר יעד לשליחה (to)");
+  if (!SMTP_USER) throw new Error(" ENV לא מוגדר ב SMTP_USER");
 
-  let filePath, filename, buffer;
+  let filePath = null;
+  let filename = null;
+  let buffer = null;
 
+  // יצירת הקובץ לפי פורמט
   if (format === "xlsx") {
-    // ✅ Excel – נשתמש ב־buffer
-    const excelResult = await generateExcel({ title, columns, rows });
-    buffer = excelResult.buffer;
-    filename = excelResult.filename;
+    const { buffer: xlsxBuffer, filename: xlsxName } = await generateExcel({
+      title,
+      columns,
+      rows,
+    });
+    buffer = xlsxBuffer;
+    filename = xlsxName;
   } else if (format === "pdf") {
-    // ✅ PDF – נשתמש בקובץ זמני
-    const pdfResult = await generatePdf({ title, columns, rows });
-    filePath = pdfResult.filePath;
-    filename = pdfResult.filename;
+    const { filePath: pdfPath, filename: pdfName } = await generatePdf({
+      title,
+      columns,
+      rows,
+    });
+    filePath = pdfPath;
+    filename = pdfName;
   } else {
-    throw new Error(`unsupported format: ${format}`);
+    throw new Error(`פורמט לא נתמך: ${format}`);
   }
 
+  // שליחת המייל
   try {
-    await transporter.sendMail({
-      from: `"מערכת CRM" <${process.env.SMTP_USER}>`,
+    await getTransporter().sendMail({
+      from: `"${FROM_NAME}" <${SMTP_USER}>`,
       to,
       subject: `דוח חדש מהמערכת: ${title}`,
       text: `מצורף הדוח "${title}" בפורמט ${format.toUpperCase()}.`,
       attachments: [
         format === "xlsx"
-          ? { filename, content: buffer } // ✅ שולחים כ־buffer
-          : { filename, path: filePath }, // ✅ שולחים כקובץ זמני
+          ? {
+              filename,
+              content: Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer),
+            }
+          : { filename, path: filePath },
       ],
     });
 
-    return { ok: true, filename };
+    return { success: true, filename };
   } finally {
-    // ✅ ננקה רק קובץ PDF זמני (Excel נשלח כ-buffer)
-    if (filePath && typeof filePath === "string") {
+    // בלבד PDF ניקוי קובץ זמני של
+    if (filePath) {
       fs.unlink(filePath, () => {});
     }
   }

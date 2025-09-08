@@ -1,4 +1,4 @@
-// utils/leadsHelpers.js
+// backend\utils\leadsHelpers.js
 
 // סטטוסים חוקיים לפנייה
 export const VALID_LEAD_STATUSES = ["חדש", "בטיפול", "טופל", "בוטלה"];

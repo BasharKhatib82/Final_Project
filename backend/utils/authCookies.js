@@ -1,3 +1,5 @@
+//backend\utils\authCookies.js
+
 const cookieOptions = {
   httpOnly: true,
   secure: true,

@@ -1,4 +1,4 @@
-// controllers/leadProgress.controller.js
+// backend\controllers\leadProgress.controller.js
 
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
