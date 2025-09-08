@@ -350,7 +350,7 @@ const Leads = () => {
             רשימת פניות
           </h2>
         </header>
-        {user.lead_add_btn === 1 && (
+        {user.permission_add_lead === 1 && (
           <div className="flex justify-start mb-2">
             <div className="inline-flex">
               <NavigationButton

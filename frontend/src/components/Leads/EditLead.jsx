@@ -41,7 +41,7 @@ const EditLead = () => {
       if (res.data.success) {
         setForm(res.data.data);
       } else {
-        console.error("שגיאה בטעינת הפנייה:", res.data.Error);
+        console.error("שגיאה בטעינת הפנייה:", res.data.message);
       }
     } catch (err) {
       console.error("שגיאה בטעינת הפנייה:", err);
