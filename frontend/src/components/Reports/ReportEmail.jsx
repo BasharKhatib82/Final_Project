@@ -12,7 +12,7 @@ import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import axios from "axios";
 import { Icon } from "@iconify/react";
-import { validateAndSanitizeEmail } from "../../utils/validateAndSanitizeEmail";
+import { validateAndSanitizeEmail } from "utils";
 import { Popup } from "components/Tools";
 
 const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
