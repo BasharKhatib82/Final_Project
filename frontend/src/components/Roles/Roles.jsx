@@ -74,7 +74,7 @@ export default function Roles() {
         setPopup({
           show: true,
           title: "הצלחה",
-          message: "✅ התפקיד נמחק בהצלחה",
+          message: "התפקיד נמחק בהצלחה",
           mode: "success",
         });
         fetchRoles();
@@ -217,7 +217,7 @@ export default function Roles() {
           columns={columns}
           rows={allRoles}
           filtersDef={filtersDef}
-          searchableKeys={["role_name", "active"]}
+          searchableKeys={["role_name"]}
           pageSize={25}
           emailApiBase={process.env.REACT_APP_API_URL}
           addButton={
