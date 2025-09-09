@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../Tools/UserContext";
-import ExitButton from "../Buttons/ExitButton";
-import AddButton from "../Buttons/AddSaveButton";
+import { AddSaveButton, ExitButton } from "@/components/Buttons";
 import Popup from "../Tools/Popup";
 
 const api = process.env.REACT_APP_API_URL;
@@ -232,7 +231,7 @@ const AddLead = () => {
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
         <div className="text-center flex justify-center gap-4">
-          <AddButton label="שמור פנייה" type="submit" />
+          <AddSaveButton label="שמור פנייה" type="submit" />
           <ExitButton label="ביטול" linkTo="/dashboard/leads" />
         </div>
       </form>

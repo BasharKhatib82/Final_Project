@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 import NavigationButton from "../Buttons/NavigationButton";
-import AddButton from "../Buttons/AddSaveButton";
+import { AddSaveButton } from "@/components/Buttons";
 import { useUser } from "../Tools/UserContext";
 import Popup from "../Tools/Popup";
 
@@ -246,7 +246,7 @@ const LeadDetails = () => {
         </div>
 
         <div className="flex justify-center">
-          <AddButton
+          <AddSaveButton
             label={saving ? "שומר..." : "שמור תיעוד"}
             type="button"
             onClick={() => setConfirmPopup(true)}

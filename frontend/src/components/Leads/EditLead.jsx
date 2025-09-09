@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import AddButton from "../Buttons/AddSaveButton";
-import ExitButton from "../Buttons/ExitButton";
+import { AddSaveButton, ExitButton } from "@/components/Buttons";
 import Popup from "../Tools/Popup";
 
 const api = process.env.REACT_APP_API_URL;
@@ -243,7 +242,7 @@ const EditLead = () => {
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
         <div className="flex justify-center gap-4 mt-6">
-          <AddButton type="submit" label="עדכן פנייה" />
+          <AddSaveButton type="submit" label="עדכן פנייה" />
           <ExitButton label="ביטול" linkTo="/dashboard/leads" />
         </div>
       </form>

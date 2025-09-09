@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Popup from "../Tools/Popup";
-import AddButton from "../Buttons/AddSaveButton";
-import ExitButton from "../Buttons/ExitButton";
+import { AddSaveButton, ExitButton } from "@/components/Buttons";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -104,7 +103,7 @@ const AddProject = () => {
         </div>
 
         <div className="flex justify-center gap-4 mt-6">
-          <AddButton label="שמור פרויקט" type="submit" />
+          <AddSaveButton label="שמור פרויקט" type="submit" />
           <ExitButton label="ביטול" linkTo="/dashboard/projects" />
         </div>
       </form>

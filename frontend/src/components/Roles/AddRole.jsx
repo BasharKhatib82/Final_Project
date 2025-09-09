@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import ExitButton from "../Buttons/ExitButton";
-import AddSaveButton from "../Buttons/AddSaveButton";
+import { AddSaveButton, ExitButton } from "@/components/Buttons";
 import {
   permissionsSchema,
   roleDataTemplate,

@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
-import AddButton from "../Buttons/AddSaveButton";
+import { AddSaveButton } from "@/components/Buttons";
 import NavigationButton from "../Buttons/NavigationButton";
 import Popup from "../Tools/Popup";
 
 const api = process.env.REACT_APP_API_URL;
 const TaskDetails = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
 
   const [task, setTask] = useState(null);
   const [progress, setProgress] = useState([]);
@@ -229,7 +228,7 @@ const TaskDetails = () => {
         </div>
 
         <div className="flex justify-center">
-          <AddButton
+          <AddSaveButton
             label={saving ? "שומר..." : "שמור תיעוד"}
             type="button"
             onClick={() => setConfirmPopup(true)}
