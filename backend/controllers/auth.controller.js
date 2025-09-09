@@ -8,6 +8,7 @@ import logAction from "../utils/logAction.js";
 import { roleFields, roleFieldsSQL } from "../utils/permissions.js";
 import { sendResetPasswordEmail } from "../services/email.service.js";
 import { getDaysSince, generateResetToken } from "../utils/passwordHelpers.js";
+import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
 
 /**
  * התחברות משתמש
@@ -161,11 +162,20 @@ export function getCurrentUser(req, res) {
  * מחזיר: הודעת הצלחה או שגיאה
  */
 export async function forgotPassword(req, res) {
-  const { email } = req.body;
+  let { email } = req.body;
   if (!email)
     return res.status(400).json({ success: false, message: "יש להזין אימייל" });
 
   try {
+    // ניקוי/ולידציה לאימייל (שומר על תאימות למסד)
+    try {
+      email = validateAndSanitizeEmail(email);
+    } catch (e) {
+      return res.status(400).json({
+        success: false,
+        message: e?.message || "כתובת אימייל לא חוקית",
+      });
+    }
     const [users] = await db.query("SELECT * FROM users WHERE email = ?", [
       email,
     ]);

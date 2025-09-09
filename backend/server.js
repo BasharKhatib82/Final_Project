@@ -1,7 +1,9 @@
 // backend\server.js
 
 import dotenv from "dotenv";
+import { verifySmtp } from "./utils/reports.mailer.js";
 dotenv.config();
+verifySmtp?.();
 
 import app from "./app.js";
 import { testDbConnection } from "./utils/dbSingleton.js";
