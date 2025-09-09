@@ -7,4 +7,3 @@ export { default as formatDate } from "./formatDate";
 export { default as formatTime } from "./formatTime";
 export { default as useInactivityLogout } from "./useInactivityLogout";
 export { default as validateAndSanitizeEmail } from "./validateAndSanitizeEmail";
-
