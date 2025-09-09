@@ -6,7 +6,7 @@ import {
   permissionsSchema,
   roleDataTemplate,
 } from "../../constants/permissions";
-import Popup from "../Tools/Popup";
+import { Popup } from "@/components/Tools";
 
 const api = process.env.REACT_APP_API_URL;
 

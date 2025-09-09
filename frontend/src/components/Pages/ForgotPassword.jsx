@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
-import Popup from "../Tools/Popup.jsx";
+import { Popup } from "@/components/Tools";
+
 const api = process.env.REACT_APP_API_URL;
 
 function ForgotPassword() {

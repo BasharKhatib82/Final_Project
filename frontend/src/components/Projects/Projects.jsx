@@ -2,7 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NavigationButton } from "@/components/Buttons";
-import Popup from "../Tools/Popup";
+import { Popup } from "@/components/Tools";
 import { ReportProvider } from "../Reports/ReportContext";
 import ReportExport from "../Reports/ReportExport";
 import ReportEmail from "../Reports/ReportEmail";

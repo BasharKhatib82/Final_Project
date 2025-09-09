@@ -1,8 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../../components/Tools/UserContext";
-import Popup from "../../components/Tools/Popup";
+import { Popup ,useUser} from "@/components/Tools";
 import { FcApproval, FcHighPriority } from "react-icons/fc";
 
 const api = process.env.REACT_APP_API_URL;
