@@ -1,4 +1,4 @@
-// utils/validateAndSanitizeEmail.js
+// frontend\src\utils\validateAndSanitizeEmail.js
 
 /**
  * Validate and sanitize email address

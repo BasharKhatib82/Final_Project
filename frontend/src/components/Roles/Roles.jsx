@@ -1,25 +1,31 @@
-import axios from "axios";
+// frontend/src/pages/Roles/Roles.jsx
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
-import { Popup ,useUser} from "components/Tools";
+import { Popup, useUser } from "components/Tools";
 import { NavigationButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
-import { permissionsSchema } from "../../constants/permissions";
+import { permissionsSchema } from "constants";
+import { ROLE_STATUSES } from "constants";
+import { api, extractApiError } from "utils";
 
-const api = process.env.REACT_APP_API_URL;
-
+// "פונקציית עזר לבדיקה אם ערך נחשב "פעיל
 const isActive = (el) => el === true || el === 1 || el === "1";
 
+// UI מיפוי רשומת תפקיד ל
 const mapRole = (r) => ({
   ...r,
   active: isActive(r.active),
-  status_human: isActive(r.active) ? "תפקיד פעיל" : "תפקיד לא פעיל",
+  status_human: isActive(r.active)
+    ? ROLE_STATUSES.ACTIVE.label
+    : ROLE_STATUSES.INACTIVE.label,
 });
 
+// הצגת סטטוס עם צבע
 const renderCheckActive = (v) => (
   <span className={v ? "text-green-600" : "text-red-500"}>
-    {v ? "תפקיד פעיל" : "תפקיד לא פעיל"}
+    {v ? ROLE_STATUSES.ACTIVE.label : ROLE_STATUSES.INACTIVE.label}
   </span>
 );
 
@@ -42,20 +48,17 @@ export default function Roles() {
 
   const fetchRoles = () => {
     setLoading(true);
-    Promise.all([
-      axios.get(`${api}/roles/active`, { withCredentials: true }),
-      axios.get(`${api}/roles/inactive`, { withCredentials: true }),
-    ])
+    Promise.all([api.get("/roles/active"), api.get("/roles/inactive")])
       .then(([activeRes, inactiveRes]) => {
         const active = (activeRes?.data?.data || []).map(mapRole);
         const inactive = (inactiveRes?.data?.data || []).map(mapRole);
         setAllRoles([...active, ...inactive]);
       })
-      .catch(() => {
+      .catch((err) => {
         setPopup({
           show: true,
           title: "שגיאה",
-          message: "שגיאה בטעינת התפקידים",
+          message: extractApiError(err, "שגיאה בטעינת התפקידים"),
           mode: "error",
         });
       })
@@ -63,9 +66,10 @@ export default function Roles() {
   };
 
   const handleEdit = (role_id) => navigate(`/dashboard/edit_role/${role_id}`);
+
   const confirmDelete = (role_id) => {
-    axios
-      .put(`${api}/roles/delete/${role_id}`, null, { withCredentials: true })
+    api
+      .put(`/roles/delete/${role_id}`)
       .then(() => {
         setPopup({
           show: true,
@@ -75,16 +79,17 @@ export default function Roles() {
         });
         fetchRoles();
       })
-      .catch(() =>
+      .catch((err) =>
         setPopup({
           show: true,
           title: "שגיאה",
-          message: "אירעה שגיאה במחיקה",
+          message: extractApiError(err, "אירעה שגיאה במחיקה"),
           mode: "error",
         })
       );
   };
 
+  // עמודות הדוח
   const columns = [
     { key: "role_id", label: "מזהה", export: (r) => String(r.role_id) },
     { key: "role_name", label: "שם תפקיד", export: (r) => String(r.role_name) },
@@ -123,7 +128,6 @@ export default function Roles() {
             }
             className="flex flex-row-reverse items-center gap-2 bg-blue-50 border border-blue-200 text-gray-700 hover:bg-blue-100 px-4 py-1 rounded shadow-sm transition"
           >
-            {" "}
             צפייה בהרשאות
             <Icon icon="emojione-v1:eye" width="1.2rem" height="1.2rem" />
           </button>
@@ -139,8 +143,8 @@ export default function Roles() {
     },
   ];
 
-  //  הוספת עמודת פעולות רק אם למשתמש יש אחת מההרשאות
-  if (user.permission_edit_role === 1 || user?.permission_delete_role === 1) {
+  // הוספת עמודת פעולות לפי הרשאות המשתמש
+  if (user?.permission_edit_role === 1 || user?.permission_delete_role === 1) {
     columns.push({
       key: "actions",
       label: "פעולות",
@@ -156,7 +160,7 @@ export default function Roles() {
                   icon="fluent-color:edit-32"
                   width="1.2rem"
                   height="1.2rem"
-                />{" "}
+                />
                 עריכה
               </button>
             )}
@@ -166,7 +170,7 @@ export default function Roles() {
                   setPopup({
                     show: true,
                     title: "אישור מחיקה",
-                    message: "⚠️ למחוק את התפקיד זה ?",
+                    message: "⚠️ למחוק את התפקיד הזה?",
                     mode: "confirm",
                     role_id: r.role_id,
                   })
@@ -194,8 +198,8 @@ export default function Roles() {
       label: "סטטוס",
       type: "select",
       options: [
-        { value: "true", label: "תפקידים פעילים" },
-        { value: "false", label: "תפקידים לא פעילים" },
+        { value: "true", label: ROLE_STATUSES.ACTIVE.label },
+        { value: "false", label: ROLE_STATUSES.INACTIVE.label },
         { value: "", label: "כל התפקידים" },
       ],
     },
@@ -215,7 +219,7 @@ export default function Roles() {
           filtersDef={filtersDef}
           searchableKeys={["role_name", "active"]}
           pageSize={25}
-          emailApiBase={api}
+          emailApiBase={process.env.REACT_APP_API_URL}
           addButton={
             user?.permission_add_role === 1 && (
               <NavigationButton
