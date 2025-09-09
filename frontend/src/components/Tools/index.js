@@ -6,4 +6,4 @@ export { default as Tooltip } from "./Tooltip";
 // export { default as ProtectedRoute } from "./ProtectedRoute"; // אם יצרת
 // export { default as RequirePermission } from "./RequirePermission"; // אם יצרת
 // export { default as LoadingSpinner } from "./LoadingSpinner"; // אם יצרת
-export { useUser, default as UserContextProvider } from "./UserContext";
+export { useUser, UserProvider as UserContextProvider } from "./UserContext";
