@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import NavigationButton from "../Buttons/NavigationButton";
-import DeleteButton from "../Buttons/DeleteButton";
+import { NavigationButton, DeleteButton } from "@/components/Buttons";
 import Popup from "../Tools/Popup";
 import { ReportProvider } from "../Reports/ReportContext";
 import ReportExport from "../Reports/ReportExport";

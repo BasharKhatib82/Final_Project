@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import NavigationButton from "../Buttons/NavigationButton";
+import { NavigationButton } from "@/components/Buttons";
 import Popup from "../Tools/Popup";
 import { ReportProvider } from "../Reports/ReportContext";
 import ReportExport from "../Reports/ReportExport";

@@ -4,7 +4,7 @@ import { useUser } from "../Tools/UserContext";
 import { useNavigate } from "react-router-dom";
 import Popup from "../Tools/Popup";
 import { Icon } from "@iconify/react";
-import NavigationButton from "../Buttons/NavigationButton";
+import { NavigationButton } from "@/components/Buttons";
 import ReportView from "../Reports/ReportView";
 
 const api = process.env.REACT_APP_API_URL;

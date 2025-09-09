@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
-import NavigationButton from "../Buttons/NavigationButton";
+import { NavigationButton } from "@/components/Buttons";
 import ReportView from "../Reports/ReportView";
 import { useUser } from "../Tools/UserContext";
 import { formatDate } from "../../utils/formatDate";

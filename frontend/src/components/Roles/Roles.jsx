@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useUser } from "../Tools/UserContext";
 import Popup from "../Tools/Popup";
-import NavigationButton from "../Buttons/NavigationButton";
+import { NavigationButton } from "@/components/Buttons";
 import ReportView from "../Reports/ReportView";
 import { permissionsSchema } from "../../constants/permissions";
 
