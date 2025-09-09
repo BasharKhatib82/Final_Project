@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import { Popup } from "@/components/Tools";
+import { Popup } from "components/Tools";
 
 const api = process.env.REACT_APP_API_URL;
 

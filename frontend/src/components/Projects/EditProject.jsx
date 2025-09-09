@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { Popup } from "@/components/Tools";
-import { ExitButton } from "@/components/Buttons";
+import { Popup } from "components/Tools";
+import { ExitButton } from "components/Buttons";
 
 const api = process.env.REACT_APP_API_URL;
 

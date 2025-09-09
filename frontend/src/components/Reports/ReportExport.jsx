@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import { Icon } from "@iconify/react";
 import axios from "axios";
-import { Popup } from "@/components/Tools";
+import { Popup } from "components/Tools";
 
 const ENV_API_BASE = (process.env.REACT_APP_API_URL || "").replace(/\/+$/, "");
 

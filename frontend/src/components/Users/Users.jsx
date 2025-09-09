@@ -1,9 +1,9 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Popup, useUser } from "@/components/Tools";
+import { Popup, useUser } from "components/Tools";
 import { Icon } from "@iconify/react";
-import { NavigationButton } from "@/components/Buttons";
+import { NavigationButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
 
 const api = process.env.REACT_APP_API_URL;
