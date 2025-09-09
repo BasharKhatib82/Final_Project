@@ -1,19 +1,39 @@
+// frontend/src/pages/Roles/EditRole.jsx
+
+/**
+ * קומפוננטה: EditRole
+ * -------------------
+ * מטרות:
+ * 1. מאפשרת עדכון תפקיד קיים במערכת (שם, סטטוס והרשאות).
+ * 2. טוענת את פרטי התפקיד מהשרת לפי מזהה (`id` מה־URL).
+ * 3. מאפשרת למשתמש לסמן/לבטל הרשאות באמצעות checkbox.
+ * 4. מבצעת שמירה לשרת (PUT) לאחר אישור המשתמש.
+ *
+ * שימושים:
+ * - משתמשת ב־permissionsSchema להצגת הרשאות בקבוצות.
+ * - משתמשת ב־roleDataTemplate כדי לוודא שכל המפתחות קיימים באובייקט.
+ * - Popup משמש להצגת שגיאות, הצלחות ואישור לפני עדכון.
+ *
+ * תרחישים:
+ * - טעינת הדף → שליפת פרטי התפקיד והצגת הנתונים בטופס.
+ * - שינוי שם/סטטוס/הרשאות → לחיצה על "שמור שינויים".
+ * - Popup אישור → שליחה לשרת → הצלחה/שגיאה מוצגת למשתמש.
+ */
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
 import { Popup } from "components/Tools";
-import {
-  permissionsSchema,
-  roleDataTemplate,
-} from "../../constants/permissions";
+import { permissionsSchema, roleDataTemplate } from "constants/permissions";
 
 const api = process.env.REACT_APP_API_URL;
 
 const EditRole = () => {
-  const { id } = useParams();
+  const { id } = useParams(); // מזהה תפקיד מתוך ה־URL
   const navigate = useNavigate();
 
+  // סטייט לניהול חלונית Popup
   const [popupData, setPopupData] = useState({
     show: false,
     title: "",
@@ -21,10 +41,12 @@ const EditRole = () => {
     mode: "info",
   });
 
-  const [roleName, setRoleName] = useState("");
-  const [selectedPermissions, setSelectedPermissions] = useState([]);
-  const [active, setActive] = useState(1);
+  // סטייטים של טופס
+  const [roleName, setRoleName] = useState(""); // שם התפקיד
+  const [selectedPermissions, setSelectedPermissions] = useState([]); // הרשאות נבחרות
+  const [active, setActive] = useState(1); // סטטוס פעיל/לא פעיל
 
+  // טעינת פרטי התפקיד מהשרת
   useEffect(() => {
     axios
       .get(`${api}/roles/${id}`, { withCredentials: true })
@@ -33,7 +55,7 @@ const EditRole = () => {
         setRoleName(role.role_name);
         setActive(role.active);
 
-        // למלא את הרשאות ה-checkbox
+        // הפקת הרשאות נבחרות (כל מפתח שערכו 1)
         const perms = [];
         Object.keys(role).forEach((key) => {
           if (role[key] === 1) perms.push(key);
@@ -51,15 +73,16 @@ const EditRole = () => {
       });
   }, [id]);
 
+  // הוספה/הסרה של הרשאה
   const togglePermission = (key) => {
     setSelectedPermissions((prev) =>
       prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]
     );
   };
 
+  // שליחת טופס (פותח Popup לאישור)
   const handleSubmit = (e) => {
     e.preventDefault();
-
     setPopupData({
       show: true,
       title: "אישור עדכון",
@@ -68,11 +91,11 @@ const EditRole = () => {
     });
   };
 
+  // עדכון התפקיד בשרת (לאחר אישור המשתמש)
   const confirmUpdate = () => {
-    // נכין את הנתונים כמו שהשרת מצפה (0/1)
     const roleData = { ...roleDataTemplate, role_name: roleName, active };
 
-    // לעדכן לפי ה־checkboxים
+    // עדכון הרשאות ל־0/1
     Object.values(permissionsSchema)
       .flat()
       .forEach((perm) => {
@@ -112,7 +135,7 @@ const EditRole = () => {
           עדכון פרטי תפקיד
         </h2>
 
-        {/* שם התפקיד */}
+        {/* שדה שם התפקיד */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">
             שם תפקיד
@@ -154,7 +177,8 @@ const EditRole = () => {
               </div>
             </div>
           ))}
-          {/* סטטוס */}
+
+          {/* בחירת סטטוס */}
           <div>
             <label className="font-rubik block mb-0.5 font-medium">סטטוס</label>
             <select
@@ -168,14 +192,14 @@ const EditRole = () => {
           </div>
         </div>
 
-        {/* כפתורים */}
+        {/* כפתורי פעולה */}
         <div className="flex justify-around pt-4">
           <AddSaveButton label="שמור שינויים" type="submit" />
           <ExitButton label="ביטול" linkTo="/dashboard/roles" />
         </div>
       </form>
 
-      {/* Popup */}
+      {/* חלונית Popup */}
       {popupData.show && (
         <Popup
           title={popupData.title}

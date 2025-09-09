@@ -1,5 +1,22 @@
 // frontend/src/pages/Roles/Roles.jsx
 
+/**
+ * קומפוננטה: Roles
+ * ----------------
+ * מטרות:
+ * 1. מציגה רשימת תפקידים קיימים במערכת (פעילים ולא פעילים).
+ * 2. מאפשרת:
+ *    - צפייה בהרשאות של כל תפקיד.
+ *    - עריכת תפקיד (למשתמשים עם הרשאת עריכה).
+ *    - מחיקת תפקיד (למשתמשים עם הרשאת מחיקה).
+ *    - הוספת תפקיד חדש (למשתמשים עם הרשאת הוספה).
+ *
+ * שימושים:
+ * - ניגשת ל־API כדי לשלוף תפקידים פעילים ולא פעילים.
+ * - מציגה טבלה (ReportView) עם אפשרות סינון, חיפוש וייצוא.
+ * - משתמשת ב־Popup להצגת הודעות, שגיאות ואישורים.
+ */
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
@@ -10,10 +27,10 @@ import { permissionsSchema } from "constants";
 import { ROLE_STATUSES } from "constants";
 import { api, extractApiError } from "utils";
 
-// "פונקציית עזר לבדיקה אם ערך נחשב "פעיל
+// "פונקציית עזר: בדיקה אם ערך נחשב "פעיל
 const isActive = (el) => el === true || el === 1 || el === "1";
 
-// UI מיפוי רשומת תפקיד ל
+// (כולל שם סטטוס קריא) UI מיפוי רשומת תפקיד ל
 const mapRole = (r) => ({
   ...r,
   active: isActive(r.active),
@@ -22,7 +39,7 @@ const mapRole = (r) => ({
     : ROLE_STATUSES.INACTIVE.label,
 });
 
-// הצגת סטטוס עם צבע
+// הצגת סטטוס עם צבעים
 const renderCheckActive = (v) => (
   <span className={v ? "text-green-600" : "text-red-500"}>
     {v ? ROLE_STATUSES.ACTIVE.label : ROLE_STATUSES.INACTIVE.label}
@@ -30,8 +47,8 @@ const renderCheckActive = (v) => (
 );
 
 export default function Roles() {
-  const [allRoles, setAllRoles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [allRoles, setAllRoles] = useState([]); // רשימת כל התפקידים
+  const [loading, setLoading] = useState(true); // מצב טעינה
   const [popup, setPopup] = useState({
     show: false,
     title: "",
@@ -39,13 +56,16 @@ export default function Roles() {
     mode: "",
     role_id: null,
   });
-  const navigate = useNavigate();
-  const { user } = useUser();
 
+  const navigate = useNavigate();
+  const { user } = useUser(); // נתוני המשתמש המחובר
+
+  // שליפת התפקידים מהשרת בעת טעינה ראשונית
   useEffect(() => {
     fetchRoles();
   }, []);
 
+  // שליפת רשימת תפקידים (פעילים + לא פעילים)
   const fetchRoles = () => {
     setLoading(true);
     Promise.all([api.get("/roles/active"), api.get("/roles/inactive")])
@@ -65,8 +85,10 @@ export default function Roles() {
       .finally(() => setLoading(false));
   };
 
+  // מעבר למסך עריכת תפקיד
   const handleEdit = (role_id) => navigate(`/dashboard/edit_role/${role_id}`);
 
+  // מחיקת תפקיד
   const confirmDelete = (role_id) => {
     api
       .put(`/roles/delete/${role_id}`)
@@ -89,7 +111,7 @@ export default function Roles() {
       );
   };
 
-  // עמודות הדוח
+  // עמודות הדוח לטבלת התפקידים
   const columns = [
     { key: "role_id", label: "מזהה", export: (r) => String(r.role_id) },
     { key: "role_name", label: "שם תפקיד", export: (r) => String(r.role_name) },
@@ -143,7 +165,7 @@ export default function Roles() {
     },
   ];
 
-  // הוספת עמודת פעולות לפי הרשאות המשתמש
+  // הוספת עמודת "פעולות" בהתאם להרשאות המשתמש
   if (user?.permission_edit_role === 1 || user?.permission_delete_role === 1) {
     columns.push({
       key: "actions",
@@ -192,6 +214,7 @@ export default function Roles() {
     });
   }
 
+  // הגדרת פילטרים
   const filtersDef = [
     {
       name: "active",

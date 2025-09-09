@@ -1,18 +1,36 @@
+// frontend/src/pages/Roles/AddRole.jsx
+
+/**
+ * קומפוננטה: AddRole
+ * ------------------
+ * מטרות:
+ * 1. מאפשרת יצירה של תפקיד חדש במערכת .
+ * 2. מוגדר מראש schema מאפשרת בחירה של שם תפקיד והרשאות מתוך .
+ * 3. להוספת התפקיד למסד הנתונים API שולחת את המידע ל .
+ *
+ * שימושים:
+ * - כדי להציג קבוצות הרשאות permissionsSchema משתמשת ב .
+ * - כדי ליצור אובייקט ברירת מחדל לתפקיד חדש roleDataTemplate משתמשת ב .
+ * - להודעות הצלחה, שגיאה או אזהרה Popup מציגה .
+ *
+ * תרחישים:
+ * - "משתמש מזין שם תפקיד > בוחר הרשאות > לוחץ > "הוסף תפקיד.
+ * - במקרה הצלחה: מוצגת הודעת הצלחה ומבוצעת הפניה חזרה למסך התפקידים.
+ * - במקרה כישלון: מוצגת הודעת שגיאה ידידותית.
+ */
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AddSaveButton, ExitButton } from "components/Buttons";
-import {
-  permissionsSchema,
-  roleDataTemplate,
-} from "../../constants/permissions";
+import { permissionsSchema, roleDataTemplate } from "constants/permissions";
 import { Popup } from "components/Tools";
 
 const api = process.env.REACT_APP_API_URL;
 
 const AddRole = () => {
-  const [roleName, setRoleName] = useState("");
-  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [roleName, setRoleName] = useState(""); // שם התפקיד החדש
+  const [selectedPermissions, setSelectedPermissions] = useState([]); // הרשאות מסומנות
   const [popupData, setPopupData] = useState({
     show: false,
     title: "",
@@ -21,15 +39,18 @@ const AddRole = () => {
   });
   const navigate = useNavigate();
 
+  // בחירה/ביטול של הרשאה
   const togglePermission = (key) => {
     setSelectedPermissions((prev) =>
       prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]
     );
   };
 
+  // שליחת טופס לשרת
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // בדיקת שם תפקיד חובה
     if (!roleName) {
       setPopupData({
         show: true,
@@ -40,10 +61,10 @@ const AddRole = () => {
       return;
     }
 
-    // יוצרים עותק מהתבנית ומוסיפים את שם התפקיד
+    // יצירת אובייקט תפקיד חדש מתוך התבנית
     const roleData = { ...roleDataTemplate, role_name: roleName };
 
-    // לעדכן 1 לפי הצ'קבוקסים שנבחרו
+    // עדכון הרשאות נבחרות ל־1
     selectedPermissions.forEach((perm) => {
       roleData[perm] = 1;
     });
@@ -77,7 +98,7 @@ const AddRole = () => {
           הוספת תפקיד חדש
         </h2>
 
-        {/* שם התפקיד */}
+        {/* שדה שם התפקיד */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">
             שם תפקיד
@@ -91,7 +112,7 @@ const AddRole = () => {
           />
         </div>
 
-        {/* קבוצות הרשאות */}
+        {/* קבוצות הרשאות לפי schema */}
         <div className="flex flex-wrap gap-4">
           {Object.entries(permissionsSchema).map(([category, perms]) => (
             <div
@@ -128,7 +149,7 @@ const AddRole = () => {
         </div>
       </form>
 
-      {/* Popup */}
+      {/* חלונית Popup */}
       {popupData.show && (
         <Popup
           title={popupData.title}
@@ -150,4 +171,5 @@ const AddRole = () => {
     </div>
   );
 };
+
 export default AddRole;
