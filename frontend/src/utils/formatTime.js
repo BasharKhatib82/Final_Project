@@ -7,7 +7,7 @@
  * @param {string|number|Date} input ערך זמן
  * @returns {string} "HH:MM" או "-"
  */
-export function formatTime(input) {
+export default function formatTime(input) {
   if (!input) return "-";
 
   // מחרוזת שעה פשוטה → נחזיר "HH:MM"
@@ -46,3 +46,4 @@ export function formatTime(input) {
   // ניקוי תווי כיווניות נדירים שעלולים להופיע
   return dtf.format(d).replace(/[\u200E\u200F]/g, "");
 }
+

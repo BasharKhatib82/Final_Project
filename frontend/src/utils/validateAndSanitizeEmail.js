@@ -10,7 +10,7 @@
  * @returns {string} sanitized email
  * @throws {Error} if email is invalid
  */
-export function validateAndSanitizeEmail(email) {
+export default function validateAndSanitizeEmail(email) {
   if (!email || typeof email !== "string") {
     throw new Error("כתובת דואר אלקטרוני לא חוקית");
   }

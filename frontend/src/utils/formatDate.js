@@ -6,7 +6,7 @@
  * @param {string|number|Date} input ערך תאריך
  * @returns {string} "DD-MM-YYYY" או ""
  */
-export function formatDate(input) {
+export default function formatDate(input) {
   if (!input) return "";
 
   // "YYYY-MM-DD" נקי → המרה טקסטואלית בלבד (ללא Date)
