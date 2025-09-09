@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink, useNavigate, Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import logo from "../../assets/img/logo.png";
-import { useUser } from "../../components/Tools/UserContext";
+import { useUser } from "components/Tools";
 
 function Navbar() {
   const { user, logout } = useUser();

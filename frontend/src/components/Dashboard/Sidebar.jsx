@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
-import { useUser } from "../../components/Tools/UserContext";
+import { useUser } from "components/Tools";
 import { Icon } from "@iconify/react";
 
 const Sidebar = () => {

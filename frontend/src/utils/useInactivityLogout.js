@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../components/Tools/UserContext";
+import { useUser } from "components/Tools";
 
 export default function useInactivityLogout() {
   const navigate = useNavigate();

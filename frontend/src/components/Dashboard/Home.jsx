@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "../Tools/UserContext";
+import { useUser } from "components/Tools";
 import AlertBar from "../Tools/AlertBar";
 import StatCard from "../Tools/StatCard";
 import LeadsStatusPieChart from "../charts/LeadsStatusPieChart";
