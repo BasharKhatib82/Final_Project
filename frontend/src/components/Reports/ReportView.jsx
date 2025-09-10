@@ -38,7 +38,7 @@ export default function ReportView({
       pageSize={pageSize}
       defaultFilters={defaultFilters}
     >
-      <div className="flex flex-col gap-4" dir="rtl">
+      <div className="flex flex-col gap-2" dir="rtl">
         {/* כותרת דף ראשית ממורכזת */}
         <header className="flex items-center justify-center py-0 my-0">
           <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
