@@ -223,7 +223,7 @@ export default function Roles() {
       options: [
         { value: "true", label: ROLE_STATUSES.ACTIVE.label },
         { value: "false", label: ROLE_STATUSES.INACTIVE.label },
-        { value: "", label: "כל התפקידים" },
+        { value: "", label: "כל הסטטוסים" },
       ],
     },
   ];

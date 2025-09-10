@@ -8,6 +8,6 @@ export const TASK_STATUSES = ["חדש", "בתהליך", "הושלם", "בוטל�
 
 // סטטוסי תפקיד
 export const ROLE_STATUSES = {
-  ACTIVE: { value: 1, label: "תפקיד פעיל" },
-  INACTIVE: { value: 0, label: "תפקיד לא פעיל" },
+  ACTIVE: { value: 1, label: "פעיל" },
+  INACTIVE: { value: 0, label: "לא פעיל" },
 };

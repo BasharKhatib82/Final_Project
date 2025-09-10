@@ -156,8 +156,8 @@ export default function EditRole() {
               onChange={(e) => setActive(Number(e.target.value))}
               className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
             >
-              <option value={1}>תפקיד פעיל</option>
-              <option value={0}>תפקיד לא פעיל</option>
+              <option value={1}>פעיל</option>
+              <option value={0}>לא פעיל</option>
             </select>
           </div>
         </div>
