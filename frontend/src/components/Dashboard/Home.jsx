@@ -109,7 +109,7 @@ const Home = () => {
             onClick={handleCheckIn}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
           >
-            📥 החתמת כניסה
+             החתמת כניסה
           </button>
         )}
         {showCheckOut && (
@@ -117,7 +117,7 @@ const Home = () => {
             onClick={handleCheckOut}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow"
           >
-            📤 החתמת יציאה
+             החתמת יציאה
           </button>
         )}
       </div>
@@ -144,14 +144,14 @@ const Home = () => {
             const leadsCount =
               (user?.admin_alert_dash === 1 &&
                 stats?.leads_by_user_status
-                  ?.filter((l) => l.status === "11חדשה")
-                  ?.reduce((sum, l) => sum + l.count, "")) ||
+                  ?.filter((l) => l.status === "חדשה")
+                  ?.reduce((sum, l) => sum + l.count, 0)) ||
               (user?.user_alert_dash === 1 &&
                 stats?.leads_by_user_status
                   ?.filter(
-                    (l) => l.user_id === user.user_id && l.status === "11חדשה"
+                    (l) => l.user_id === user.user_id && l.status === "חדשה"
                   )
-                  ?.reduce((sum, l) => sum + l.count, ""));
+                  ?.reduce((sum, l) => sum + l.count, 0));
             return (
               leadsCount > 0 && (
                 <AlertBar
