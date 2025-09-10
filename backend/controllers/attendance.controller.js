@@ -265,51 +265,54 @@ export async function checkIn(req, res) {
  */
 export async function checkOut(req, res) {
   const { user_id } = req.body;
+
   if (!user_id) {
     return res.status(400).json({ success: false, message: "חסר מזהה משתמש" });
   }
+
   if (!isNineDigitId(user_id)) {
     return res.status(400).json({
       success: false,
-      message: "מספר תעודת זהות חייבת להיות מספר בן 9 ספרות",
+      message: "מספר תעודת זהות חייב להיות מספר בן 9 ספרות",
     });
   }
 
   const today = new Date().toISOString().split("T")[0];
 
   try {
+    // שליפת החתמת הכניסה האחרונה להיום – שעדיין אין בה שעת יציאה
     const [rows] = await db.query(
-      `SELECT attendance_id, check_out FROM attendance
-       WHERE user_id = ? AND date = ?`,
+      `SELECT attendance_id FROM attendance
+       WHERE user_id = ? AND date = ? AND check_out IS NULL
+       ORDER BY attendance_id DESC LIMIT 1`,
       [user_id, today]
     );
 
     if (rows.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "לא קיימת נוכחות להיום – יש להחתים כניסה קודם",
+        message: "לא נמצאה החתמת כניסה פתוחה להיום – יש להחתים כניסה קודם",
       });
     }
 
-    if (rows[0].check_out) {
-      return res
-        .status(400)
-        .json({ success: false, message: "כבר בוצעה החתמת יציאה להיום" });
-    }
+    const attendanceId = rows[0].attendance_id;
 
     const [update] = await db.query(
       `UPDATE attendance SET check_out = NOW() WHERE attendance_id = ?`,
-      [rows[0].attendance_id]
+      [attendanceId]
     );
 
     if (update.affectedRows === 1) {
       return res.json({ success: true, message: "שעת יציאה נרשמה בהצלחה" });
     }
-    return res
-      .status(500)
-      .json({ success: false, message: "החתמת יציאה נכשלה" });
+
+    return res.status(500).json({
+      success: false,
+      message: "החתמת יציאה נכשלה",
+    });
   } catch (err) {
     console.error("checkOut:", err);
     return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 }
+
