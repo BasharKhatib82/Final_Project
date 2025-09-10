@@ -475,45 +475,49 @@ const Leads = () => {
                   </td>
 
                   <td className="border p-2">
-                    <button
-                      onClick={() =>
-                        navigate(`/dashboard/details_lead/${lead.lead_id}`)
-                      }
-                      className="bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
-                    >
-                      <Icon
-                        icon="emojione-v1:eye"
-                        width="1.2rem"
-                        height="1.2rem"
-                      />
-                      הצג
-                    </button>
-                    <button
-                      onClick={() =>
-                        navigate(`/dashboard/edit_lead/${lead.lead_id}`)
-                      }
-                      className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
-                    >
-                      <Icon
-                        icon="fluent-color:edit-32"
-                        width="1.2rem"
-                        height="1.2rem"
-                      />
-                      עריכה
-                    </button>
-                    {lead.status !== "בוטלה" && (
-                      <button
-                        onClick={() => setLeadToDelete(lead.lead_id)}
-                        className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                      >
-                        <Icon
-                          icon="streamline-color:recycle-bin-2-flat"
-                          width="1.2em"
-                          height="1.2em"
-                        />
-                        מחיקה
-                      </button>
-                    )}
+                    <div className="flex justify-center">
+                      <div className="flex items-center gap-1 text-center">
+                        <button
+                          onClick={() =>
+                            navigate(`/dashboard/details_lead/${lead.lead_id}`)
+                          }
+                          className="bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
+                        >
+                          <Icon
+                            icon="emojione-v1:eye"
+                            width="1.2rem"
+                            height="1.2rem"
+                          />
+                          הצג
+                        </button>
+                        <button
+                          onClick={() =>
+                            navigate(`/dashboard/edit_lead/${lead.lead_id}`)
+                          }
+                          className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+                        >
+                          <Icon
+                            icon="fluent-color:edit-32"
+                            width="1.2rem"
+                            height="1.2rem"
+                          />
+                          עריכה
+                        </button>
+                        {lead.status !== "בוטלה" && (
+                          <button
+                            onClick={() => setLeadToDelete(lead.lead_id)}
+                            className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                          >
+                            <Icon
+                              icon="streamline-color:recycle-bin-2-flat"
+                              width="1.2em"
+                              height="1.2em"
+                            />
+                            מחיקה
+                          </button>
+                        )}{" "}
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ))
