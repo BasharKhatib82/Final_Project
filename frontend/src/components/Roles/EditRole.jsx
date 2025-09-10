@@ -3,111 +3,82 @@
 /**
  * קומפוננטה: EditRole
  * -------------------
- * מטרות:
- * 1. מאפשרת עדכון תפקיד קיים במערכת (שם, סטטוס והרשאות).
- * 2. טוענת את פרטי התפקיד מהשרת לפי מזהה (`id` מה־URL).
- * 3. מאפשרת למשתמש לסמן/לבטל הרשאות באמצעות checkbox.
- * 4. מבצעת שמירה לשרת (PUT) לאחר אישור המשתמש.
- *
- * שימושים:
- * - משתמשת ב־permissionsSchema להצגת הרשאות בקבוצות.
- * - משתמשת ב־roleDataTemplate כדי לוודא שכל המפתחות קיימים באובייקט.
- * - Popup משמש להצגת שגיאות, הצלחות ואישור לפני עדכון.
- *
- * תרחישים:
- * - טעינת הדף → שליפת פרטי התפקיד והצגת הנתונים בטופס.
- * - שינוי שם/סטטוס/הרשאות → לחיצה על "שמור שינויים".
- * - Popup אישור → שליחה לשרת → הצלחה/שגיאה מוצגת למשתמש.
+ * מאפשרת עריכת תפקיד קיים, כולל שם, סטטוס והרשאות.
+ * מאפשרת עריכה ושמירה , ID טוענת את התפקיד מהשרת לפי  .
  */
 
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
 import { Popup } from "components/Tools";
-import { permissionsSchema, roleDataTemplate } from "constants/permissions";
+import { permissionsSchema, roleDataTemplate } from "constants";
+import { api, extractApiError } from "utils";
 
-const api = process.env.REACT_APP_API_URL;
-
-const EditRole = () => {
-  const { id } = useParams(); // מזהה תפקיד מתוך ה־URL
+export default function EditRole() {
+  const { id } = useParams();
   const navigate = useNavigate();
 
-  // סטייט לניהול חלונית Popup
-  const [popupData, setPopupData] = useState({
+  const [popup, setPopup] = useState({
     show: false,
     title: "",
     message: "",
     mode: "info",
   });
 
-  // סטייטים של טופס
-  const [roleName, setRoleName] = useState(""); // שם התפקיד
-  const [selectedPermissions, setSelectedPermissions] = useState([]); // הרשאות נבחרות
-  const [active, setActive] = useState(1); // סטטוס פעיל/לא פעיל
+  const [roleName, setRoleName] = useState("");
+  const [selectedPermissions, setSelectedPermissions] = useState([]);
+  const [active, setActive] = useState(1);
 
-  // טעינת פרטי התפקיד מהשרת
   useEffect(() => {
-    axios
-      .get(`${api}/roles/${id}`, { withCredentials: true })
+    api
+      .get(`/roles/${id}`)
       .then((res) => {
-        const role = res.data.data;
+        const role = res.data.data || {};
         setRoleName(role.role_name);
         setActive(role.active);
 
-        // הפקת הרשאות נבחרות (כל מפתח שערכו 1)
-        const perms = [];
-        Object.keys(role).forEach((key) => {
-          if (role[key] === 1) perms.push(key);
-        });
+        const perms = Object.keys(role).filter((k) => role[k] === 1);
         setSelectedPermissions(perms);
       })
       .catch((err) => {
-        setPopupData({
+        setPopup({
           show: true,
           title: "שגיאה",
-          message: "שגיאה בטעינת פרטי התפקיד",
+          message: extractApiError(err, "שגיאה בטעינת פרטי התפקיד"),
           mode: "error",
         });
-        console.error(err);
       });
   }, [id]);
 
-  // הוספה/הסרה של הרשאה
   const togglePermission = (key) => {
     setSelectedPermissions((prev) =>
       prev.includes(key) ? prev.filter((p) => p !== key) : [...prev, key]
     );
   };
 
-  // שליחת טופס (פותח Popup לאישור)
   const handleSubmit = (e) => {
     e.preventDefault();
-    setPopupData({
+    setPopup({
       show: true,
       title: "אישור עדכון",
-      message: "⚠️ האם אתה בטוח שברצונך לעדכן את פרטי התפקיד?",
+      message: "האם לעדכן את פרטי התפקיד ?",
       mode: "confirm",
     });
   };
 
-  // עדכון התפקיד בשרת (לאחר אישור המשתמש)
   const confirmUpdate = () => {
     const roleData = { ...roleDataTemplate, role_name: roleName, active };
 
-    // עדכון הרשאות ל־0/1
     Object.values(permissionsSchema)
       .flat()
       .forEach((perm) => {
-        if (perm.key) {
-          roleData[perm.key] = selectedPermissions.includes(perm.key) ? 1 : 0;
-        }
+        roleData[perm.key] = selectedPermissions.includes(perm.key) ? 1 : 0;
       });
 
-    axios
-      .put(`${api}/roles/${id}`, roleData, { withCredentials: true })
+    api
+      .put(`/roles/${id}`, roleData)
       .then(() => {
-        setPopupData({
+        setPopup({
           show: true,
           title: "הצלחה",
           message: "התפקיד עודכן בהצלחה!",
@@ -115,13 +86,12 @@ const EditRole = () => {
         });
       })
       .catch((err) => {
-        setPopupData({
+        setPopup({
           show: true,
-          title: "שגיאת עדכון",
-          message: "אירעה שגיאה במהלך עדכון התפקיד",
+          title: "שגיאה",
+          message: extractApiError(err, "שגיאה במהלך עדכון התפקיד"),
           mode: "error",
         });
-        console.error(err);
       });
   };
 
@@ -135,7 +105,7 @@ const EditRole = () => {
           עדכון פרטי תפקיד
         </h2>
 
-        {/* שדה שם התפקיד */}
+        {/* שם תפקיד */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">
             שם תפקיד
@@ -178,7 +148,7 @@ const EditRole = () => {
             </div>
           ))}
 
-          {/* בחירת סטטוס */}
+          {/* סטטוס */}
           <div>
             <label className="font-rubik block mb-0.5 font-medium">סטטוס</label>
             <select
@@ -192,7 +162,7 @@ const EditRole = () => {
           </div>
         </div>
 
-        {/* כפתורי פעולה */}
+        {/* כפתורים */}
         <div className="flex justify-around pt-4">
           <AddSaveButton label="שמור שינויים" type="submit" />
           <ExitButton label="ביטול" linkTo="/dashboard/roles" />
@@ -200,27 +170,25 @@ const EditRole = () => {
       </form>
 
       {/* חלונית Popup */}
-      {popupData.show && (
+      {popup.show && (
         <Popup
-          title={popupData.title}
-          message={popupData.message}
-          mode={popupData.mode}
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
           onClose={() => {
-            setPopupData({
+            setPopup({
               show: false,
               title: "",
               message: "",
               mode: "info",
             });
-            if (popupData.mode === "success") {
+            if (popup.mode === "success") {
               navigate("/dashboard/roles");
             }
           }}
-          onConfirm={popupData.mode === "confirm" ? confirmUpdate : undefined}
+          onConfirm={popup.mode === "confirm" ? confirmUpdate : undefined}
         />
       )}
     </div>
   );
-};
-
-export default EditRole;
+}
