@@ -1,10 +1,16 @@
+/**
+ * קומפוננטה: AddProject
+ * ----------------------
+ * 1. מאפשרת הוספת פרויקט חדש למערכת.
+ * 2. שדות נדרשים: שם פרויקט, תיאור (אופציונלי), סטטוס פעיל/לא פעיל.
+ * 3.  פופאפ אישור ושמירה.
+ */
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { Popup } from "components/Tools";
 import { AddSaveButton, ExitButton } from "components/Buttons";
-
-const api = process.env.REACT_APP_API_URL;
+import { api } from "utils";
 
 const AddProject = () => {
   const [form, setForm] = useState({
@@ -37,15 +43,15 @@ const AddProject = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post(`${api}/projects/add`, form, {
-        withCredentials: true,
-      });
+      const res = await api.post("/projects/add", form);
 
-      if (res.data.Status) {
+      if (res.data?.success || res.data?.Status) {
         setShowConfirmPopup(false);
         setSuccessPopup(true);
       } else {
-        setError(res.data.Error || "שגיאה בהוספת הפרויקט");
+        setError(
+          res.data?.message || res.data?.Error || "שגיאה בהוספת הפרויקט"
+        );
         setShowConfirmPopup(false);
       }
     } catch (err) {
@@ -108,6 +114,7 @@ const AddProject = () => {
         </div>
       </form>
 
+      {/* פופאפ אישור */}
       {showConfirmPopup && (
         <Popup
           title="אישור שמירה"
@@ -118,6 +125,7 @@ const AddProject = () => {
         />
       )}
 
+      {/* פופאפ הצלחה */}
       {successPopup && (
         <Popup
           title="הצלחה"

@@ -1,10 +1,16 @@
+/**
+ * קומפוננטה: EditProject
+ * -----------------------
+ * 1. project_id מאפשרת עריכה של פרויקט קיים לפי מזהה .
+ * 2. כולל שדות: שם, תיאור, סטטוס פעיל/לא פעיל.
+ * 3. לאישור ושגיאה Popup שימוש ב   .
+ */
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import { Popup } from "components/Tools";
 import { ExitButton } from "components/Buttons";
-
-const api = process.env.REACT_APP_API_URL;
+import { api } from "utils";
 
 const EditProject = () => {
   const [form, setForm] = useState({
@@ -12,6 +18,7 @@ const EditProject = () => {
     project_description: "",
     is_active: 1,
   });
+
   const [error, setError] = useState("");
   const [popupData, setPopupData] = useState(null);
   const [confirmPopup, setConfirmPopup] = useState(false);
@@ -22,20 +29,18 @@ const EditProject = () => {
     fetchProject();
   }, []);
 
-  const fetchProject = () => {
-    axios
-      .get(`${api}/projects/${id}`, { withCredentials: true })
-      .then((res) => {
-        if (res.data.success && res.data.data) {
-          setForm(res.data.data);
-        } else {
-          setError("לא ניתן לטעון את נתוני הפרויקט");
-        }
-      })
-      .catch((err) => {
-        console.error("שגיאה בטעינת פרויקט:", err);
-        setError("שגיאה בטעינת נתונים מהשרת");
-      });
+  const fetchProject = async () => {
+    try {
+      const res = await api.get(`/projects/${id}`);
+      if (res.data.success && res.data.data) {
+        setForm(res.data.data);
+      } else {
+        setError("לא ניתן לטעון את נתוני הפרויקט");
+      }
+    } catch (err) {
+      console.error("שגיאה בטעינת פרויקט:", err);
+      setError("שגיאה בטעינת נתונים מהשרת");
+    }
   };
 
   const handleChange = (e) => {
@@ -46,31 +51,29 @@ const EditProject = () => {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!form.project_name.trim()) {
       setError("יש להזין שם פרויקט");
       return;
     }
 
-    axios
-      .put(`${api}/projects/edit/${id}`, form, {
-        withCredentials: true,
-      })
-      .then((res) => {
-        if (res.data.Status) {
-          setPopupData({
-            title: "הצלחה",
-            message: "הפרויקט עודכן בהצלחה!",
-            mode: "success",
-          });
-        } else {
-          setError(res.data.Error || "שגיאה בעדכון הפרויקט");
-        }
-      })
-      .catch((err) => {
-        console.error("שגיאה:", err);
-        setError("שגיאה בהתחברות לשרת");
-      });
+    try {
+      const res = await api.put(`/projects/edit/${id}`, form);
+      if (res.data?.success || res.data?.Status) {
+        setPopupData({
+          title: "הצלחה",
+          message: "הפרויקט עודכן בהצלחה!",
+          mode: "success",
+        });
+      } else {
+        setError(
+          res.data?.message || res.data?.Error || "שגיאה בעדכון הפרויקט"
+        );
+      }
+    } catch (err) {
+      console.error("שגיאה בעדכון פרויקט:", err);
+      setError("שגיאה בהתחברות לשרת");
+    }
   };
 
   const handleConfirm = (e) => {
