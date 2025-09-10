@@ -6,35 +6,30 @@
  * 3. אפשרות לשיוך מרובה של נציגים למשימות.
  * 4. עדכון סטטוס/נציג ישירות מהטבלה.
  * 5. פעולות: עריכה, הצגה, ביטול.
- * 6. כולל ייצוא ודוא"ל דרך ReportProvider.
+ * 6. כולל ייצוא ודוא"ל דרך ReportView.
  */
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { NavigationButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
-import { Popup } from "components/Tools";
-import { ReportProvider } from "../Reports/ReportContext";
-import ReportExport from "../Reports/ReportExport";
-import ReportEmail from "../Reports/ReportEmail";
-import { api } from "utils";
+import { NavigationButton, Popup, useUser } from "components/Tools";
+import ReportView from "../Reports/ReportView";
+import { api, extractApiError } from "utils";
 
-const Tasks = () => {
+export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
+  const [popup, setPopup] = useState(null);
   const [taskToDelete, setTaskToDelete] = useState(null);
-  const [popupData, setPopupData] = useState(null);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [repFilter, setRepFilter] = useState("all");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedTasks, setSelectedTasks] = useState([]);
-  const [bulkUserId, setBulkUserId] = useState("");
-  const [bulkAssignConfirm, setBulkAssignConfirm] = useState(false);
   const [repToSave, setRepToSave] = useState(null);
   const [newRepId, setNewRepId] = useState(null);
   const [statusToSave, setStatusToSave] = useState(null);
-  const [newStatusValue, setNewStatusValue] = useState(null);
+  const [newStatus, setNewStatus] = useState(null);
+  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [bulkUserId, setBulkUserId] = useState("");
+  const [bulkAssignConfirm, setBulkAssignConfirm] = useState(false);
 
+  const { user } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,14 +40,14 @@ const Tasks = () => {
   const fetchTasks = async () => {
     try {
       const res = await api.get("/tasks");
-      if (res.data.success) {
-        const updated = res.data.data.map((task) => ({
-          ...task,
-          selectedRepId: task.user_id || "",
-          selectedStatus: task.status,
-        }));
-        setTasks(updated);
-      }
+      const rows = res.data.data || [];
+      setTasks(
+        rows.map((t) => ({
+          ...t,
+          selectedRepId: t.user_id || "",
+          selectedStatus: t.status,
+        }))
+      );
     } catch (err) {
       console.error("שגיאה בטעינת משימות:", err);
     }
@@ -61,142 +56,25 @@ const Tasks = () => {
   const fetchUsers = async () => {
     try {
       const res = await api.get("/users/active");
-      if (res.data.success) {
-        setUsers(res.data.data || []);
-      }
+      setUsers(res.data?.data || []);
     } catch (err) {
-      console.error("שגיאה בטעינת משתמשים:", err);
+      console.error("שגיאה בטעינת עובדים", err);
     }
   };
 
-  const handleDelete = async () => {
-    if (!taskToDelete) return;
+  const handleRepSave = async () => {
     try {
-      const res = await api.delete(`/tasks/delete/${taskToDelete}`);
-      if (res.data.success) {
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.task_id === taskToDelete
-              ? { ...t, status: "בוטלה", selectedStatus: "בוטלה" }
-              : t
-          )
-        );
-        setPopupData({
-          title: "הצלחה",
-          message: res.data.message,
-          mode: "success",
-        });
-      } else {
-        setPopupData({
-          title: "שגיאה",
-          message: res.data.message,
-          mode: "error",
-        });
-      }
+      await api.put(`/tasks/update-rep/${repToSave}`, { user_id: newRepId });
+      fetchTasks();
+      setPopup({
+        title: "הצלחה",
+        message: "הנציג עודכן בהצלחה",
+        mode: "success",
+      });
     } catch (err) {
-      setPopupData({
+      setPopup({
         title: "שגיאה",
-        message: "שגיאה בביטול המשימה",
-        mode: "error",
-      });
-    } finally {
-      setTaskToDelete(null);
-    }
-  };
-
-  const handleSelectTask = (taskId) => {
-    setSelectedTasks((prev) =>
-      prev.includes(taskId)
-        ? prev.filter((id) => id !== taskId)
-        : [...prev, taskId]
-    );
-  };
-
-  const handleBulkAssignConfirm = () => {
-    if (selectedTasks.length === 0) {
-      return setPopupData({
-        title: "שגיאה",
-        message: "יש לבחור משימות",
-        mode: "error",
-      });
-    }
-    if (!bulkUserId) {
-      return setPopupData({
-        title: "שגיאה",
-        message: "יש לבחור נציג לשיוך",
-        mode: "error",
-      });
-    }
-    setBulkAssignConfirm(true);
-  };
-
-  const handleBulkAssign = async () => {
-    try {
-      const res = await api.put("/tasks/bulk-assign", {
-        taskIds: selectedTasks,
-        user_id: bulkUserId || null,
-      });
-      if (res.data.success) {
-        fetchTasks();
-        setSelectedTasks([]);
-        setBulkUserId("");
-        setPopupData({
-          title: "הצלחה",
-          message: res.data.message,
-          mode: "success",
-        });
-      } else {
-        setPopupData({
-          title: "שגיאה",
-          message: res.data.message,
-          mode: "error",
-        });
-      }
-    } catch (err) {
-      setPopupData({
-        title: "שגיאה",
-        message: "שגיאה בשיוך משימות",
-        mode: "error",
-      });
-    } finally {
-      setBulkAssignConfirm(false);
-    }
-  };
-
-  const handleRepSelect = (taskId, newUserId) => {
-    setRepToSave(taskId);
-    setNewRepId(newUserId);
-  };
-
-  const handleRepSave = async (taskId, selectedRepId) => {
-    try {
-      const res = await api.put(`/tasks/update-rep/${taskId}`, {
-        user_id: selectedRepId,
-      });
-      if (res.data.success) {
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.task_id === taskId
-              ? { ...t, user_id: selectedRepId, selectedRepId }
-              : t
-          )
-        );
-        setPopupData({
-          title: "הצלחה",
-          message: res.data.message,
-          mode: "success",
-        });
-      } else {
-        setPopupData({
-          title: "שגיאה",
-          message: res.data.message,
-          mode: "error",
-        });
-      }
-    } catch (err) {
-      setPopupData({
-        title: "שגיאה",
-        message: "שגיאה בעדכון נציג",
+        message: extractApiError(err, "שגיאה בעדכון נציג"),
         mode: "error",
       });
     } finally {
@@ -205,326 +83,277 @@ const Tasks = () => {
     }
   };
 
-  const handleStatusSelect = (taskId, newStatus) => {
-    setStatusToSave(taskId);
-    setNewStatusValue(newStatus);
-  };
-
-  const handleStatusSave = async (taskId, selectedStatus) => {
+  const handleStatusSave = async () => {
     try {
-      const res = await api.put(`/tasks/update-status/${taskId}`, {
-        status: selectedStatus,
+      await api.put(`/tasks/update-status/${statusToSave}`, {
+        status: newStatus,
       });
-      if (res.data.success) {
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.task_id === taskId
-              ? { ...t, status: selectedStatus, selectedStatus }
-              : t
-          )
-        );
-        setPopupData({
-          title: "הצלחה",
-          message: res.data.message,
-          mode: "success",
-        });
-      } else {
-        setPopupData({
-          title: "שגיאה",
-          message: res.data.message,
-          mode: "error",
-        });
-      }
+      fetchTasks();
+      setPopup({
+        title: "הצלחה",
+        message: "הסטטוס עודכן בהצלחה",
+        mode: "success",
+      });
     } catch (err) {
-      setPopupData({
+      setPopup({
         title: "שגיאה",
-        message: "שגיאה בעדכון סטטוס",
+        message: extractApiError(err, "שגיאה בעדכון סטטוס"),
         mode: "error",
       });
     } finally {
       setStatusToSave(null);
-      setNewStatusValue(null);
+      setNewStatus(null);
     }
   };
 
-  const handleClosePopup = () => setPopupData(null);
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/tasks/delete/${taskToDelete}`);
+      fetchTasks();
+      setPopup({
+        title: "הצלחה",
+        message: "המשימה בוטלה בהצלחה",
+        mode: "success",
+      });
+    } catch (err) {
+      setPopup({
+        title: "שגיאה",
+        message: extractApiError(err, "שגיאה בביטול משימה"),
+        mode: "error",
+      });
+    } finally {
+      setTaskToDelete(null);
+    }
+  };
 
-  const filteredTasks = tasks.filter((t) => {
-    const search = searchTerm.toLowerCase();
-    const matchSearch =
-      t.task_title.toLowerCase().includes(search) ||
-      t.description?.toLowerCase().includes(search);
-    const matchStatus =
-      statusFilter === "all" ? t.status !== "בוטלה" : t.status === statusFilter;
-    const matchUser = repFilter === "all" || String(t.user_id) === repFilter;
-    return matchSearch && matchStatus && matchUser;
-  });
+  const handleBulkAssign = async () => {
+    try {
+      await api.put("/tasks/bulk-assign", {
+        taskIds: selectedTasks,
+        user_id: bulkUserId === "null" ? null : bulkUserId,
+      });
+      fetchTasks();
+      setSelectedTasks([]);
+      setBulkUserId("");
+      setPopup({
+        title: "הצלחה",
+        message: "שיוך המשימות בוצע בהצלחה",
+        mode: "success",
+      });
+    } catch (err) {
+      setPopup({
+        title: "שגיאה",
+        message: extractApiError(err, "שגיאה בשיוך מרובה"),
+        mode: "error",
+      });
+    } finally {
+      setBulkAssignConfirm(false);
+    }
+  };
 
   const columns = [
-    { key: "task_id", label: "מזהה", export: (r) => r.task_id },
-    { key: "task_title", label: "כותרת", export: (r) => r.task_title },
     {
-      key: "created_at",
-      label: "תאריך יצירה",
-      export: (r) => new Date(r.created_at).toLocaleDateString("he-IL"),
+      key: "select",
+      label: "✔️",
+      render: (r) => (
+        <input
+          type="checkbox"
+          checked={selectedTasks.includes(r.task_id)}
+          onChange={() => {
+            setSelectedTasks((prev) =>
+              prev.includes(r.task_id)
+                ? prev.filter((id) => id !== r.task_id)
+                : [...prev, r.task_id]
+            );
+          }}
+        />
+      ),
+      export: () => null,
     },
+    { key: "task_id", label: "מזהה", export: (r) => r.task_id },
+    { key: "task_title", label: "נושא", export: (r) => r.task_title },
     {
       key: "due_date",
       label: "תאריך יעד",
+      render: (r) => new Date(r.due_date).toLocaleDateString("he-IL"),
       export: (r) => new Date(r.due_date).toLocaleDateString("he-IL"),
     },
-    { key: "status", label: "סטטוס", export: (r) => r.status },
     {
-      key: "assigned",
-      label: "נציג מטפל",
-      export: (r) => {
-        const u = users.find((u) => u.user_id === r.user_id);
-        return u ? `${u.first_name} ${u.last_name}` : "ללא";
-      },
-    },
-  ];
-
-  return (
-    <div className="p-6 text-right">
-      <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
-        רשימת משימות
-      </h2>
-
-      {/* 🔹 סרגל סינון ושיוך מרובה */}
-      <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-4">
-        <NavigationButton
-          linkTo="/dashboard/add_task"
-          label="הוספת משימה חדשה"
-        />
-
+      key: "status",
+      label: "סטטוס",
+      render: (r) => (
         <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-1 text-sm"
+          value={r.selectedStatus}
+          onChange={(e) => {
+            setStatusToSave(r.task_id);
+            setNewStatus(e.target.value);
+          }}
+          className="border border-gray-300 rounded px-2 py-1 text-sm"
         >
-          <option value="all">כל הסטטוסים</option>
           <option value="חדש">חדש</option>
           <option value="בתהליך">בתהליך</option>
           <option value="הושלם">הושלם</option>
           <option value="בוטלה">בוטלה</option>
         </select>
-
+      ),
+      export: (r) => r.status,
+    },
+    {
+      key: "user_id",
+      label: "נציג",
+      render: (r) => (
         <select
-          value={repFilter}
-          onChange={(e) => setRepFilter(e.target.value)}
-          className="border border-gray-300 rounded px-3 py-1 text-sm"
+          value={r.selectedRepId}
+          onChange={(e) => {
+            setRepToSave(r.task_id);
+            setNewRepId(e.target.value);
+          }}
+          className="border border-gray-300 rounded px-2 py-1 text-sm"
         >
-          <option value="all">כל הנציגים</option>
-          <option value="null">ללא</option>
+          <option value="">ללא</option>
           {users.map((u) => (
             <option key={u.user_id} value={u.user_id}>
               {u.first_name} {u.last_name}
             </option>
           ))}
         </select>
-
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="🔍 חיפוש לפי נושא או תיאור..."
-            className="border border-gray-300 rounded px-3 py-1 text-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          {searchTerm && (
+      ),
+      export: (r) => {
+        const u = users.find((u) => u.user_id === r.user_id);
+        return u ? `${u.first_name} ${u.last_name}` : "ללא";
+      },
+    },
+    {
+      key: "actions",
+      label: "פעולות",
+      render: (r) => (
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => navigate(`/dashboard/details_task/${r.task_id}`)}
+            className="bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
+          >
+            <Icon icon="emojione-v1:eye" width="1.2rem" />
+            הצג
+          </button>
+          <button
+            onClick={() => navigate(`/dashboard/edit_task/${r.task_id}`)}
+            className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
+          >
+            <Icon icon="fluent-color:edit-32" width="1.2rem" />
+            עריכה
+          </button>
+          {r.status !== "בוטלה" && (
             <button
-              onClick={() => setSearchTerm("")}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 text-red-500"
+              onClick={() => setTaskToDelete(r.task_id)}
+              className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
             >
-              ✖
+              <Icon icon="streamline-color:recycle-bin-2-flat" width="1.2rem" />
+              מחיקה
             </button>
           )}
         </div>
+      ),
+      export: () => null,
+    },
+  ];
 
-        <div className="flex items-center gap-2 ml-auto">
-          <select
-            value={bulkUserId}
-            onChange={(e) => setBulkUserId(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-1 text-sm"
-          >
-            <option value="">בחר נציג לשיוך</option>
-            <option value="null">ללא</option>
-            {users.map((u) => (
-              <option key={u.user_id} value={u.user_id}>
-                {u.first_name} {u.last_name}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={handleBulkAssignConfirm}
-            className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
-          >
-            שייך את הנבחרות ({selectedTasks.length})
-          </button>
-        </div>
-      </div>
+  const filtersDef = [
+    {
+      name: "status",
+      label: "סטטוס",
+      type: "select",
+      options: [
+        { value: "", label: "כל הסטטוסים" },
+        { value: "חדש", label: "חדש" },
+        { value: "בתהליך", label: "בתהליך" },
+        { value: "הושלם", label: "הושלם" },
+        { value: "בוטלה", label: "בוטלה" },
+      ],
+    },
+    {
+      name: "user_id",
+      label: "נציג",
+      type: "select",
+      options: [
+        { value: "", label: "כל הנציגים" },
+        { value: "null", label: "ללא" },
+        ...users.map((u) => ({
+          value: u.user_id,
+          label: `${u.first_name} ${u.last_name}`,
+        })),
+      ],
+    },
+  ];
 
-      {/*  Email ייצוא ושליחה ב  */}
-      <ReportProvider
+  const bulkAssignBar = (
+    <div className="flex items-center gap-2">
+      <label className="text-sm font-semibold">שיוך מרובה:</label>
+      <select
+        value={bulkUserId}
+        onChange={(e) => setBulkUserId(e.target.value)}
+        className="border border-gray-300 rounded px-3 py-1 text-sm"
+      >
+        <option value="">בחר נציג לשיוך</option>
+        <option value="null">ללא</option>
+        {users.map((u) => (
+          <option key={u.user_id} value={u.user_id}>
+            {u.first_name} {u.last_name}
+          </option>
+        ))}
+      </select>
+      <button
+        onClick={() => {
+          if (!selectedTasks.length || !bulkUserId) {
+            setPopup({
+              title: "שגיאה",
+              message: "יש לבחור משימות ונציג",
+              mode: "error",
+            });
+            return;
+          }
+          setBulkAssignConfirm(true);
+        }}
+        className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 text-sm"
+      >
+        שיוך {selectedTasks.length} משימות
+      </button>
+    </div>
+  );
+
+  return (
+    <div className="flex flex-col flex-1 p-6 text-right">
+      <ReportView
         title="רשימת משימות"
         columns={columns}
-        rows={filteredTasks}
-      >
-        <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
-          <ReportExport apiBase={process.env.REACT_APP_API_URL} />
-          <ReportEmail apiBase={process.env.REACT_APP_API_URL} />
-        </div>
-      </ReportProvider>
+        rows={tasks.filter((t) => t.status !== "בוטלה")}
+        filtersDef={filtersDef}
+        searchableKeys={["task_title", "description"]}
+        searchPlaceholder="חיפוש לפי נושא או תיאור..."
+        addButton={
+          <NavigationButton
+            label="הוספת משימה חדשה"
+            linkTo="/dashboard/add_task"
+          />
+        }
+        bulkAssignBar={bulkAssignBar}
+      />
 
-      {/* 🔹 טבלת משימות */}
-      <div className="overflow-auto rounded-lg shadow-lg bg-white/85 mt-4">
-        <table className="w-full table-auto border-collapse text-sm text-center">
-          <thead>
-            <tr className="bg-slate-100 text-gray-800">
-              <th className="p-2 border">✔️</th>
-              <th className="p-2 border">מזהה</th>
-              <th className="p-2 border">כותרת</th>
-              <th className="p-2 border">תאריך יצירה</th>
-              <th className="p-2 border">תאריך יעד</th>
-              <th className="p-2 border">סטטוס</th>
-              <th className="p-2 border">נציג</th>
-              <th className="p-2 border">פעולות</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredTasks.length === 0 ? (
-              <tr>
-                <td colSpan="8" className="text-center text-red-500 p-4">
-                  אין משימות להצגה
-                </td>
-              </tr>
-            ) : (
-              filteredTasks.map((task) => (
-                <tr key={task.task_id} className="hover:bg-blue-50 transition">
-                  <td className="border p-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedTasks.includes(task.task_id)}
-                      onChange={() => handleSelectTask(task.task_id)}
-                    />
-                  </td>
-                  <td className="border p-2">{task.task_id}</td>
-                  <td className="border p-2">{task.task_title}</td>
-                  <td className="border p-2">
-                    {new Date(task.created_at).toLocaleDateString("he-IL")}
-                  </td>
-                  <td className="border p-2">
-                    {new Date(task.due_date).toLocaleDateString("he-IL")}
-                  </td>
-                  <td className="border p-2">
-                    <select
-                      value={task.selectedStatus}
-                      onChange={(e) =>
-                        handleStatusSelect(task.task_id, e.target.value)
-                      }
-                      className="border border-gray-300 rounded px-2 py-1 text-sm"
-                    >
-                      <option value="חדש">חדש</option>
-                      <option value="בתהליך">בתהליך</option>
-                      <option value="הושלם">הושלם</option>
-                      <option value="בוטלה">בוטלה</option>
-                    </select>
-                  </td>
-                  <td className="border p-2">
-                    <select
-                      value={task.selectedRepId}
-                      onChange={(e) =>
-                        handleRepSelect(task.task_id, e.target.value)
-                      }
-                      className="border border-gray-300 rounded px-2 py-1 text-sm"
-                    >
-                      <option value="">ללא</option>
-                      {users.map((u) => (
-                        <option key={u.user_id} value={u.user_id}>
-                          {u.first_name} {u.last_name}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="border p-2">
-                    <div className="flex justify-center">
-                      <div className="flex items-center gap-1 text-center">
-                        <button
-                          onClick={() =>
-                            navigate(`/dashboard/details_task/${task.task_id}`)
-                          }
-                          className="flex items-center gap-2 bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
-                        >
-                          <Icon
-                            icon="emojione-v1:eye"
-                            width="1.2rem"
-                            height="1.2rem"
-                          />
-                          הצג
-                        </button>
-                        <button
-                          onClick={() =>
-                            navigate(`/dashboard/edit_task/${task.task_id}`)
-                          }
-                          className="flex items-center gap-2 bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 "
-                        >
-                          <Icon
-                            icon="fluent-color:edit-32"
-                            width="1.2rem"
-                            height="1.2rem"
-                          />
-                          עריכה
-                        </button>
-                        {task.status !== "בוטלה" && (
-                          <button
-                            onClick={() => setTaskToDelete(task.task_id)}
-                            className="flex items-center gap-2 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                          >
-                            <Icon
-                              icon="streamline-color:recycle-bin-2-flat"
-                              width="1.2em"
-                              height="1.2em"
-                            />
-                            מחיקה
-                          </button>
-                        )}{" "}
-                      </div>
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* פופאפים */}
-      {taskToDelete && (
+      {/* Popups */}
+      {popup && (
         <Popup
-          title="אישור ביטול משימה"
-          message="האם אתה בטוח שברצונך לבטל משימה זו?"
-          mode="confirm"
-          onConfirm={handleDelete}
-          onClose={() => setTaskToDelete(null)}
-        />
-      )}
-
-      {bulkAssignConfirm && (
-        <Popup
-          title="אישור שיוך מרובה"
-          message={`האם אתה בטוח שברצונך לשייך ${selectedTasks.length} משימות?`}
-          mode="confirm"
-          onConfirm={handleBulkAssign}
-          onClose={() => setBulkAssignConfirm(false)}
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
+          onClose={() => setPopup(null)}
         />
       )}
 
       {repToSave && (
         <Popup
-          title="אישור שינוי נציג"
-          message="האם אתה בטוח שברצונך לשנות את הנציג המטפל?"
+          title="עדכון נציג"
+          message="האם לעדכן את הנציג למשימה זו?"
           mode="confirm"
-          onConfirm={() => handleRepSave(repToSave, newRepId)}
+          onConfirm={handleRepSave}
           onClose={() => {
             setRepToSave(null);
             setNewRepId(null);
@@ -534,27 +363,36 @@ const Tasks = () => {
 
       {statusToSave && (
         <Popup
-          title="אישור שינוי סטטוס"
-          message="האם אתה בטוח שברצונך לעדכן את סטטוס המשימה?"
+          title="עדכון סטטוס"
+          message="האם לעדכן את הסטטוס?"
           mode="confirm"
-          onConfirm={() => handleStatusSave(statusToSave, newStatusValue)}
+          onConfirm={handleStatusSave}
           onClose={() => {
             setStatusToSave(null);
-            setNewStatusValue(null);
+            setNewStatus(null);
           }}
         />
       )}
 
-      {popupData && (
+      {taskToDelete && (
         <Popup
-          title={popupData.title}
-          message={popupData.message}
-          mode={popupData.mode}
-          onClose={handleClosePopup}
+          title="ביטול משימה"
+          message="האם לבטל משימה זו?"
+          mode="confirm"
+          onConfirm={handleDelete}
+          onClose={() => setTaskToDelete(null)}
+        />
+      )}
+
+      {bulkAssignConfirm && (
+        <Popup
+          title="אישור שיוך מרובה"
+          message={`האם לשייך ${selectedTasks.length} משימות?`}
+          mode="confirm"
+          onConfirm={handleBulkAssign}
+          onClose={() => setBulkAssignConfirm(false)}
         />
       )}
     </div>
   );
-};
-
-export default Tasks;
+}
