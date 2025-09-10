@@ -491,9 +491,12 @@ const Leads = () => {
                       עריכה
                     </button>
                     {lead.status !== "בוטלה" && (
-                      <DeleteButton
+                      <button
                         onClick={() => setLeadToDelete(lead.lead_id)}
-                      />
+                        className="bg-yellow-500 text-white mx-1 px-2 py-1 rounded hover:bg-yellow-600"
+                      >
+                        מחיקה
+                      </button>
                     )}
                   </td>
                 </tr>
