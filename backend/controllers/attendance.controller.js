@@ -226,16 +226,20 @@ export async function checkIn(req, res) {
   const today = new Date().toISOString().split("T")[0];
 
   try {
-    const [exists] = await db.query(
-      "SELECT attendance_id FROM attendance WHERE user_id = ? AND date = ?",
+    const [rows] = await db.query(
+      "SELECT attendance_id, check_out FROM attendance WHERE user_id = ? AND date = ? ORDER BY attendance_id DESC LIMIT 1",
       [user_id, today]
     );
-    if (exists.length > 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: "כבר קיימת נוכחות עבור היום" });
+
+    // אם יש רשומה פתוחה (כלומר אין check_out) – החתמה חדשה לא תתאפשר
+    if (rows.length > 0 && rows[0].check_out === null) {
+      return res.status(400).json({
+        success: false,
+        message: "כבר קיימת החתמת כניסה ללא יציאה – אנא בצע החתמת יציאה",
+      });
     }
 
+    // אחרת – מוסיפים רשומה חדשה
     const [insert] = await db.query(
       `INSERT INTO attendance (user_id, date, check_in, status)
        VALUES (?, ?, NOW(), ?)`,
