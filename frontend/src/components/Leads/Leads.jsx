@@ -1,632 +1,431 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+// frontend/src/pages/Leads/Leads.jsx
+
+/**
+ * קומפוננטה: Leads
+ * -----------------
+ * מטרות:
+ * 1. מציגה רשימת פניות קיימות במערכת (כולל פניות חדשות, בטיפול, וכו').
+ * 2. מאפשרת:
+ * - צפייה וסינון של פניות לפי סטטוס, פרויקט ונציג.
+ * - חיפוש לפי שם לקוח או מספר טלפון.
+ * - שיוך פנייה לנציג בודד או מרובה.
+ * - שינוי סטטוס פנייה.
+ * - עריכת פרטי פנייה.
+ * - ביטול פנייה.
+ * - הוספת פנייה חדשה.
+ *
+ * שימושים:
+ * - ניגשת ל־API כדי לשלוף נתוני פניות, משתמשים ופרויקטים.
+ * - מציגה טבלה (ReportView) עם אפשרויות סינון, חיפוש וייצוא.
+ * - משתמשת ב־Popup להצגת הודעות, שגיאות ואישורים.
+ */
+
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { NavigationButton, DeleteButton } from "components/Buttons";
-import { Popup ,useUser} from "components/Tools";
-import { ReportProvider } from "../Reports/ReportContext";
-import ReportExport from "../Reports/ReportExport";
-import ReportEmail from "../Reports/ReportEmail";
+import { Icon } from "@iconify/react";
+import { Popup, useUser } from "components/Tools";
+import { NavigationButton } from "components/Buttons";
+import ReportView from "../Reports/ReportView";
+import { api, extractApiError } from "utils";
 
-
-const api = process.env.REACT_APP_API_URL;
-
-const Leads = () => {
-  const [leads, setLeads] = useState([]);
+export default function Leads() {
+  const [allLeads, setAllLeads] = useState([]);
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [repFilter, setRepFilter] = useState("all");
-  const [projectFilter, setProjectFilter] = useState("all");
-  const [selectedLeads, setSelectedLeads] = useState([]);
-  const [bulkUserId, setBulkUserId] = useState("");
-  const [popupData, setPopupData] = useState(null);
-  const [leadToDelete, setLeadToDelete] = useState(null);
-  const [repToSave, setRepToSave] = useState(null);
-  const [newRepId, setNewRepId] = useState(null);
-  const [statusToSave, setStatusToSave] = useState(null);
-  const [newStatusValue, setNewStatusValue] = useState(null);
-  const [bulkAssignConfirm, setBulkAssignConfirm] = useState(false);
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [popup, setPopup] = useState({
+    show: false,
+    title: "",
+    message: "",
+    mode: "",
+    lead_id: null,
+    bulk_leads: null,
+  });
 
+  const navigate = useNavigate();
+  const { user } = useUser();
+
+  // שליפת נתונים מהשרת
   useEffect(() => {
-    fetchLeads();
-    fetchUsers();
-    fetchProjects();
+    Promise.all([fetchLeads(), fetchUsers(), fetchProjects()]).finally(() =>
+      setLoading(false)
+    );
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const res = await axios.get(`${api}/users/active`, {
-        withCredentials: true,
-      });
-      if (res.data.success) {
-        setUsers(res.data.data);
-      }
-    } catch (err) {
-      console.error("שגיאה בטעינת עובדים:", err);
-    }
-  };
-
-  const fetchProjects = async () => {
-    try {
-      const res = await axios.get(`${api}/projects`, {
-        withCredentials: true,
-      });
-      if (res.data.success) {
-        setProjects(res.data.data);
-      }
-    } catch (err) {
-      console.error("שגיאה בטעינת פרויקטים:", err);
-    }
-  };
-
-  const fetchLeads = async () => {
-    try {
-      const res = await axios.get(`${api}/leads`, {
-        withCredentials: true,
-      });
-      if (res.data.success) {
-        const updatedLeads = res.data.data.map((lead) => ({
-          ...lead,
-          selectedRepId: lead.user_id || "",
-          selectedStatus: lead.status,
-        }));
-        setLeads(updatedLeads);
-      }
-    } catch (err) {
-      console.error("שגיאה בטעינת פניות:", err);
-    }
-  };
-
-  const handleRepSelect = (leadId, newUserId) => {
-    setRepToSave(leadId);
-    setNewRepId(newUserId);
-  };
-
-  const handleRepSave = async (leadId, selectedRepId) => {
-    try {
-      const res = await axios.put(
-        `${api}/leads/update-rep/${leadId}`,
-        { user_id: selectedRepId },
-        { withCredentials: true }
-      );
-
-      if (res.data.success) {
-        setLeads((prevLeads) =>
-          prevLeads.map((lead) =>
-            lead.lead_id === leadId
-              ? {
-                  ...lead,
-                  user_id: selectedRepId,
-                  selectedRepId: selectedRepId,
-                }
-              : lead
-          )
-        );
-        setPopupData({
-          title: "הצלחה",
-          message: "הנציג עודכן בהצלחה",
-          mode: "success",
-        });
-      } else {
-        setPopupData({
+  const fetchLeads = () => {
+    return api
+      .get("/leads")
+      .then((res) => {
+        const leads = res?.data?.data || [];
+        setAllLeads(leads);
+      })
+      .catch((err) => {
+        setPopup({
+          show: true,
           title: "שגיאה",
-          message: res.data?.Error || res.data?.Message || "שגיאה בעדכון נציג",
+          message: extractApiError(err, "שגיאה בטעינת הפניות"),
           mode: "error",
         });
-      }
-    } catch (err) {
-      setPopupData({
-        title: "שגיאה",
-        message: "שגיאה בעדכון נציג",
-        mode: "error",
       });
-    } finally {
-      setRepToSave(null);
-      setNewRepId(null);
-    }
   };
 
-  const handleStatusSelect = (leadId, newStatus) => {
-    setStatusToSave(leadId);
-    setNewStatusValue(newStatus);
+  const fetchUsers = () => {
+    return api
+      .get("/users/active")
+      .then((res) => setUsers(res?.data?.data || []));
   };
 
-  const handleStatusSave = async (leadId, selectedStatus) => {
-    try {
-      const res = await axios.put(
-        `${api}/leads/update-status/${leadId}`,
-        { status: selectedStatus },
-        { withCredentials: true }
-      );
+  const fetchProjects = () => {
+    return api
+      .get("/projects")
+      .then((res) => setProjects(res?.data?.data || []));
+  };
 
-      if (res.data.success) {
-        setLeads((prevLeads) =>
-          prevLeads.map((lead) =>
-            lead.lead_id === leadId
-              ? {
-                  ...lead,
-                  status: selectedStatus,
-                  selectedStatus: selectedStatus,
-                }
-              : lead
-          )
-        );
-        setPopupData({
+  // מעבר למסך עריכת/צפייה בפנייה
+  const handleView = (lead_id) =>
+    navigate(`/dashboard/details_lead/${lead_id}`);
+  const handleEdit = (lead_id) => navigate(`/dashboard/edit_lead/${lead_id}`);
+
+  // עדכון סטטוס הפנייה
+  const confirmChangeStatus = (lead_id, status) => {
+    api
+      .put(`/leads/update-status/${lead_id}`, { status })
+      .then(() => {
+        setPopup({
+          show: true,
           title: "הצלחה",
           message: "הסטטוס עודכן בהצלחה",
           mode: "success",
         });
-
-        // סגור את popup אוטומטית אחרי 1.5 שניות
-        setTimeout(() => setPopupData(null), 1500);
-      } else {
-        setPopupData({
+        fetchLeads();
+      })
+      .catch((err) =>
+        setPopup({
+          show: true,
           title: "שגיאה",
-          message: res.data?.Error || res.data?.Message || "שגיאה בעדכון סטטוס",
+          message: extractApiError(err, "אירעה שגיאה בעדכון הסטטוס"),
           mode: "error",
-        });
-      }
-    } catch (err) {
-      setPopupData({
-        title: "שגיאה",
-        message: "שגיאה בעדכון סטטוס",
-        mode: "error",
-      });
-    } finally {
-      setStatusToSave(null);
-      setNewStatusValue(null);
-    }
+        })
+      );
   };
 
-  const handleDelete = async () => {
-    if (!leadToDelete) return;
+  // עדכון נציג מטפל
+  const confirmChangeRep = (lead_id, user_id) => {
+    api
+      .put(`/leads/update-rep/${lead_id}`, { user_id })
+      .then(() => {
+        setPopup({
+          show: true,
+          title: "הצלחה",
+          message: "הנציג עודכן בהצלחה",
+          mode: "success",
+        });
+        fetchLeads();
+      })
+      .catch((err) =>
+        setPopup({
+          show: true,
+          title: "שגיאה",
+          message: extractApiError(err, "אירעה שגיאה בעדכון הנציג"),
+          mode: "error",
+        })
+      );
+  };
 
-    try {
-      const res = await axios.delete(`${api}/leads/delete/${leadToDelete}`, {
-        withCredentials: true,
-      });
-      if (res.data.success) {
-        setLeads((prevLeads) =>
-          prevLeads.map((lead) =>
-            lead.lead_id === leadToDelete
-              ? { ...lead, status: "בוטלה", selectedStatus: "בוטלה" }
-              : lead
-          )
-        );
-        setPopupData({
+  // ביטול פנייה (מחיקה לוגית)
+  const confirmDelete = (lead_id) => {
+    api
+      .delete(`/leads/delete/${lead_id}`)
+      .then(() => {
+        setPopup({
+          show: true,
           title: "הצלחה",
           message: "הפנייה בוטלה בהצלחה",
           mode: "success",
         });
-      } else {
-        setPopupData({
-          title: "שגיאה",
-          message: res.data?.Error || res.data?.Message || "שגיאה בביטול פנייה",
-          mode: "error",
-        });
-      }
-    } catch (err) {
-      setPopupData({
-        title: "שגיאה",
-        message: "שגיאה בביטול פנייה",
-        mode: "error",
-      });
-    } finally {
-      setLeadToDelete(null);
-    }
-  };
-
-  const handleSelectLead = (leadId) => {
-    setSelectedLeads((prev) =>
-      prev.includes(leadId)
-        ? prev.filter((id) => id !== leadId)
-        : [...prev, leadId]
-    );
-  };
-
-  const handleBulkAssignConfirm = () => {
-    if (selectedLeads.length === 0) {
-      setPopupData({
-        title: "שגיאה",
-        message: "יש לבחור פניות",
-        mode: "error",
-      });
-      return;
-    }
-    if (!bulkUserId) {
-      setPopupData({
-        title: "שגיאה",
-        message: "יש לבחור נציג לשיוך",
-        mode: "error",
-      });
-      return;
-    }
-    setBulkAssignConfirm(true);
-  };
-
-  const handleBulkAssign = async () => {
-    try {
-      const res = await axios.put(
-        `${api}/leads/bulk-assign`,
-        {
-          leadIds: selectedLeads,
-          user_id: bulkUserId === "null" ? null : bulkUserId,
-        },
-        { withCredentials: true }
-      );
-
-      if (res.data.success) {
         fetchLeads();
-        setSelectedLeads([]);
-        setBulkUserId("");
-        setPopupData({
+      })
+      .catch((err) =>
+        setPopup({
+          show: true,
+          title: "שגיאה",
+          message: extractApiError(err, "אירעה שגיאה בביטול הפנייה"),
+          mode: "error",
+        })
+      );
+  };
+
+  // שיוך מרובה (Bulk Assign)
+  const confirmBulkAssign = (bulk_leads, bulk_user_id) => {
+    api
+      .put("/leads/bulk-assign", {
+        leadIds: bulk_leads,
+        user_id: bulk_user_id,
+      })
+      .then(() => {
+        setPopup({
+          show: true,
           title: "הצלחה",
-          message: "השיוך בוצע בהצלחה",
+          message: `${bulk_leads.length} פניות שויכו בהצלחה`,
           mode: "success",
         });
-      } else {
-        setPopupData({
+        fetchLeads();
+      })
+      .catch((err) =>
+        setPopup({
+          show: true,
           title: "שגיאה",
-          message: res.data?.Error || res.data?.Message || "שגיאה בשיוך פניות",
+          message: extractApiError(err, "אירעה שגיאה בשיוך הפניות"),
           mode: "error",
-        });
-      }
-    } catch (err) {
-      setPopupData({
-        title: "שגיאה",
-        message: "שגיאה בשיוך פניות",
-        mode: "error",
-      });
-    } finally {
-      setBulkAssignConfirm(false);
-    }
+        })
+      );
   };
 
-  const handleClosePopup = () => {
-    setPopupData(null);
-  };
-
-  const filteredLeads = leads.filter((lead) => {
-    const name = `${lead.first_name} ${lead.last_name}`.toLowerCase();
-    const search = searchTerm.toLowerCase();
-    const matchesSearch =
-      search === "" ||
-      lead.phone_number.includes(search) ||
-      name.includes(search);
-    const matchesStatus =
-      statusFilter === "all"
-        ? lead.status !== "בוטלה"
-        : lead.status === statusFilter;
-    const matchesProject =
-      projectFilter === "all" || lead.project_name === projectFilter;
-    const matchesRep =
-      repFilter === "all" || String(lead.user_id) === repFilter;
-
-    return matchesSearch && matchesStatus && matchesProject && matchesRep;
-  });
-
-  const columns = [
-    { key: "lead_id", label: "מס׳ פנייה", export: (r) => r.lead_id },
-    {
-      key: "created_at",
-      label: "תאריך יצירה",
-      export: (r) =>
-        new Date(r.created_at).toLocaleString("he-IL", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-    },
-    { key: "phone_number", label: "טלפון", export: (r) => r.phone_number },
-    {
-      key: "full_name",
-      label: "שם לקוח",
-      export: (r) => `${r.first_name} ${r.last_name}`,
-    },
-    { key: "project_name", label: "פרויקט", export: (r) => r.project_name },
-    {
-      key: "rep",
-      label: "נציג מטפל",
-      export: (r) => {
-        const u = users.find((u) => u.user_id === r.user_id);
-        return u ? `${u.first_name} ${u.last_name}` : "ללא";
+  // הגדרת עמודות הדוח (MEMO לביצועים)
+  const columns = useMemo(() => {
+    const baseColumns = [
+      { key: "lead_id", label: "מזהה", export: (l) => String(l.lead_id) },
+      {
+        key: "created_at",
+        label: "תאריך יצירה",
+        export: (l) =>
+          new Date(l.created_at).toLocaleString("he-IL", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        type: "date",
       },
-    },
-    { key: "status", label: "סטטוס", export: (r) => r.status },
-  ];
-
-  const { user } = useUser();
-
-  return (
-    <>
-      <div className="p-4 text-right">
-        <header className="flex items-center justify-center py-0 my-0">
-          <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-2 text-center">
-            רשימת פניות
-          </h2>
-        </header>
-        {user.permission_add_lead === 1 && (
-          <div className="flex justify-start mb-2">
-            <div className="inline-flex">
-              <NavigationButton
-                linkTo="/dashboard/add_lead"
-                label="הוספת פנייה חדשה"
-              />
-            </div>
-          </div>
-        )}
-        <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 ">
+      {
+        key: "full_name",
+        label: "שם לקוח",
+        export: (l) => `${l.first_name || ""} ${l.last_name || ""}`,
+      },
+      { key: "phone_number", label: "טלפון", export: (l) => l.phone_number },
+      {
+        key: "project_name",
+        label: "פרויקט",
+        export: (l) => l.project_name,
+        filterable: true,
+      },
+      {
+        key: "user_id",
+        label: "נציג מטפל",
+        export: (l) => {
+          const rep = users.find((u) => u.user_id === l.user_id);
+          return rep ? `${rep.first_name} ${rep.last_name}` : "ללא";
+        },
+        render: (lead) => (
           <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-1 text-sm"
+            defaultValue={lead.user_id || ""}
+            onChange={(e) =>
+              setPopup({
+                show: true,
+                title: "אישור שינוי נציג",
+                message: `האם אתה בטוח שברצונך לשנות את הנציג המטפל של פנייה מספר ${lead.lead_id}?`,
+                mode: "confirm",
+                onConfirm: () => confirmChangeRep(lead.lead_id, e.target.value),
+              })
+            }
+            className="border border-gray-300 rounded px-2 py-1 text-sm"
           >
-            <option value="all">כל הפניות</option>
+            <option value="">ללא</option>
+            {users.map((u) => (
+              <option key={u.user_id} value={u.user_id}>
+                {u.first_name} {u.last_name}
+              </option>
+            ))}
+          </select>
+        ),
+      },
+      {
+        key: "status",
+        label: "סטטוס",
+        export: (l) => l.status,
+        render: (lead) => (
+          <select
+            defaultValue={lead.status}
+            onChange={(e) =>
+              setPopup({
+                show: true,
+                title: "אישור שינוי סטטוס",
+                message: `האם אתה בטוח שברצונך לעדכן את הסטטוס של פנייה מספר ${lead.lead_id}?`,
+                mode: "confirm",
+                onConfirm: () =>
+                  confirmChangeStatus(lead.lead_id, e.target.value),
+              })
+            }
+            className="border border-gray-300 rounded px-2 py-1 text-sm"
+          >
             <option value="חדש">חדש</option>
             <option value="בטיפול">בטיפול</option>
             <option value="טופל">טופל</option>
             <option value="בוטלה">בוטלה</option>
           </select>
+        ),
+      },
+    ];
 
-          <select
-            value={projectFilter}
-            onChange={(e) => setProjectFilter(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-1 text-sm"
-          >
-            <option value="all">כל הפרויקטים</option>
-            {projects.map((proj) => (
-              <option key={proj.project_id} value={proj.project_name}>
-                {proj.project_name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={repFilter}
-            onChange={(e) => setRepFilter(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-1 text-sm"
-          >
-            <option value="all">כל הנציגים</option>
-            <option value="null">ללא</option>
-            {users.map((user) => (
-              <option key={user.user_id} value={user.user_id}>
-                {user.first_name} {user.last_name}
-              </option>
-            ))}
-          </select>
-
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="🔍 חיפוש לפי טלפון או שם לקוח..."
-              className="border border-gray-300 rounded px-3 py-1 text-sm"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm("")}
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 text-red-500 cursor-pointer"
-              >
-                ✖
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-2 ml-auto">
-            <select
-              value={bulkUserId}
-              onChange={(e) => setBulkUserId(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-1 text-sm"
-            >
-              <option value="">בחר נציג לשיוך</option>
-              <option value="null">ללא</option>
-              {users.map((user) => (
-                <option key={user.user_id} value={user.user_id}>
-                  {user.first_name} {user.last_name}
-                </option>
-              ))}
-            </select>
-
+    baseColumns.push({
+      key: "actions",
+      label: "פעולות",
+      render: (l) => (
+        <div className="flex justify-center items-center gap-1">
+          {user?.permission_view_lead === 1 && (
             <button
-              onClick={handleBulkAssignConfirm}
-              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+              onClick={() => handleView(l.lead_id)}
+              className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
             >
-              שייך את הנבחרות ({selectedLeads.length})
+              <Icon icon="emojione-v1:eye" width="1.2rem" height="1.2rem" />
+              הצג
             </button>
-          </div>
-
-          {/* 🔹 שורת ייצוא / הדפסה / שליחה למייל */}
-          <ReportProvider
-            title="רשימת פניות"
-            columns={columns}
-            rows={filteredLeads}
-          >
-            <div className="flex items-center flex-wrap gap-4 ">
-              <ReportExport apiBase={api} />
-              <ReportEmail apiBase={api} />
-            </div>
-          </ReportProvider>
+          )}
+          {user?.permission_edit_lead === 1 && (
+            <button
+              onClick={() => handleEdit(l.lead_id)}
+              className="flex items-center gap-2 bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+            >
+              <Icon
+                icon="fluent-color:edit-32"
+                width="1.2rem"
+                height="1.2rem"
+              />
+              עריכה
+            </button>
+          )}
+          {user?.permission_delete_lead === 1 && l.status !== "בוטלה" && (
+            <button
+              onClick={() =>
+                setPopup({
+                  show: true,
+                  title: "אישור ביטול פנייה",
+                  message: `⚠️ האם אתה בטוח שברצונך לבטל פנייה מספר ${l.lead_id}?`,
+                  mode: "confirm",
+                  onConfirm: () => confirmDelete(l.lead_id),
+                })
+              }
+              className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+            >
+              <Icon
+                icon="streamline-color:recycle-bin-2-flat"
+                width="1.2em"
+                height="1.2em"
+              />
+              ביטול
+            </button>
+          )}
         </div>
-        <div className="overflow-auto rounded-lg shadow-lg bg-white/85 mt-4">
-          <table className="w-full table-auto border-collapse text-sm text-center">
-            <thead>
-              <tr className="bg-slate-100 text-gray-800">
-                <th className="p-2 border">✔️</th>
-                <th className="p-2 border">מס׳ פנייה</th>
-                <th className="p-2 border">תאריך יצירה</th>
-                <th className="p-2 border">טלפון</th>
-                <th className="p-2 border">שם לקוח</th>
-                <th className="p-2 border">פרויקט</th>
-                <th className="p-2 border">נציג מטפל</th>
-                <th className="p-2 border">סטטוס</th>
-                <th className="p-2 border">פעולות</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLeads.length === 0 ? (
-                <tr>
-                  <td colSpan="8" className="text-center text-red-500 p-4">
-                    אין פניות להצגה
-                  </td>
-                </tr>
-              ) : (
-                filteredLeads.map((lead) => (
-                  <tr
-                    key={lead.lead_id}
-                    className="hover:bg-blue-50 transition"
-                  >
-                    <td className="border p-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedLeads.includes(lead.lead_id)}
-                        onChange={() => handleSelectLead(lead.lead_id)}
-                      />
-                    </td>
-                    <td className="border p-2">{lead.lead_id}</td>
-                    <td className="border p-2">
-                      {new Date(lead.created_at).toLocaleDateString("he-IL", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        year: "numeric",
-                      })}{" "}
-                      -{" "}
-                      {new Date(lead.created_at).toLocaleTimeString("he-IL", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </td>
-                    <td className="border p-2">{lead.phone_number}</td>
-                    <td className="border p-2">
-                      {lead.first_name} {lead.last_name}
-                    </td>
-                    <td className="border p-2">{lead.project_name}</td>
-                    <td className="border p-2">
-                      <select
-                        value={lead.selectedRepId}
-                        onChange={(e) =>
-                          handleRepSelect(lead.lead_id, e.target.value)
-                        }
-                        className="border border-gray-300 rounded px-2 py-1 text-sm"
-                      >
-                        <option value="">ללא</option>
-                        {users.map((user) => (
-                          <option key={user.user_id} value={user.user_id}>
-                            {user.first_name} {user.last_name}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="border p-2">
-                      <select
-                        value={lead.selectedStatus}
-                        onChange={(e) =>
-                          handleStatusSelect(lead.lead_id, e.target.value)
-                        }
-                        className="border border-gray-300 rounded px-2 py-1 text-sm"
-                      >
-                        <option value="חדש">חדש</option>
-                        <option value="בטיפול">בטיפול</option>
-                        <option value="טופל">טופל</option>
-                        <option value="בוטלה">בוטלה</option>
-                      </select>
-                    </td>
-                    <td className="border p-2 text-center">
-                      <button
-                        onClick={() =>
-                          navigate(`/dashboard/details_lead/${lead.lead_id}`)
-                        }
-                        className="bg-blue-500 text-white mx-1 px-2 py-1 rounded hover:bg-blue-600"
-                      >
-                        הצג פנייה
-                      </button>
-                      <button
-                        onClick={() =>
-                          navigate(`/dashboard/edit_lead/${lead.lead_id}`)
-                        }
-                        className="bg-yellow-500 text-white mx-1 px-2 py-1 rounded hover:bg-yellow-600"
-                      >
-                        עריכה
-                      </button>
-                      {lead.status !== "בוטלה" && (
-                        <DeleteButton
-                          onClick={() => setLeadToDelete(lead.lead_id)}
-                        />
-                      )}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+      ),
+    });
 
-        {/* פופאפ שינוי נציג */}
-        {repToSave && (
-          <Popup
-            title="אישור שינוי נציג"
-            message="האם אתה בטוח שברצונך לשנות את הנציג המטפל?"
-            mode="confirm"
-            onConfirm={() => handleRepSave(repToSave, newRepId)}
-            onClose={() => {
-              setRepToSave(null);
-              setNewRepId(null);
-            }}
-          />
-        )}
+    return baseColumns;
+  }, [users, user]);
 
-        {/* פופאפ שינוי סטטוס */}
-        {statusToSave && (
-          <Popup
-            title="אישור שינוי סטטוס"
-            message="האם אתה בטוח שברצונך לעדכן את סטטוס הפנייה?"
-            mode="confirm"
-            onConfirm={() => handleStatusSave(statusToSave, newStatusValue)}
-            onClose={() => {
-              setStatusToSave(null);
-              setNewStatusValue(null);
-            }}
-          />
-        )}
+  // הגדרת פילטרים
+  const filtersDef = useMemo(() => {
+    const projectOptions = projects.map((proj) => ({
+      value: proj.project_name,
+      label: proj.project_name,
+    }));
+    const repOptions = users.map((u) => ({
+      value: u.user_id,
+      label: `${u.first_name} ${u.last_name}`,
+    }));
 
-        {/* פופאפ מחיקה */}
-        {leadToDelete && (
-          <Popup
-            title="אישור מחיקה"
-            message="האם אתה בטוח שברצונך למחוק פנייה זו?"
-            mode="confirm"
-            onConfirm={handleDelete}
-            onClose={() => setLeadToDelete(null)}
-          />
-        )}
+    return [
+      {
+        name: "status",
+        label: "סטטוס",
+        type: "select",
+        options: [
+          { value: "all", label: "כל הפניות" },
+          { value: "חדש", label: "חדש" },
+          { value: "בטיפול", label: "בטיפול" },
+          { value: "טופל", label: "טופל" },
+        ],
+      },
+      {
+        name: "project_name",
+        label: "פרויקט",
+        type: "select",
+        options: [{ value: "all", label: "כל הפרויקטים" }, ...projectOptions],
+      },
+      {
+        name: "user_id",
+        label: "נציג מטפל",
+        type: "select",
+        options: [
+          { value: "all", label: "כל הנציגים" },
+          { value: "null", label: "ללא" },
+          ...repOptions,
+        ],
+      },
+    ];
+  }, [users, projects]);
 
-        {/* פופאפ אישור Bulk */}
-        {bulkAssignConfirm && (
-          <Popup
-            title="אישור שיוך מרובה"
-            message={`האם אתה בטוח שברצונך לשייך ${selectedLeads.length} פניות?`}
-            mode="confirm"
-            onConfirm={handleBulkAssign}
-            onClose={() => setBulkAssignConfirm(false)}
-          />
-        )}
+  const defaultFilters = { status: "all", project_name: "all", user_id: "all" };
 
-        {/* פופאפ רגיל */}
-        {popupData && (
-          <Popup
-            title={popupData.title}
-            message={popupData.message}
-            mode={popupData.mode}
-            onClose={handleClosePopup}
-          />
-        )}
-      </div>
-    </>
+  return (
+    <div className="flex flex-col flex-1 p-6 text-right">
+      {loading ? (
+        <div className="text-center text-gray-600">טוען נתונים...</div>
+      ) : (
+        <ReportView
+          title="רשימת פניות"
+          columns={columns}
+          rows={allLeads}
+          filtersDef={filtersDef}
+          searchableKeys={["full_name", "phone_number"]}
+          pageSize={25}
+          emailApiBase={process.env.REACT_APP_API_URL}
+          addButton={
+            user?.permission_add_lead === 1 && (
+              <NavigationButton
+                linkTo="/dashboard/add_lead"
+                label="הוספת פנייה חדשה"
+              />
+            )
+          }
+          defaultFilters={defaultFilters}
+          searchPlaceholder="שם לקוח או טלפון..."
+          showBulkAssign={user?.permission_assign_lead === 1}
+          bulkAssignOptions={{
+            title: "שיוך מרובה",
+            label: "שייך נבחרות",
+            selectPlaceholder: "בחר נציג לשיוך",
+            options: [
+              { value: "", label: "בחר נציג לשיוך" },
+              { value: "null", label: "ללא" },
+              ...users.map((u) => ({
+                value: String(u.user_id),
+                label: `${u.first_name} ${u.last_name}`,
+              })),
+            ],
+            onBulkAssign: (leadIds, userId) =>
+              setPopup({
+                show: true,
+                title: "אישור שיוך מרובה",
+                message: `האם אתה בטוח שברצונך לשייך ${leadIds.length} פניות?`,
+                mode: "confirm",
+                onConfirm: () => confirmBulkAssign(leadIds, userId),
+              }),
+          }}
+        />
+      )}
+
+      {popup.show && (
+        <Popup
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
+          onClose={() =>
+            setPopup({ show: false, title: "", message: "", mode: "" })
+          }
+          onConfirm={popup.mode === "confirm" ? popup.onConfirm : undefined}
+        />
+      )}
+    </div>
   );
-};
-
-export default Leads;
+}
