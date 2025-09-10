@@ -227,11 +227,17 @@ export default function Tasks() {
         return u ? `${u.first_name} ${u.last_name}` : "ללא";
       },
     },
-    {
+  ];
+  if (
+    user?.permission_view_task === 1 ||
+    user?.permission_edit_task === 1 ||
+    user?.permission_delete_task === 1
+  ) {
+    columns.push({
       key: "actions",
       label: "פעולות",
       render: (r) => (
-        <div className="flex items-center gap-1">
+        <div className="flex justify-center gap-1">
           {user?.permission_view_task === 1 && (
             <button
               onClick={() => navigate(`/dashboard/details_task/${r.task_id}`)}
@@ -262,16 +268,16 @@ export default function Tasks() {
         </div>
       ),
       export: () => null,
-    },
-  ];
+    });
+  }
 
   const filtersDef = [
     {
       name: "status",
       label: "סטטוס",
-      type: "select",
+      type: "multiselect",
       options: [
-        { value: "", label: "כל הסטטוסים" },
+        { value: "", label: "בחר סטטוס" },
         { value: "חדש", label: "חדש" },
         { value: "בתהליך", label: "בתהליך" },
         { value: "הושלם", label: "הושלם" },
