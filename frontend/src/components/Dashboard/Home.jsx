@@ -134,7 +134,7 @@ const Home = () => {
   return (
     <div className="flex-col flex-grow p-6 font-rubik text-right space-y-6">
       {/*החתמה (כניסה/יציאה) */}
-      {user?.permission_check_in_out && renderAttendanceButtons()}
+      {user?.permission_check_in_out === 1 && renderAttendanceButtons()}
 
       {/* פס התראות */}
       {(user?.admin_alert_dash === 1 || user?.user_alert_dash === 1) && (
