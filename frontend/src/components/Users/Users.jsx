@@ -1,14 +1,28 @@
-import axios from "axios";
+// frontend/src/pages/Users/Users.jsx
+
+/**
+ * קומפוננטה: Users
+ * ----------------
+ * מטרות:
+ * 1. מציגה רשימת משתמשים , פעילים ולא פעילים .
+ * 2. אפשרויות :
+ *    -   עריכה.
+ *    -  מחיקה (מחיקה לוגית).
+ *    -  הוספה .
+ */
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Popup, useUser } from "components/Tools";
 import { Icon } from "@iconify/react";
+import { Popup, useUser } from "components/Tools";
 import { NavigationButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
+import { api, extractApiError } from "utils";
 
-const api = process.env.REACT_APP_API_URL;
+// עזר לבדוק אם סטטוס פעיל
 const isActive = (v) => v === true || v === 1 || v === "1";
 
+// הצגת סטטוס עם צבעים
 const renderCheckActive = (v) => (
   <span className={v ? "text-green-600" : "text-red-500"}>
     {v ? "פעיל" : "לא פעיל"}
@@ -25,6 +39,7 @@ export default function Users() {
     mode: "",
     user_id: null,
   });
+
   const navigate = useNavigate();
   const { user } = useUser();
 
@@ -32,63 +47,63 @@ export default function Users() {
     fetchUsers();
   }, []);
 
+  // שליפת משתמשים פעילים ולא פעילים
   const fetchUsers = () => {
     setLoading(true);
-    Promise.all([
-      axios.get(`${api}/users/active`, { withCredentials: true }),
-      axios.get(`${api}/users/inactive`, { withCredentials: true }),
-    ])
+    Promise.all([api.get("/users/active"), api.get("/users/inactive")])
       .then(([activeRes, inactiveRes]) => {
         const active = (activeRes?.data?.data || []).map((u) => ({
           ...u,
           active: isActive(u.active),
-          status_human: isActive(u.active) ? "פעיל" : "לא פעיל",
+          status_human: "פעיל",
         }));
         const inactive = (inactiveRes?.data?.data || []).map((u) => ({
           ...u,
           active: isActive(u.active),
-          status_human: isActive(u.active) ? "פעיל" : "לא פעיל",
+          status_human: "לא פעיל",
         }));
         setAllUsers([...active, ...inactive]);
       })
-      .catch(() =>
+      .catch((err) =>
         setPopup({
           show: true,
           title: "שגיאה",
-          message: "שגיאה בטעינת עובדים",
+          message: extractApiError(err, "שגיאה בטעינת עובדים"),
           mode: "error",
         })
       )
       .finally(() => setLoading(false));
   };
 
-  const handleEdit = (user_id) => navigate(`/dashboard/users/edit/${user_id}`);
+  // עריכת משתמש
+  const handleEdit = (user_id) => {
+    navigate(`/dashboard/users/edit/${user_id}`);
+  };
+
+  // סימון משתמש כלא פעיל
   const confirmDelete = (user_id) => {
-    axios
-      .put(
-        `${api}/users/delete/${user_id}`,
-        { active: 0 },
-        { withCredentials: true }
-      )
+    api
+      .put(`/users/delete/${user_id}`, { active: 0 })
       .then(() => {
         setPopup({
           show: true,
           title: "הצלחה",
-          message: "✅ המשתמש סומן כלא פעיל",
+          message: "המשתמש סומן כלא פעיל",
           mode: "success",
         });
         fetchUsers();
       })
-      .catch(() =>
+      .catch((err) =>
         setPopup({
           show: true,
           title: "שגיאה",
-          message: "אירעה שגיאה במחיקה",
+          message: extractApiError(err, "אירעה שגיאה במחיקה"),
           mode: "error",
         })
       );
   };
 
+  // עמודות הדוח
   const columns = [
     { key: "user_id", label: "ת.ז", export: (u) => String(u.user_id) },
     { key: "first_name", label: "שם פרטי", export: (u) => u.first_name },
@@ -99,32 +114,38 @@ export default function Users() {
       key: "active",
       label: "סטטוס",
       render: (u) => renderCheckActive(u.active),
-      export: (u) => u.status_human, // ✅ תיקון כאן
+      export: (u) => u.status_human,
     },
-    {
+  ];
+
+  // עמודת פעולות לפי הרשאות
+  if (user?.permission_edit_user === 1 || user?.permission_delete_user === 1) {
+    columns.push({
       key: "actions",
       label: "פעולות",
       render: (u) => (
         <div className="flex justify-center">
           <div className="flex items-center gap-1 text-center">
-            <button
-              onClick={() => handleEdit(u.user_id)}
-              className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
-            >
-              <Icon
-                icon="fluent-color:edit-32"
-                width="1.2rem"
-                height="1.2rem"
-              />{" "}
-              עריכה
-            </button>
-            {user?.permission_delete_role === 1 && u.active && (
+            {user?.permission_edit_user === 1 && (
+              <button
+                onClick={() => handleEdit(u.user_id)}
+                className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+              >
+                <Icon
+                  icon="fluent-color:edit-32"
+                  width="1.2rem"
+                  height="1.2rem"
+                />
+                עריכה
+              </button>
+            )}
+            {user?.permission_delete_user === 1 && u.active && (
               <button
                 onClick={() =>
                   setPopup({
                     show: true,
                     title: "אישור מחיקה",
-                    message: "⚠️ להפוך את המשתמש ללא פעיל?",
+                    message: "להפוך את המשתמש ללא פעיל ?",
                     mode: "confirm",
                     user_id: u.user_id,
                   })
@@ -143,9 +164,10 @@ export default function Users() {
         </div>
       ),
       export: () => null,
-    },
-  ];
+    });
+  }
 
+  // הגדרת פילטרים
   const filtersDef = [
     {
       name: "active",
@@ -161,7 +183,7 @@ export default function Users() {
       name: "role_id",
       label: "תפקיד",
       type: "select",
-      dynamic: true, // 🟢 יבנה לפי filteredRows
+      dynamic: true,
       optionLabelKey: "role_name",
     },
   ];
@@ -180,12 +202,14 @@ export default function Users() {
           filtersDef={filtersDef}
           searchableKeys={["first_name", "last_name", "email", "role_name"]}
           pageSize={25}
-          emailApiBase={api}
+          emailApiBase={process.env.REACT_APP_API_URL}
           addButton={
-            <NavigationButton
-              linkTo="/dashboard/add_user"
-              label="הוספת עובד חדש"
-            />
+            user?.permission_add_user === 1 && (
+              <NavigationButton
+                linkTo="/dashboard/add_user"
+                label="הוספת עובד חדש"
+              />
+            )
           }
           defaultFilters={defaultFilters}
           searchPlaceholder="חיפוש לפי שם או אימייל..."

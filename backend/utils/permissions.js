@@ -19,8 +19,6 @@ export const roleFields = [
   "permission_add_user",
   "permission_edit_user",
   "permission_delete_user",
-  // דוחות
-  "reports_page_access",
   // נוכחות ושעות עבודה
   "attendance_page_access",
   "permission_check_in_out",
@@ -50,7 +48,7 @@ export const roleFields = [
 ];
 
 // SELECT SQL פונקציה : מייצרת
-// SQL לשימוש ב SELECT יוצר מחרוזת 
+// SQL לשימוש ב SELECT יוצר מחרוזת
 export const roleFieldsSQL = roleFields.join(", ");
 
 // פונקציה : אובייקט עם כל ההרשאות מאותחל ל-0

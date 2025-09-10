@@ -8,8 +8,8 @@
  */
 
 export const permissionsSchema = {
-  דשבורד: [
-    { key: "dashboard_access", label: "גישה ל-דשבורד" },
+  "לוח בקרה": [
+    { key: "dashboard_access", label: "גישה ללוח בקרה" },
     { key: "admin_alert_dash", label: "התראות מנהל" },
     { key: "user_alert_dash", label: "התראות משתמש" },
     { key: "admin_status_dash", label: "סטטוסים מנהל" },

@@ -1,15 +1,29 @@
-import axios from "axios";
+// frontend/src/pages/Users/AddUser.jsx
+
+/**
+ * קומפוננטה: AddUser
+ * ------------------
+ * מטרות:
+ * - מאפשרת הוספת עובד חדש.
+ * - טוענת תפקידים פעילים ומציגה בטופס.
+ * - שומרת את העובד במסד באמצעות API.
+ * - מציגה Popup במצב הצלחה/שגיאה.
+ *
+ * הרשאות:
+ * - רק המשתמשים עם permission_add_user יראו את כפתור ההוספה.
+ */
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
-import { Popup } from "components/Tools";
+import { Popup, useUser } from "components/Tools";
+import { api, extractApiError } from "utils";
 
-const api = process.env.REACT_APP_API_URL;
-
-const AddUser = () => {
+export default function AddUser() {
   const navigate = useNavigate();
+  const { user: currentUser } = useUser();
 
-  const [user, setUser] = useState({
+  const [newUser, setNewUser] = useState({
     user_id: "",
     first_name: "",
     last_name: "",
@@ -22,9 +36,7 @@ const AddUser = () => {
   });
 
   const [roles, setRoles] = useState([]);
-
-  // ✅ סטייט לפופאפ
-  const [popupData, setPopupData] = useState({
+  const [popup, setPopup] = useState({
     show: false,
     title: "",
     message: "",
@@ -36,27 +48,16 @@ const AddUser = () => {
   }, []);
 
   const fetchRoles = () => {
-    axios
-      .get(`${api}/roles/active`, { withCredentials: true })
+    api
+      .get("/roles/active")
       .then((res) => {
-        // ✅ עדכון לפי ה־API שלך
-        if (res.data.success && Array.isArray(res.data.data)) {
-          setRoles(res.data.data);
-        } else {
-          setPopupData({
-            show: true,
-            title: "שגיאה",
-            message: "לא התקבלה רשימת תפקידים",
-            mode: "error",
-          });
-        }
+        setRoles(res.data?.data || []);
       })
       .catch((err) => {
-        console.error("שגיאה בטעינת תפקידים:", err);
-        setPopupData({
+        setPopup({
           show: true,
           title: "שגיאה",
-          message: "שגיאה בטעינת רשימת התפקידים",
+          message: extractApiError(err, "שגיאה בטעינת רשימת התפקידים"),
           mode: "error",
         });
       });
@@ -76,8 +77,8 @@ const AddUser = () => {
     ];
 
     for (let field of requiredFields) {
-      if (!user[field]) {
-        return setPopupData({
+      if (!newUser[field]) {
+        return setPopup({
           show: true,
           title: "שגיאה",
           message: `שדה חובה חסר: ${field}`,
@@ -86,31 +87,21 @@ const AddUser = () => {
       }
     }
 
-    axios
-      .post(`${api}/users/add`, user, { withCredentials: true })
-      .then((res) => {
-        if (res.data.success) {
-          setPopupData({
-            show: true,
-            title: "הצלחה",
-            message: res.data.message || "המשתמש נוסף בהצלחה",
-            mode: "success",
-          });
-        } else {
-          setPopupData({
-            show: true,
-            title: "שגיאה",
-            message: res.data.message || "שגיאה בהוספת המשתמש",
-            mode: "error",
-          });
-        }
+    api
+      .post("/users/add", newUser)
+      .then(() => {
+        setPopup({
+          show: true,
+          title: "הצלחה",
+          message: "המשתמש נוסף בהצלחה",
+          mode: "success",
+        });
       })
       .catch((err) => {
-        console.error("שגיאה בהוספת משתמש:", err);
-        setPopupData({
+        setPopup({
           show: true,
           title: "שגיאה",
-          message: "שגיאת שרת - נסה שוב מאוחר יותר.",
+          message: extractApiError(err, "שגיאה בהוספת המשתמש"),
           mode: "error",
         });
       });
@@ -118,7 +109,7 @@ const AddUser = () => {
 
   const handleUserIdChange = (e) => {
     const numericValue = e.target.value.replace(/[^0-9]/g, "");
-    setUser({ ...user, user_id: numericValue });
+    setNewUser({ ...newUser, user_id: numericValue });
   };
 
   return (
@@ -131,7 +122,7 @@ const AddUser = () => {
           הוספת עובד חדש
         </h2>
 
-        {/* תעודת זהות */}
+        {/* ת.ז */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">
             תעודת זהות
@@ -139,13 +130,12 @@ const AddUser = () => {
           <input
             type="text"
             required
-            inputMode="numeric"
-            name="user_id"
             maxLength={9}
-            placeholder="הקלד תעודת זהות"
+            inputMode="numeric"
+            value={newUser.user_id}
             onChange={handleUserIdChange}
-            value={user.user_id}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            placeholder="הקלד תעודת זהות"
           />
         </div>
 
@@ -155,10 +145,11 @@ const AddUser = () => {
           <input
             type="text"
             required
-            name="first_name"
-            placeholder="הקלד שם פרטי"
-            onChange={(e) => setUser({ ...user, first_name: e.target.value })}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            value={newUser.first_name}
+            onChange={(e) =>
+              setNewUser({ ...newUser, first_name: e.target.value })
+            }
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
@@ -169,26 +160,28 @@ const AddUser = () => {
           </label>
           <input
             type="text"
-            name="last_name"
             required
-            placeholder="הקלד שם משפחה"
-            onChange={(e) => setUser({ ...user, last_name: e.target.value })}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            value={newUser.last_name}
+            onChange={(e) =>
+              setNewUser({ ...newUser, last_name: e.target.value })
+            }
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
-        {/* מספר טלפון */}
+        {/* טלפון */}
         <div>
           <label className="font-rubik block mb-0.5 font-medium">
             מספר טלפון
           </label>
           <input
             type="text"
-            name="phone_number"
             required
-            placeholder="הקלד מספר טלפון"
-            onChange={(e) => setUser({ ...user, phone_number: e.target.value })}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            value={newUser.phone_number}
+            onChange={(e) =>
+              setNewUser({ ...newUser, phone_number: e.target.value })
+            }
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
@@ -197,11 +190,10 @@ const AddUser = () => {
           <label className="font-rubik block mb-0.5 font-medium">אימייל</label>
           <input
             type="email"
-            name="email"
             required
-            placeholder="הקלד דואר אלקטרוני"
-            onChange={(e) => setUser({ ...user, email: e.target.value })}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            value={newUser.email}
+            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
@@ -209,10 +201,12 @@ const AddUser = () => {
         <div>
           <label className="font-rubik block mb-0.5 font-medium">תפקיד</label>
           <select
-            name="role_id"
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
-            value={user.role_id}
-            onChange={(e) => setUser({ ...user, role_id: e.target.value })}
+            required
+            value={newUser.role_id}
+            onChange={(e) =>
+              setNewUser({ ...newUser, role_id: e.target.value })
+            }
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 bg-white"
           >
             <option value="">בחר תפקיד</option>
             {roles.map((role) => (
@@ -228,11 +222,12 @@ const AddUser = () => {
           <label className="font-rubik block mb-0.5 font-medium">סיסמה</label>
           <input
             type="password"
-            name="password"
             required
-            placeholder="הקלד סיסמה"
-            onChange={(e) => setUser({ ...user, password: e.target.value })}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
+            value={newUser.password}
+            onChange={(e) =>
+              setNewUser({ ...newUser, password: e.target.value })
+            }
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
           />
         </div>
 
@@ -240,29 +235,30 @@ const AddUser = () => {
         <div>
           <label className="font-rubik block mb-0.5 font-medium">הערות</label>
           <textarea
-            name="notes"
-            placeholder="הוספת הערות..."
-            onChange={(e) => setUser({ ...user, notes: e.target.value })}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-400"
-            rows="2"
-          ></textarea>
+            value={newUser.notes}
+            onChange={(e) => setNewUser({ ...newUser, notes: e.target.value })}
+            rows={2}
+            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+          />
         </div>
 
+        {/* כפתורים */}
         <div className="flex justify-around pt-4">
-          <AddSaveButton label="הוסף עובד" type="submit" />
+          {currentUser?.permission_add_user === 1 && (
+            <AddSaveButton label="הוסף עובד" type="submit" />
+          )}
           <ExitButton label="ביטול" linkTo="/dashboard/users" />
         </div>
       </form>
 
-      {/* ✅ חלון פופאפ */}
-      {popupData.show && (
+      {popup.show && (
         <Popup
-          title={popupData.title}
-          message={popupData.message}
-          mode={popupData.mode}
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
           onClose={() => {
-            setPopupData({ show: false, title: "", message: "", mode: "info" });
-            if (popupData.mode === "success") {
+            setPopup({ show: false, title: "", message: "", mode: "info" });
+            if (popup.mode === "success") {
               navigate("/dashboard/users");
             }
           }}
@@ -270,6 +266,4 @@ const AddUser = () => {
       )}
     </div>
   );
-};
-
-export default AddUser;
+}
