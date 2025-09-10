@@ -257,7 +257,7 @@ export default function Leads() {
                 עריכה
               </button>
             )}
-            {user?.permission_delete_lead && r.active && (
+            {user?.permission_delete_lead === 1 && r.active && (
               <button
                 onClick={() => setLeadToDelete(r.lead_id)}
                 className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
