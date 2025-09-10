@@ -1,13 +1,27 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+// frontend/src/pages/Attendance/AddAttendance.jsx
+
+/**
+ * קומפוננטה: AddAttendance
+ * ------------------------
+ * מטרות:
+ * - הוספת רישום נוכחות ידני
+ * - טוענת עובדים פעילים
+ * - טיפול בשעות כניסה/יציאה לפי סטטוס
+ * - API שמירה לשרת דרך
+ *
+ * הרשאות:
+ * - נדרשת הרשאה permission_add_attendance
+ */
+
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
-import { Popup } from "components/Tools";
+import { Popup, useUser } from "components/Tools";
+import { api, extractApiError } from "utils";
 
-const api = process.env.REACT_APP_API_URL;
-
-const AddAttendance = () => {
+export default function AddAttendance() {
   const navigate = useNavigate();
+  const { user: currentUser } = useUser();
 
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({
@@ -19,7 +33,7 @@ const AddAttendance = () => {
     notes: "",
   });
 
-  const [popupData, setPopupData] = useState({
+  const [popup, setPopup] = useState({
     show: false,
     title: "",
     message: "",
@@ -29,31 +43,25 @@ const AddAttendance = () => {
   const specialStatuses = ["חופשה", "מחלה", "היעדרות"];
   const isSpecialStatus = specialStatuses.includes(form.status);
 
-  // ✅ טעינת עובדים פעילים בלבד
   useEffect(() => {
-    axios
-      .get(`${api}/users/active`, { withCredentials: true })
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = () => {
+    api
+      .get("/users/active")
       .then((res) => {
-        if (res.data.success) {
-          setUsers(res.data.data || []);
-        } else {
-          setPopupData({
-            show: true,
-            title: "שגיאה",
-            message: res.data.Error || "שגיאה בטעינת עובדים",
-            mode: "error",
-          });
-        }
+        setUsers(res.data?.data || []);
       })
-      .catch(() =>
-        setPopupData({
+      .catch((err) => {
+        setPopup({
           show: true,
           title: "שגיאה",
-          message: "שגיאה בעת טעינת העובדים",
+          message: extractApiError(err, "שגיאה בטעינת עובדים"),
           mode: "error",
-        })
-      );
-  }, []);
+        });
+      });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -69,22 +77,20 @@ const AddAttendance = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // ✅ בדיקות חובה
-    const requiredFields = ["user_id", "date", "status"];
-    for (let field of requiredFields) {
+    const required = ["user_id", "date", "status"];
+    for (let field of required) {
       if (!form[field]) {
-        setPopupData({
+        return setPopup({
           show: true,
           title: "שגיאה",
           message: `שדה חובה חסר: ${field}`,
           mode: "error",
         });
-        return;
       }
     }
 
     if (!isSpecialStatus && (!form.check_in || !form.check_out)) {
-      return setPopupData({
+      return setPopup({
         show: true,
         title: "שגיאה",
         message: "יש להזין שעת כניסה ויציאה",
@@ -92,44 +98,43 @@ const AddAttendance = () => {
       });
     }
 
-    // ✅ פופאפ אישור
-    setPopupData({
+    setPopup({
       show: true,
-      title: "אישור הוספת נוכחות",
-      message: "האם אתה בטוח שברצונך להוסיף רישום נוכחות?",
+      title: "אישור הוספה",
+      message: "להוסיף את רישום הנוכחות?",
       mode: "confirm",
     });
   };
 
   const confirmAdd = () => {
-    axios
-      .post(`${api}/attendance/add`, form, { withCredentials: true })
-      .then((res) => {
-        if (res.data.success) {
-          setPopupData({
-            show: true,
-            title: "הצלחה",
-            message: res.data.message || "הנוכחות נוספה בהצלחה",
-            mode: "success",
-          });
-        } else {
-          setPopupData({
-            show: true,
-            title: "שגיאה",
-            message: res.data.message || "שגיאה בשמירה",
-            mode: "error",
-          });
-        }
+    api
+      .post("/attendance/add", form)
+      .then(() => {
+        setPopup({
+          show: true,
+          title: "הצלחה",
+          message: "✅ רישום הנוכחות נשמר",
+          mode: "success",
+        });
       })
-      .catch(() =>
-        setPopupData({
+      .catch((err) => {
+        setPopup({
           show: true,
           title: "שגיאה",
-          message: "אירעה שגיאה בשמירה",
+          message: extractApiError(err, "שגיאה בשמירה"),
           mode: "error",
-        })
-      );
+        });
+      });
   };
+
+  //  חסימת קומפוננטה אם אין הרשאה
+  if (currentUser?.permission_add_attendance !== 1) {
+    return (
+      <div className="text-center text-red-600 font-semibold mt-10">
+        אין לך הרשאה להוספת רישומי נוכחות
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-center pt-10">
@@ -141,11 +146,9 @@ const AddAttendance = () => {
           הוספת רישום נוכחות
         </h2>
 
-        {/* בחירת עובד */}
+        {/* עובד */}
         <div>
-          <label className="font-rubik block mb-0.5 font-medium">
-            בחר עובד
-          </label>
+          <label className="font-rubik block mb-0.5 font-medium">עובד</label>
           <select
             name="user_id"
             value={form.user_id}
@@ -153,9 +156,9 @@ const AddAttendance = () => {
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
           >
             <option value="">-- בחר עובד --</option>
-            {users.map((user) => (
-              <option key={user.user_id} value={user.user_id}>
-                {user.first_name} {user.last_name}
+            {users.map((u) => (
+              <option key={u.user_id} value={u.user_id}>
+                {u.first_name} {u.last_name}
               </option>
             ))}
           </select>
@@ -190,7 +193,7 @@ const AddAttendance = () => {
           </select>
         </div>
 
-        {/* שעות נוכחות – יוצגו רק אם לא חופשה/מחלה/היעדרות */}
+        {/* שעות – רק אם סטטוס רגיל */}
         {!isSpecialStatus && (
           <>
             <div>
@@ -229,8 +232,8 @@ const AddAttendance = () => {
             value={form.notes}
             onChange={handleChange}
             rows="2"
+            placeholder="הזן הערה (לא חובה)..."
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 resize-none"
-            placeholder="הזן הערה (אופציונלי)..."
           />
         </div>
 
@@ -242,27 +245,20 @@ const AddAttendance = () => {
       </form>
 
       {/* פופאפ */}
-      {popupData.show && (
+      {popup.show && (
         <Popup
-          title={popupData.title}
-          message={popupData.message}
-          mode={popupData.mode}
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
           onClose={() => {
-            setPopupData({
-              show: false,
-              title: "",
-              message: "",
-              mode: "info",
-            });
-            if (popupData.mode === "success") {
+            setPopup({ show: false, title: "", message: "", mode: "info" });
+            if (popup.mode === "success") {
               navigate("/dashboard/attendance");
             }
           }}
-          onConfirm={popupData.mode === "confirm" ? confirmAdd : undefined}
+          onConfirm={popup.mode === "confirm" ? confirmAdd : undefined}
         />
       )}
     </div>
   );
-};
-
-export default AddAttendance;
+}

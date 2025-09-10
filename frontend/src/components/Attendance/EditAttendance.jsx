@@ -1,14 +1,27 @@
+// frontend/src/pages/Attendance/EditAttendance.jsx
+
+/**
+ * קומפוננטה: EditAttendance
+ * -------------------------
+ * מטרות:
+ * - עריכת רישום נוכחות
+ * - טוענת נתוני עובדים ונוכחות
+ * - שמירה לאחר אישור
+ *
+ * הרשאות:
+ * - permission_edit_attendance
+ */
+
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
-import { Popup } from "components/Tools";
+import { Popup, useUser } from "components/Tools";
+import { api, extractApiError } from "utils";
 
-const api = process.env.REACT_APP_API_URL;
-
-const EditAttendance = () => {
+export default function EditAttendance() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser } = useUser();
 
   const [users, setUsers] = useState([]);
   const [form, setForm] = useState({
@@ -24,10 +37,8 @@ const EditAttendance = () => {
     show: false,
     title: "",
     message: "",
-    type: "",
+    mode: "info",
   });
-
-  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
 
   const specialStatuses = ["חופשה", "מחלה", "היעדרות"];
   const isSpecialStatus = specialStatuses.includes(form.status);
@@ -37,71 +48,57 @@ const EditAttendance = () => {
     fetchAttendance();
   }, [id]);
 
-  // ✅ שליפת משתמשים פעילים + לא פעילים
   const fetchUsers = () => {
-    Promise.all([
-      axios.get(`${api}/users/active`, { withCredentials: true }),
-      axios.get(`${api}/users/inactive`, { withCredentials: true }),
-    ])
+    Promise.all([api.get("/users/active"), api.get("/users/inactive")])
       .then(([activeRes, inactiveRes]) => {
-        const active = (activeRes.data.data || []).map((user) => ({
-          ...user,
+        const active = (activeRes.data.data || []).map((u) => ({
+          ...u,
           active: true,
         }));
-        const inactive = (inactiveRes.data.data || []).map((user) => ({
-          ...user,
+        const inactive = (inactiveRes.data.data || []).map((u) => ({
+          ...u,
           active: false,
         }));
         setUsers([...active, ...inactive]);
       })
       .catch((err) => {
-        console.error("שגיאה בטעינת משתמשים:", err);
         setPopup({
           show: true,
           title: "שגיאה",
-          message: "שגיאה בטעינת המשתמשים",
-          type: "error",
+          message: extractApiError(err, "שגיאה בטעינת עובדים"),
+          mode: "error",
         });
       });
   };
 
-  //  שליפת נתוני נוכחות קיימת
   const fetchAttendance = () => {
-    axios
-      .get(`${api}/attendance/${id}`, { withCredentials: true })
+    api
+      .get(`/attendance/${id}`)
       .then((res) => {
-        if (res.data.success) {
-          const attendance = res.data.data;
-          const formattedDate = attendance.date?.split("T")[0] || "";
-          setForm({
-            user_id: attendance.user_id,
-            date: formattedDate,
-            check_in: attendance.check_in || "",
-            check_out: attendance.check_out || "",
-            status: attendance.status,
-            notes: attendance.notes || "",
-          });
-        } else {
-          setPopup({
-            show: true,
-            title: "שגיאה",
-            message: res.data.Error || "לא נמצאה רשומה",
-            type: "error",
-          });
-        }
+        const data = res.data?.data;
+        if (!data) throw new Error("לא נמצאה רשומה");
+
+        const formattedDate = data.date?.split("T")[0] || "";
+
+        setForm({
+          user_id: data.user_id,
+          date: formattedDate,
+          check_in: data.check_in || "",
+          check_out: data.check_out || "",
+          status: data.status,
+          notes: data.notes || "",
+        });
       })
       .catch((err) => {
-        console.error("שגיאה בטעינת נוכחות:", err);
         setPopup({
           show: true,
           title: "שגיאה",
-          message: "שגיאה בטעינת פרטי הנוכחות",
-          type: "error",
+          message: extractApiError(err, "שגיאה בטעינת רישום הנוכחות"),
+          mode: "error",
         });
       });
   };
 
-  // ✅ שינוי ערכים
   const handleChange = (e) => {
     const { name, value } = e.target;
     const updated = { ...form, [name]: value };
@@ -114,7 +111,6 @@ const EditAttendance = () => {
     setForm(updated);
   };
 
-  // ✅ שליחה עם בדיקות
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -123,7 +119,7 @@ const EditAttendance = () => {
         show: true,
         title: "שגיאה",
         message: "נא למלא את כל שדות החובה",
-        type: "error",
+        mode: "error",
       });
     }
 
@@ -132,45 +128,53 @@ const EditAttendance = () => {
         show: true,
         title: "שגיאה",
         message: "יש להזין שעת כניסה ויציאה",
-        type: "error",
+        mode: "error",
       });
     }
 
-    setShowConfirmPopup(true);
+    setPopup({
+      show: true,
+      title: "אישור עדכון",
+      message: "האם אתה בטוח שברצונך לעדכן את הנוכחות?",
+      mode: "confirm",
+    });
   };
 
-  // ✅ שמירה סופית
-  const handleConfirmSave = () => {
-    setShowConfirmPopup(false);
-
+  const confirmUpdate = () => {
     const payload = {
       ...form,
       check_in: isSpecialStatus ? null : form.check_in,
       check_out: isSpecialStatus ? null : form.check_out,
     };
 
-    axios
-      .put(`${api}/attendance/edit/${id}`, payload, {
-        withCredentials: true,
-      })
+    api
+      .put(`/attendance/edit/${id}`, payload)
       .then(() => {
         setPopup({
           show: true,
           title: "הצלחה",
           message: "הנוכחות עודכנה בהצלחה",
-          type: "success",
+          mode: "success",
         });
       })
       .catch((err) => {
-        console.error("שגיאה בעדכון נוכחות:", err);
         setPopup({
           show: true,
           title: "שגיאה",
-          message: "שגיאה בעדכון הנתונים",
-          type: "error",
+          message: extractApiError(err, "שגיאה בעדכון הנתונים"),
+          mode: "error",
         });
       });
   };
+
+  // הרשאה
+  if (currentUser?.permission_edit_attendance !== 1) {
+    return (
+      <div className="text-center text-red-600 font-semibold mt-10">
+        אין לך הרשאה לעריכת נוכחות
+      </div>
+    );
+  }
 
   return (
     <div className="flex justify-center items-center pt-10">
@@ -184,21 +188,17 @@ const EditAttendance = () => {
 
         {/* עובד */}
         <div>
-          <label className="font-rubik block mb-0.5 font-medium">
-            בחר עובד
-          </label>
+          <label className="font-rubik block mb-0.5 font-medium">עובד</label>
           <select
             name="user_id"
             value={form.user_id}
-            onChange={handleChange}
             disabled
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-gray-500"
           >
-            <option value="">-- בחר עובד --</option>
-            {users.map((user) => (
-              <option key={user.user_id} value={user.user_id}>
-                {user.first_name} {user.last_name}
-                {!user.active ? " ⚠ לא פעיל" : ""}
+            {users.map((u) => (
+              <option key={u.user_id} value={u.user_id}>
+                {u.first_name} {u.last_name}
+                {!u.active ? " ⚠ לא פעיל" : ""}
               </option>
             ))}
           </select>
@@ -233,7 +233,7 @@ const EditAttendance = () => {
           </select>
         </div>
 
-        {/* שעות כניסה/יציאה */}
+        {/* שעות נוכחות */}
         {!isSpecialStatus && (
           <>
             <div>
@@ -283,33 +283,21 @@ const EditAttendance = () => {
         </div>
       </form>
 
-      {/* פופאפ הצלחה/שגיאה */}
+      {/* פופאפ כללי */}
       {popup.show && (
         <Popup
           title={popup.title}
           message={popup.message}
-          mode={popup.type}
+          mode={popup.mode}
           onClose={() => {
-            setPopup({ show: false, title: "", message: "", type: "" });
-            if (popup.type === "success") {
+            setPopup({ show: false, title: "", message: "", mode: "info" });
+            if (popup.mode === "success") {
               navigate("/dashboard/attendance");
             }
           }}
-        />
-      )}
-
-      {/* פופאפ אישור שמירה */}
-      {showConfirmPopup && (
-        <Popup
-          title="אישור עדכון"
-          message="האם אתה בטוח שברצונך לעדכן את הנוכחות?"
-          mode="confirm"
-          onClose={() => setShowConfirmPopup(false)}
-          onConfirm={handleConfirmSave}
+          onConfirm={popup.mode === "confirm" ? confirmUpdate : undefined}
         />
       )}
     </div>
   );
-};
-
-export default EditAttendance;
+}
