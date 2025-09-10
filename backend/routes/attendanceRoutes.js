@@ -10,6 +10,7 @@ import {
   generateAbsenceReport,
   checkIn,
   checkOut,
+  getTodayAttendanceStatus,
 } from "../controllers/attendance.controller.js";
 
 const router = express.Router();
