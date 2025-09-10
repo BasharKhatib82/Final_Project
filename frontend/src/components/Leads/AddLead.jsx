@@ -91,7 +91,6 @@ export default function AddLead() {
     if (
       !form.phone_number ||
       !form.project_id ||
-      !form.status ||
       (!clientExists &&
         (!form.first_name || !form.last_name || !form.email || !form.city))
     ) {
@@ -224,19 +223,6 @@ export default function AddLead() {
                 {u.first_name} {u.last_name}
               </option>
             ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block mb-1 font-semibold">סטטוס:</label>
-          <select
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            value={form.status}
-            onChange={(e) => setForm({ ...form, status: e.target.value })}
-          >
-            <option value="חדש">חדש</option>
-            <option value="בטיפול">בטיפול</option>
-            <option value="טופל">טופל</option>
           </select>
         </div>
 
