@@ -16,7 +16,7 @@ const AddProject = () => {
   const [form, setForm] = useState({
     project_name: "",
     project_description: "",
-    is_active: 1,
+    active: 1,
   });
 
   const [error, setError] = useState("");
@@ -95,17 +95,6 @@ const AddProject = () => {
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
             rows={3}
           />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            name="is_active"
-            checked={form.is_active === 1}
-            onChange={handleChange}
-            className="accent-blue-500"
-          />
-          <label className="text-sm">הפרויקט פעיל</label>
         </div>
 
         <div className="flex justify-center gap-4 mt-6">

@@ -1,9 +1,9 @@
 /**
  * קומפוננטה: EditProject
  * -----------------------
- * 1. project_id מאפשרת עריכה של פרויקט קיים לפי מזהה .
- * 2. כולל שדות: שם, תיאור, סטטוס פעיל/לא פעיל.
- * 3. לאישור ושגיאה Popup שימוש ב   .
+ * 1. project_id מאפשרת עריכת פרויקט קיים לפי מזהה .
+ * 2. כולל שדות: שם פרויקט, תיאור, סטטוס (פעיל / לא פעיל).
+ * 3. לאישור או תוצאה Popup שימוש ב .
  */
 
 import React, { useEffect, useState } from "react";
@@ -16,7 +16,7 @@ const EditProject = () => {
   const [form, setForm] = useState({
     project_name: "",
     project_description: "",
-    is_active: 1,
+    active: 1,
   });
 
   const [error, setError] = useState("");
@@ -44,10 +44,10 @@ const EditProject = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? (checked ? 1 : 0) : value,
+      [name]: value,
     }));
   };
 
@@ -121,12 +121,12 @@ const EditProject = () => {
         <div>
           <label className="block mb-1 font-medium">סטטוס הפרויקט</label>
           <select
-            name="is_active"
-            value={form.is_active}
+            name="active"
+            value={form.active}
             onChange={(e) =>
               setForm((prev) => ({
                 ...prev,
-                is_active: Number(e.target.value),
+                active: Number(e.target.value),
               }))
             }
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
