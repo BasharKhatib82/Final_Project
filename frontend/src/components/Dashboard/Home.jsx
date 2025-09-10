@@ -144,14 +144,14 @@ const Home = () => {
             const leadsCount =
               (user?.admin_alert_dash === 1 &&
                 stats?.leads_by_user_status
-                  ?.filter((l) => l.status === "חדש")
-                  ?.reduce((sum, l) => sum + l.count, 0)) ||
+                  ?.filter((l) => l.status === "11חדשה")
+                  ?.reduce((sum, l) => sum + l.count, "")) ||
               (user?.user_alert_dash === 1 &&
                 stats?.leads_by_user_status
                   ?.filter(
-                    (l) => l.user_id === user.user_id && l.status === "חדש"
+                    (l) => l.user_id === user.user_id && l.status === "11חדשה"
                   )
-                  ?.reduce((sum, l) => sum + l.count, 0));
+                  ?.reduce((sum, l) => sum + l.count, ""));
             return (
               leadsCount > 0 && (
                 <AlertBar
@@ -177,13 +177,13 @@ const Home = () => {
               (user?.admin_alert_dash === 1 &&
                 stats?.tasks_by_user_status
                   ?.filter((t) => t.status === "חדש")
-                  ?.reduce((sum, t) => sum + t.count, 0)) ||
+                  ?.reduce((sum, t) => sum + t.count, "")) ||
               (user?.user_alert_dash === 1 &&
                 stats?.tasks_by_user_status
                   ?.filter(
                     (t) => t.user_id === user.user_id && t.status === "חדש"
                   )
-                  ?.reduce((sum, t) => sum + t.count, 0));
+                  ?.reduce((sum, t) => sum + t.count, ""));
             return (
               tasksCount > 0 && (
                 <AlertBar

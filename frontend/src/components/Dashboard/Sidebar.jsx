@@ -1,5 +1,24 @@
+/**
+ * קומפוננטה: Sidebar (תפריט צד למערכת ניהול)
+ * -------------------------------------------
+ * מטרות:
+ * - הצגת תפריט ניווט מותאם אישית לפי הרשאות המשתמש.
+ * - תמיכה במצב כיווץ (collapsed) לשולחן עבודה, פתיחה/סגירה לנייד.
+ * - תצוגת אייקונים + טקסט (או אייקון בלבד במצב כיווץ).
+ * - לחצן יציאה מהמערכת.
+ *
+ * הרשאות נדרשות:
+ * - dashboard_access, users_page_access, roles_page_access, etc.
+ * -  useUser() דרך user הנתונים נשלפים מתוך   .
+ *
+ * פונקציונליות:
+ * - כפתורי שליטה על מצב סיידבר (פתיחה/סגירה).
+ * - Logout → הפעלת פונקציית logout מתוך useUser.
+ * - Tooltip כאשר התפריט מכווץ.
+ */
+
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import { useUser } from "components/Tools";
 import { Icon } from "@iconify/react";
@@ -8,10 +27,7 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // mobile
   const [isCollapsed, setIsCollapsed] = useState(false); // desktop
   const { user, logout } = useUser();
-
-  const handleLogout = () => {
-    logout();
-  };
+  const navigate = useNavigate();
 
   const getNavItems = () => {
     if (!user) return [];
@@ -111,7 +127,6 @@ const Sidebar = () => {
 
       {
         label: "יציאה",
-        to: "/userlogin",
         icon: (
           <Icon
             icon="streamline-cyber:door-exit"
@@ -120,7 +135,10 @@ const Sidebar = () => {
             color="white "
           />
         ),
-        onClick: handleLogout,
+        onClick: () => {
+          logout();
+          navigate("/userlogin");
+        },
       },
     ].filter(Boolean);
   };
