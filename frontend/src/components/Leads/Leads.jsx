@@ -481,7 +481,7 @@ const Leads = () => {
                           onClick={() =>
                             navigate(`/dashboard/details_lead/${lead.lead_id}`)
                           }
-                          className="bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
+                          className="flex items-center gap-2 bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
                         >
                           <Icon
                             icon="emojione-v1:eye"
