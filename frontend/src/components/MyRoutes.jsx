@@ -18,8 +18,6 @@ import Users from "./Users/Users";
 import AddUser from "./Users/AddUser";
 import EditUser from "./Users/EditUser";
 
-import SuccessMessage from "./SuccessMessage";
-
 import Attendance from "./Attendance/Attendance";
 import AddAttendance from "./Attendance/AddAttendance";
 import EditAttendance from "./Attendance/EditAttendance";
@@ -72,7 +70,6 @@ function MyRoutes() {
             <Route path="users" element={<Users />} />
             <Route path="add_user" element={<AddUser />} />
             <Route path="users/edit/:id" element={<EditUser />} />
-            <Route path="add_user/success" element={<SuccessMessage />} />
             <Route path="attendance" element={<Attendance />} />
             <Route path="add_attendance" element={<AddAttendance />} />
             <Route path="edit_attendance/:id" element={<EditAttendance />} />
