@@ -177,6 +177,17 @@ export default function Tasks() {
     { key: "task_id", label: "מזהה", export: (r) => r.task_id },
     { key: "task_title", label: "נושא", export: (r) => r.task_title },
     {
+      key: "created_at",
+      label: "תאריך יצירה",
+      render: (r) =>
+        new Date(r.created_at).toLocaleDateString("he-IL", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+        }),
+      export: (r) => new Date(r.created_at).toLocaleDateString("he-IL"),
+    },
+    {
       key: "due_date",
       label: "תאריך יעד",
       render: (r) => new Date(r.due_date).toLocaleDateString("he-IL"),
@@ -277,7 +288,7 @@ export default function Tasks() {
       label: "סטטוס",
       type: "select",
       options: [
-        { value: "", label: "בחר סטטוס" },
+        { value: "", label: "כל הסטטוסים" },
         { value: "חדש", label: "חדש" },
         { value: "בתהליך", label: "בתהליך" },
         { value: "הושלם", label: "הושלם" },
