@@ -34,19 +34,19 @@ export async function getDashboardSummary(_req, res) {
     roles_inactive:
       "SELECT COUNT(*) AS count FROM roles_permissions WHERE active = 0",
 
-    leads_new: "SELECT COUNT(*) AS count FROM leads WHERE status = 'חדש'",
+    leads_new: "SELECT COUNT(*) AS count FROM leads WHERE status = 'חדשה'",
     leads_in_progress:
       "SELECT COUNT(*) AS count FROM leads WHERE status = 'בטיפול'",
     leads_completed:
-      "SELECT COUNT(*) AS count FROM leads WHERE status = 'טופל'",
+      "SELECT COUNT(*) AS count FROM leads WHERE status = 'טופלה'",
     leads_canceled:
       "SELECT COUNT(*) AS count FROM leads WHERE status = 'בוטלה'",
 
-    tasks_new: "SELECT COUNT(*) AS count FROM tasks WHERE status = 'חדש'",
+    tasks_new: "SELECT COUNT(*) AS count FROM tasks WHERE status = 'חדשה'",
     tasks_in_progress:
       "SELECT COUNT(*) AS count FROM tasks WHERE status = 'בטיפול'",
     tasks_completed:
-      "SELECT COUNT(*) AS count FROM tasks WHERE status = 'הושלמה'",
+      "SELECT COUNT(*) AS count FROM tasks WHERE status = 'טופלה'",
     tasks_canceled:
       "SELECT COUNT(*) AS count FROM tasks WHERE status = 'בוטלה'",
 
