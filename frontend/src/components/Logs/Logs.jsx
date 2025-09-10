@@ -43,7 +43,7 @@ export default function Logs() {
       console.error("שגיאה בטעינת יומן פעילות:", err);
       setPopup({
         title: "שגיאה",
-        message: extractApiError(err, "שגיאה בטעינת רשימת הנוכחות"),
+        message: extractApiError(err, "שגיאה בטעינת יומן פעילות"),
         mode: "error",
         show: true,
       });

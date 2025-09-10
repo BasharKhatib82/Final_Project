@@ -220,7 +220,7 @@ export default function Attendance() {
             ) : null
           }
           defaultFilters={{}}
-          searchPlaceholder="חיפוש לפי שם או סטטוס..."
+          searchPlaceholder=" לפי שם עובד / פעולה..."
           filtersVariant="inline"
         />
       )}

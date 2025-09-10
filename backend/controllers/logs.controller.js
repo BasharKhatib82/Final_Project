@@ -14,7 +14,7 @@ export async function listLogs(_req, res) {
               l.time_date, l.action_name
        FROM user_activity_log l
        LEFT JOIN users u ON l.user_id = u.user_id
-       ORDER BY l.date DESC`
+       ORDER BY l.time_date DESC`
     );
     return res.json({ success: true, data: rows });
   } catch (err) {
