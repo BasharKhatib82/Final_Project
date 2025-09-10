@@ -389,7 +389,7 @@ export default function Leads() {
       <ReportView
         title="רשימת פניות"
         columns={columns}
-        rows={leads.filter((l) => l.status !== "בוטלה")}
+        rows={leads}
         filtersDef={filtersDef}
         searchableKeys={["phone_number", "full_name"]}
         pageSize={10}
@@ -404,6 +404,7 @@ export default function Leads() {
             />
           )
         }
+        defaultFilters={{ status: ["חדש", "בטיפול"] }}
         extraTopContent={bulkAssignBar}
       />
 

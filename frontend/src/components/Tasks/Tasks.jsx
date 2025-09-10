@@ -345,6 +345,7 @@ export default function Tasks() {
             />
           )
         }
+        defaultFilters={{ status: ["חדש", "בתהליך"] }}
         extraTopContent={bulkAssignBar}
       />
 
