@@ -383,7 +383,7 @@ export default function Leads() {
       ],
     },
   ];
-
+  const defaultFilters = { status: "חדש" };
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
       <ReportView
@@ -404,7 +404,7 @@ export default function Leads() {
             />
           )
         }
-        defaultFilters={{ status: ["חדש", "בטיפול"] }}
+        defaultFilters={defaultFilters}
         extraTopContent={bulkAssignBar}
       />
 

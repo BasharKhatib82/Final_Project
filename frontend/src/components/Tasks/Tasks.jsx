@@ -299,6 +299,8 @@ export default function Tasks() {
     },
   ];
 
+  const defaultFilters = { status: "חדש" };
+
   const bulkAssignBar = (
     <div className="flex items-center gap-2">
       <label className="text-sm font-semibold">שיוך מרובה:</label>
@@ -351,7 +353,7 @@ export default function Tasks() {
             />
           )
         }
-        defaultFilters={{ status: ["חדש", "בתהליך"] }}
+        defaultFilters={defaultFilters}
         extraTopContent={bulkAssignBar}
       />
 
