@@ -265,7 +265,7 @@ const Profile = () => {
           message={popupData.message}
           mode={popupData.mode}
           onClose={handleClosePopup}
-          autoClose={true}
+          autoClose={3000}
         />
       )}
     </div>
