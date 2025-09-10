@@ -148,7 +148,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
 
   return (
     <div className="flex items-center gap-2">
-      <Icon icon="oui:export" width="1.5em" height="1.5em" color="blue" />
+      <Icon icon="oui:export" width="1.5em" height="1.5em" color="gray" />
       <span className="text-sm text-slate-700">יצוא / הדפסה</span>
 
       <button
