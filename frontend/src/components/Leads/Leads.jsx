@@ -383,7 +383,7 @@ export default function Leads() {
       ],
     },
   ];
-  const defaultFilters = { status: "חדש" };
+  const defaultFilters = { status: "חדשה" };
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
       <ReportView

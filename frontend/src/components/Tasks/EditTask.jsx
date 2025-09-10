@@ -20,7 +20,7 @@ const EditTask = () => {
   const [form, setForm] = useState({
     task_title: "",
     description: "",
-    status: "חדש",
+    status: "חדשה",
     due_date: "",
     user_id: "",
   });
@@ -178,9 +178,9 @@ const EditTask = () => {
             onChange={handleChange}
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
           >
-            <option value="חדש">חדש</option>
-            <option value="בתהליך">בתהליך</option>
-            <option value="הושלם">הושלם</option>
+            <option value="חדשה">חדשה</option>
+            <option value="בטיפול">בטיפול</option>
+            <option value="טופלה">טופלה</option>
             <option value="בוטלה">בוטלה</option>
           </select>
         </div>

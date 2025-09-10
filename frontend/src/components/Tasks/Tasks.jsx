@@ -205,9 +205,9 @@ export default function Tasks() {
           }}
           className="border border-gray-300 rounded px-2 py-1 text-sm"
         >
-          <option value="חדש">חדש</option>
+          <option value="חדשה">חדשה</option>
           <option value="בתהליך">בתהליך</option>
-          <option value="הושלם">הושלם</option>
+          <option value="טופלה">טופלה</option>
           <option value="בוטלה">בוטלה</option>
         </select>
       ),
@@ -289,9 +289,9 @@ export default function Tasks() {
       type: "select",
       options: [
         { value: "", label: "כל הסטטוסים" },
-        { value: "חדש", label: "חדש" },
+        { value: "חדשה", label: "חדשה" },
         { value: "בתהליך", label: "בתהליך" },
-        { value: "הושלם", label: "הושלם" },
+        { value: "טופלה", label: "טופלה" },
         { value: "בוטלה", label: "בוטלה" },
       ],
     },
@@ -310,7 +310,7 @@ export default function Tasks() {
     },
   ];
 
-  const defaultFilters = { status: "חדש" };
+  const defaultFilters = { status: "חדשה" };
 
   const bulkAssignBar = (
     <div className="flex items-center gap-2">

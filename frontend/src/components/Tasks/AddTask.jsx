@@ -16,7 +16,7 @@ const AddTask = () => {
   const [form, setForm] = useState({
     task_title: "",
     description: "",
-    status: "חדש",
+    status: "חדשה",
     due_date: "",
     user_id: "",
   });
@@ -144,22 +144,6 @@ const AddTask = () => {
             ))}
           </select>
         </div>
-
-        <div>
-          <label className="block mb-1 font-medium">סטטוס</label>
-          <select
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-          >
-            <option value="חדש">חדש</option>
-            <option value="בתהליך">בתהליך</option>
-            <option value="הושלם">הושלם</option>
-            <option value="בוטלה">בוטלה</option>
-          </select>
-        </div>
-
         <div>
           <label className="block mb-1 font-medium">תאריך יעד *</label>
           <input

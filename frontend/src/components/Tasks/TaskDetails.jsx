@@ -146,11 +146,11 @@ const TaskDetails = () => {
             <strong>סטטוס:</strong>{" "}
             <span
               className={`font-semibold ${
-                task.status === "חדש"
+                task.status === "חדשה"
                   ? "text-green-600"
-                  : task.status === "בתהליך"
+                  : task.status === "בטיפול"
                   ? "text-blue-600"
-                  : task.status === "הושלם"
+                  : task.status === "טופלה"
                   ? "text-gray-600"
                   : "text-red-600"
               }`}
