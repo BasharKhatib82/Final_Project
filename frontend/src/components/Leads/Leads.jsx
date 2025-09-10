@@ -1,10 +1,12 @@
 /**
  * קומפוננטה: Leads
  * ----------------
- * 1. הצגת רשימת פניות עם אפשרות לסינון, שיוך נציגים, עדכון סטטוס, ביטול, חיפוש, ייצוא ושליחה במייל.
- * 2. שימוש ב-ReportView להצגת טבלה אינטראקטיבית עם עמודות, חיפושים ופילטרים.
- * 3. כולל הרשאות לפי useUser:
+ * 1. הצגת רשימת פניות עם חיפוש, פילטרים, ייצוא, שיוך נציגים, עדכון סטטוס, מחיקה, שיוך מרובה.
+ * 2. להצגת טבלה ReportView שימוש ב .
+ * 3. בקרת הרשאות לפי useUser:
  *    - permission_add_lead → כפתור הוספה
+ *    - permission_edit_lead → עריכה
+ *    - permission_delete_lead → מחיקה
  */
 
 import React, { useEffect, useState } from "react";
@@ -20,11 +22,17 @@ export default function Leads() {
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [popup, setPopup] = useState(null);
+
   const [leadToDelete, setLeadToDelete] = useState(null);
   const [repToSave, setRepToSave] = useState(null);
   const [newRepId, setNewRepId] = useState(null);
+
   const [statusToSave, setStatusToSave] = useState(null);
   const [newStatus, setNewStatus] = useState(null);
+
+  const [selectedLeads, setSelectedLeads] = useState([]);
+  const [bulkUserId, setBulkUserId] = useState("");
+  const [bulkAssignConfirm, setBulkAssignConfirm] = useState(false);
 
   const { user } = useUser();
   const navigate = useNavigate();
@@ -145,37 +153,68 @@ export default function Leads() {
     }
   };
 
+  const handleBulkAssign = async () => {
+    try {
+      await api.put("/leads/bulk-assign", {
+        leadIds: selectedLeads,
+        user_id: bulkUserId === "null" ? null : bulkUserId,
+      });
+      fetchLeads();
+      setSelectedLeads([]);
+      setBulkUserId("");
+      setPopup({
+        title: "הצלחה",
+        message: "השיוך בוצע בהצלחה",
+        mode: "success",
+        show: true,
+      });
+    } catch (err) {
+      setPopup({
+        title: "שגיאה",
+        message: extractApiError(err, "שגיאה בשיוך מרובה"),
+        mode: "error",
+        show: true,
+      });
+    } finally {
+      setBulkAssignConfirm(false);
+    }
+  };
+
   const columns = [
     {
-      key: "lead_id",
-      label: "מס׳ פנייה",
-      export: (r) => r.lead_id,
+      key: "select",
+      label: "✔️",
+      render: (r) => (
+        <input
+          type="checkbox"
+          checked={selectedLeads.includes(r.lead_id)}
+          onChange={() => {
+            setSelectedLeads((prev) =>
+              prev.includes(r.lead_id)
+                ? prev.filter((id) => id !== r.lead_id)
+                : [...prev, r.lead_id]
+            );
+          }}
+        />
+      ),
+      export: () => null,
     },
+    { key: "lead_id", label: "מס׳ פנייה" },
     {
       key: "created_at",
       label: "תאריך יצירה",
       render: (r) =>
         new Date(r.created_at).toLocaleString("he-IL", {
-          day: "2-digit",
-          month: "2-digit",
           year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
           hour: "2-digit",
           minute: "2-digit",
         }),
-      export: (r) => new Date(r.created_at).toLocaleString("he-IL"),
     },
-    {
-      key: "phone_number",
-      label: "טלפון",
-    },
-    {
-      key: "full_name",
-      label: "שם לקוח",
-    },
-    {
-      key: "project_name",
-      label: "פרויקט",
-    },
+    { key: "phone_number", label: "טלפון" },
+    { key: "full_name", label: "שם לקוח" },
+    { key: "project_name", label: "פרויקט" },
     {
       key: "rep",
       label: "נציג",
@@ -196,10 +235,6 @@ export default function Leads() {
           ))}
         </select>
       ),
-      export: (r) => {
-        const u = users.find((u) => u.user_id === r.user_id);
-        return u ? `${u.first_name} ${u.last_name}` : "ללא";
-      },
     },
     {
       key: "status",
@@ -219,11 +254,9 @@ export default function Leads() {
           <option value="בוטלה">בוטלה</option>
         </select>
       ),
-      export: (r) => r.status,
     },
   ];
 
-  // עמודת פעולות לפי הרשאות
   if (
     user?.permission_view_lead === 1 ||
     user?.permission_edit_lead === 1 ||
@@ -233,47 +266,36 @@ export default function Leads() {
       key: "actions",
       label: "פעולות",
       render: (r) => (
-        <div className="flex justify-center">
-          <div className="flex items-center gap-1 text-center">
-            {user?.permission_view_lead === 1 && (
-              <button
-                onClick={() => navigate(`/dashboard/details_lead/${r.lead_id}`)}
-                className="flex items-center gap-2 bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700 ml-1"
-              >
-                <Icon icon="emojione-v1:eye" width="1.2rem" height="1.2rem" />
-                הצג
-              </button>
-            )}
-            {user?.permission_edit_lead === 1 && (
-              <button
-                onClick={() => navigate(`/dashboard/edit_lead/${r.lead_id}`)}
-                className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
-              >
-                <Icon
-                  icon="fluent-color:edit-32"
-                  width="1.2rem"
-                  height="1.2rem"
-                />
-                עריכה
-              </button>
-            )}
-            {user?.permission_delete_lead === 1 && r.active && (
-              <button
-                onClick={() => setLeadToDelete(r.lead_id)}
-                className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-              >
-                <Icon
-                  icon="streamline-color:recycle-bin-2-flat"
-                  width="1.2em"
-                  height="1.2em"
-                />
-                מחיקה
-              </button>
-            )}
-          </div>
+        <div className="flex justify-center gap-1">
+          {user?.permission_view_lead === 1 && (
+            <button
+              onClick={() => navigate(`/dashboard/details_lead/${r.lead_id}`)}
+              className="bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
+            >
+              <Icon icon="emojione-v1:eye" width="1.2rem" />
+              הצג
+            </button>
+          )}
+          {user?.permission_edit_lead === 1 && (
+            <button
+              onClick={() => navigate(`/dashboard/edit_lead/${r.lead_id}`)}
+              className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+            >
+              <Icon icon="fluent-color:edit-32" width="1.2rem" />
+              עריכה
+            </button>
+          )}
+          {user?.permission_delete_lead === 1 && r.status !== "בוטלה" && (
+            <button
+              onClick={() => setLeadToDelete(r.lead_id)}
+              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+            >
+              <Icon icon="streamline-color:recycle-bin-2-flat" width="1.2rem" />
+              מחיקה
+            </button>
+          )}
         </div>
       ),
-      export: () => null,
     });
   }
 
@@ -326,8 +348,8 @@ export default function Leads() {
         filtersDef={filtersDef}
         searchableKeys={["phone_number", "full_name"]}
         pageSize={10}
-        searchPlaceholder="חיפוש לפי שם או טלפון..."
         emailApiBase={api.defaults.baseURL}
+        searchPlaceholder="חיפוש לפי שם או טלפון..."
         filtersVariant="inline"
         addButton={
           user?.permission_add_lead === 1 && (
@@ -339,6 +361,42 @@ export default function Leads() {
         }
       />
 
+      {/* שיוך מרובה */}
+      <div className="mt-4 flex flex-wrap items-center gap-4 bg-white/90 p-4 rounded-lg">
+        <label className="text-sm font-semibold">שיוך מרובה:</label>
+        <select
+          value={bulkUserId}
+          onChange={(e) => setBulkUserId(e.target.value)}
+          className="border border-gray-300 rounded px-3 py-1 text-sm"
+        >
+          <option value="">בחר נציג</option>
+          <option value="null">ללא</option>
+          {users.map((u) => (
+            <option key={u.user_id} value={u.user_id}>
+              {u.first_name} {u.last_name}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={() => {
+            if (!selectedLeads.length || !bulkUserId) {
+              setPopup({
+                title: "שגיאה",
+                message: "יש לבחור פניות ונציג לשיוך",
+                mode: "error",
+                show: true,
+              });
+              return;
+            }
+            setBulkAssignConfirm(true);
+          }}
+          className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 text-sm"
+        >
+          שיוך {selectedLeads.length} פניות
+        </button>
+      </div>
+
+      {/* פופאפים */}
       {popup?.show && (
         <Popup
           title={popup.title}
@@ -351,7 +409,7 @@ export default function Leads() {
       {repToSave && (
         <Popup
           title="עדכון נציג"
-          message="האם לעדכן את הנציג לפנייה זו?"
+          message="האם לעדכן את הנציג?"
           mode="confirm"
           onConfirm={handleRepSave}
           onClose={() => {
@@ -376,11 +434,21 @@ export default function Leads() {
 
       {leadToDelete && (
         <Popup
-          title="אישור ביטול פנייה"
-          message="האם אתה בטוח שברצונך לבטל את הפנייה?"
+          title="אישור מחיקה"
+          message="האם למחוק את הפנייה?"
           mode="confirm"
           onConfirm={handleDelete}
           onClose={() => setLeadToDelete(null)}
+        />
+      )}
+
+      {bulkAssignConfirm && (
+        <Popup
+          title="שיוך מרובה"
+          message={`האם לשייך ${selectedLeads.length} פניות לנציג שנבחר?`}
+          mode="confirm"
+          onConfirm={handleBulkAssign}
+          onClose={() => setBulkAssignConfirm(false)}
         />
       )}
     </div>
