@@ -200,9 +200,9 @@ export default function EditLead() {
             onChange={handleChange}
             className="w-full border p-2 rounded"
           >
-            <option value="חדש">חדש</option>
+            <option value="חדשה">חדשה</option>
             <option value="בטיפול">בטיפול</option>
-            <option value="טופל">טופל</option>
+            <option value="טופלה">טופלה</option>
             <option value="בוטלה">בוטלה</option>
           </select>
         </div>

@@ -29,7 +29,7 @@ export default function AddLead() {
   const [form, setForm] = useState({
     phone_number: "",
     project_id: "",
-    status: "חדש",
+    status: "חדשה",
     first_name: "",
     last_name: "",
     email: "",

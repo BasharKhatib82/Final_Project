@@ -239,9 +239,9 @@ const LeadDetails = () => {
             value={newStatus}
             onChange={(e) => setNewStatus(e.target.value)}
           >
-            <option value="חדש">חדש</option>
+            <option value="חדשה">חדשה</option>
             <option value="בטיפול">בטיפול</option>
-            <option value="טופל">טופל</option>
+            <option value="טופלה">טופלה</option>
             <option value="בוטלה">בוטלה</option>
           </select>
         </div>
