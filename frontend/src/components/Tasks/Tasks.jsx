@@ -275,7 +275,7 @@ export default function Tasks() {
     {
       name: "status",
       label: "סטטוס",
-      type: "multiselect",
+      type: "select",
       options: [
         { value: "", label: "בחר סטטוס" },
         { value: "חדש", label: "חדש" },
