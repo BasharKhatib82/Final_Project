@@ -221,37 +221,61 @@ export default function Leads() {
       ),
       export: (r) => r.status,
     },
-    {
+  ];
+
+  // עמודת פעולות לפי הרשאות
+  if (
+    user?.permission_view_lead === 1 ||
+    user?.permission_edit_lead === 1 ||
+    user?.permission_delete_lead === 1
+  ) {
+    columns.push({
       key: "actions",
       label: "פעולות",
       render: (r) => (
-        <div className="flex justify-center gap-1">
-          <button
-            onClick={() => navigate(`/dashboard/details_lead/${r.lead_id}`)}
-            className="bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700 text-sm"
-          >
-            <Icon icon="emojione-v1:eye" width="1.2rem" /> הצג
-          </button>
-          <button
-            onClick={() => navigate(`/dashboard/edit_lead/${r.lead_id}`)}
-            className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 text-sm"
-          >
-            <Icon icon="fluent-color:edit-32" width="1.2rem" /> עריכה
-          </button>
-          {r.status !== "בוטלה" && (
-            <button
-              onClick={() => setLeadToDelete(r.lead_id)}
-              className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-sm"
-            >
-              <Icon icon="streamline-color:recycle-bin-2-flat" width="1.2em" />
-              מחיקה
-            </button>
-          )}
+        <div className="flex justify-center">
+          <div className="flex items-center gap-1 text-center">
+            {user?.permission_view_lead === 1 && (
+              <button
+                onClick={() => navigate(`/dashboard/details_lead/${r.lead_id}`)}
+                className="flex items-center gap-2 bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700 ml-1"
+              >
+                <Icon icon="emojione-v1:eye" width="1.2rem" height="1.2rem" />
+                הצג
+              </button>
+            )}
+            {user?.permission_edit_lead === 1 && (
+              <button
+                onClick={() => navigate(`/dashboard/edit_lead/${r.lead_id}`)}
+                className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+              >
+                <Icon
+                  icon="fluent-color:edit-32"
+                  width="1.2rem"
+                  height="1.2rem"
+                />
+                עריכה
+              </button>
+            )}
+            {user?.permission_delete_lead && r.active && (
+              <button
+                onClick={() => setLeadToDelete(r.lead_id)}
+                className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+              >
+                <Icon
+                  icon="streamline-color:recycle-bin-2-flat"
+                  width="1.2em"
+                  height="1.2em"
+                />
+                מחיקה
+              </button>
+            )}
+          </div>
         </div>
       ),
       export: () => null,
-    },
-  ];
+    });
+  }
 
   const filtersDef = [
     {
@@ -295,25 +319,24 @@ export default function Leads() {
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
-      {user?.permission_add_lead === 1 && (
-        <div className="mb-2">
-          <NavigationButton
-            label="הוספת פנייה חדשה"
-            linkTo="/dashboard/add_lead"
-          />
-        </div>
-      )}
-
       <ReportView
         title="רשימת פניות"
         columns={columns}
         rows={leads.filter((l) => l.status !== "בוטלה")}
         filtersDef={filtersDef}
         searchableKeys={["phone_number", "full_name"]}
-        pageSize={15}
+        pageSize={10}
         searchPlaceholder="חיפוש לפי שם או טלפון..."
         emailApiBase={api.defaults.baseURL}
         filtersVariant="inline"
+        addButton={
+          user?.permission_add_lead === 1 && (
+            <NavigationButton
+              label="הוספת פנייה חדשה"
+              linkTo="/dashboard/add_lead"
+            />
+          )
+        }
       />
 
       {popup?.show && (
