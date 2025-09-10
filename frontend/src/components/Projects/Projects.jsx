@@ -1,4 +1,17 @@
-import axios from "axios";
+// frontend/src/pages/Projects/Projects.jsx
+
+/**
+ * קומפוננטה: Projects
+ * -------------------
+ * 1. הצגת כל הפרויקטים הקיימים במערכת.
+ * 2. אפשרויות:
+ *    - חיפוש וסינון לפי סטטוס (פעיל / לא פעיל / הכל).
+ *    - הוספת פרויקט חדש.
+ *    - עריכת פרויקט קיים.
+ *    - סימון פרויקט כלא פעיל (מחיקה לוגית).
+ *    - (Excel / PDF / שליחה למייל) ייצוא דוחות .
+ */
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NavigationButton } from "components/Buttons";
@@ -6,8 +19,7 @@ import { Popup } from "components/Tools";
 import { ReportProvider } from "../Reports/ReportContext";
 import ReportExport from "../Reports/ReportExport";
 import ReportEmail from "../Reports/ReportEmail";
-
-const api = process.env.REACT_APP_API_URL;
+import { api, extractApiError } from "utils";
 
 const Projects = () => {
   const [projects, setProjects] = useState([]);
@@ -22,15 +34,19 @@ const Projects = () => {
   }, []);
 
   const fetchProjects = () => {
-    axios
-      .get(`${api}/projects`, { withCredentials: true })
+    api
+      .get("/projects")
       .then((res) => {
         if (res.data.success) {
           setProjects(res.data.data || []);
         }
       })
       .catch((err) => {
-        console.error("שגיאה בטעינת פרויקטים:", err);
+        setPopupData({
+          title: "שגיאה",
+          message: extractApiError(err, "שגיאה בטעינת פרויקטים"),
+          mode: "error",
+        });
       });
   };
 
@@ -38,10 +54,7 @@ const Projects = () => {
     if (!projectToDelete) return;
 
     try {
-      const res = await axios.delete(
-        `${api}/projects/delete/${projectToDelete}`,
-        { withCredentials: true }
-      );
+      const res = await api.delete(`/projects/delete/${projectToDelete}`);
 
       if (res.data.success) {
         fetchProjects();
@@ -58,10 +71,9 @@ const Projects = () => {
         });
       }
     } catch (err) {
-      console.error("שגיאה במחיקת פרויקט:", err);
       setPopupData({
         title: "שגיאה",
-        message: "שגיאה במחיקת פרויקט",
+        message: extractApiError(err, "שגיאה במחיקת פרויקט"),
         mode: "error",
       });
     } finally {
@@ -82,7 +94,6 @@ const Projects = () => {
     return statusCheck && (nameMatch || descMatch);
   });
 
-  // 🟢 הגדרת העמודות לייצוא
   const columns = [
     { key: "project_id", label: "קוד פרויקט", export: (r) => r.project_id },
     { key: "project_name", label: "שם פרויקט", export: (r) => r.project_name },
@@ -104,6 +115,7 @@ const Projects = () => {
         רשימת פרויקטים
       </h2>
 
+      {/* סינון + כפתור הוספה */}
       <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-4">
         <NavigationButton
           linkTo="/dashboard/add_project"
@@ -123,7 +135,7 @@ const Projects = () => {
         <div className="relative">
           <input
             type="text"
-            placeholder="🔍 חיפוש לפי שם פרויקט..."
+            placeholder="חיפוש לפי שם פרויקט..."
             className="border border-gray-300 rounded px-3 py-1 text-sm"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -139,18 +151,19 @@ const Projects = () => {
         </div>
       </div>
 
-      {/* 🔹 סרגל ייצוא / הדפסה / שליחה למייל */}
+      {/* ייצוא ודוחות */}
       <ReportProvider
         title="רשימת פרויקטים"
         columns={columns}
         rows={filteredProjects}
       >
         <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
-          <ReportExport apiBase={api} />
-          <ReportEmail apiBase={api} />
+          <ReportExport />
+          <ReportEmail />
         </div>
       </ReportProvider>
 
+      {/* טבלה */}
       <div className="overflow-auto rounded-lg shadow-lg bg-white/85">
         <table className="w-full table-auto border-collapse text-sm text-center">
           <thead>
@@ -216,7 +229,7 @@ const Projects = () => {
         </table>
       </div>
 
-      {/* פופאפ אישור מחיקה */}
+      {/* פופאפ מחיקה */}
       {projectToDelete && (
         <Popup
           title="אישור מחיקת פרויקט"
@@ -227,7 +240,7 @@ const Projects = () => {
         />
       )}
 
-      {/* פופאפ רגיל */}
+      {/* פופאפ כללי */}
       {popupData && (
         <Popup
           title={popupData.title}
