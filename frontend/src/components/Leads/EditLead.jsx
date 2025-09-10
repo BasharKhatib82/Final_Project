@@ -58,7 +58,7 @@ export default function EditLead() {
 
   const fetchProjects = async () => {
     try {
-      const res = await api.get("/projects/active");
+      const res = await api.get("/projects/1");
       setProjects(res.data.data || []);
     } catch (err) {
       setError(extractApiError(err, "שגיאה בטעינת פרויקטים"));
@@ -76,7 +76,25 @@ export default function EditLead() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    let newValue = value;
+
+    //'phone_number' לוגיקה ספציפית עבור שדה
+    if (name === "phone_number") {
+      // מסנן רק ספרות ומגביל ל-10 תווים
+      const sanitizedValue = value.replace(/[^0-9]/g, "");
+      if (sanitizedValue.length <= 10) {
+        newValue = sanitizedValue;
+      } else {
+        // אם כבר הגענו ל-10 ספרות, אל תעדכן את הערך
+        return;
+      }
+    }
+
+    // עבור כל שדה state עדכון מצב ה
+    setForm({
+      ...form,
+      [name]: newValue,
+    });
   };
 
   const handleConfirm = (e) => {
@@ -120,7 +138,7 @@ export default function EditLead() {
         <div>
           <label className="block mb-1 font-semibold">מספר טלפון:</label>
           <input
-            type="text"
+            type="number"
             name="phone_number"
             value={form.phone_number}
             onChange={handleChange}
