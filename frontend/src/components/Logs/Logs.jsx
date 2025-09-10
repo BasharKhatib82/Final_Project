@@ -108,7 +108,7 @@ export default function Logs() {
       key: "time_date",
       label: "תאריך ושעה",
       render: (r) =>
-        new Date(r.timestamp).toLocaleString("he-IL", {
+        new Date(r.time_date).toLocaleString("he-IL", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
@@ -116,7 +116,7 @@ export default function Logs() {
           minute: "2-digit",
         }),
       export: (r) =>
-        new Date(r.timestamp).toLocaleString("he-IL", {
+        new Date(r.time_date).toLocaleString("he-IL", {
           day: "2-digit",
           month: "2-digit",
           year: "numeric",
@@ -128,7 +128,21 @@ export default function Logs() {
 
   const filtersDef = [
     {
-      name: "date",
+      name: "user_id",
+      label: "שם עובד",
+      type: "select",
+      options: [
+        { value: "", label: "כל העובדים" },
+        ...users.map((u) => ({
+          value: String(u.user_id),
+          label: `${u.first_name} ${u.last_name}${
+            !u.active ? " ⚠ לא פעיל" : ""
+          }`,
+        })),
+      ],
+    },
+    {
+      name: "time_date",
       label: "טווח תאריכים",
       type: "daterange",
     },
