@@ -301,7 +301,7 @@ const Home = () => {
                     : stats?.tasks_by_user_status
                         ?.filter(
                           (t) =>
-                            t.user_id === user.user_id && t.status === "בתהליך"
+                            t.user_id === user.user_id && t.status === "בטיפול"
                         )
                         ?.reduce((sum, t) => sum + t.count, 0) ?? 0,
               },

@@ -225,9 +225,9 @@ const TaskDetails = () => {
             onChange={(e) => setNewStatus(e.target.value)}
             className="w-full border border-gray-300 rounded px-3 py-2"
           >
-            <option value="חדש">חדש</option>
-            <option value="בתהליך">בתהליך</option>
-            <option value="הושלם">הושלם</option>
+            <option value="חדשה">חדשה</option>
+            <option value="בטיפול">בטיפול</option>
+            <option value="טופלה">טופלה</option>
             <option value="בוטלה">בוטלה</option>
           </select>
         </div>

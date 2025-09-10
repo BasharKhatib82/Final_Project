@@ -206,7 +206,7 @@ export default function Tasks() {
           className="border border-gray-300 rounded px-2 py-1 text-sm"
         >
           <option value="חדשה">חדשה</option>
-          <option value="בתהליך">בתהליך</option>
+          <option value="בטיפול">בטיפול</option>
           <option value="טופלה">טופלה</option>
           <option value="בוטלה">בוטלה</option>
         </select>
@@ -290,7 +290,7 @@ export default function Tasks() {
       options: [
         { value: "", label: "כל הסטטוסים" },
         { value: "חדשה", label: "חדשה" },
-        { value: "בתהליך", label: "בתהליך" },
+        { value: "בטיפול", label: "בטיפול" },
         { value: "טופלה", label: "טופלה" },
         { value: "בוטלה", label: "בוטלה" },
       ],
