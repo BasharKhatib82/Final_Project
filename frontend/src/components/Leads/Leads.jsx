@@ -375,6 +375,7 @@ const Leads = () => {
           title="רשימת פניות"
           columns={columns}
           rows={filteredLeads}
+          pageSize={10}
         >
           <div className="flex items-center flex-wrap gap-4">
             <ReportExport apiBase={process.env.REACT_APP_API_URL} />

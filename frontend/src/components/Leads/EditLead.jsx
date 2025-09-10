@@ -58,7 +58,7 @@ export default function EditLead() {
 
   const fetchProjects = async () => {
     try {
-      const res = await api.get("/projects/1");
+      const res = await api.get("/projects/status/1");
       setProjects(res.data.data || []);
     } catch (err) {
       setError(extractApiError(err, "שגיאה בטעינת פרויקטים"));
