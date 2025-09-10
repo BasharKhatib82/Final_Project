@@ -103,7 +103,7 @@ const Home = () => {
     const showCheckOut = latest?.check_in && !latest?.check_out;
 
     return (
-      <div className="flex justify-end">
+      <div className="flex justify-center">
         {showCheckIn && (
           <button
             onClick={handleCheckIn}
