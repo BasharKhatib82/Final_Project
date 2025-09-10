@@ -1,13 +1,23 @@
+/**
+ * קומפוננטה: Tasks
+ * -----------------------
+ * 1. מציגה את רשימת המשימות.
+ * 2. מאפשרת סינון לפי סטטוס, נציג, חיפוש.
+ * 3. אפשרות לשיוך מרובה של נציגים למשימות.
+ * 4. עדכון סטטוס/נציג ישירות מהטבלה.
+ * 5. פעולות: עריכה, הצגה, ביטול.
+ * 6. כולל ייצוא ודוא"ל דרך ReportProvider.
+ */
+
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { NavigationButton, DeleteButton } from "components/Buttons";
+import { NavigationButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { Popup } from "components/Tools";
 import { ReportProvider } from "../Reports/ReportContext";
 import ReportExport from "../Reports/ReportExport";
 import ReportEmail from "../Reports/ReportEmail";
-
-const api = process.env.REACT_APP_API_URL;
+import { api } from "utils";
 
 const Tasks = () => {
   const [tasks, setTasks] = useState([]);
@@ -34,7 +44,7 @@ const Tasks = () => {
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get(`${api}/tasks`, { withCredentials: true });
+      const res = await api.get("/tasks");
       if (res.data.success) {
         const updated = res.data.data.map((task) => ({
           ...task,
@@ -50,9 +60,7 @@ const Tasks = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${api}/users/active`, {
-        withCredentials: true,
-      });
+      const res = await api.get("/users/active");
       if (res.data.success) {
         setUsers(res.data.data || []);
       }
@@ -64,9 +72,7 @@ const Tasks = () => {
   const handleDelete = async () => {
     if (!taskToDelete) return;
     try {
-      const res = await axios.delete(`${api}/tasks/delete/${taskToDelete}`, {
-        withCredentials: true,
-      });
+      const res = await api.delete(`/tasks/delete/${taskToDelete}`);
       if (res.data.success) {
         setTasks((prev) =>
           prev.map((t) =>
@@ -126,11 +132,10 @@ const Tasks = () => {
 
   const handleBulkAssign = async () => {
     try {
-      const res = await axios.put(
-        `${api}/tasks/bulk-assign`,
-        { taskIds: selectedTasks, user_id: bulkUserId || null },
-        { withCredentials: true }
-      );
+      const res = await api.put("/tasks/bulk-assign", {
+        taskIds: selectedTasks,
+        user_id: bulkUserId || null,
+      });
       if (res.data.success) {
         fetchTasks();
         setSelectedTasks([]);
@@ -165,11 +170,9 @@ const Tasks = () => {
 
   const handleRepSave = async (taskId, selectedRepId) => {
     try {
-      const res = await axios.put(
-        `${api}/tasks/update-rep/${taskId}`,
-        { user_id: selectedRepId },
-        { withCredentials: true }
-      );
+      const res = await api.put(`/tasks/update-rep/${taskId}`, {
+        user_id: selectedRepId,
+      });
       if (res.data.success) {
         setTasks((prev) =>
           prev.map((t) =>
@@ -209,11 +212,9 @@ const Tasks = () => {
 
   const handleStatusSave = async (taskId, selectedStatus) => {
     try {
-      const res = await axios.put(
-        `${api}/tasks/update-status/${taskId}`,
-        { status: selectedStatus },
-        { withCredentials: true }
-      );
+      const res = await api.put(`/tasks/update-status/${taskId}`, {
+        status: selectedStatus,
+      });
       if (res.data.success) {
         setTasks((prev) =>
           prev.map((t) =>
@@ -259,19 +260,18 @@ const Tasks = () => {
     return matchSearch && matchStatus && matchUser;
   });
 
-  // עמודות ייצוא
   const columns = [
     { key: "task_id", label: "מזהה", export: (r) => r.task_id },
     { key: "task_title", label: "כותרת", export: (r) => r.task_title },
     {
+      key: "created_at",
+      label: "תאריך יצירה",
+      export: (r) => new Date(r.created_at).toLocaleDateString("he-IL"),
+    },
+    {
       key: "due_date",
       label: "תאריך יעד",
-      export: (r) =>
-        new Date(r.due_date).toLocaleDateString("he-IL", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        }),
+      export: (r) => new Date(r.due_date).toLocaleDateString("he-IL"),
     },
     { key: "status", label: "סטטוס", export: (r) => r.status },
     {
@@ -290,7 +290,7 @@ const Tasks = () => {
         רשימת משימות
       </h2>
 
-      {/* 🔹 סרגל מסננים */}
+      {/* 🔹 סרגל סינון ושיוך מרובה */}
       <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-4">
         <NavigationButton
           linkTo="/dashboard/add_task"
@@ -355,7 +355,6 @@ const Tasks = () => {
               </option>
             ))}
           </select>
-
           <button
             onClick={handleBulkAssignConfirm}
             className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
@@ -365,19 +364,19 @@ const Tasks = () => {
         </div>
       </div>
 
-      {/* 🔹 סרגל ייצוא */}
+      {/*  Email ייצוא ושליחה ב  */}
       <ReportProvider
         title="רשימת משימות"
         columns={columns}
         rows={filteredTasks}
       >
         <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
-          <ReportExport apiBase={api} />
-          <ReportEmail apiBase={api} />
+          <ReportExport apiBase={process.env.REACT_APP_API_URL} />
+          <ReportEmail apiBase={process.env.REACT_APP_API_URL} />
         </div>
       </ReportProvider>
 
-      {/* 🔹 טבלה */}
+      {/* 🔹 טבלת משימות */}
       <div className="overflow-auto rounded-lg shadow-lg bg-white/85 mt-4">
         <table className="w-full table-auto border-collapse text-sm text-center">
           <thead>
@@ -385,16 +384,17 @@ const Tasks = () => {
               <th className="p-2 border">✔️</th>
               <th className="p-2 border">מזהה</th>
               <th className="p-2 border">כותרת</th>
+              <th className="p-2 border">תאריך יצירה</th>
               <th className="p-2 border">תאריך יעד</th>
               <th className="p-2 border">סטטוס</th>
-              <th className="p-2 border">נציג מטפל</th>
+              <th className="p-2 border">נציג</th>
               <th className="p-2 border">פעולות</th>
             </tr>
           </thead>
           <tbody>
             {filteredTasks.length === 0 ? (
               <tr>
-                <td colSpan="7" className="text-center text-red-500 p-4">
+                <td colSpan="8" className="text-center text-red-500 p-4">
                   אין משימות להצגה
                 </td>
               </tr>
@@ -410,6 +410,9 @@ const Tasks = () => {
                   </td>
                   <td className="border p-2">{task.task_id}</td>
                   <td className="border p-2">{task.task_title}</td>
+                  <td className="border p-2">
+                    {new Date(task.created_at).toLocaleDateString("he-IL")}
+                  </td>
                   <td className="border p-2">
                     {new Date(task.due_date).toLocaleDateString("he-IL")}
                   </td>
@@ -443,28 +446,50 @@ const Tasks = () => {
                       ))}
                     </select>
                   </td>
-                  <td className="border p-2 flex flex-wrap justify-center gap-1">
-                    <button
-                      onClick={() =>
-                        navigate(`/dashboard/details_task/${task.task_id}`)
-                      }
-                      className="bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
-                    >
-                      פתח משימה
-                    </button>
-                    <button
-                      onClick={() =>
-                        navigate(`/dashboard/edit_task/${task.task_id}`)
-                      }
-                      className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-                    >
-                      עריכה
-                    </button>
-                    {task.status !== "בוטלה" && (
-                      <DeleteButton
-                        onClick={() => setTaskToDelete(task.task_id)}
-                      />
-                    )}
+                  <td className="border p-2">
+                    <div className="flex justify-center">
+                      <div className="flex items-center gap-1 text-center">
+                        <button
+                          onClick={() =>
+                            navigate(`/dashboard/details_task/${task.task_id}`)
+                          }
+                          className="flex items-center gap-2 bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
+                        >
+                          <Icon
+                            icon="emojione-v1:eye"
+                            width="1.2rem"
+                            height="1.2rem"
+                          />
+                          הצג
+                        </button>
+                        <button
+                          onClick={() =>
+                            navigate(`/dashboard/edit_task/${task.task_id}`)
+                          }
+                          className="flex items-center gap-2 bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 "
+                        >
+                          <Icon
+                            icon="fluent-color:edit-32"
+                            width="1.2rem"
+                            height="1.2rem"
+                          />
+                          עריכה
+                        </button>
+                        {task.status !== "בוטלה" && (
+                          <button
+                            onClick={() => setTaskToDelete(task.task_id)}
+                            className="flex items-center gap-2 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                          >
+                            <Icon
+                              icon="streamline-color:recycle-bin-2-flat"
+                              width="1.2em"
+                              height="1.2em"
+                            />
+                            מחיקה
+                          </button>
+                        )}{" "}
+                      </div>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -473,7 +498,7 @@ const Tasks = () => {
         </table>
       </div>
 
-      {/* 🔹 פופאפים */}
+      {/* פופאפים */}
       {taskToDelete && (
         <Popup
           title="אישור ביטול משימה"
@@ -483,6 +508,7 @@ const Tasks = () => {
           onClose={() => setTaskToDelete(null)}
         />
       )}
+
       {bulkAssignConfirm && (
         <Popup
           title="אישור שיוך מרובה"
@@ -492,6 +518,7 @@ const Tasks = () => {
           onClose={() => setBulkAssignConfirm(false)}
         />
       )}
+
       {repToSave && (
         <Popup
           title="אישור שינוי נציג"
@@ -504,6 +531,7 @@ const Tasks = () => {
           }}
         />
       )}
+
       {statusToSave && (
         <Popup
           title="אישור שינוי סטטוס"
@@ -516,6 +544,7 @@ const Tasks = () => {
           }}
         />
       )}
+
       {popupData && (
         <Popup
           title={popupData.title}

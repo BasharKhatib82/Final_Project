@@ -1,10 +1,17 @@
+/**
+ * קומפוננטה: EditTask
+ * -----------------------
+ * 1. task_id מאפשרת עריכת משימה לפי מזהה .
+ * 2. טוענת נתוני משימה ונתוני נציגים פעילים.
+ * 3. כוללת טופס עם שדות: נושא, תיאור, סטטוס, תאריך יעד, נציג.
+ * 4. כוללת אישור לפני שמירה, ופופאפ הצלחה/שגיאה.
+ */
+
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
 import { Popup } from "components/Tools";
-
-const api = process.env.REACT_APP_API_URL;
+import { api } from "utils";
 
 const EditTask = () => {
   const { id } = useParams();
@@ -29,28 +36,24 @@ const EditTask = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${api}/users/active`, {
-        withCredentials: true,
-      });
-      if (res.data.Status) {
-        setUsers(res.data.Result || []);
+      const res = await api.get("/users/active");
+      if (res.data.success) {
+        setUsers(res.data.data || []);
       }
     } catch (err) {
-      console.error("שגיאה בטעינת עובדים:", err);
+      console.error("שגיאה בטעינת נציגים:", err);
     }
   };
 
   const fetchTask = async () => {
     try {
-      const res = await axios.get(`${api}/tasks/${id}`, {
-        withCredentials: true,
-      });
-      if (res.data.Status && res.data.Result) {
-        setForm(res.data.Result);
+      const res = await api.get(`/tasks/${id}`);
+      if (res.data.success && res.data.data) {
+        setForm(res.data.data);
       } else {
         setPopupData({
           title: "שגיאה",
-          message: res.data.Error || "לא ניתן לטעון את נתוני המשימה",
+          message: res.data.message || "לא ניתן לטעון את נתוני המשימה",
           mode: "error",
         });
       }
@@ -73,21 +76,19 @@ const EditTask = () => {
     e.preventDefault();
 
     if (!form.task_title.trim()) {
-      setPopupData({
+      return setPopupData({
         title: "שגיאה",
         message: "יש להזין נושא משימה",
         mode: "error",
       });
-      return;
     }
 
     if (!form.due_date) {
-      setPopupData({
+      return setPopupData({
         title: "שגיאה",
         message: "יש לבחור תאריך יעד",
         mode: "error",
       });
-      return;
     }
 
     setConfirmPopup(true);
@@ -95,33 +96,30 @@ const EditTask = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.put(`${api}/tasks/edit/${id}`, form, {
-        withCredentials: true,
-      });
+      const res = await api.put(`/tasks/edit/${id}`, form);
 
-      if (res.data.Status) {
-        setConfirmPopup(false);
+      if (res.data.success || res.data.Status) {
         setPopupData({
           title: "הצלחה",
           message: "המשימה עודכנה בהצלחה!",
           mode: "success",
         });
       } else {
-        setConfirmPopup(false);
         setPopupData({
           title: "שגיאה",
-          message: res.data.Error || "שגיאה בעדכון המשימה",
+          message: res.data.message || res.data.Error || "שגיאה בעדכון המשימה",
           mode: "error",
         });
       }
     } catch (err) {
       console.error("שגיאה בעדכון משימה:", err);
-      setConfirmPopup(false);
       setPopupData({
         title: "שגיאה",
-        message: "שגיאה בחיבור לשרת",
+        message: "שגיאה בהתחברות לשרת",
         mode: "error",
       });
+    } finally {
+      setConfirmPopup(false);
     }
   };
 
@@ -205,6 +203,7 @@ const EditTask = () => {
         </div>
       </form>
 
+      {/* פופאפ הצלחה / שגיאה */}
       {popupData && (
         <Popup
           title={popupData.title}
@@ -220,6 +219,7 @@ const EditTask = () => {
         />
       )}
 
+      {/* פופאפ אישור */}
       {confirmPopup && (
         <Popup
           title="אישור עדכון משימה"

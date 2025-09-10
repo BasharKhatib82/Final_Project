@@ -1,10 +1,16 @@
+/**
+ * קומפוננטה: AddTask
+ * -----------------------
+ * 1. מאפשרת הוספת משימה חדשה.
+ * 2. כוללת שדות: נושא, תיאור, סטטוס, תאריך יעד, נציג.
+ * 3. כוללת אישור לפני שמירה, ופופאפ הצלחה/שגיאה.
+ */
+
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
 import { Popup } from "components/Tools";
-
-const api = process.env.REACT_APP_API_URL;
+import { api } from "utils";
 
 const AddTask = () => {
   const [form, setForm] = useState({
@@ -26,14 +32,12 @@ const AddTask = () => {
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${api}/users/active`, {
-        withCredentials: true,
-      });
-      if (res.data.Status) {
-        setUsers(res.data.Result || []);
+      const res = await api.get("/users/active");
+      if (res.data.success) {
+        setUsers(res.data.data || []);
       }
     } catch (err) {
-      console.error("שגיאה בטעינת עובדים:", err);
+      console.error("שגיאה בטעינת נציגים:", err);
     }
   };
 
@@ -46,21 +50,19 @@ const AddTask = () => {
     e.preventDefault();
 
     if (!form.task_title.trim()) {
-      setPopupData({
+      return setPopupData({
         title: "שגיאה",
         message: "יש להזין נושא משימה",
         mode: "error",
       });
-      return;
     }
 
     if (!form.due_date) {
-      setPopupData({
+      return setPopupData({
         title: "שגיאה",
         message: "יש לבחור תאריך יעד",
         mode: "error",
       });
-      return;
     }
 
     setConfirmPopup(true);
@@ -68,11 +70,9 @@ const AddTask = () => {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post(`${api}/tasks/add`, form, {
-        withCredentials: true,
-      });
+      const res = await api.post("/tasks/add", form);
 
-      if (res.data.Status) {
+      if (res.data.success || res.data.Status) {
         setConfirmPopup(false);
         setPopupData({
           title: "הצלחה",
@@ -83,16 +83,16 @@ const AddTask = () => {
         setConfirmPopup(false);
         setPopupData({
           title: "שגיאה",
-          message: res.data.Error || "שגיאה בהוספת המשימה",
+          message: res.data.message || res.data.Error || "שגיאה בהוספת המשימה",
           mode: "error",
         });
       }
     } catch (err) {
-      console.error("שגיאה:", err);
+      console.error("שגיאה בהוספת משימה:", err);
       setConfirmPopup(false);
       setPopupData({
         title: "שגיאה",
-        message: "שגיאה בחיבור לשרת",
+        message: "שגיאה בהתחברות לשרת",
         mode: "error",
       });
     }
@@ -178,6 +178,7 @@ const AddTask = () => {
         </div>
       </form>
 
+      {/* פופאפ הצלחה / שגיאה */}
       {popupData && (
         <Popup
           title={popupData.title}
@@ -193,6 +194,7 @@ const AddTask = () => {
         />
       )}
 
+      {/*  פופאפ אישור שמירת משימה*/}
       {confirmPopup && (
         <Popup
           title="אישור שמירת משימה"

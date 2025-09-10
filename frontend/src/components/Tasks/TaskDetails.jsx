@@ -1,10 +1,18 @@
+/**
+ * קומפוננטה: TaskDetails
+ * -----------------------
+ * 1. task_id מציגה פרטי משימה לפי מזהה (``).
+ * 2. מציגה תיעוד התקדמות המשימה.
+ * 3. מאפשרת הוספת תיעוד חדש + עדכון סטטוס המשימה.
+ * 4. כולל פופאפים להצלחה/שגיאה/אישור.
+ */
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import { AddSaveButton, NavigationButton } from "components/Buttons";
 import { Popup } from "components/Tools";
+import { api } from "utils";
 
-const api = process.env.REACT_APP_API_URL;
 const TaskDetails = () => {
   const { id } = useParams();
 
@@ -12,6 +20,7 @@ const TaskDetails = () => {
   const [progress, setProgress] = useState([]);
   const [newNote, setNewNote] = useState("");
   const [newStatus, setNewStatus] = useState("חדש");
+
   const [saving, setSaving] = useState(false);
   const [popupData, setPopupData] = useState(null);
   const [confirmPopup, setConfirmPopup] = useState(false);
@@ -23,27 +32,34 @@ const TaskDetails = () => {
 
   const fetchTask = async () => {
     try {
-      const res = await axios.get(`${api}/tasks/${id}`, {
-        withCredentials: true,
-      });
-      if (res.data.Status) {
-        setTask(res.data.Result);
-        setNewStatus(res.data.Result.status);
+      const res = await api.get(`/tasks/${id}`);
+      if (res.data.success || res.data.Status) {
+        const data = res.data.data || res.data.Result;
+        setTask(data);
+        setNewStatus(data.status);
       } else {
-        console.error("שגיאה בטעינת משימה:", res.data.Error);
+        setPopupData({
+          title: "שגיאה",
+          message: res.data.message || "שגיאה בטעינת פרטי המשימה",
+          mode: "error",
+        });
       }
     } catch (err) {
       console.error("שגיאה בטעינת משימה:", err);
+      setPopupData({
+        title: "שגיאה",
+        message: "שגיאה בהתחברות לשרת",
+        mode: "error",
+      });
     }
   };
 
   const fetchProgress = async () => {
     try {
-      const res = await axios.get(`${api}/tasks/progress/${id}`, {
-        withCredentials: true,
-      });
-      if (res.data.Status) {
-        setProgress(res.data.Result);
+      const res = await api.get(`/tasks/progress/${id}`);
+      if (res.data.success || res.data.Status) {
+        const data = res.data.data || res.data.Result;
+        setProgress(data || []);
       } else {
         console.error("שגיאה בטעינת התקדמות:", res.data.Error);
       }
@@ -53,28 +69,24 @@ const TaskDetails = () => {
   };
 
   const handleSaveNote = async () => {
-    if (newNote.trim() === "") {
-      setPopupData({
+    if (!newNote.trim()) {
+      return setPopupData({
         title: "שגיאה",
         message: "לא ניתן לשמור תיעוד ריק",
         mode: "error",
       });
-      return;
     }
 
     setSaving(true);
-    try {
-      const res = await axios.post(
-        `${api}/tasks/progress/add`,
-        {
-          task_id: id,
-          progress_note: newNote.trim(),
-          status: newStatus,
-        },
-        { withCredentials: true }
-      );
 
-      if (res.data.Status) {
+    try {
+      const res = await api.post("/tasks/progress/add", {
+        task_id: id,
+        progress_note: newNote.trim(),
+        status: newStatus,
+      });
+
+      if (res.data.success || res.data.Status) {
         setNewNote("");
         fetchProgress();
         fetchTask();
@@ -86,7 +98,7 @@ const TaskDetails = () => {
       } else {
         setPopupData({
           title: "שגיאה",
-          message: res.data.Error || "שגיאה בשמירת התיעוד",
+          message: res.data.message || res.data.Error || "שגיאה בשמירת התיעוד",
           mode: "error",
         });
       }
@@ -94,7 +106,7 @@ const TaskDetails = () => {
       console.error("שגיאה בשמירת תיעוד:", err);
       setPopupData({
         title: "שגיאה",
-        message: "שגיאה בשמירת תיעוד",
+        message: "שגיאה בחיבור לשרת",
         mode: "error",
       });
     } finally {
@@ -104,19 +116,22 @@ const TaskDetails = () => {
   };
 
   if (!task) {
-    return <div className="p-6 text-center">טוען משימה...</div>;
+    return <div className="p-6 text-center">טוען פרטי משימה...</div>;
   }
 
   return (
     <div className="p-6 max-w-4xl mx-auto font-rubik">
-      <div className="flex justify-center mb-2">
+      {/* כפתור ניווט */}
+      <div className="flex justify-center mb-4">
         <NavigationButton
           label="חזרה לרשימת משימות"
           linkTo="/dashboard/tasks"
         />
       </div>
-      <div className="bg-white rounded shadow p-6 text-gray-700 mb-6 space-y-4 text-right">
-        <div className="text-xl font-semibold text-blue-700 mb-4 text-center">
+
+      {/* פרטי משימה */}
+      <div className="bg-white rounded shadow p-6 text-gray-700 mb-6 text-right space-y-4">
+        <div className="text-xl font-semibold text-blue-700 text-center">
           פרטי משימה #{task.task_id}
         </div>
 
@@ -145,11 +160,7 @@ const TaskDetails = () => {
           </div>
           <div>
             <strong>תאריך יעד:</strong>{" "}
-            {new Date(task.due_date).toLocaleDateString("he-IL", {
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-            })}
+            {new Date(task.due_date).toLocaleDateString("he-IL")}
           </div>
           <div>
             <strong>נציג מטפל:</strong>{" "}
@@ -158,37 +169,30 @@ const TaskDetails = () => {
         </div>
       </div>
 
-      <h3 className="text-xl font-semibold text-blue-700 mt-8 mb-4 text-center">
+      {/* תיעוד התקדמות */}
+      <h3 className="text-xl font-semibold text-blue-700 mb-4 text-center">
         תיעוד התקדמות
       </h3>
 
       {progress.length === 0 ? (
         <div className="text-center text-gray-500 mb-4">אין תיעוד עד כה</div>
       ) : (
-        <div className="bg-white rounded shadow p-4 space-y-2 text-right text-gray-700 mb-4">
+        <div className="bg-white rounded shadow p-4 space-y-3 text-right text-gray-700 mb-6">
           {progress.map((p) => (
-            <div key={p.task_progress_id} className="border-b py-2 space-y-1">
+            <div key={p.task_progress_id} className="border-b py-2">
               <div>
-                <strong>סטטוס:</strong>{" "}
-                <span className="font-semibold">{p.status}</span>
+                <strong>סטטוס:</strong> {p.status}
               </div>
               <div>
-                <strong>תיעוד:</strong>{" "}
-                <span className="font-semibold">{p.progress_note}</span>
+                <strong>תיעוד:</strong> {p.progress_note}
               </div>
               <div className="text-sm text-gray-600 flex justify-between">
                 <div>
-                  <strong>עודכן ע"י:</strong>{" "}
-                  {p.user_name ? p.user_name : "מערכת"}
+                  <strong>עודכן ע"י:</strong> {p.user_name || "מערכת"}
                 </div>
                 <div>
                   <strong>תאריך:</strong>{" "}
-                  {new Date(p.update_time).toLocaleDateString("he-IL", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                  })}{" "}
-                  -{" "}
+                  {new Date(p.update_time).toLocaleDateString("he-IL")} -{" "}
                   {new Date(p.update_time).toLocaleTimeString("he-IL", {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -200,10 +204,12 @@ const TaskDetails = () => {
         </div>
       )}
 
+      {/* טופס תיעוד חדש */}
       <div className="bg-white rounded shadow p-4 mb-6 space-y-4">
-        <h4 className="text-lg font-semibold text-blue-700 mb-2 text-center">
+        <h4 className="text-lg font-semibold text-blue-700 text-center">
           הוסף תיעוד חדש
         </h4>
+
         <textarea
           className="w-full border border-gray-300 rounded px-3 py-2"
           rows="4"
@@ -213,7 +219,7 @@ const TaskDetails = () => {
         />
 
         <div>
-          <label className="block mb-1 font-semibold">סטטוס משימה:</label>
+          <label className="block mb-1 font-semibold">עדכן סטטוס משימה:</label>
           <select
             value={newStatus}
             onChange={(e) => setNewStatus(e.target.value)}
@@ -235,6 +241,7 @@ const TaskDetails = () => {
         </div>
       </div>
 
+      {/* פופאפים */}
       {popupData && (
         <Popup
           title={popupData.title}

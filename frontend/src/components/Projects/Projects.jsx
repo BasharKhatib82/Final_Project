@@ -15,7 +15,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { NavigationButton } from "components/Buttons";
-import { Popup } from "components/Tools";
+import { Popup, useUser } from "components/Tools";
 import { ReportProvider } from "../Reports/ReportContext";
 import ReportExport from "../Reports/ReportExport";
 import ReportEmail from "../Reports/ReportEmail";
@@ -28,6 +28,7 @@ const Projects = () => {
   const [popupData, setPopupData] = useState(null);
   const [projectToDelete, setProjectToDelete] = useState(null);
   const navigate = useNavigate();
+  const { user } = useUser();
 
   useEffect(() => {
     fetchProjects();
@@ -110,18 +111,24 @@ const Projects = () => {
   ];
 
   return (
-    <div className="p-6 text-right">
-      <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
-        רשימת פרויקטים
-      </h2>
+    <div className="p-4 text-right">
+      <header className="flex items-center justify-center py-0 my-0">
+        <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-2 text-center">
+          רשימת פרויקטים
+        </h2>
+      </header>
 
-      {/* סינון + כפתור הוספה */}
+      {/*  כפתור הוספה פרויקט */}
+      {user?.permission_add_lead === 1 && (
+        <div className="flex justify-start mb-2">
+          <NavigationButton
+            linkTo="/dashboard/add_project"
+            label="הוספת פרויקט חדש"
+          />
+        </div>
+      )}
+      {/* סרגל סינון תפקידים  */}
       <div className="rounded-lg bg-white/85 p-2 flex flex-wrap items-center gap-4 mb-4">
-        <NavigationButton
-          linkTo="/dashboard/add_project"
-          label="הוספת פרויקט חדש"
-        />
-
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -149,19 +156,17 @@ const Projects = () => {
             </button>
           )}
         </div>
-      </div>
 
-      {/* ייצוא ודוחות */}
-      <ReportProvider
-        title="רשימת פרויקטים"
-        columns={columns}
-        rows={filteredProjects}
-      >
-        <div className="flex items-center flex-wrap gap-4 bg-white/85 rounded-lg p-3 mb-4 shadow-sm">
+        {/* ייצוא ודוחות */}
+        <ReportProvider
+          title="רשימת פרויקטים"
+          columns={columns}
+          rows={filteredProjects}
+        >
           <ReportExport />
           <ReportEmail />
-        </div>
-      </ReportProvider>
+        </ReportProvider>
+      </div>
 
       {/* טבלה */}
       <div className="overflow-auto rounded-lg shadow-lg bg-white/85">
