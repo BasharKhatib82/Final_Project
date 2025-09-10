@@ -176,12 +176,12 @@ const Home = () => {
             const tasksCount =
               (user?.admin_alert_dash === 1 &&
                 stats?.tasks_by_user_status
-                  ?.filter((t) => t.status === "חדש")
+                  ?.filter((t) => t.status === "חדשה")
                   ?.reduce((sum, t) => sum + t.count, "")) ||
               (user?.user_alert_dash === 1 &&
                 stats?.tasks_by_user_status
                   ?.filter(
-                    (t) => t.user_id === user.user_id && t.status === "חדש"
+                    (t) => t.user_id === user.user_id && t.status === "חדשה"
                   )
                   ?.reduce((sum, t) => sum + t.count, ""));
             return (
