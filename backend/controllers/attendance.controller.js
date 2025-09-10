@@ -239,7 +239,7 @@ export async function checkIn(req, res) {
     const [insert] = await db.query(
       `INSERT INTO attendance (user_id, date, check_in, status)
        VALUES (?, ?, NOW(), ?)`,
-      [user_id, today, "עובד"]
+      [user_id, today, "נוכח"]
     );
 
     if (insert.affectedRows === 1) {

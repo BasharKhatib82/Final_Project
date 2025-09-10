@@ -109,7 +109,7 @@ const Home = () => {
             onClick={handleCheckIn}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
           >
-             החתמת כניסה
+            החתמת כניסה
           </button>
         )}
         {showCheckOut && (
@@ -117,7 +117,7 @@ const Home = () => {
             onClick={handleCheckOut}
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow"
           >
-             החתמת יציאה
+            החתמת יציאה
           </button>
         )}
       </div>
