@@ -162,9 +162,12 @@ const Projects = () => {
           title="רשימת פרויקטים"
           columns={columns}
           rows={filteredProjects}
+          pageSize={10}
         >
-          <ReportExport />
-          <ReportEmail />
+          <div className="flex items-center flex-wrap gap-4">
+            <ReportExport />
+            <ReportEmail />
+          </div>
         </ReportProvider>
       </div>
 
