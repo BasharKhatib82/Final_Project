@@ -308,6 +308,11 @@ export default function Tasks() {
         })),
       ],
     },
+    {
+      name: "created_at",
+      label: "טווח תאריכים",
+      type: "daterange",
+    },
   ];
 
   const defaultFilters = { status: "חדשה" };

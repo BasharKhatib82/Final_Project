@@ -382,6 +382,11 @@ export default function Leads() {
         })),
       ],
     },
+    {
+      name: "created_at",
+      label: "טווח תאריכים",
+      type: "daterange",
+    },
   ];
   const defaultFilters = { status: "חדשה" };
   return (
