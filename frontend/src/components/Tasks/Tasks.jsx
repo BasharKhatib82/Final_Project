@@ -12,7 +12,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
-import { NavigationButton, Popup, useUser } from "components/Tools";
+import { NavigationButton } from "components/Buttons";
+import { Popup, useUser } from "components/Tools";
 import ReportView from "../Reports/ReportView";
 import { api, extractApiError } from "utils";
 
