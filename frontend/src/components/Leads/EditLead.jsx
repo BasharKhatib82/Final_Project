@@ -1,14 +1,24 @@
+// frontend/src/pages/Leads/EditLead.jsx
+
+/**
+ * קומפוננטה: EditLead
+ * ---------------------
+ * - עריכת פרטי פנייה קיימת.
+ * - טוען פרויקטים, משתמשים, ושדות של הפנייה לעריכה.
+ * - מאפשר עדכון של סטטוס, נציג, פרויקט, פרטי לקוח.
+ * - שמירה מתבצעת רק לאחר אישור המשתמש.
+ */
+
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
 import { AddSaveButton, ExitButton } from "components/Buttons";
 import { Popup } from "components/Tools";
+import { api, extractApiError } from "utils";
 
-const api = process.env.REACT_APP_API_URL;
-
-const EditLead = () => {
+export default function EditLead() {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     phone_number: "",
     first_name: "",
@@ -20,6 +30,7 @@ const EditLead = () => {
     user_id: "",
     created_at: "",
   });
+
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
@@ -34,70 +45,64 @@ const EditLead = () => {
 
   const fetchLead = async () => {
     try {
-      const res = await axios.get(`${api}/leads/${id}`, {
-        withCredentials: true,
-      });
+      const res = await api.get(`/leads/${id}`);
       if (res.data.success) {
         setForm(res.data.data);
       } else {
-        console.error("שגיאה בטעינת הפנייה:", res.data.message);
+        setError(res.data.message || "שגיאה בטעינת הפנייה");
       }
     } catch (err) {
-      console.error("שגיאה בטעינת הפנייה:", err);
+      setError(extractApiError(err, "שגיאה בטעינת הפנייה"));
     }
   };
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get(`${api}/projects/active`, {
-        withCredentials: true,
-      });
-      setProjects(res.data.data);
+      const res = await api.get("/projects/active");
+      setProjects(res.data.data || []);
     } catch (err) {
-      console.error("שגיאה בטעינת פרויקטים:", err);
+      setError(extractApiError(err, "שגיאה בטעינת פרויקטים"));
     }
   };
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${api}/users/active`, {
-        withCredentials: true,
-      });
-      setUsers(res.data.data);
+      const res = await api.get("/users/active");
+      setUsers(res.data.data || []);
     } catch (err) {
-      console.error("שגיאה בטעינת עובדים:", err);
+      setError(extractApiError(err, "שגיאה בטעינת עובדים"));
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleConfirm = (e) => {
     e.preventDefault();
+
     if (!form.phone_number || !form.project_id || !form.status) {
       setError("נא למלא את כל השדות החובה");
       return;
     }
+
+    setError("");
     setShowConfirmPopup(true);
   };
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.put(`${api}/leads/edit/${id}`, form, {
-        withCredentials: true,
-      });
+      const res = await api.put(`/leads/edit/${id}`, form);
       if (res.data.success) {
-        setShowConfirmPopup(false);
         setSuccessPopup(true);
+        setShowConfirmPopup(false);
       } else {
-        setError(res.data.Error || "שגיאה בעדכון פנייה");
+        setError(res.data.message || "שגיאה בעדכון פנייה");
         setShowConfirmPopup(false);
       }
     } catch (err) {
-      console.error("שגיאה בעדכון פנייה:", err);
-      setError("שגיאה בעדכון פנייה");
+      setError(extractApiError(err, "שגיאה בעדכון פנייה"));
       setShowConfirmPopup(false);
     }
   };
@@ -193,9 +198,9 @@ const EditLead = () => {
             className="w-full border p-2 rounded"
           >
             <option value="">בחר פרויקט</option>
-            {projects.map((project) => (
-              <option key={project.project_id} value={project.project_id}>
-                {project.project_name}
+            {projects.map((p) => (
+              <option key={p.project_id} value={p.project_id}>
+                {p.project_name}
               </option>
             ))}
           </select>
@@ -210,9 +215,9 @@ const EditLead = () => {
             className="w-full border p-2 rounded"
           >
             <option value="">ללא נציג</option>
-            {users.map((user) => (
-              <option key={user.user_id} value={user.user_id}>
-                {user.first_name} {user.last_name}
+            {users.map((u) => (
+              <option key={u.user_id} value={u.user_id}>
+                {u.first_name} {u.last_name}
               </option>
             ))}
           </select>
@@ -222,6 +227,7 @@ const EditLead = () => {
           <label className="block mb-1 font-semibold">תאריך יצירה:</label>
           <input
             type="text"
+            readOnly
             value={
               form.created_at
                 ? `${new Date(form.created_at).toLocaleDateString("he-IL", {
@@ -230,11 +236,13 @@ const EditLead = () => {
                     year: "numeric",
                   })} - שעה: ${new Date(form.created_at).toLocaleTimeString(
                     "he-IL",
-                    { hour: "2-digit", minute: "2-digit" }
+                    {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }
                   )}`
                 : ""
             }
-            readOnly
             className="w-full border p-2 rounded bg-gray-100 text-gray-600"
           />
         </div>
@@ -247,6 +255,7 @@ const EditLead = () => {
         </div>
       </form>
 
+      {/* אישור עדכון פנייה  */}
       {showConfirmPopup && (
         <Popup
           title="אישור עדכון"
@@ -257,6 +266,7 @@ const EditLead = () => {
         />
       )}
 
+      {/* "הודעת הצלחה "עדכון פנייה */}
       {successPopup && (
         <Popup
           title="הצלחה"
@@ -270,6 +280,4 @@ const EditLead = () => {
       )}
     </div>
   );
-};
-
-export default EditLead;
+}

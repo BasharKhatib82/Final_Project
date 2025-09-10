@@ -1,17 +1,31 @@
+// frontend/src/pages/Leads/AddLead.jsx
+
+/**
+ * קומפוננטה: AddLead
+ * -------------------
+ * מטרות:
+ * 1. יצירת פנייה חדשה.
+ * 2. אם קיים לקוח לפי טלפון → השלמת שדות אוטומטית.
+ * 3. אפשרות שיוך לפרויקט ונציג.
+ * 4. שמירה עם אישור משתמש.
+ */
+
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
-import { Popup,useUser } from "components/Tools";
+import { Popup } from "components/Tools";
+import { api, extractApiError } from "utils";
 
-const api = process.env.REACT_APP_API_URL;
-
-const AddLead = () => {
+export default function AddLead() {
   const navigate = useNavigate();
-  const { user } = useUser();
 
   const [projects, setProjects] = useState([]);
   const [users, setUsers] = useState([]);
+  const [clientExists, setClientExists] = useState(false);
+  const [error, setError] = useState("");
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  const [successPopup, setSuccessPopup] = useState(false);
+
   const [form, setForm] = useState({
     phone_number: "",
     project_id: "",
@@ -23,11 +37,6 @@ const AddLead = () => {
     user_id: null,
   });
 
-  const [clientExists, setClientExists] = useState(false);
-  const [error, setError] = useState("");
-  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
-  const [successPopup, setSuccessPopup] = useState(false);
-
   useEffect(() => {
     fetchProjects();
     fetchUsers();
@@ -35,32 +44,27 @@ const AddLead = () => {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get(`${api}/projects/active`, {
-        withCredentials: true,
-      });
-      setProjects(res.data.data);
+      const res = await api.get("/projects/active");
+      setProjects(res.data.data || []);
     } catch (err) {
-      console.error("Error loading projects:", err);
+      setError(extractApiError(err, "שגיאה בטעינת פרויקטים"));
     }
   };
 
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${api}/users/active`, {
-        withCredentials: true,
-      });
-      setUsers(res.data.data);
+      const res = await api.get("/users/active");
+      setUsers(res.data.data || []);
     } catch (err) {
-      console.error("Error loading users:", err);
+      setError(extractApiError(err, "שגיאה בטעינת נציגים"));
     }
   };
 
   const handlePhoneBlur = async () => {
+    if (!form.phone_number) return;
+
     try {
-      const res = await axios.get(
-        `${api}/clients/by-phone/${form.phone_number}`,
-        { withCredentials: true }
-      );
+      const res = await api.get(`/clients/by-phone/${form.phone_number}`);
       if (res.data.success) {
         const c = res.data.data;
         setForm((prev) => ({
@@ -76,39 +80,47 @@ const AddLead = () => {
         setClientExists(false);
       }
     } catch (err) {
-      console.error("Error checking client:", err);
+      console.error("שגיאה בבדיקת לקוח:", err);
     }
   };
 
   const handleConfirm = (e) => {
     e.preventDefault();
-    if (!form.phone_number || !form.project_id || !form.status) {
+
+    //  ולידציה בסיסית למילוי טופס
+    if (
+      !form.phone_number ||
+      !form.project_id ||
+      !form.status ||
+      (!clientExists &&
+        (!form.first_name || !form.last_name || !form.email || !form.city))
+    ) {
       setError("נא למלא את כל השדות החובה");
       return;
     }
+
+    setError("");
     setShowConfirmPopup(true);
   };
 
   const handleSubmit = async () => {
-    const leadData = {
-      ...form,
-      user_id: form.user_id || null,
-    };
-
     try {
-      const res = await axios.post(`${api}/leads/add`, leadData, {
-        withCredentials: true,
-      });
+      const leadData = {
+        ...form,
+        user_id: form.user_id || null,
+      };
+
+      const res = await api.post("/leads/add", leadData);
+
       if (res.data.success) {
-        setShowConfirmPopup(false);
         setSuccessPopup(true);
+        setShowConfirmPopup(false);
       } else {
-        setError(res.data.message || "שגיאה בשמירת פנייה");
+        setError(res.data?.message || "שגיאה בשמירת הפנייה");
         setShowConfirmPopup(false);
       }
     } catch (err) {
-      console.error("Error submitting lead:", err);
-      setError("שגיאה בשמירת פנייה");
+      setError(extractApiError(err, "שגיאה בשמירת הפנייה"));
       setShowConfirmPopup(false);
     }
   };
@@ -127,7 +139,7 @@ const AddLead = () => {
           <label className="block mb-1 font-semibold">מספר טלפון:</label>
           <input
             type="text"
-            className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-gray-400"
+            className="w-full border border-gray-300 rounded px-3 py-2"
             value={form.phone_number}
             onChange={(e) => setForm({ ...form, phone_number: e.target.value })}
             onBlur={handlePhoneBlur}
@@ -170,6 +182,7 @@ const AddLead = () => {
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
             </div>
+
             <div>
               <label className="block mb-1 font-semibold">עיר:</label>
               <input
@@ -235,16 +248,18 @@ const AddLead = () => {
         </div>
       </form>
 
+      {/* אישור שמירת פנייה חדשה */}
       {showConfirmPopup && (
         <Popup
           title="אישור שמירה"
-          message="האם אתה בטוח שברצונך לשמור את הפנייה?"
+          message="האם לשמור את הפנייה?"
           mode="confirm"
           onConfirm={handleSubmit}
           onClose={() => setShowConfirmPopup(false)}
         />
       )}
 
+      {/* "הודעת הצלחה "יצירת פנייה */}
       {successPopup && (
         <Popup
           title="הצלחה"
@@ -258,6 +273,4 @@ const AddLead = () => {
       )}
     </div>
   );
-};
-
-export default AddLead;
+}

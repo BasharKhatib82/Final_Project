@@ -1,10 +1,10 @@
+// frontend/src/pages/Leads/LeadDetails.jsx
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
-import { AddSaveButton ,NavigationButton } from "components/Buttons";
-import { Popup, useUser} from "components/Tools";
-
-const api = process.env.REACT_APP_API_URL;
+import { AddSaveButton, NavigationButton } from "components/Buttons";
+import { Popup, useUser } from "components/Tools";
+import { api, extractApiError } from "utils";
 
 const LeadDetails = () => {
   const { id } = useParams();
@@ -25,32 +25,44 @@ const LeadDetails = () => {
 
   const fetchLead = async () => {
     try {
-      const res = await axios.get(`${api}/leads/${id}`, {
-        withCredentials: true,
-      });
+      const res = await api.get(`/leads/${id}`);
       if (res.data.success) {
         setLead(res.data.data);
-        setNewStatus(res.data.data.status); // ✅ נעדכן גם את סטטוס הפנייה
+        setNewStatus(res.data.data.status);
       } else {
-        console.error("שגיאה בטעינת הפנייה:", res.data.Error);
+        setPopupData({
+          title: "שגיאה",
+          message: res.data.message || "שגיאה בטעינת הפנייה",
+          mode: "error",
+        });
       }
     } catch (err) {
-      console.error("שגיאה בטעינת הפנייה:", err);
+      setPopupData({
+        title: "שגיאה",
+        message: extractApiError(err, "שגיאה בטעינת הפנייה"),
+        mode: "error",
+      });
     }
   };
 
   const fetchProgress = async () => {
     try {
-      const res = await axios.get(`${api}/leads/progress/${id}`, {
-        withCredentials: true,
-      });
+      const res = await api.get(`/leads/progress/${id}`);
       if (res.data.success) {
         setProgress(res.data.data);
       } else {
-        console.error("שגיאה בטעינת התקדמות:", res.data.message);
+        setPopupData({
+          title: "שגיאה",
+          message: res.data.message || "שגיאה בטעינת תיעודים",
+          mode: "error",
+        });
       }
     } catch (err) {
-      console.error("שגיאה בטעינת התקדמות:", err);
+      setPopupData({
+        title: "שגיאה",
+        message: extractApiError(err, "שגיאה בטעינת תיעודים"),
+        mode: "error",
+      });
     }
   };
 
@@ -66,21 +78,17 @@ const LeadDetails = () => {
 
     setSaving(true);
     try {
-      const res = await axios.post(
-        `${api}/leads/progress/add`,
-        {
-          lead_id: id,
-          lead_note: newNote.trim(),
-          status: newStatus,
-          user_id: user.user_id,
-        },
-        { withCredentials: true }
-      );
+      const res = await api.post("/leads/progress/add", {
+        lead_id: id,
+        lead_note: newNote.trim(),
+        status: newStatus,
+        user_id: user.user_id,
+      });
 
       if (res.data.success) {
         setNewNote("");
-        await fetchProgress(); // ✅ נטען מחדש את התיעודים
-        await fetchLead(); // ✅ נטען מחדש את הפנייה (סטטוס למעלה)
+        await fetchProgress();
+        await fetchLead();
         setPopupData({
           title: "הצלחה",
           message: "התיעוד נשמר בהצלחה!",
@@ -89,15 +97,14 @@ const LeadDetails = () => {
       } else {
         setPopupData({
           title: "שגיאה",
-          message: res.data.message || "שגיאה בשמירת התיעוד",
+          message: res.data.message || "שגיאה בשמירת תיעוד",
           mode: "error",
         });
       }
     } catch (err) {
-      console.error("שגיאה בשמירת תיעוד:", err);
       setPopupData({
         title: "שגיאה",
-        message: "שגיאה בשמירת תיעוד",
+        message: extractApiError(err, "שגיאה בשמירת תיעוד"),
         mode: "error",
       });
     } finally {
@@ -106,13 +113,11 @@ const LeadDetails = () => {
     }
   };
 
-  if (!lead) {
-    return <div className="p-6 text-center">טוען פנייה...</div>;
-  }
+  if (!lead) return <div className="p-6 text-center">טוען פנייה...</div>;
 
   return (
     <div className="p-6 max-w-4xl mx-auto font-rubik">
-      <div className="flex justify-center mb-2 ">
+      <div className="flex justify-center mb-2">
         <NavigationButton label="חזרה לרשימת פניות" linkTo="/dashboard/leads" />
       </div>
 
@@ -186,17 +191,14 @@ const LeadDetails = () => {
           {progress.map((p) => (
             <div key={p.lead_progress_id} className="border-b py-2 space-y-1">
               <div>
-                <strong>סטטוס:</strong>{" "}
-                <span className="font-semibold">{p.status}</span>
+                <strong>סטטוס:</strong> {p.status}
               </div>
               <div>
-                <strong>תיעוד:</strong>{" "}
-                <span className="font-semibold">{p.lead_note}</span>
+                <strong>תיעוד:</strong> {p.lead_note}
               </div>
               <div className="text-sm text-gray-600 flex justify-between">
                 <div>
-                  <strong>עודכן ע"י:</strong>{" "}
-                  {p.user_name ? p.user_name : "מערכת"}
+                  <strong>עודכן ע"י:</strong> {p.user_name || "מערכת"}
                 </div>
                 <div>
                   <strong>תאריך:</strong>{" "}
@@ -221,6 +223,7 @@ const LeadDetails = () => {
         <h4 className="text-lg font-semibold text-blue-700 mb-2 text-center">
           הוסף תיעוד חדש
         </h4>
+
         <textarea
           className="w-full border border-gray-300 rounded px-3 py-2"
           rows="4"
