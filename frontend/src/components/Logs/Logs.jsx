@@ -16,7 +16,6 @@ import ReportView from "../Reports/ReportView";
 export default function Logs() {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [popup, setPopup] = useState(null);
 
   const [filters, setFilters] = useState({
     date: [], // [from, to]
@@ -44,12 +43,6 @@ export default function Logs() {
       }
     } catch (err) {
       console.error("שגיאה בטעינת לוגים:", err);
-      setPopup({
-        title: "שגיאה",
-        message: "שגיאה בטעינת לוגים",
-        mode: "error",
-        show: true,
-      });
     } finally {
       setLoading(false);
     }
