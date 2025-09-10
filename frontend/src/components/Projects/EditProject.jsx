@@ -118,15 +118,22 @@ const EditProject = () => {
           />
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            type="checkbox"
+        <div>
+          <label className="block mb-1 font-medium">סטטוס הפרויקט</label>
+          <select
             name="is_active"
-            checked={form.is_active === 1}
-            onChange={handleChange}
-            className="accent-blue-500"
-          />
-          <label className="text-sm">הפרויקט פעיל</label>
+            value={form.is_active}
+            onChange={(e) =>
+              setForm((prev) => ({
+                ...prev,
+                is_active: Number(e.target.value),
+              }))
+            }
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+          >
+            <option value={1}>פעיל</option>
+            <option value={0}>לא פעיל</option>
+          </select>
         </div>
 
         <div className="flex justify-center gap-4 mt-6">
