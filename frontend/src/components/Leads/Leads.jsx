@@ -494,7 +494,7 @@ const Leads = () => {
                           onClick={() =>
                             navigate(`/dashboard/edit_lead/${lead.lead_id}`)
                           }
-                          className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+                          className="flex items-center gap-2 bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 "
                         >
                           <Icon
                             icon="fluent-color:edit-32"
@@ -506,7 +506,7 @@ const Leads = () => {
                         {lead.status !== "בוטלה" && (
                           <button
                             onClick={() => setLeadToDelete(lead.lead_id)}
-                            className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                            className="flex items-center gap-2 bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
                           >
                             <Icon
                               icon="streamline-color:recycle-bin-2-flat"
