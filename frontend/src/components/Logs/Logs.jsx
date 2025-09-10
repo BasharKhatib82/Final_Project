@@ -5,47 +5,56 @@
  * -----------------------------
  * 1. מציגה את כל הלוגים שנרשמו במערכת (מי עשה מה ומתי).
  * 2. מאפשרת חיפוש לפי שם עובד / פעולה.
- * 3. מאפשרת סינון לפי תאריכים: מתאריך / עד תאריך.
- * 4. תומכת בייצוא ל־Excel / PDF ושליחה במייל.
- * 5. משתמשת בקומפוננטת ReportView להצגה מרכזית.
+ * 3. daterange מאפשרת סינון לפי טווח תאריכים .
+ * 4. ושליחה במייל Excel / PDF תמיכה בייצוא ל- .
  */
 
 import React, { useEffect, useState } from "react";
 import { api } from "utils";
 import ReportView from "../Reports/ReportView";
 
-const Logs = () => {
+export default function Logs() {
   const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [popup, setPopup] = useState(null);
 
-  const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
-    from: "",
-    to: "",
+    date: [], // [from, to]
   });
 
-  // שליפת הלוגים מהשרת
+  const [searchTerm, setSearchTerm] = useState("");
+
   useEffect(() => {
     fetchLogs();
-  }, [searchTerm, filters.from, filters.to]);
+  }, [filters, searchTerm]);
 
   const fetchLogs = async () => {
+    setLoading(true);
     try {
       const res = await api.get("/logs", {
         params: {
+          from: filters.date?.[0],
+          to: filters.date?.[1],
           search: searchTerm,
-          from: filters.from,
-          to: filters.to,
         },
       });
+
       if (res.data.success) {
         setLogs(res.data.data || []);
       }
     } catch (err) {
-      console.error("❌ שגיאה בטעינת לוגים:", err);
+      console.error("שגיאה בטעינת לוגים:", err);
+      setPopup({
+        title: "שגיאה",
+        message: "שגיאה בטעינת לוגים",
+        mode: "error",
+        show: true,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // הגדרת עמודות
   const columns = [
     {
       key: "log_id",
@@ -84,36 +93,34 @@ const Logs = () => {
     },
   ];
 
-  // הגדרת פילטרים (תאריכים)
   const filtersDef = [
     {
-      name: "from",
-      label: "מתאריך",
-      type: "date",
-    },
-    {
-      name: "to",
-      label: "עד תאריך",
-      type: "date",
+      name: "date",
+      label: "טווח תאריכים",
+      type: "daterange",
     },
   ];
 
   return (
-    <div className="p-6 text-right">
-      <ReportView
-        title="יומן פעולות - תיעוד מערכת"
-        columns={columns}
-        rows={logs}
-        filtersDef={filtersDef}
-        searchableKeys={["user_name", "action"]}
-        pageSize={12}
-        searchPlaceholder="חיפוש לפי שם עובד או פעולה..."
-        emailApiBase={api.defaults.baseURL}
-        filtersVariant="inline"
-        defaultFilters={filters}
-      />
+    <div className="flex flex-col flex-1 p-6 text-right">
+      {loading ? (
+        <div className="text-center text-gray-600">טוען יומן פעולות...</div>
+      ) : (
+        <ReportView
+          title="יומן פעולות - תיעוד מערכת"
+          columns={columns}
+          rows={logs}
+          filtersDef={filtersDef}
+          searchableKeys={["user_name", "action"]}
+          pageSize={12}
+          emailApiBase={api.defaults.baseURL}
+          searchPlaceholder="חיפוש לפי שם עובד או פעולה..."
+          filtersVariant="inline"
+          defaultFilters={filters}
+          onFiltersChange={setFilters}
+          onSearchChange={setSearchTerm}
+        />
+      )}
     </div>
   );
-};
-
-export default Logs;
+}
