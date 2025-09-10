@@ -1,11 +1,25 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { Popup, useUser } from "components/Tools";
+/**
+ * קומפוננטה: Profile (הגדרות חשבון)
+ * ----------------------------------
+ * מטרות:
+ * 1. הצגת פרטי המשתמש המחובר (שם, אימייל, תפקיד, טלפון).
+ * 2. עדכון אימייל ומספר טלפון.
+ * 3. שינוי סיסמה עם אימות סיסמה נוכחית.
+ * 4. Popup הצגת הודעות הצלחה/שגיאה עם .
+ *
+ * עזרים:
+ * - useUser (קבלת פרטי המשתמש)
+ * - api (קריאות לשרת)
+ * - Popup (הודעות)
+ */
 
-const api = process.env.REACT_APP_API_URL;
+import React, { useEffect, useState } from "react";
+import { Popup, useUser } from "components/Tools";
+import { api } from "utils";
 
 const Profile = () => {
   const { user } = useUser();
+
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -17,7 +31,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [popupData, setPopupData] = useState(null);
 
-  // 🔑 שינוי סיסמה
+  // שינוי סיסמה
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
@@ -29,11 +43,10 @@ const Profile = () => {
     fetchUserProfile();
   }, []);
 
+  //  שליפת פרטי המשתמש מהשרת
   const fetchUserProfile = async () => {
     try {
-      const res = await axios.get(`${api}/users/${user.user_id}`, {
-        withCredentials: true,
-      });
+      const res = await api.get(`/users/${user.user_id}`);
       if (res.data.success) {
         setFormData(res.data.data);
       }
@@ -54,15 +67,14 @@ const Profile = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  //  שליחת עדכון פרטי משתמש
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`${api}/users/${user.user_id}`, formData, {
-        withCredentials: true,
-      });
+      await api.put(`/users/${user.user_id}`, formData);
       setPopupData({
         title: "הצלחה",
-        message: "🎉 פרטי המשתמש עודכנו בהצלחה",
+        message: "פרטי המשתמש עודכנו בהצלחה",
         mode: "success",
       });
     } catch (err) {
@@ -75,6 +87,7 @@ const Profile = () => {
     }
   };
 
+  //  שליחת בקשה לשינוי סיסמה
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (passwordData.newPassword !== passwordData.confirmPassword) {
@@ -84,15 +97,12 @@ const Profile = () => {
         mode: "error",
       });
     }
+
     try {
-      await axios.put(
-        `${api}/users/change-password/${user.user_id}`,
-        passwordData,
-        { withCredentials: true }
-      );
+      await api.put(`/users/change-password/${user.user_id}`, passwordData);
       setPopupData({
         title: "הצלחה",
-        message: "🔑 הסיסמה עודכנה בהצלחה",
+        message: "הסיסמה עודכנה בהצלחה",
         mode: "success",
       });
       setPasswordData({
@@ -120,7 +130,7 @@ const Profile = () => {
         הגדרות חשבון
       </h2>
 
-      {/* טופס עדכון פרטי קשר */}
+      {/* טופס פרטי קשר */}
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-1 font-medium">שם פרטי:</label>
@@ -128,7 +138,7 @@ const Profile = () => {
             type="text"
             value={formData.first_name}
             disabled
-            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
+            className="w-full border rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
           />
         </div>
 
@@ -138,7 +148,7 @@ const Profile = () => {
             type="text"
             value={formData.last_name}
             disabled
-            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
+            className="w-full border rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
           />
         </div>
 
@@ -148,7 +158,7 @@ const Profile = () => {
             type="text"
             value={formData.role_name}
             disabled
-            className="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
+            className="w-full border rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
           />
         </div>
 
@@ -159,7 +169,7 @@ const Profile = () => {
             name="email"
             value={formData.email || ""}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2"
           />
         </div>
 
@@ -170,7 +180,7 @@ const Profile = () => {
             name="phone_number"
             value={formData.phone_number || ""}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2"
+            className="w-full border rounded px-3 py-2"
           />
         </div>
 
@@ -182,14 +192,14 @@ const Profile = () => {
         </button>
       </form>
 
-      {/* 🔑 כפתור הצגת טופס שינוי סיסמה */}
+      {/* שינוי סיסמה */}
       <div className="mt-6 text-center">
         {!showPasswordForm ? (
           <button
             onClick={() => setShowPasswordForm(true)}
             className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
           >
-            🔑 שינוי סיסמה
+            שינוי סיסמה
           </button>
         ) : (
           <div className="mt-4 p-4 border rounded bg-gray-50 space-y-3">
@@ -203,7 +213,7 @@ const Profile = () => {
                   currentPassword: e.target.value,
                 })
               }
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border rounded px-3 py-2"
             />
             <input
               type="password"
@@ -215,7 +225,7 @@ const Profile = () => {
                   newPassword: e.target.value,
                 })
               }
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border rounded px-3 py-2"
             />
             <input
               type="password"
@@ -227,7 +237,7 @@ const Profile = () => {
                   confirmPassword: e.target.value,
                 })
               }
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border rounded px-3 py-2"
             />
 
             <div className="flex gap-3">
@@ -248,13 +258,14 @@ const Profile = () => {
         )}
       </div>
 
-      {/* 🔔 פופאפ */}
+      {/* פופאפ הודעה */}
       {popupData && (
         <Popup
           title={popupData.title}
           message={popupData.message}
           mode={popupData.mode}
           onClose={handleClosePopup}
+          autoClose={true}
         />
       )}
     </div>

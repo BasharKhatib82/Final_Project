@@ -1,5 +1,14 @@
 // frontend/src/pages/Leads/LeadDetails.jsx
 
+/**
+ * קומפוננטה: LeadDetails
+ * -----------------------
+ * 1. lead_id מציגה פרטי פנייה לפי מזהה .
+ * 2. מציגה תיעוד התקדמות פנייה.
+ * 3. מאפשרת הוספת תיעוד חדש + עדכון סטטוס הפנייה.
+ * 4. כולל פופאפים להצלחה/שגיאה/אישור.
+ */
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AddSaveButton, NavigationButton } from "components/Buttons";
