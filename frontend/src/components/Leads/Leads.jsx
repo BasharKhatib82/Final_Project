@@ -181,7 +181,12 @@ export default function Leads() {
 
   const bulkAssignBar = (
     <div className="flex flex-wrap items-center gap-4">
-      <label className="text-sm font-semibold">שיוך מרובה:</label>
+      <Icon
+        icon="icon-park:four-round-point-connection"
+        width="1.5em"
+        height="1.5em"
+      />
+      <label className="text-sm">שיוך מרובה:</label>
       <select
         value={bulkUserId}
         onChange={(e) => setBulkUserId(e.target.value)}
