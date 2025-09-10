@@ -1,3 +1,22 @@
+/**
+ * קובץ: MyRoutes.jsx
+ * ------------------
+ * אחראי על ניהול הניווט (Routing) בין כל דפי המערכת:
+ *
+ *  דפי מערכת כלליים:
+ * - דף הבית, אודות, צור קשר, התחברות, שחזור סיסמה
+ *
+ *  דפי לוח ניהול (Dashboard):
+ * - תפקידים, משתמשים, נוכחות, לידים, פרויקטים, משימות, לוגים, פרופיל
+ *
+ *  דף הרשאה חסרה + טיפול בהתנתקות אוטומטית
+ *
+ *  תלות:
+ * - react-router-dom
+ * - useInactivityLogout – מנתק משתמש לא פעיל
+ * - Header, Footer, כל דפי המשנה (Pages, Dashboard, etc.)
+ */
+
 import { Routes, Route } from "react-router-dom";
 import HomePage from "./Pages/HomePage";
 import About from "./Pages/About";
@@ -41,6 +60,7 @@ import Unauthorized from "./Pages/Unauthorized";
 import Footer from "./Pages/Footer";
 import EditTask from "./Tasks/EditTask";
 import TaskDetails from "./Tasks/TaskDetails";
+import NotFound from "./Pages/NotFound";
 
 import useInactivityLogout from "../utils/useInactivityLogout.js";
 
@@ -48,7 +68,7 @@ function MyRoutes() {
   useInactivityLogout();
   return (
     <div className="min-h-screen flex flex-col ">
-      {/* Header - גובה קבוע, לא תופס מקום נוסף . */}
+      {/* Header */}
       <header className="shrink-0">
         <Header />
       </header>
@@ -91,6 +111,7 @@ function MyRoutes() {
             <Route path="profile" element={<Profile />} />
           </Route>
           <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 

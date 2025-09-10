@@ -1,3 +1,17 @@
+/**
+ * קובץ: MyRoutes.jsx
+ * -------------------
+ * Client Side Routing אחראי על ניתוב כל הדפים באפליקציה .
+ *
+ * תכונות:
+ * -  react-router-dom מ <Route> ו <Routes>משתמש ב ־ .
+ * - כולל ניתוב:
+ *    - דפי מערכת ציבוריים: דף הבית, אודות, צור קשר, התחברות וכו'.
+ *    - דפים פנימיים בדשבורד: משתמשים, תפקידים, נוכחות, לידים, משימות, פרויקטים וכו'.
+ * - Header, Footer : כולל קומפוננטות קבועות .
+ * - ניתוק אוטומטי בעת חוסר פעילות useInactivityLogout משלב  .
+ */
+
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
