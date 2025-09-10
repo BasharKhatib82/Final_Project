@@ -76,6 +76,7 @@ const Profile = () => {
         title: "הצלחה",
         message: "פרטי המשתמש עודכנו בהצלחה",
         mode: "success",
+        
       });
     } catch (err) {
       console.error("שגיאה בעדכון פרטי משתמש:", err);
@@ -265,7 +266,7 @@ const Profile = () => {
           message={popupData.message}
           mode={popupData.mode}
           onClose={handleClosePopup}
-          autoClose={3000}
+          autoClose={2500}
         />
       )}
     </div>

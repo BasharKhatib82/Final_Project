@@ -101,7 +101,7 @@ export default function Projects() {
       export: (r) => (r.active === 1 ? "פעיל" : "לא פעיל"),
     },
   ];
-
+  const defaultFilters = { active: "true" };
   //  תנאי להצגת פעולות רק אם יש הרשאה
   if (
     user?.permission_edit_project === 1 ||
@@ -170,6 +170,7 @@ export default function Projects() {
             />
           )
         }
+        defaultFilters={defaultFilters}
       />
 
       {/* פופאפ מחיקה */}
