@@ -241,7 +241,7 @@ export default function Roles() {
           rows={allRoles}
           filtersDef={filtersDef}
           searchableKeys={["role_name"]}
-          pageSize={25}
+          pageSize={10}
           emailApiBase={process.env.REACT_APP_API_URL}
           addButton={
             user?.permission_add_role === 1 && (

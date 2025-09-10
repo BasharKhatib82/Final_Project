@@ -209,7 +209,7 @@ export default function Attendance() {
           rows={attendance}
           filtersDef={filtersDef}
           searchableKeys={["status", "notes", "full_name"]}
-          pageSize={25}
+          pageSize={10}
           emailApiBase={api.defaults.baseURL}
           addButton={
             user?.permission_add_attendance === 1 ? (

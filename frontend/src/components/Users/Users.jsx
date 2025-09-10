@@ -201,7 +201,7 @@ export default function Users() {
           rows={allUsers}
           filtersDef={filtersDef}
           searchableKeys={["first_name", "last_name", "email", "role_name"]}
-          pageSize={25}
+          pageSize={10}
           emailApiBase={process.env.REACT_APP_API_URL}
           addButton={
             user?.permission_add_user === 1 && (

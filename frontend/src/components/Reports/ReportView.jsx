@@ -15,7 +15,7 @@ export default function ReportView({
   rows,
   filtersDef = [],
   searchableKeys = [],
-  pageSize = 20,
+  pageSize = 10,
   addButton,
   emailApiBase = ENV_API_BASE,
   defaultFilters = {},
