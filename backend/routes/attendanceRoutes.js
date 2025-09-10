@@ -38,4 +38,8 @@ router.post("/check-in", checkIn);
 /** POST /attendance/check-out – החתמת יציאה להיום */
 router.post("/check-out", checkOut);
 
+/** GET /attendance/status – החתמה יומית נוכחית */
+router.get("/status", getTodayAttendanceStatus);
+
+
 export default router;

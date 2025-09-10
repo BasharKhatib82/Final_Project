@@ -316,3 +316,41 @@ export async function checkOut(req, res) {
   }
 }
 
+export async function getTodayAttendanceStatus(req, res) {
+  const user_id = req.user?.user_id;
+
+  if (!user_id) {
+    return res.status(401).json({ success: false, message: "לא מחובר" });
+  }
+
+  const today = new Date().toISOString().split("T")[0];
+
+  try {
+    const [rows] = await db.query(
+      `SELECT attendance_id, check_in, check_out FROM attendance
+       WHERE user_id = ? AND date = ?
+       ORDER BY attendance_id DESC`,
+      [user_id, today]
+    );
+
+    if (rows.length === 0) {
+      return res.json({
+        success: true,
+        data: { status: "none" }, // אין החתמה כלל
+      });
+    }
+
+    const last = rows.find((r) => !r.check_out);
+
+    return res.json({
+      success: true,
+      data: {
+        status: last ? "checked_in" : "checked_out",
+        last_check_in: last?.check_in || rows[0]?.check_in,
+      },
+    });
+  } catch (err) {
+    console.error("getTodayAttendanceStatus:", err);
+    return res.status(500).json({ success: false, message: "שגיאת שרת" });
+  }
+}
