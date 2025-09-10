@@ -45,7 +45,7 @@ function ResetPassword() {
 
       setMessage(res.data.message || "הסיסמה הוגדרה בהצלחה");
       if (res.data.success) {
-        setShowSuccessPopup(true); // ✅ מציגים פופאפ הצלחה בלבד
+        setShowSuccessPopup(true); //  מציגים פופאפ הצלחה בלבד
       }
     } catch (err) {
       setMessage("שגיאה באיפוס סיסמה");
@@ -93,7 +93,7 @@ function ResetPassword() {
         )}
       </div>
 
-      {/* ✅ פופאפ הצלחה שמפנה ללוגאין על סגירה/אישור (ואפשר גם אוטו-סגירה) */}
+      {/*  פופאפ הצלחה שמפנה ללוגאין על סגירה/אישור (ואפשר גם אוטו-סגירה) */}
       {showSuccessPopup && (
         <Popup
           mode="success"

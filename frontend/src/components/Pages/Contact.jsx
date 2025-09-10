@@ -29,7 +29,7 @@ function Contact() {
 
       setPopupData({
         title: "הצלחה",
-        message: "הפנייה נשלחה בהצלחה ✅",
+        message: "הפנייה נשלחה בהצלחה",
         mode: "success",
       });
 

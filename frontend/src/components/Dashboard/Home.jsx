@@ -1,7 +1,22 @@
+/**
+ * קומפוננטה: Home (דף ראשי / דף ניהול)
+ * --------------------------------------
+ * מטרות:
+ * - הצגת סטטיסטיקות כלליות (משתמשים, תפקידים, פניות, משימות, פרויקטים וכו').
+ * - הצגת גרפים ודוחות על פעילות המערכת.
+ * - הצגת התראות על פריטים חדשים (פניות, משימות, חורגים).
+ * - אפשרות להחתמת כניסה/יציאה לעובדים עם הרשאה מתאימה.
+ *
+ * הרשאות:
+ * - permission_check_in_out → מציג כפתור החתמת כניסה/יציאה.
+ * - admin_alert_dash / user_alert_dash → פסי התראות.
+ * - admin_status_dash / user_status_dash → הצגת כרטיסי סטטוס וגרפים.
+ *
+ */
+
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useUser } from "components/Tools";
+import { useUser, Popup } from "components/Tools";
 import AlertBar from "../Tools/AlertBar";
 import StatCard from "../Tools/StatCard";
 import LeadsStatusPieChart from "../charts/LeadsStatusPieChart";
@@ -9,27 +24,104 @@ import LeadsByDateBarChart from "../charts/LeadsByDateBarChart";
 import LeadsBySourceChart from "../charts/LeadsBySourceChart";
 import LeadsByUserChart from "../charts/LeadsByUserChart";
 import { Icon } from "@iconify/react";
-
-const api = process.env.REACT_APP_API_URL;
+import { api } from "utils";
 
 const Home = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const [stats, setStats] = useState(null);
+  const [popup, setPopup] = useState(null);
+  const [attendanceStatus, setAttendanceStatus] = useState(null);
 
   useEffect(() => {
     fetchDashboardData();
+    if (user?.permission_check_in_out) {
+      fetchAttendanceStatus();
+    }
   }, []);
 
   const fetchDashboardData = async () => {
     try {
-      const res = await axios.get(`${api}/dashboard`, {
-        withCredentials: true,
-      });
-      setStats(res.data.data);
+      const res = await api.get("/dashboard");
+      setStats(res.data?.data || {});
     } catch (err) {
-      console.error("Error loading dashboard:", err);
+      console.error("דף שגיאה בטעינת דף ניהול :", err);
     }
+  };
+
+  const fetchAttendanceStatus = async () => {
+    try {
+      const res = await api.get("/attendance/status");
+      setAttendanceStatus(res.data?.data || null);
+    } catch (err) {
+      console.error("שגיאה בשליפת סטטוס החתמה:", err);
+    }
+  };
+
+  const handleCheckIn = async () => {
+    try {
+      await api.post("/attendance/check-in");
+      setPopup({
+        title: "הצלחה",
+        message: "החתמת כניסה בוצעה בהצלחה",
+        mode: "success",
+        autoClose: true,
+      });
+      fetchAttendanceStatus();
+    } catch (err) {
+      setPopup({
+        title: "שגיאה",
+        message: err?.response?.data?.message || "שגיאה בהחתמת כניסה",
+        mode: "error",
+      });
+    }
+  };
+
+  const handleCheckOut = async () => {
+    try {
+      await api.post("/attendance/check-out");
+      setPopup({
+        title: "הצלחה",
+        message: "החתמת יציאה בוצעה בהצלחה",
+        mode: "success",
+        autoClose: true,
+      });
+      fetchAttendanceStatus();
+    } catch (err) {
+      setPopup({
+        title: "שגיאה",
+        message: err?.response?.data?.message || "שגיאה בהחתמת יציאה",
+        mode: "error",
+      });
+    }
+  };
+
+  const renderAttendanceButtons = () => {
+    const latest = attendanceStatus?.latest;
+    const showCheckIn = !latest || (latest?.check_in && latest?.check_out);
+
+    const showCheckOut = latest?.check_in && !latest?.check_out;
+
+    return (
+      <div className="flex justify-end">
+        {showCheckIn && (
+          <button
+            onClick={handleCheckIn}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
+          >
+            📥 החתמת כניסה
+          </button>
+        )}
+        {showCheckOut && (
+          <button
+            onClick={handleCheckOut}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow"
+          >
+            📤 החתמת יציאה
+          </button>
+        )}
+      </div>
+    );
   };
 
   if (!stats)
@@ -41,7 +133,10 @@ const Home = () => {
 
   return (
     <div className="flex-col flex-grow p-6 font-rubik text-right space-y-6">
-      {/* 🔔 פס התראות */}
+      {/*החתמה (כניסה/יציאה) */}
+      {user?.permission_check_in_out && renderAttendanceButtons()}
+
+      {/* פס התראות */}
       {(user?.admin_alert_dash === 1 || user?.user_alert_dash === 1) && (
         <div className="flex flex-wrap justify-center gap-3 max-w-5xl mx-auto text-center">
           {/* פניות חדשות */}
@@ -144,7 +239,7 @@ const Home = () => {
       {/* כרטיסי סטטיסטיקה */}
 
       <div className="flex flex-wrap justify-center gap-3">
-        {/* 👥 עובדים */}
+        {/*  עובדים */}
         {user?.admin_status_dash === 1 && (
           <StatCard
             icon={
@@ -184,7 +279,7 @@ const Home = () => {
           />
         )}
 
-        {/* 🛡️ תפקידים */}
+        {/*  תפקידים */}
         {user?.admin_status_dash === 1 && (
           <StatCard
             icon={
@@ -200,7 +295,7 @@ const Home = () => {
           />
         )}
 
-        {/* 💼 פרויקטים */}
+        {/*  פרויקטים */}
         {user?.admin_status_dash === 1 && (
           <StatCard
             icon={
@@ -216,7 +311,7 @@ const Home = () => {
           />
         )}
 
-        {/* 📩 פניות */}
+        {/*  פניות */}
         {(user?.admin_status_dash === 1 || user?.user_status_dash === 1) && (
           <StatCard
             icon={
@@ -236,7 +331,7 @@ const Home = () => {
                     : stats?.leads_by_user_status
                         ?.filter(
                           (l) =>
-                            l.user_id === user.user_id && l.status === "חדש"
+                            l.user_id === user.user_id && l.status === "חדשה"
                         )
                         ?.reduce((sum, l) => sum + l.count, 0) ?? 0,
               },
@@ -260,7 +355,7 @@ const Home = () => {
                     : stats?.leads_by_user_status
                         ?.filter(
                           (l) =>
-                            l.user_id === user.user_id && l.status === "טופל"
+                            l.user_id === user.user_id && l.status === "טופלה"
                         )
                         ?.reduce((sum, l) => sum + l.count, 0) ?? 0,
               },
@@ -269,7 +364,7 @@ const Home = () => {
           />
         )}
 
-        {/* 🔄 משימות */}
+        {/*  משימות */}
         {(user?.admin_status_dash === 1 || user?.user_status_dash === 1) && (
           <StatCard
             icon={
@@ -289,7 +384,7 @@ const Home = () => {
                     : stats?.tasks_by_user_status
                         ?.filter(
                           (t) =>
-                            t.user_id === user.user_id && t.status === "חדש"
+                            t.user_id === user.user_id && t.status === "חדשה"
                         )
                         ?.reduce((sum, t) => sum + t.count, 0) ?? 0,
               },
@@ -313,7 +408,7 @@ const Home = () => {
                     : stats?.tasks_by_user_status
                         ?.filter(
                           (t) =>
-                            t.user_id === user.user_id && t.status === "הושלם"
+                            t.user_id === user.user_id && t.status === "טופלה"
                         )
                         ?.reduce((sum, t) => sum + t.count, 0) ?? 0,
               },
@@ -403,6 +498,16 @@ const Home = () => {
           </div>
         </div>
       </div>
+      {/* 🔔 פופאפ */}
+      {popup && (
+        <Popup
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
+          autoClose={popup.autoClose}
+          onClose={() => setPopup(null)}
+        />
+      )}
     </div>
   );
 };
