@@ -20,12 +20,15 @@ import { api, extractApiError } from "utils";
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
+
   const [popup, setPopup] = useState(null);
+
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [repToSave, setRepToSave] = useState(null);
   const [newRepId, setNewRepId] = useState(null);
   const [statusToSave, setStatusToSave] = useState(null);
   const [newStatus, setNewStatus] = useState(null);
+
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [bulkUserId, setBulkUserId] = useState("");
   const [bulkAssignConfirm, setBulkAssignConfirm] = useState(false);
@@ -229,24 +232,28 @@ export default function Tasks() {
       label: "פעולות",
       render: (r) => (
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => navigate(`/dashboard/details_task/${r.task_id}`)}
-            className="bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
-          >
-            <Icon icon="emojione-v1:eye" width="1.2rem" />
-            הצג
-          </button>
-          <button
-            onClick={() => navigate(`/dashboard/edit_task/${r.task_id}`)}
-            className="bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600"
-          >
-            <Icon icon="fluent-color:edit-32" width="1.2rem" />
-            עריכה
-          </button>
-          {r.status !== "בוטלה" && (
+          {user?.permission_view_task === 1 && (
+            <button
+              onClick={() => navigate(`/dashboard/details_task/${r.task_id}`)}
+              className="flex items-center gap-1 bg-slate-600 text-white px-2 py-1 rounded hover:bg-slate-700"
+            >
+              <Icon icon="emojione-v1:eye" width="1.2rem" />
+              הצג
+            </button>
+          )}
+          {user?.permission_edit_task === 1 && (
+            <button
+              onClick={() => navigate(`/dashboard/edit_task/${r.task_id}`)}
+              className="flex items-center gap-1 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+            >
+              <Icon icon="fluent-color:edit-32" width="1.2rem" />
+              עריכה
+            </button>
+          )}
+          {user?.permission_delete_task === 1 && r.status !== "בוטלה" && (
             <button
               onClick={() => setTaskToDelete(r.task_id)}
-              className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+              className="flex items-center gap-1 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
             >
               <Icon icon="streamline-color:recycle-bin-2-flat" width="1.2rem" />
               מחיקה
@@ -326,17 +333,19 @@ export default function Tasks() {
       <ReportView
         title="רשימת משימות"
         columns={columns}
-        rows={tasks.filter((t) => t.status !== "בוטלה")}
+        rows={tasks}
         filtersDef={filtersDef}
         searchableKeys={["task_title", "description"]}
         searchPlaceholder="חיפוש לפי נושא או תיאור..."
         addButton={
-          <NavigationButton
-            label="הוספת משימה חדשה"
-            linkTo="/dashboard/add_task"
-          />
+          user?.permission_add_task === 1 && (
+            <NavigationButton
+              label="הוספת משימה חדשה"
+              linkTo="/dashboard/add_task"
+            />
+          )
         }
-        bulkAssignBar={bulkAssignBar}
+        extraTopContent={bulkAssignBar}
       />
 
       {/* Popups */}
