@@ -24,7 +24,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { getCurrentUser, logoutUser } from "../../utils/auth.js";
+import { getCurrentUser, logoutUser } from "../../utils/auth";
 import Popup from "./Popup";
 
 const UserContext = createContext();

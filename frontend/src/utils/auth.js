@@ -1,6 +1,5 @@
 // frontend/src/utils/api/auth.js
 
-
 import { api } from "../api";
 
 /**
