@@ -7,7 +7,7 @@ import { db } from "../utils/dbSingleton.js";
  * מה מקבל: —
  * מה מחזיר: { success, data: summary } או שגיאה.
  */
-export async function getDashboardSummary(_req, res) {
+export async function getDashboardSummary(req, res) {
   const user = req.user;
 
   // פילטרים לפי data_scope
