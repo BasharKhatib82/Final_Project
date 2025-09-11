@@ -1,6 +1,6 @@
 // frontend/src/utils/api/auth.js
 
-import { api } from "../api";
+import { api } from "./api";
 
 /**
  * JWT בקשת המשתמש הנוכחי לפי
