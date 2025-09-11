@@ -11,22 +11,38 @@ import {
 } from "../utils/fieldValidators.js";
 
 /**
- * שליפת כל הפניות
- * מקבל: —
- * מחזיר: מערך פניות עם פרטי לקוח/פרויקט/נציג
+ * data_scopeשליפת פניות עם תמיכה ב־
+ * ---------------------------------
+ *  (req.user) מקבל : משתמש מחובר
+ *   - data_scope_all = 1 → מחזיר את כל הפניות.
+ *   - data_scope_self = 1 → מחזיר רק את הפניות של המשתמש עצמו.
+ *
+ * מחזיר: מערך פניות כולל פרטי לקוח, פרויקט ונציג.
  */
-export async function listLeads(_req, res) {
+
+export async function listLeads(req, res) {
+  const user = req.user;
+
+  let where = "";
+  if (user?.data_scope_self === 1 && user?.data_scope_all !== 1) {
+    // משתמש מוגבל → רואה רק את עצמו
+    where = `WHERE l.user_id = ${db.escape(user.user_id)}`;
+  }
+
   const sql = `
     SELECT 
-      l.*, c.first_name, c.last_name, c.email, c.city,
+      l.*, 
+      c.first_name, c.last_name, c.email, c.city,
       p.project_name,
       u.first_name AS rep_first_name, u.last_name AS rep_last_name
     FROM leads l
     JOIN clients c ON l.phone_number = c.phone_number
     JOIN projects p ON l.project_id = p.project_id
     LEFT JOIN users u ON l.user_id = u.user_id
+    ${where}
     ORDER BY l.lead_id DESC
   `;
+
   try {
     const [rows] = await db.query(sql);
     return res.json({ success: true, data: rows });

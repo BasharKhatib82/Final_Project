@@ -66,19 +66,36 @@ export async function addAttendance(req, res) {
 }
 
 /**
- * שליפת כל הנוכחויות (כולל פרטי עובדים)
- * מקבל : כלום
- * מחזיר: מערך רשומות נוכחות
+ * data_scope שליפת רשומות נוכחות בהתאם להרשאות הצפייה
+ * ------------------------------------------------------
+ * req.user מקבל : משתמש מחובר
+ * מחזיר: מערך רשומות נוכחות (הכול / עצמי בלבד / ריק)
  */
-export async function listAttendances(_req, res) {
+export async function listAttendances(req, res) {
   try {
-    const [rows] = await db.query(
-      `SELECT a.attendance_id, a.user_id, u.first_name, u.last_name,
-              a.date, a.check_in, a.check_out, a.status, a.notes
-       FROM attendance a
-       LEFT JOIN users u ON a.user_id = u.user_id
-       ORDER BY a.date DESC`
-    );
+    let baseQuery = `
+      SELECT a.attendance_id, a.user_id, u.first_name, u.last_name,
+             a.date, a.check_in, a.check_out, a.status, a.notes
+      FROM attendance a
+      LEFT JOIN users u ON a.user_id = u.user_id
+    `;
+    const params = [];
+
+    // אם יש הרשאת "רואה הכל" → אין סינון
+    if (req.user?.data_scope_all === 1) {
+      baseQuery += " ORDER BY a.date DESC";
+    }
+    // אם יש הרשאת "רואה רק את עצמו"
+    else if (req.user?.data_scope_self === 1) {
+      baseQuery += " WHERE a.user_id = ? ORDER BY a.date DESC";
+      params.push(req.user.user_id);
+    }
+    // ברירת מחדל – מחזיר ריק (אם אין הגדרת data_scope)
+    else {
+      return res.json({ success: true, data: [] });
+    }
+
+    const [rows] = await db.query(baseQuery, params);
     return res.json({ success: true, data: rows });
   } catch (err) {
     console.error("listAttendances:", err);

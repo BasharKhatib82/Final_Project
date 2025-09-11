@@ -8,6 +8,22 @@ import { db } from "../utils/dbSingleton.js";
  * מה מחזיר: { success, data: summary } או שגיאה.
  */
 export async function getDashboardSummary(_req, res) {
+  const user = req.user;
+
+  // פילטרים לפי data_scope
+  const leadsFilter =
+    user?.data_scope_self === 1
+      ? `AND l.user_id = ${db.escape(user.user_id)}`
+      : "";
+  const tasksFilter =
+    user?.data_scope_self === 1
+      ? `AND t.user_id = ${db.escape(user.user_id)}`
+      : "";
+  const attendanceFilter =
+    user?.data_scope_self === 1
+      ? `WHERE a.user_id = ${db.escape(user.user_id)}`
+      : "";
+
   const summary = {
     users: {},
     roles: {},
@@ -67,6 +83,7 @@ export async function getDashboardSummary(_req, res) {
       SELECT u.first_name, u.last_name, COUNT(*) AS total_attendance
       FROM attendance a
       JOIN users u ON u.user_id = a.user_id
+      ${attendanceFilter}
       GROUP BY a.user_id
       ORDER BY total_attendance DESC
     `,
@@ -79,19 +96,22 @@ export async function getDashboardSummary(_req, res) {
       WHERE u.user_id <> 1 AND u.role_id <> 1
     `,
 
+    // --- פניות ---
     leads_by_day: `
-      SELECT DATE(created_at) AS date, COUNT(*) AS count
-      FROM leads
-      WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-      GROUP BY DATE(created_at)
+      SELECT DATE(l.created_at) AS date, COUNT(*) AS count
+      FROM leads l
+      WHERE l.created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+      ${leadsFilter}
+      GROUP BY DATE(l.created_at)
       ORDER BY date ASC
     `,
 
     leads_by_source: `
-      SELECT source, COUNT(*) AS count
-      FROM leads
-      WHERE source IS NOT NULL AND source != ''
-      GROUP BY source
+      SELECT l.source, COUNT(*) AS count
+      FROM leads l
+      WHERE l.source IS NOT NULL AND l.source != ''
+      ${leadsFilter}
+      GROUP BY l.source
       ORDER BY count DESC
     `,
 
@@ -107,6 +127,7 @@ export async function getDashboardSummary(_req, res) {
       SELECT l.user_id, u.first_name, u.last_name, l.status, COUNT(*) AS count
       FROM leads l
       JOIN users u ON l.user_id = u.user_id
+      ${leadsFilter}
       GROUP BY l.user_id, l.status
     `,
 
@@ -114,6 +135,7 @@ export async function getDashboardSummary(_req, res) {
       SELECT t.user_id, u.first_name, u.last_name, t.status, COUNT(*) AS count
       FROM tasks t
       JOIN users u ON t.user_id = u.user_id
+      ${tasksFilter}
       GROUP BY t.user_id, t.status
     `,
 
@@ -122,6 +144,7 @@ export async function getDashboardSummary(_req, res) {
       FROM tasks t
       JOIN users u ON t.user_id = u.user_id
       WHERE t.due_date < CURDATE() AND t.status <> 'הושלמה'
+      ${tasksFilter}
       GROUP BY t.user_id
     `,
   };

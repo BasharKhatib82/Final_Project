@@ -7,17 +7,34 @@ import { isNineDigitId, isPositiveInt } from "../utils/fieldValidators.js";
 import { isValidDate } from "../utils/attendanceHelpers.js";
 
 /**
- * שליפת כל המשימות
- * מקבל: —
+ * data_scope שליפת משימות עם תמיכה ב־
+ * ----------------------------------
+ * (req.user) מקבל : משתמש מחובר
+ *   - data_scope_all = 1 → מחזיר את כל המשימות.
+ *   - data_scope_self = 1 → מחזיר רק את המשימות של המשתמש עצמו.
+ *
  * מחזיר: { success, data: Task[] }
  */
-export async function listTasks(_req, res) {
+
+export async function listTasks(req, res) {
+  const user = req.user;
+
+  let where = "";
+  if (user?.data_scope_self === 1 && user?.data_scope_all !== 1) {
+    where = `WHERE t.user_id = ${db.escape(user.user_id)}`;
+  }
+
   const sql = `
-    SELECT t.*, u.first_name AS assigned_to_first_name, u.last_name AS assigned_to_last_name
+    SELECT 
+      t.*, 
+      u.first_name AS assigned_to_first_name, 
+      u.last_name AS assigned_to_last_name
     FROM tasks t
     LEFT JOIN users u ON t.user_id = u.user_id
+    ${where}
     ORDER BY t.task_id DESC
   `;
+
   try {
     const [rows] = await db.query(sql);
     const tasks = rows.map((t) => ({
@@ -64,12 +81,10 @@ export async function addTask(req, res) {
       .json({ success: false, message: "תאריך יעד לא תקין" });
   }
   if (user_id && !isNineDigitId(user_id)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
+    });
   }
 
   try {
@@ -124,12 +139,10 @@ export async function updateTask(req, res) {
       .json({ success: false, message: "תאריך יעד לא תקין" });
   }
   if (user_id && !isNineDigitId(user_id)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
+    });
   }
 
   try {
@@ -213,12 +226,10 @@ export async function bulkAssignTasks(req, res) {
 
   const repUserId = user_id != null ? String(user_id).trim() : null;
   if (repUserId && !isNineDigitId(repUserId)) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
+    });
   }
 
   try {
