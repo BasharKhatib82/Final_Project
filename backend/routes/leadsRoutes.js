@@ -6,6 +6,7 @@ import {
   listLeads,
   getLeadById,
   addLead,
+  getClientByPhone,
   editLead,
   updateLeadRep,
   cancelLead,
@@ -26,6 +27,9 @@ router.get("/:id", getLeadById);
 
 /** POST /leads/add – יצירת פנייה חדשה */
 router.post("/add", addLead);
+
+/** POST /leads/add – חיפוש לקוח לפי טלפון */
+router.post("/:phone", addLead);
 
 /** PUT /leads/edit/:id – עדכון פנייה */
 router.put("/edit/:id", editLead);

@@ -85,7 +85,7 @@ export async function addLead(req, res) {
   project_id = Number(project_id);
 
   // חובה
-  if (!phone_number || !project_id ) {
+  if (!phone_number || !project_id) {
     return res
       .status(400)
       .json({ success: false, message: "נא למלא את כל השדות החובה" });
@@ -170,6 +170,31 @@ export async function addLead(req, res) {
     return res.status(500).json({ success: false, message: "שגיאה בשרת" });
   } finally {
     conn.release();
+  }
+}
+
+export async function getClientByPhone(req, res) {
+  try {
+    const { phone } = req.params;
+    if (!phone) {
+      return res
+        .status(400)
+        .json({ success: false, message: "חסר מספר טלפון" });
+    }
+
+    const [rows] = await db.query(
+      "SELECT * FROM clients WHERE phone = ? LIMIT 1",
+      [phone]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({ success: false, message: "לא נמצא לקוח" });
+    }
+
+    return res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error("getClientByPhone:", err);
+    return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 }
 
