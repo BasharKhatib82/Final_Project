@@ -43,6 +43,7 @@ export const UserProvider = ({ children }) => {
       location.pathname === "/" ||
       location.pathname === "/about" ||
       location.pathname === "/contact" ||
+      location.pathname === "/userlogin" ||
       location.pathname === "/forgot-password" ||
       location.pathname.startsWith("/reset-password");
 
@@ -57,11 +58,13 @@ export const UserProvider = ({ children }) => {
         const data = await getCurrentUser();
         setUser(data);
       } catch (err) {
-        setPopup({
-          title: "שגיאת התחברות",
-          message: err.userMessage || "אירעה שגיאה בבדיקת המשתמש",
-          mode: "error",
-        });
+        if (err.response?.status === 500) {
+          setPopup({
+            title: "שגיאת התחברות",
+            message: err.userMessage || "אירעה שגיאה בבדיקת המשתמש",
+            mode: "error",
+          });
+        }
         setUser(null);
       } finally {
         setIsAuthChecked(true);

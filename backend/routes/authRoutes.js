@@ -1,7 +1,7 @@
 // backend\routes\authRoutes.js
 
 import express from "express";
-import verifyToken from "../utils/verifyToken.js";
+import optionalAuth  from "../utils/verifyToken.js";
 import {
   login,
   logout,
@@ -19,7 +19,7 @@ router.post("/login", login);
 router.post("/logout", logout);
 
 /** JWT בדיקת משתמש מחובר לפי ==> GET /auth/me */
-router.get("/me", verifyToken, getCurrentUser);
+router.get("/me", optionalAuth, getCurrentUser);
 
 /** שליחת טוקן איפוס סיסמה למייל ==> POST /auth/forgot-password */
 router.post("/forgot-password", forgotPassword);
