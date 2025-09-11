@@ -467,36 +467,38 @@ const Home = () => {
         </div>
 
         {/* לוגים */}
-        <div
-          onClick={() => navigate("/dashboard/logs")}
-          className="bg-white rounded-xl shadow p-6 cursor-pointer"
-        >
-          <h3 className="text-center text-lg font-bold text-gray-700 mb-4">
-            📋 תיעודים ליום (7 ימים אחרונים)
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="p-2 border-b text-center">תאריך</th>
-                  <th className="p-2 border-b text-center">כמות תיעודים</th>
-                </tr>
-              </thead>
-              <tbody>
-                {stats?.logs_by_day?.map((row, i) => (
-                  <tr key={i} className="hover:bg-gray-50">
-                    <td className="p-2 border-b text-center">
-                      {row?.date ? row.date.slice(0, 10) : "-"}
-                    </td>
-                    <td className="p-2 border-b text-center">
-                      {row?.total_logs ?? 0} תיעודים
-                    </td>
+        {user?.logs_page_access === 1 && (
+          <div
+            onClick={() => navigate("/dashboard/logs")}
+            className="bg-white rounded-xl shadow p-6 cursor-pointer"
+          >
+            <h3 className="text-center text-lg font-bold text-gray-700 mb-4">
+              📋 תיעודים ליום (7 ימים אחרונים)
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border border-gray-200 rounded-lg overflow-hidden">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="p-2 border-b text-center">תאריך</th>
+                    <th className="p-2 border-b text-center">כמות תיעודים</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {stats?.logs_by_day?.map((row, i) => (
+                    <tr key={i} className="hover:bg-gray-50">
+                      <td className="p-2 border-b text-center">
+                        {row?.date ? row.date.slice(0, 10) : "-"}
+                      </td>
+                      <td className="p-2 border-b text-center">
+                        {row?.total_logs ?? 0} תיעודים
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        )}
       </div>
       {/* 🔔 פופאפ */}
       {popup && (
