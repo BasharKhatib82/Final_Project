@@ -25,7 +25,9 @@ const LeadsStatusPieChart = ({ data }) => {
   cutoff.setMonth(cutoff.getMonth() - 1);
 
   // סינון הפניות של חודש אחרון בלבד
-  const lastMonthData = data.filter((item) => new Date(item.date) >= cutoff);
+  const lastMonthData = data.filter(
+    (item) => new Date(item.created_at) >= cutoff
+  );
 
   // ספירה לפי סטטוס
   const counts = {
