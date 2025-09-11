@@ -60,7 +60,7 @@ const Home = () => {
 
   const handleCheckIn = async () => {
     try {
-      await api.post("/attendance/check-in");
+      await api.post("/attendance/check-in", user.user_id);
       setPopup({
         title: "הצלחה",
         message: "החתמת כניסה בוצעה בהצלחה",

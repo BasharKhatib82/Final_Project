@@ -74,7 +74,7 @@ const LeadsStatusPieChart = ({ data }) => {
   return (
     <div className="w-full h-full flex flex-col">
       <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
-        סטטוס הפניות חודש אחרון
+        (החודש) סטטוס הפניות
       </h3>
       <div className="flex-grow w-full">
         <Doughnut data={chartData} options={options} />
@@ -82,6 +82,5 @@ const LeadsStatusPieChart = ({ data }) => {
     </div>
   );
 };
-
 
 export default LeadsStatusPieChart;
