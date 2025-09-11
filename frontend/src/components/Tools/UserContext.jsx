@@ -43,7 +43,6 @@ export const UserProvider = ({ children }) => {
       location.pathname === "/" ||
       location.pathname === "/about" ||
       location.pathname === "/contact" ||
-      location.pathname === "/userlogin" ||
       location.pathname === "/forgot-password" ||
       location.pathname.startsWith("/reset-password");
 
