@@ -24,8 +24,11 @@ const LeadsStatusPieChart = ({ data }) => {
   const cutoff = new Date();
   cutoff.setMonth(cutoff.getMonth() - 1);
 
+  // הבטחה ש-data תמיד יהיה מערך
+  const safeData = Array.isArray(data) ? data : [];
+
   // סינון הפניות של חודש אחרון בלבד
-  const lastMonthData = data.filter(
+  const lastMonthData = safeData.filter(
     (item) => new Date(item.created_at) >= cutoff
   );
 
@@ -52,7 +55,7 @@ const LeadsStatusPieChart = ({ data }) => {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: "65%", // דונאט מודרני
+    cutout: "65%",
     plugins: {
       legend: {
         position: "bottom",
@@ -62,7 +65,7 @@ const LeadsStatusPieChart = ({ data }) => {
             size: 12,
             weight: "500",
           },
-          color: "#374151", // אפור כהה
+          color: "#374151",
         },
       },
     },
@@ -79,5 +82,6 @@ const LeadsStatusPieChart = ({ data }) => {
     </div>
   );
 };
+
 
 export default LeadsStatusPieChart;
