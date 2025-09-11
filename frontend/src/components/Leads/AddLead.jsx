@@ -64,7 +64,7 @@ export default function AddLead() {
     if (!form.phone_number) return;
 
     try {
-      const res = await api.get(`/clients/by-phone/${form.phone_number}`);
+      const res = await api.get(`/leads/${form.phone_number}`);
       if (res.data.success) {
         const c = res.data.data;
         setForm((prev) => ({
