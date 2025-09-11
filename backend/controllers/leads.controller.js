@@ -78,7 +78,7 @@ export async function addLead(req, res) {
 
   // נרמול
   phone_number = String(phone_number ?? "").trim();
-  status = String(status ?? "").trim();
+  status = "חדשה";
   first_name = String(first_name ?? "").trim();
   last_name = String(last_name ?? "").trim();
   email = String(email ?? "").trim();
