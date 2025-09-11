@@ -192,7 +192,7 @@ export default function Roles() {
                   setPopup({
                     show: true,
                     title: "אישור מחיקה",
-                    message: "⚠️ למחוק את התפקיד הזה?",
+                    message: " למחוק את התפקיד הזה?",
                     mode: "confirm",
                     role_id: r.role_id,
                   })

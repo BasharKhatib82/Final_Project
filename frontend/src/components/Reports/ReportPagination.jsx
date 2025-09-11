@@ -1,4 +1,20 @@
-// src/components/Reports/ReportPagination.jsx
+// frontend\src\components\Reports\ReportPagination.jsx
+
+/**
+ * קובץ: ReportPagination.jsx
+ * --------------------------
+ * תיאור:
+ * קומפוננטת פג'ינציה לדוחות.
+ * מאפשרת מעבר בין עמודים, קפיצה לעמוד מסוים,
+ * וכפתורים לראשון/אחרון/הבא/הקודם.
+ *
+ * תכונות עיקריות:
+ * - page, setPage ו־pages לקבלת useReport שימוש ב.
+ * - לשמירה על עמוד בטווח חוקי go()  מנגנון .
+ * - Enter שדה קלט לקפיצה ישירה לעמוד בלחיצה על .
+ * - מוסתר אם יש רק עמוד אחד.
+ */
+
 import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 

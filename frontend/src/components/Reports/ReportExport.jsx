@@ -1,3 +1,25 @@
+// frontend\src\components\Reports\ReportExport.jsx
+
+/**
+ * קובץ: ReportExport.jsx
+ * ----------------------
+ * תיאור:
+ * קומפוננטה לייצוא והדפסת דוחות.
+ * ותצוגת הדפסה מקדימה Excel או PDF מאפשרת הורדה בפורמט  .
+ *
+ * תכונות עיקריות:
+ * - download(format): הורדת הדוח כקובץ Excel/PDF.
+ * - previewPdf(): פתיחת PDF חדש בחלון להדפסה.
+ * - שימוש ב־useReport: קבלת כותרת, עמודות ושורות מסוננות.
+ * - עיבוד שורות לפי עמודות שמוגדרות ל־export.
+ * - טיפול בשמות קבצים + Content-Disposition מהשרת.
+ * - הצגת Popup על הצלחה/שגיאה.
+ *
+ * מטרה:
+ * לאפשר למשתמש לייצא או להדפיס דוחות ישירות מתוך המערכת.
+ */
+
+
 import React, { useState } from "react";
 import { useReport } from "./ReportContext";
 import { Icon } from "@iconify/react";
@@ -15,10 +37,10 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
     mode: "",
   });
 
-  /** 📥 הורדת קובץ (Excel / PDF) */
+  /** הורדת קובץ (Excel / PDF) */
   const download = async (format) => {
     try {
-      // 🛠️ עיבוד שורות לפי export לפני שליחה לשרת
+      // עיבוד שורות לפי export לפני שליחה לשרת
       const processedRows = filteredRows.map((row) =>
         Object.fromEntries(
           columns
@@ -84,7 +106,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
       setPopup({
         show: true,
         title: "הצלחה",
-        message: `✅ הדוח הורד בהצלחה בפורמט ${format.toUpperCase()}`,
+        message: ` הדוח הורד בהצלחה בפורמט ${format.toUpperCase()}`,
         mode: "success",
       });
     } catch (err) {
@@ -101,7 +123,7 @@ export default function ReportExport({ apiBase = ENV_API_BASE }) {
     }
   };
 
-  /** 🖨️ תצוגה לפני הדפסה */
+  /** תצוגה לפני הדפסה */
   const previewPdf = async () => {
     try {
       const processedRows = filteredRows.map((row) =>

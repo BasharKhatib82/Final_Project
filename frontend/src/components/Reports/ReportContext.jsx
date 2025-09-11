@@ -1,4 +1,23 @@
-// src/components/Reports/ReportContext.jsx
+// frontend\src\components\Reports\ReportContext.jsx
+
+/**
+ * קובץ: ReportContext.jsx
+ * -----------------------
+ * תיאור:
+ * Context ניהול דוחות באמצעות .
+ * כולל חיפוש, סינון, חלוקה לעמודים ושיתוף נתונים בין קומפוננטות.
+ *
+ * תכונות עיקריות:
+ * - ReportProvider: מספק title, columns, rows וכלי ניהול.
+ * - setFilter / setSearch: עדכון פילטרים וחיפוש חופשי.
+ * - filteredRows: חישוב דינמי לפי סינון וחיפוש.
+ * - pageRows: נתוני עמוד נוכחי (Pagination).
+ * -select, date, daterange, text תמיכה בפילטרים מסוג .
+ *
+ * מטרה:
+ * לאפשר ניהול טבלאות דוחות במערכת בצורה אחידה ונוחה.
+ */
+
 import React, { createContext, useContext, useMemo, useState } from "react";
 
 const ReportCtx = createContext(null);

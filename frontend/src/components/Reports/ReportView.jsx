@@ -1,4 +1,24 @@
-// frontend/src/pages/Reports/ReportView.jsx
+// frontend\src\components\Reports\ReportView.jsx
+
+/**
+ * קובץ: ReportView.jsx
+ * --------------------
+ * תיאור:
+ * קומפוננטה ראשית להצגת דוחות.
+ * ReportProvider עוטפת את כלל רכיבי הדוחות בתוך
+ * ומרכזת אותם במבנה אחיד: חיפוש, פילטרים, ייצוא, דוא"ל, טבלה ופג'ינציה.
+ *
+ * תכונות עיקריות:
+ * - ( 'וכו title, columns, rows ) לניהול נתוני הדוח ReportProvider שימוש ב    .
+ * - הצגת כותרת דף + כפתור הוספה (אם קיים).
+ * - שילוב ReportFilters, ReportSearch, ReportExport, ReportEmail.
+ * - עם נתונים מעודכנים  ReportTable הצגת  .
+ * - ReportPagination מעבר בין עמודים עם .
+ *
+ * מטרה:
+ * לספק ממשק מלא ואחיד להצגת דוחות במערכת
+ * עם חיפוש, סינון, ייצוא, שליחה במייל, טבלה וניווט בין עמודים.
+ */
 
 import React, { useRef } from "react";
 import { ReportProvider } from "./ReportContext";
@@ -56,7 +76,6 @@ export default function ReportView({
         {/*אזור עליון: סינון, חיפוש, שיוך מרובה, ייצוא */}
         <section className="rounded-xl border border-slate-200 bg-white/95 p-3 shadow-sm">
           <div className="flex flex-col space-y-3">
-
             {/*שורה רישומי : חיפוש + פילטרים */}
             <div className="flex flex-wrap items-center gap-4">
               {filtersDef.length > 0 && (

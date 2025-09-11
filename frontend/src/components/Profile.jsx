@@ -1,3 +1,5 @@
+// frontend\src\components\Profile.jsx
+
 /**
  * קומפוננטה: Profile (הגדרות חשבון)
  * ----------------------------------

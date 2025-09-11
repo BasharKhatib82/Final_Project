@@ -1,4 +1,22 @@
-// src/components/Reports/ReportFilters.jsx
+// frontend\src\components\Reports\ReportFilters.jsx
+
+/**
+ * קובץ: ReportFilters.jsx
+ * -----------------------
+ * תיאור:
+ * קומפוננטה להצגת פילטרים לדוחות (טקסט, תאריך, טווח תאריכים, select).
+ * ומציגה גם סה״כ שורות מסוננות inline או block תומכת במצב  .
+ *
+ * תכונות עיקריות:
+ * - filtersDef, filters ו־setFilter לקבלת useReport שימוש ב .
+ * - לבניית אפשרויות מהנתונים dynamic select תמיכה ב .
+ * - תמיכה בסוגי פילטרים: select, date, daterange, text.
+ * - במידת הצורך total הצגת סה״כ רשומות .
+ *
+ * מטרה:
+ * לאפשר סינון גמיש ואינטראקטיבי על נתוני הדוח.
+ */
+
 import React, { useMemo } from "react";
 import { useReport } from "./ReportContext";
 import { Icon } from "@iconify/react";
@@ -48,7 +66,7 @@ function Filter({ def, value, onChange, inline, filteredRows }) {
       </span>
     );
 
-  // 🟢 אם הפילטר מוגדר dynamic: true – נבנה אפשרויות מהנתונים
+  //  נבנה אפשרויות מהנתונים dynamic: true אם הפילטר מוגדר
   const dynamicOptions = useMemo(() => {
     if (def.type === "select" && def.dynamic && Array.isArray(filteredRows)) {
       // יוצרים Map ייחודי לפי value
@@ -131,7 +149,7 @@ function Filter({ def, value, onChange, inline, filteredRows }) {
     );
   }
 
-  // 🔹 ברירת מחדל → טקסט רגיל
+  // ברירת מחדל → טקסט רגיל
   return (
     <div className="flex items-center gap-2">
       {renderLabel()}

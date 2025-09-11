@@ -1,4 +1,23 @@
-// src/components/Reports/ReportTable.jsx
+// frontend\src\components\Reports\ReportTable.jsx
+
+/**
+ * קובץ: ReportTable.jsx
+ * ---------------------
+ * תיאור:
+ * קומפוננטת טבלה להצגת נתוני דוחות.
+ * (pageRows) מציגה כותרות עמודות ושורות בהתאם לעמוד הנוכחי .
+ * במידה ואין נתונים – מוצגת הודעה מתאימה.
+ *
+ * תכונות עיקריות:
+ * - columns ו־pageRows לקבלת useReport שימוש ב־   .
+ * - מותאמת לעמודה render תמיכה בפונקציית  .
+ * - הצגת הודעת "אין נתונים להצגה" כשאין תוצאות.
+ * - על שורות hover מצב + Tailwind עיצוב בסיסי עם    .
+ *
+ * מטרה:
+ * לאפשר הצגה נוחה, קריאה ורספונסיבית של נתוני הדוחות במבנה טבלאי.
+ */
+
 import React, { forwardRef } from "react";
 import { useReport } from "./ReportContext";
 

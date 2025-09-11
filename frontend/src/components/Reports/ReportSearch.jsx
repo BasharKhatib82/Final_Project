@@ -1,4 +1,22 @@
-// src/components/Reports/ReportSearch.jsx
+// frontend\src\components\Reports\ReportSearch.jsx
+
+/**
+ * קובץ: ReportSearch.jsx
+ * ----------------------
+ * תיאור:
+ * קומפוננטה לחיפוש בתוך דוחות.
+ * כוללת שדה טקסט עם אייקון חיפוש ותווית,
+ * (sm/md) וגודל placeholder מאפשרת שינוי   .
+ *
+ * תכונות עיקריות:
+ * - search ו־setSearch לניהול useReport שימוש ב־   .
+ * - איפוס עמוד לעמוד ראשון בכל שינוי חיפוש.
+ * - תמיכה בהתאמת גודל שדה החיפוש.
+ *
+ * מטרה:
+ * לאפשר חיפוש חופשי בטבלאות הדוחות בצורה פשוטה ונוחה.
+ */
+
 import React from "react";
 import { useReport } from "./ReportContext";
 import { Icon } from "@iconify/react";

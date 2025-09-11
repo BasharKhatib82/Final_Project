@@ -1,4 +1,4 @@
-// C:\My Projects\Final_Project\frontend\src\components\Pages\ForgotPassword.jsx
+// frontend\src\components\Pages\ForgotPassword.jsx
 /**
  * רכיב: ForgotPassword
  * -------------------------
@@ -73,7 +73,7 @@ function ForgotPassword() {
         </form>
       </div>
 
-      {/* ✅ הצגת הפופאפ */}
+      {/* הצגת הפופאפ */}
       {showPopup && (
         <Popup
           mode={message.includes("שגיאה") ? "error" : "success"}

@@ -1,3 +1,5 @@
+// frontend\src\components\Tasks\TaskDetails.jsx
+
 /**
  * קומפוננטה: TaskDetails
  * -----------------------
