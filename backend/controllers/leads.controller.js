@@ -69,7 +69,7 @@ export async function getLeadById(req, res) {
 
 /**
  * יצירת פנייה חדשה (לקוח + פנייה)
- * מקבל: { phone_number, project_id, status, first_name?, last_name?, email?, city? }
+ * מקבל: { phone_number, project_id, first_name?, last_name?, email?, city? }
  * מחזיר: הודעת הצלחה/שגיאה
  */
 export async function addLead(req, res) {
@@ -85,7 +85,7 @@ export async function addLead(req, res) {
   project_id = Number(project_id);
 
   // חובה
-  if (!phone_number || !project_id || !status) {
+  if (!phone_number || !project_id ) {
     return res
       .status(400)
       .json({ success: false, message: "נא למלא את כל השדות החובה" });
