@@ -1,8 +1,31 @@
 // frontend\src\components\Tools\UserContext.jsx
 
+/**
+ * (Context) ניהול מצב משתמש מחובר
+ * -----------------------------------
+ * רכיב זה מספק מידע גלובלי על המשתמש המחובר ומצב האימות.
+ *
+ * תכונות:
+ * - GET /auth/me טוען את המשתמש המחובר בקריאת
+ * - מונע טעינה מיותרת בדפי התחברות / איפוס סיסמה
+ * - לניתוק logout מספק פונקציית
+ *
+ * API endpoints:
+ * - GET    /auth/me         - JWT קבלת מידע על המשתמש המחובר לפי
+ * - POST   /auth/logout     - ניתוק המשתמש מהמערכת ומחיקת הטוקן
+ *
+ * ערכים גלובליים מסופקים:
+ * - user: אובייקט המשתמש המחובר
+ * - setUser: עדכון ידני של המשתמש
+ * - logout: פונקציית התנתקות
+ * - isAuthChecked: האם בוצעה בדיקת התחברות
+ * - loading: האם בטעינה
+ */
+
 import { createContext, useContext, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
+import { getCurrentUser, logoutUser } from "../../utils/api/auth";
+import Popup from "./Popup";
 
 const UserContext = createContext();
 
@@ -10,9 +33,11 @@ export const useUser = () => useContext(UserContext);
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthChecked, setIsAuthChecked] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [popup, setPopup] = useState(null); //   לניהול חלון הודעות state
   const location = useLocation();
+
   useEffect(() => {
     const isPublicPage =
       location.pathname === "/userlogin" ||
@@ -20,27 +45,24 @@ export const UserProvider = ({ children }) => {
       location.pathname.startsWith("/reset-password");
 
     if (isPublicPage) {
-      setAuthChecked(true);
+      setIsAuthChecked(true);
       setLoading(false);
       return;
     }
 
     const fetchUser = async () => {
       try {
-        const res = await axios.get(
-          `${process.env.REACT_APP_API_URL}/auth/me`,
-          {
-            withCredentials: true,
-          }
-        );
-        setUser(res.data.data);
+        const data = await getCurrentUser();
+        setUser(data);
       } catch (err) {
-        if (err.response?.status !== 403) {
-          console.error("Auth check failed:", err);
-        }
+        setPopup({
+          title: "שגיאת התחברות",
+          message: err.userMessage || "אירעה שגיאה בבדיקת המשתמש",
+          mode: "error",
+        });
         setUser(null);
       } finally {
-        setAuthChecked(true);
+        setIsAuthChecked(true);
         setLoading(false);
       }
     };
@@ -48,23 +70,39 @@ export const UserProvider = ({ children }) => {
     fetchUser();
   }, [location.pathname]);
 
-  const logout = () => {
-    axios
-      .post(
-        `${process.env.REACT_APP_API_URL}/auth/logout`,
-        { user_id: user?.user_id },
-        { withCredentials: true }
-      )
-      .then(() => setUser(null))
-      .catch((err) => console.error("Logout error:", err))
-      .finally(() => setUser(null));
+  const logout = async () => {
+    try {
+      await logoutUser(user?.user_id);
+      setUser(null);
+      setPopup({
+        title: "התנתקות",
+        message: "התנתקת בהצלחה מהמערכת",
+        mode: "success",
+      });
+    } catch (err) {
+      setPopup({
+        title: "שגיאה",
+        message: err.userMessage || "אירעה שגיאה בהתנתקות",
+        mode: "error",
+      });
+    } finally {
+      setUser(null);
+    }
   };
 
   return (
     <UserContext.Provider
-      value={{ user, setUser, logout, authChecked, loading }}
+      value={{ user, setUser, logout, isAuthChecked, loading }}
     >
       {children}
+      {popup && (
+        <Popup
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
+          onClose={() => setPopup(null)} //  סגירת החלון
+        />
+      )}
     </UserContext.Provider>
   );
 };
