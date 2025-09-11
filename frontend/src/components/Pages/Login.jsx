@@ -1,7 +1,30 @@
+// frontend\src\components\Pages\Login.jsx
+/**
+ * רכיב: Login
+ * -------------------------
+ * רכיב המציג עמוד התחברות למערכת.
+ *
+ * מטרת הרכיב:
+ * - לאפשר למשתמש להתחבר באמצעות תעודת זהות וסיסמה
+ * - Contextלבצע אימות מול השרת ולשמור את פרטי המשתמש ב־
+ * - להציג חיווי למשתמש (הצלחה / שגיאה) באמצעות חלון קופץ
+ * - לטפל במצב של "שינוי סיסמה מאולץ" אם עברו 90 יום
+ *
+ * קלט: אין ( פנימי של הטופס state הרכיב שומר )
+ * פלט: טופס התחברות + חלונות קופצים בהתאם לסטטוס
+ *
+ * זרימת עבודה:
+ * 1. המשתמש מזין תעודת זהות וסיסמה ולוחץ על כפתור התחברות.
+ * 2. אם השרת דורש החלפת סיסמה → מוצג מסך לשינוי סיסמה חדש.
+ * 3. ומוצג פופאפ הצלחה Context אם ההתחברות הצליחה נשמר משתמש ב  .
+ * 4. אם ההתחברות נכשלה → מוצג פופאפ שגיאה.
+ * 5. קיים קישור לשחזור סיסמה במקרה של שכחת פרטים.
+ */
+
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Popup ,useUser} from "components/Tools";
+import { Popup, useUser } from "components/Tools";
 import { FcApproval, FcHighPriority } from "react-icons/fc";
 
 const api = process.env.REACT_APP_API_URL;
@@ -15,8 +38,10 @@ function Login() {
   const [showPopupErrorLogin, setShowPopupErrorLogin] = useState(false);
   const [showPopupMustChange, setShowPopupMustChange] = useState(false);
   const navigate = useNavigate();
+
   // מצב שינוי סיסמה מאולץ
   const [mustChange, setMustChange] = useState(false);
+
   const [pwdForm, setPwdForm] = useState({
     next: "",
     confirm: "",
@@ -196,7 +221,7 @@ function Login() {
             </button>
           </form>
 
-          {/* 🔗 כפתור שכחת סיסמה */}
+          {/* כפתור שכחת סיסמה */}
           <div className="text-center mt-4">
             <button
               type="button"

@@ -1,14 +1,35 @@
-// frontend\src\utils\validateAndSanitizeEmail.js
+// frontend/src/utils/validateAndSanitizeEmail.js
 
 /**
- * Validate and sanitize email address
- * - Removes hidden unicode characters
- * - Normalizes text
- * - Validates email format
+ * קובץ: validateAndSanitizeEmail.js
+ * ----------------------------------
+ * מטרת הקובץ: לבדוק ולנקות כתובת אימייל שהוזנה על ידי המשתמש,
+ * כדי לוודא שהיא תקינה לשימוש ואינה מכילה תווים לא חוקיים.
  *
- * @param {string} email - input email address
- * @returns {string} sanitized email
- * @throws {Error} if email is invalid
+ * למה צריך את זה?
+ * - משתמשים יכולים להזין אימיילים לא תקינים (חסרים @ או נקודה).
+ * - שמזיקים למסד הנתונים = חבויים Unicode עלולים להופיע תווי  .
+ *
+ * שימוש עיקרי:
+ * - טפסי הרשמה / התחברות / איפוס סיסמה
+ * - כל מקום שבו נדרשת קלט אימייל מהמשתמש
+ */
+
+/**
+ * validateAndSanitizeEmail
+ * ------------------------------------------------------
+ * מנקה ומאמת כתובת אימייל.
+ *
+ * שלבים:
+ * 1. בדיקה ראשונית שהקלט הוא מחרוזת לא ריקה.
+ * 2. Normalization (NFKC) + הסרת תווים חבויים/חריגים (חוקי ASCII רק ).
+ * 3. הסרת רווחים מיותרים בתחילת ובסוף המחרוזת.
+ * 4. של אימייל תקני regex בדיקת התאמה ל  .
+ *
+ * @param {string} email - כתובת אימייל שהוזנה על ידי המשתמש
+ * @returns {string} כתובת אימייל נקייה ותקינה
+ * @throws {Error} אם האימייל לא תקין
+ *
  */
 export default function validateAndSanitizeEmail(email) {
   if (!email || typeof email !== "string") {

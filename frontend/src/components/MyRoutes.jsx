@@ -56,7 +56,6 @@ import EditProject from "./Projects/EditProject";
 import Logs from "./Logs/Logs";
 
 import Profile from "./Profile";
-import Unauthorized from "./Pages/Unauthorized";
 import Footer from "./Pages/Footer";
 import EditTask from "./Tasks/EditTask";
 import TaskDetails from "./Tasks/TaskDetails";
@@ -110,8 +109,7 @@ function MyRoutes() {
             <Route path="logs" element={<Logs />} />
             <Route path="profile" element={<Profile />} />
           </Route>
-          <Route path="/unauthorized" element={<Unauthorized />} />
-          <Route path="*" element={<NotFound />} />
+         <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 

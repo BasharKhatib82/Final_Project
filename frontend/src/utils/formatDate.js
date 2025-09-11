@@ -1,26 +1,47 @@
-// frontend\src\utils\formatDate.js
+// frontend/src/utils/formatDate.js
 
 /**
- * "DD-MM-YYYY" ממיר תאריך לפורמט
- *  Asia/Jerusalem מבוצעת המרה טקסטואלית / אחרת פירמוט לפי "YYYY-MM-DD" אם הקלט הוא
- * @param {string|number|Date} input ערך תאריך
- * @returns {string} "DD-MM-YYYY" או ""
+ * קובץ: formatDate.js
+ * --------------------
+ * מטרת הקובץ: לספק פונקציית עזר שמקבלת תאריך בפורמטים שונים
+ * "DD-MM-YYYY" ומחזירה אותו בפורמט אחיד של .
+ *
+ * שימוש :
+ * - (Date, timestamp, string) במערכות שונות תאריכים נשמרים בפורמטים שונים .
+ * - עלול להחזיר יום קודם בגלל הפרשי אזורי זמן Date שימוש ב JavaScript ב .
+ * - (Asia/Jerusalem) לכן כאן יש המרה מפורשת לאזור הזמן של ישראל .
+ *
+ * שימוש עיקרי: הצגת תאריכים בטפסים, דוחות ורכיבים ויזואליים
+ * בצורה אחידה וברורה למשתמש.
+ */
+
+/**
+ * formatDate
+ * ------------------------------------------------------
+ * ממיר ערך תאריך (Date, מספר, או מחרוזת) לפורמט "DD-MM-YYYY".
+ *
+ * @param {string|number|Date} input - ערך תאריך בפורמט נתמך:
+ *   - string: מבוצעת המרה טקסטואלית בלבד "YYYY-MM-DD" אם הפורמט הוא
+ *   - string: Date פורמטים אחרים ננסה ליצור אובייקט
+ *   - number: timestamp (שניות או מילי־שניות)
+ *   - Date: אובייקט תאריך תקין
+ * @returns {string}  במקרה של שגיאה "" /  "DD-MM-YYYY" מחרוזת תאריך בפורמט
  */
 export default function formatDate(input) {
   if (!input) return "";
 
-  // "YYYY-MM-DD" נקי → המרה טקסטואלית בלבד (ללא Date)
+  //( Date ללא ) המרה ישירה "YYYY-MM-DD" מחרוזת נקייה  →
   if (typeof input === "string" && /^\d{4}-\d{2}-\d{2}$/.test(input)) {
     const [y, m, d] = input.split("-");
     return `${d}-${m}-${y}`;
   }
 
-  // Date שאר המקרים > ננסה ליצור
+  // משאר המקרים Date יצירת
   let d;
   if (input instanceof Date) {
     d = input;
   } else if (typeof input === "number") {
-    // אם לא מילי שניות - נבצע המרה למילי שניות
+    //  המרה משניות למילי שניות
     const ts = input < 2e10 ? input * 1000 : input;
     d = new Date(ts);
   } else if (typeof input === "string") {
@@ -30,7 +51,7 @@ export default function formatDate(input) {
   }
   if (Number.isNaN(d.getTime())) return "";
 
-  // "פירמוט באזור הזמן של ישראל כדי למנוע "יום קודם
+  // עם אזור זמן ישראל כדי למנוע סטיות יום Intl.DateTimeFormat שימוש ב
   const dtf = new Intl.DateTimeFormat("en-GB", {
     timeZone: "Asia/Jerusalem",
     year: "numeric",
@@ -38,6 +59,6 @@ export default function formatDate(input) {
     day: "2-digit",
   });
 
-  //  לכן נעביר למקפים - "DD/MM/YYYY"  — מחזיר en-GB
+  // "DD/MM/YYYY" מחזיר en-GB   →  - נחליף / ב
   return dtf.format(d).replace(/\//g, "-");
 }
