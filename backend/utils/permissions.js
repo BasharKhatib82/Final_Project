@@ -43,6 +43,9 @@ export const roleFields = [
   "permission_view_task",
   "permission_edit_task",
   "permission_delete_task",
+  // היקף נתונים
+  "data_scope_self",
+  "data_scope_all",
   // דוח לוג פעילות
   "logs_page_access",
 ];

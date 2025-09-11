@@ -65,6 +65,8 @@ export async function login(req, res) {
       user_id: user.user_id,
       role_id: user.role_id,
       full_name: `${user.first_name} ${user.last_name}`,
+      data_scope_all: user.data_scope_all,
+      data_scope_self: user.data_scope_self,
     };
     roleFields.forEach((f) => (tokenPayload[f] = user[f]));
 
@@ -97,6 +99,8 @@ export async function login(req, res) {
         first_name: user.first_name,
         last_name: user.last_name,
         role_name: user.role_name,
+        data_scope_all: user.data_scope_all,
+        data_scope_self: user.data_scope_self,
         ...roleFields.reduce((acc, f) => ({ ...acc, [f]: user[f] }), {}),
       },
     });

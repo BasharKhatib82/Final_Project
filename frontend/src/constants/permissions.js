@@ -55,6 +55,10 @@ export const permissionsSchema = {
     { key: "permission_edit_task", label: "עדכון פרטי משימה" },
     { key: "permission_delete_task", label: "מחיקת משימה" },
   ],
+  "היקף נתונים": [
+    { key: "data_scope_self", label: "צפייה בנתונים אישיים בלבד" },
+    { key: "data_scope_all", label: "צפייה בנתוני כל המשתמשים" },
+  ],
   "דוח לוג פעילות": [{ key: "logs_page_access", label: "גישה ללוג פעילות" }],
 };
 
