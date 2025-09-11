@@ -73,12 +73,11 @@ export async function getLeadById(req, res) {
  * מחזיר: הודעת הצלחה/שגיאה
  */
 export async function addLead(req, res) {
-  let { phone_number, project_id, status, first_name, last_name, email, city } =
+  let { phone_number, project_id, first_name, last_name, email, city } =
     req.body;
 
   // נרמול
   phone_number = String(phone_number ?? "").trim();
-  status = "חדשה";
   first_name = String(first_name ?? "").trim();
   last_name = String(last_name ?? "").trim();
   email = String(email ?? "").trim();
@@ -101,9 +100,6 @@ export async function addLead(req, res) {
     return res
       .status(400)
       .json({ success: false, message: "מזהה פרויקט חייב להיות מספר חיובי" });
-  }
-  if (!isValidLeadStatus(status)) {
-    return res.status(400).json({ success: false, message: "סטטוס לא חוקי" });
   }
   if (email) {
     try {
@@ -158,9 +154,9 @@ export async function addLead(req, res) {
 
     // יצירת פנייה
     const [insLead] = await conn.query(
-      `INSERT INTO leads (phone_number, project_id, status, user_id)
-       VALUES (?, ?, ?, ?)`,
-      [phone_number, project_id, status, req.user.user_id] // מזהה משתמש של הנציג המחובר
+      `INSERT INTO leads (phone_number, project_id, user_id)
+       VALUES (?, ?, ?)`,
+      [phone_number, project_id, req.user.user_id] // מזהה משתמש של הנציג המחובר
     );
     if (insLead.affectedRows !== 1) throw new Error("שמירת פנייה נכשלה");
 
