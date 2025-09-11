@@ -29,7 +29,7 @@ router.get("/:id", getLeadById);
 router.post("/add", addLead);
 
 /** POST /leads/add – חיפוש לקוח לפי טלפון */
-router.post("/:phone", addLead);
+router.post("/:phone", getClientByPhone);
 
 /** PUT /leads/edit/:id – עדכון פנייה */
 router.put("/edit/:id", editLead);
