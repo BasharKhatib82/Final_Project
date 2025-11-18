@@ -24,25 +24,15 @@ import { Popup, useUser } from "components/Tools";
 import { NavigationButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
 import { permissionsSchema } from "constants";
-import { ROLE_STATUSES } from "constants";
 import { api, extractApiError } from "utils";
 
-// "פונקציית עזר: בדיקה אם ערך נחשב "פעיל
-const isActive = (el) => el === true || el === 1 || el === "1";
-
-// (כולל שם סטטוס קריא) UI מיפוי רשומת תפקיד ל
-const mapRole = (r) => ({
-  ...r,
-  active: isActive(r.active),
-  status_human: isActive(r.active)
-    ? ROLE_STATUSES.ACTIVE.label
-    : ROLE_STATUSES.INACTIVE.label,
-});
+// עזר לבדוק אם סטטוס פעיל
+const isActive = (v) => v === true || v === 1 || v === "1";
 
 // הצגת סטטוס עם צבעים
 const renderCheckActive = (v) => (
   <span className={v ? "text-green-600" : "text-red-500"}>
-    {v ? ROLE_STATUSES.ACTIVE.label : ROLE_STATUSES.INACTIVE.label}
+    {v ? "פעיל" : "לא פעיל"}
   </span>
 );
 
@@ -68,13 +58,28 @@ export default function Roles() {
   // שליפת רשימת תפקידים (פעילים + לא פעילים)
   const fetchRoles = () => {
     setLoading(true);
+
     Promise.all([api.get("/roles/active"), api.get("/roles/inactive")])
       .then(([activeRes, inactiveRes]) => {
-        const active = (activeRes?.data?.data || []).map(mapRole);
-        const inactive = (inactiveRes?.data?.data || []).map(mapRole);
+        // תפקידים פעילים
+        const active = (activeRes?.data?.data || []).map((r) => ({
+          ...r,
+          active: isActive(r.active),
+          status_human: "פעיל",
+        }));
+
+        // תפקידים לא פעילים
+        const inactive = (inactiveRes?.data?.data || []).map((r) => ({
+          ...r,
+          active: isActive(r.active),
+          status_human: "לא פעיל",
+        }));
+
+        // איחוד הרשימות לתוך state אחד במסך
         setAllRoles([...active, ...inactive]);
       })
       .catch((err) => {
+        // הצגת הודעת שגיאה ידידותית למשתמש
         setPopup({
           show: true,
           title: "שגיאה",
