@@ -257,7 +257,7 @@ export default function Roles() {
             )
           }
           defaultFilters={defaultFilters}
-          searchPlaceholder="שם תפקיד..."
+          searchPlaceholder="שם פקיד..."
         />
       )}
 
