@@ -221,14 +221,14 @@ export default function Roles() {
       label: "סטטוס",
       type: "select",
       options: [
-        { value: 1, label: ROLE_STATUSES.ACTIVE.label },
-        { value: 0, label: ROLE_STATUSES.INACTIVE.label },
+        { value: "true", label: "פעיל" },
+        { value: "false", label: "לא פעיל" },
         { value: "", label: "כל הסטטוסים" },
       ],
     },
   ];
 
-  const defaultFilters = { active: 1 };
+  const defaultFilters = { active: "true" };
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
