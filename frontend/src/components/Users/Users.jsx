@@ -19,7 +19,7 @@ import { NavigationButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
 import { api, extractApiError } from "utils";
 
-// עזר לבדוק אם סטטוס פעיל
+//פונקציית עזר לבדיקת סטטוס
 const isActive = (v) => v === true || v === 1 || v === "1";
 
 // הצגת סטטוס עם צבעים
@@ -50,6 +50,7 @@ export default function Users() {
   // שליפת משתמשים פעילים ולא פעילים
   const fetchUsers = () => {
     setLoading(true);
+
     Promise.all([api.get("/users/active"), api.get("/users/inactive")])
       .then(([activeRes, inactiveRes]) => {
         const active = (activeRes?.data?.data || []).map((u) => ({
@@ -75,7 +76,7 @@ export default function Users() {
       .finally(() => setLoading(false));
   };
 
-  // עריכת משתמש
+  //  מעבר למסך עריכת משתמש
   const handleEdit = (user_id) => {
     navigate(`/dashboard/users/edit/${user_id}`);
   };
@@ -103,7 +104,7 @@ export default function Users() {
       );
   };
 
-  // עמודות הדוח
+  // עמודות הדוח לטבלת המשתמשים
   const columns = [
     { key: "user_id", label: "ת.ז", export: (u) => String(u.user_id) },
     { key: "first_name", label: "שם פרטי", export: (u) => u.first_name },

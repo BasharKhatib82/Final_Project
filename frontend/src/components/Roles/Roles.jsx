@@ -26,7 +26,7 @@ import ReportView from "../Reports/ReportView";
 import { permissionsSchema } from "constants";
 import { api, extractApiError } from "utils";
 
-// עזר לבדוק אם סטטוס פעיל
+//פונקציית עזר לבדיקת סטטוס
 const isActive = (v) => v === true || v === 1 || v === "1";
 
 // הצגת סטטוס עם צבעים
@@ -83,7 +83,7 @@ export default function Roles() {
         setPopup({
           show: true,
           title: "שגיאה",
-          message: extractApiError(err, "שגיאה בטעינת התפקידים"),
+          message: extractApiError(err, "שגיאה בטעינת תפקידים"),
           mode: "error",
         });
       })
@@ -101,7 +101,7 @@ export default function Roles() {
         setPopup({
           show: true,
           title: "הצלחה",
-          message: "התפקיד נמחק בהצלחה",
+          message: "התפקיד סומן כלא פעיל",
           mode: "success",
         });
         fetchRoles();
