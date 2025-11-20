@@ -88,9 +88,7 @@ export async function getInactiveRoles(req, res) {
  */
 export async function getAllRoles(req, res) {
   try {
-    const [results] = await db.query(
-      "SELECT * FROM roles_permissions ORDER BY role_id ASC"
-    );
+    const [results] = await db.query("SELECT * FROM roles_permissions");
     return res.status(200).json({ success: true, data: results });
   } catch (err) {
     console.error("שגיאת שליפת תפקידים:", err);
