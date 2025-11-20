@@ -244,7 +244,7 @@ export default function Roles() {
           title="רשימת תפקידים"
           columns={columns}
           rows={allRoles}
-          filtersDef={[filtersDef]}
+          filtersDef={filtersDef}
           searchableKeys={["role_name"]}
           pageSize={10}
           emailApiBase={process.env.REACT_APP_API_URL}
