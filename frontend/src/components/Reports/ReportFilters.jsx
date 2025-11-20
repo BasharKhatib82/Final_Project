@@ -66,63 +66,48 @@ function Filter({ def, value, onChange, inline, filteredRows }) {
       </span>
     );
 
-  const options = def.options || [];
+  //  נבנה אפשרויות מהנתונים dynamic: true אם הפילטר מוגדר
+  const dynamicOptions = useMemo(() => {
+    if (def.type === "select" && def.dynamic && Array.isArray(filteredRows)) {
+      // יוצרים Map ייחודי לפי value
+      const uniq = new Map();
+      filteredRows.forEach((row) => {
+        const value = String(row[def.name] ?? "");
+        const label = row[def.optionLabelKey || def.name] || "לא ידוע"; // טיפול בחסר
+        if (!uniq.has(value)) uniq.set(value, label);
+      });
 
-  <select
-    id={def.name}
-    className="border rounded px-2 py-1 text-sm"
-    value={value ?? ""}
-    onChange={(e) => onChange(e.target.value || "")}
-  >
-    {options.map((opt) => (
-      <option key={String(opt.value)} value={opt.value}>
-        {opt.label}
-      </option>
-    ))}
-  </select>;
+      return [
+        { value: "", label: `כל ה${def.label}ים` },
+        ...Array.from(uniq.entries()).map(([value, label]) => ({
+          value,
+          label,
+        })),
+      ];
+    }
+    return def.options || [];
+  }, [def, filteredRows]);
 
-  // //  נבנה אפשרויות מהנתונים dynamic: true אם הפילטר מוגדר
-  // const dynamicOptions = useMemo(() => {
-  //   if (def.type === "select" && def.dynamic && Array.isArray(filteredRows)) {
-  //     // יוצרים Map ייחודי לפי value
-  //     const uniq = new Map();
-  //     filteredRows.forEach((row) => {
-  //       const value = String(row[def.name] ?? "");
-  //       const label = row[def.optionLabelKey || def.name] || "לא ידוע"; // טיפול בחסר
-  //       if (!uniq.has(value)) uniq.set(value, label);
-  //     });
-
-  //     return [
-  //       { value: "", label: `כל ה${def.label}ים` },
-  //       ...Array.from(uniq.entries()).map(([value, label]) => ({
-  //         value,
-  //         label,
-  //       })),
-  //     ];
-  //   }
-  //   return def.options || [];
-  // }, [def, filteredRows]);
-
-  // // Select
-  // if (def.type === "select") {
-  //   return (
-  //     <div className="flex items-center gap-2">
-  //       {renderLabel()}
-  //       <select
-  //         id={def.name}
-  //         className="border rounded px-2 py-1 text-sm"
-  //         value={value ?? ""}
-  //         onChange={(e) => onChange(e.target.value || "")}
-  //       >
-  //         {(dynamicOptions || []).map((opt) => (
-  //           <option key={String(opt.value)} value={opt.value}>
-  //             {opt.label}
-  //           </option>
-  //         ))}
-  //       </select>
-  //     </div>
-  //   );
-  // }
+  // 🔹 Select
+  if (def.type === "select") {
+    return (
+      <div className="flex items-center gap-2">
+        {renderLabel()}
+        <select
+          id={def.name}
+          className="border rounded px-2 py-1 text-sm"
+          value={value ?? ""}
+          onChange={(e) => onChange(e.target.value || "")}
+        >
+          {(dynamicOptions || []).map((opt) => (
+            <option key={String(opt.value)} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
 
   //  תאריך יחיד
   if (def.type === "date") {
