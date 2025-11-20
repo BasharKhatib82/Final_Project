@@ -185,7 +185,8 @@ export default function Users() {
       label: "תפקיד",
       type: "select",
       dynamic: true,
-      optionLabelKey: "כל התפקידים",
+      optionLabelKey: "role_name",
+      emptyOption: { value: "", label: "כל התפקידים" }, // ברירת מחדל
     },
   ];
 
