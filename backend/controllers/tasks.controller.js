@@ -206,6 +206,88 @@ export async function cancelTask(req, res) {
 }
 
 /**
+ * עדכון נציג למשימה
+ * מקבל: :id, { user_id }
+ */
+export async function updateTaskRep(req, res) {
+  const taskId = req.params.id;
+  const repUserId =
+    req.body.user_id != null ? String(req.body.user_id).trim() : null;
+
+  if (repUserId && !isNineDigitId(repUserId)) {
+    return res.status(400).json({
+      success: false,
+      message: "תעודת זהות של הנציג חייבת להיות מספר בן 9 ספרות",
+    });
+  }
+
+  try {
+    const [result] = await db.query(
+      "UPDATE tasks SET user_id = ? WHERE task_id = ?",
+      [repUserId || null, taskId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "משימה לא נמצאה" });
+    }
+
+    logAction(`עדכון נציג למשימה #${taskId}`, req.user.user_id)(
+      req,
+      res,
+      () => {}
+    );
+
+    return res.json({ success: true, message: "נציג עודכן בהצלחה" });
+  } catch (err) {
+    console.error("updateTaskRep:", err);
+    return res.status(500).json({ success: false, message: "שגיאה בשרת" });
+  }
+}
+
+
+/**
+ * עדכון סטטוס למשימה
+ * מקבל: :id, { status }
+ */
+export async function updateTaskStatus(req, res) {
+  const taskId = req.params.id;
+  const newStatus = String(req.body.status ?? "").trim();
+
+  if (!isValidTaskStatus(newStatus)) {
+    return res
+      .status(400)
+      .json({ success: false, message: "סטטוס משימה לא חוקי" });
+  }
+
+  try {
+    const [result] = await db.query(
+      "UPDATE tasks SET status = ? WHERE task_id = ?",
+      [newStatus, taskId]
+    );
+
+    if (result.affectedRows === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "משימה לא נמצאה" });
+    }
+
+    logAction(`עדכון סטטוס למשימה #${taskId}`, req.user.user_id)(
+      req,
+      res,
+      () => {}
+    );
+
+    return res.json({ success: true, message: "סטטוס עודכן בהצלחה" });
+  } catch (err) {
+    console.error("updateTaskStatus:", err);
+    return res.status(500).json({ success: false, message: "שגיאה בשרת" });
+  }
+}
+
+
+/**
  * שיוך מרוכז של משימות לנציג
  * מקבל: { taskIds:number[], user_id?[9 ספרות] } – null מסיר שיוך
  * מחזיר: { success, message }
