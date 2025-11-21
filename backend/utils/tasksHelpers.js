@@ -1,7 +1,7 @@
 // backend\utils\tasksHelpers.js
 
 // סטטוסים חוקיים למשימות
-export const VALID_TASK_STATUSES = ["חדשה", "בטיפול", "הושלמה", "בוטלה"];
+export const VALID_TASK_STATUSES = ["חדשה", "בטיפול", "טופלה", "בוטלה"];
 
 /**
  * בדיקת סטטוס חוקי למשימה
