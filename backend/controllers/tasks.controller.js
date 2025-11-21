@@ -65,7 +65,7 @@ export async function getTaskById(req, res) {
       u.last_name AS assigned_last_name,
       u.user_id AS assigned_user_id
     FROM tasks t
-    LEFT JOIN users u ON t.assigned_to = u.user_id
+    LEFT JOIN users u ON t.user_id = u.user_id
     WHERE t.task_id = ?
   `;
 
