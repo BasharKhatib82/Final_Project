@@ -90,7 +90,6 @@ const AddTask = () => {
         });
       }
     } catch (err) {
-      console.error("שגיאה בהוספת משימה:", err);
       setConfirmPopup(false);
       setPopupData({
         title: "שגיאה",

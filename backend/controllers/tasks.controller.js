@@ -80,12 +80,6 @@ export async function addTask(req, res) {
       .status(400)
       .json({ success: false, message: "תאריך יעד לא תקין" });
   }
-  if (user_id && !isNineDigitId(user_id)) {
-    return res.status(400).json({
-      success: false,
-      message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
-    });
-  }
 
   try {
     await db.query(
@@ -97,7 +91,6 @@ export async function addTask(req, res) {
     logAction("הוספת משימה חדשה", req.user?.user_id)(req, res, () => {});
     return res.json({ success: true, message: "המשימה נוספה בהצלחה" });
   } catch (err) {
-    console.error("addTask:", err);
     return res
       .status(500)
       .json({ success: false, message: "שגיאה בהוספת משימה" });
