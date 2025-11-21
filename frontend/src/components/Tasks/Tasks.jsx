@@ -362,7 +362,7 @@ export default function Tasks() {
         rows={tasks}
         filtersDef={filtersDef}
         searchableKeys={["task_title", "description"]}
-        searchPlaceholder="חיפוש לפי נושא או תיאור..."
+        searchPlaceholder="חיפוש לפי נושא"
         addButton={
           user?.permission_add_task === 1 && (
             <NavigationButton
