@@ -139,18 +139,18 @@ const TaskDetails = () => {
       {/* פרטי משימה */}
       <div className="bg-white rounded shadow p-6 text-gray-700 mb-6 text-right space-y-4">
         <div className="text-xl font-semibold text-blue-700 text-center">
-          פרטי משימה #{task.task_id}
+          פרטי משימה מספר -{task.task_id}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <strong>נושא:</strong> {task.task_title}
+            <strong>נושא :</strong> {task.task_title}
           </div>
           <div>
-            <strong>תיאור:</strong> {task.description || "-"}
+            <strong>תיאור :</strong> {task.description || "-"}
           </div>
           <div>
-            <strong>סטטוס:</strong>{" "}
+            <strong>סטטוס :</strong>{" "}
             <span
               className={`font-semibold ${
                 task.status === "חדשה"
@@ -166,12 +166,19 @@ const TaskDetails = () => {
             </span>
           </div>
           <div>
-            <strong>תאריך יעד:</strong>{" "}
-            {new Date(task.due_date).toLocaleDateString("he-IL")}
+            <strong>תאריך יצירה :</strong>{" "}
+            {new Date(task.created_at).toLocaleDateString("he-IL")}
           </div>
           <div>
+            <strong>תאריך יעד :</strong>{" "}
+            {new Date(task.due_date).toLocaleDateString("he-IL")}
+          </div>
+
+          <div>
             <strong>נציג מטפל:</strong>{" "}
-            {task.assigned_to_name ? task.assigned_to_name : "ללא"}
+            {task.assigned_first_name
+              ? `${task.assigned_first_name} ${task.assigned_last_name}`
+              : "ללא"}
           </div>
         </div>
       </div>

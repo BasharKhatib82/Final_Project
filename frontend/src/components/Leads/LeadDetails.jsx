@@ -161,11 +161,11 @@ const LeadDetails = () => {
             <strong>סטטוס:</strong>{" "}
             <span
               className={
-                lead.status === "חדש"
+                lead.status === "חדשה"
                   ? "text-green-600 font-semibold"
                   : lead.status === "בטיפול"
                   ? "text-blue-600 font-semibold"
-                  : lead.status === "טופל"
+                  : lead.status === "טופלה"
                   ? "text-gray-600 font-semibold"
                   : "text-red-600 font-semibold"
               }
