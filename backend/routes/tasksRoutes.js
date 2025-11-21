@@ -4,6 +4,7 @@ import express from "express";
 import verifyToken from "../utils/verifyToken.js";
 import {
   listTasks,
+  getTaskById,
   addTask,
   updateTask,
   cancelTask,
@@ -19,6 +20,8 @@ router.use(verifyToken);
 
 /** GET /tasks – שליפת כל המשימות */
 router.get("/", listTasks);
+/** GET /tasks/:id – שליפת משימה לפי מזהה */
+router.get("/tasks/:id", getTaskById);
 
 /** POST /tasks/add – הוספת משימה */
 router.post("/add", addTask);

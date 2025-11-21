@@ -53,6 +53,39 @@ export async function listTasks(req, res) {
 }
 
 /**
+ * ID שליפת משימה לפי
+ * מקבל: :id
+ * מחזיר: אובייקט משימה עם פרטי נציג (אם יש)
+ */
+export async function getTaskById(req, res) {
+  const sql = `
+    SELECT 
+      t.*,
+      u.first_name AS assigned_first_name,
+      u.last_name AS assigned_last_name,
+      u.user_id AS assigned_user_id
+    FROM tasks t
+    LEFT JOIN users u ON t.assigned_to = u.user_id
+    WHERE t.task_id = ?
+  `;
+
+  try {
+    const [rows] = await db.query(sql, [req.params.id]);
+
+    if (rows.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, message: "משימה לא נמצאה" });
+    }
+
+    return res.json({ success: true, data: rows[0] });
+  } catch (err) {
+    console.error("getTaskById:", err);
+    return res.status(500).json({ success: false, message: "שגיאה בשרת" });
+  }
+}
+
+/**
  * הוספת משימה
  * מקבל: { task_title (חובה), description?, status(חוקי), due_date(חובה), user_id? }
  * מחזיר: { success, message }
@@ -246,7 +279,6 @@ export async function updateTaskRep(req, res) {
   }
 }
 
-
 /**
  * עדכון סטטוס למשימה
  * מקבל: :id, { status }
@@ -285,7 +317,6 @@ export async function updateTaskStatus(req, res) {
     return res.status(500).json({ success: false, message: "שגיאה בשרת" });
   }
 }
-
 
 /**
  * שיוך מרוכז של משימות לנציג
