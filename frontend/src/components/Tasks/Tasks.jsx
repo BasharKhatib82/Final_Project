@@ -209,7 +209,7 @@ export default function Tasks() {
         >
           <option value="חדשה">חדשה</option>
           <option value="בטיפול">בטיפול</option>
-          <option value="טופלה">טופלה</option>
+          <option value="הטופל">הטופל</option>
           <option value="בוטלה">בוטלה</option>
         </select>
       ),
@@ -293,7 +293,7 @@ export default function Tasks() {
         { value: "", label: "כל הסטטוסים" },
         { value: "חדשה", label: "חדשה" },
         { value: "בטיפול", label: "בטיפול" },
-        { value: "טופלה", label: "טופלה" },
+        { value: "הטופל", label: "הטופל" },
         { value: "בוטלה", label: "בוטלה" },
       ],
     },

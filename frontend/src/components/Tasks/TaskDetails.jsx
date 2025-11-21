@@ -157,7 +157,7 @@ const TaskDetails = () => {
                   ? "text-green-600"
                   : task.status === "בטיפול"
                   ? "text-blue-600"
-                  : task.status === "טופלה"
+                  : task.status === "הטופל"
                   ? "text-gray-600"
                   : "text-red-600"
               }`}
@@ -241,7 +241,7 @@ const TaskDetails = () => {
           >
             <option value="חדשה">חדשה</option>
             <option value="בטיפול">בטיפול</option>
-            <option value="טופלה">טופלה</option>
+            <option value="הטופל">הטופל</option>
             <option value="בוטלה">בוטלה</option>
           </select>
         </div>

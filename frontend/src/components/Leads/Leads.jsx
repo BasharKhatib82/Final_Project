@@ -292,9 +292,9 @@ export default function Leads() {
           }}
           className="border border-gray-300 rounded px-2 py-1 text-sm"
         >
-          <option value="חדש">חדשה</option>
+          <option value="חדשה">חדשה</option>
           <option value="בטיפול">בטיפול</option>
-          <option value="טופל">טופלה</option>
+          <option value="הטופל">הטופל</option>
           <option value="בוטלה">בוטלה</option>
         </select>
       ),
@@ -353,7 +353,7 @@ export default function Leads() {
         { value: "", label: "כל הסטטוסים" },
         { value: "חדשה", label: "חדשה" },
         { value: "בטיפול", label: "בטיפול" },
-        { value: "טופלה", label: "טופלה" },
+        { value: "הטופל", label: "הטופל" },
         { value: "בוטלה", label: "בוטלה" },
       ],
     },

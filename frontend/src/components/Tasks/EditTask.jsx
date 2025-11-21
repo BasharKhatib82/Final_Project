@@ -182,7 +182,7 @@ const EditTask = () => {
           >
             <option value="חדשה">חדשה</option>
             <option value="בטיפול">בטיפול</option>
-            <option value="טופלה">טופלה</option>
+            <option value="הטופל">הטופל</option>
             <option value="בוטלה">בוטלה</option>
           </select>
         </div>
