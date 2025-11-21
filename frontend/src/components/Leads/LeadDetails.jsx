@@ -41,14 +41,14 @@ const LeadDetails = () => {
       } else {
         setPopupData({
           title: "שגיאה",
-          message: res.data.message || "שגיאה בטעינת הפנייה",
+          message: res.data.message || "שגיאה בטעינת פרטי הפנייה",
           mode: "error",
         });
       }
     } catch (err) {
       setPopupData({
         title: "שגיאה",
-        message: extractApiError(err, "שגיאה בטעינת הפנייה"),
+        message: extractApiError(err, "שגיאה בטעינת פרטי הפנייה"),
         mode: "error",
       });
     }

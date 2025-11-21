@@ -13,7 +13,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { AddSaveButton, NavigationButton } from "components/Buttons";
 import { Popup } from "components/Tools";
-import { api } from "utils";
+import { api, extractApiError } from "utils";
 
 const TaskDetails = () => {
   const { id } = useParams();
@@ -35,10 +35,9 @@ const TaskDetails = () => {
   const fetchTask = async () => {
     try {
       const res = await api.get(`/tasks/${id}`);
-      if (res.data.success || res.data.Status) {
-        const data = res.data.data || res.data.Result;
-        setTask(data);
-        setNewStatus(data.status);
+      if (res.data.success) {
+        setTask(res.data.data);
+        setNewStatus(res.data.data.status);
       } else {
         setPopupData({
           title: "שגיאה",
@@ -47,10 +46,9 @@ const TaskDetails = () => {
         });
       }
     } catch (err) {
-      console.error("שגיאה בטעינת משימה:", err);
       setPopupData({
         title: "שגיאה",
-        message: "שגיאה בהתחברות לשרת",
+        message: extractApiError(err, "שגיאה בטעינת פרטי משימה"),
         mode: "error",
       });
     }
@@ -59,14 +57,21 @@ const TaskDetails = () => {
   const fetchProgress = async () => {
     try {
       const res = await api.get(`/tasks/progress/${id}`);
-      if (res.data.success || res.data.Status) {
-        const data = res.data.data || res.data.Result;
-        setProgress(data || []);
+      if (res.data.success) {
+        setProgress(res.data.data);
       } else {
-        console.error("שגיאה בטעינת התקדמות:", res.data.Error);
+        setPopupData({
+          title: "שגיאה",
+          message: res.data.message || "שגיאה בטעינת תיעודים",
+          mode: "error",
+        });
       }
     } catch (err) {
-      console.error("שגיאה בטעינת התקדמות:", err);
+      setPopupData({
+        title: "שגיאה",
+        message: extractApiError(err, "שגיאה בטעינת תיעודים"),
+        mode: "error",
+      });
     }
   };
 
