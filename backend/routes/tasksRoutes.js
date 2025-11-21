@@ -21,7 +21,7 @@ router.use(verifyToken);
 /** GET /tasks – שליפת כל המשימות */
 router.get("/", listTasks);
 /** GET /tasks/:id – שליפת משימה לפי מזהה */
-router.get(":id", getTaskById);
+router.get("/:id", getTaskById);
 
 /** POST /tasks/add – הוספת משימה */
 router.post("/add", addTask);
