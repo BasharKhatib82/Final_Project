@@ -157,7 +157,7 @@ const TaskDetails = () => {
                   ? "text-green-600"
                   : task.status === "בטיפול"
                   ? "text-blue-600"
-                  : task.status === "הטופל"
+                  : task.status === "טופלה"
                   ? "text-gray-600"
                   : "text-red-600"
               }`}
@@ -170,8 +170,16 @@ const TaskDetails = () => {
             {new Date(task.created_at).toLocaleDateString("he-IL")}
           </div>
           <div>
-            <strong>תאריך יעד :</strong>{" "}
-            {new Date(task.due_date).toLocaleDateString("he-IL")}
+            <strong>תאריך יעד:</strong>{" "}
+            <span
+              className={
+                new Date(task.due_date) < new Date() && task.status !== "טופלה"
+                  ? "text-red-600 font-semibold"
+                  : ""
+              }
+            >
+              {new Date(task.due_date).toLocaleDateString("he-IL")}
+            </span>
           </div>
 
           <div>
@@ -241,7 +249,7 @@ const TaskDetails = () => {
           >
             <option value="חדשה">חדשה</option>
             <option value="בטיפול">בטיפול</option>
-            <option value="הטופל">הטופל</option>
+            <option value="טופלה">טופלה</option>
             <option value="בוטלה">בוטלה</option>
           </select>
         </div>

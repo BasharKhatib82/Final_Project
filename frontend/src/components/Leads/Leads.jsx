@@ -294,7 +294,7 @@ export default function Leads() {
         >
           <option value="חדשה">חדשה</option>
           <option value="בטיפול">בטיפול</option>
-          <option value="הטופל">הטופל</option>
+          <option value="טופלה">טופלה</option>
           <option value="בוטלה">בוטלה</option>
         </select>
       ),
@@ -353,7 +353,7 @@ export default function Leads() {
         { value: "", label: "כל הסטטוסים" },
         { value: "חדשה", label: "חדשה" },
         { value: "בטיפול", label: "בטיפול" },
-        { value: "הטופל", label: "הטופל" },
+        { value: "טופלה", label: "טופלה" },
         { value: "בוטלה", label: "בוטלה" },
       ],
     },

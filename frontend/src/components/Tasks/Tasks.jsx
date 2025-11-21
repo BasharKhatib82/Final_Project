@@ -192,7 +192,15 @@ export default function Tasks() {
     {
       key: "due_date",
       label: "תאריך יעד",
-      render: (r) => new Date(r.due_date).toLocaleDateString("he-IL"),
+      render: (r) => {
+        const isOverdue =
+          new Date(r.due_date) < new Date() && r.status !== "טופלה";
+        return (
+          <span className={isOverdue ? "text-red-600 font-semibold" : ""}>
+            {new Date(r.due_date).toLocaleDateString("he-IL")}
+          </span>
+        );
+      },
       export: (r) => new Date(r.due_date).toLocaleDateString("he-IL"),
     },
     {
@@ -209,7 +217,7 @@ export default function Tasks() {
         >
           <option value="חדשה">חדשה</option>
           <option value="בטיפול">בטיפול</option>
-          <option value="הטופל">הטופל</option>
+          <option value="טופלה">טופלה</option>
           <option value="בוטלה">בוטלה</option>
         </select>
       ),
@@ -293,7 +301,7 @@ export default function Tasks() {
         { value: "", label: "כל הסטטוסים" },
         { value: "חדשה", label: "חדשה" },
         { value: "בטיפול", label: "בטיפול" },
-        { value: "הטופל", label: "הטופל" },
+        { value: "טופלה", label: "טופלה" },
         { value: "בוטלה", label: "בוטלה" },
       ],
     },
