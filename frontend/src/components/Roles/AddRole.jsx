@@ -48,7 +48,12 @@ export default function AddRole() {
       });
       return;
     }
-
+    setPopup({
+      show: true,
+      title: "אישור יצירת תפקיד",
+      message: "האם להוסיף תפקיד חדש ?",
+      mode: "confirm",
+    });
     const roleData = { ...roleDataTemplate, role_name: roleName };
     selectedPermissions.forEach((perm) => {
       roleData[perm] = 1;
