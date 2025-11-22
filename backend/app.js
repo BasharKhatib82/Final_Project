@@ -12,6 +12,9 @@ const app = express();
 // JSON
 app.use(express.json({ limit: "10mb" }));
 
+// הגדרת אזור זמן ברמת האפליקציה
+process.env.TZ = "Asia/Jerusalem";
+
 // CORS
 app.use(
   cors({
