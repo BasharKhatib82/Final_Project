@@ -40,7 +40,7 @@ export default function LandingPage() {
     try {
       console.log("🟢 שולח נתונים:", form);
 
-      await api.post("/leads", form); // תחליף ל־API שלך
+      await api.post("/public/landing-leads", form);
       alert("פנייתך נשלחה בהצלחה!");
       setForm({
         first_name: "",

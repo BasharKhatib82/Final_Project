@@ -13,6 +13,7 @@ import dashboardRoutes from "./dashboardRoutes.js";
 import logsRoutes from "./logsRoutes.js";
 import reportsRouter from "./reportsRoutes.js";
 import contactRoutes from "./contactRoutes.js";
+import publicRoutes from "./routes/publicRoutes.js";
 
 /**
  * רישום כל הראוטים באפליקציה בצורה מרוכזת
@@ -31,4 +32,5 @@ export default function routes(app) {
   app.use("/logs", logsRoutes);
   app.use("/reports", reportsRouter);
   app.use("/contact", contactRoutes);
+   app.use("/public", publicRoutes);
 }
