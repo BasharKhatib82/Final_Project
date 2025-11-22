@@ -43,7 +43,11 @@ export async function addRole(req, res) {
       values
     );
 
-    logAction(`${role_name}הוספת תפקיד : `, user.user_id)(req, res, () => {});
+    logAction(`${role_name}הוספת תפקיד : `, req.user?.user_id)(
+      req,
+      res,
+      () => {}
+    );
 
     return res.status(201).json({ success: true, result });
   } catch (err) {
