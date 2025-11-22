@@ -98,8 +98,15 @@ const EditTask = () => {
 
   const handleSubmit = async () => {
     try {
-      console.log("🛠️ נתונים שנשלחים לשרת:", form);
-      const res = await api.put(`/tasks/edit/${id}`, form);
+      const payload = {
+        task_title: form.task_title,
+        description: form.description,
+        status: form.status,
+        due_date: form.due_date,
+        user_id: form.user_id || null,
+      };
+      console.log("🛠️ נתונים שנשלחים לשרת:", payload);
+      const res = await api.put(`/tasks/edit/${id}`, payload);
 
       if (res.data.success || res.data.Status) {
         setPopupData({
