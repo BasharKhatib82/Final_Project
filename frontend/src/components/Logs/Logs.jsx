@@ -11,7 +11,7 @@
 
 import React, { useEffect, useState } from "react";
 import { api, extractApiError } from "utils";
-import { formatIsraelDateTime } from "utils/date";
+import { formatDateAndTimeRaw } from "utils/date";
 import { Popup } from "components/Tools";
 import ReportView from "../Reports/ReportView";
 
@@ -108,8 +108,8 @@ export default function Logs() {
     {
       key: "time_date",
       label: "תאריך ושעה",
-      render: (r) => formatIsraelDateTime(r.time_date),
-      export: (r) => formatIsraelDateTime(r.time_date),
+      render: (r) => formatDateAndTimeRaw(r.time_date),
+      export: (r) => formatDateAndTimeRaw(r.time_date),
     },
   ];
 

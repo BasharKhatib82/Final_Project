@@ -1,44 +1,33 @@
 // frontend/src/utils/date.js
 
-// עוזר פנימי: מחלץ חלקי תאריך/זמן בשעון ישראל
-function getILParts(dateInput) {
-  const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
-  if (Number.isNaN(d.getTime())) return null;
+/** מחזיר ISO כמות-שהוא (אם הגיע Date – נהפוך ל־ISO פעם אחת, עדיין UTC) */
+const toIsoString = (input) => {
+  if (!input) return "";
+  if (typeof input === "string") return input;
+  if (input instanceof Date && !isNaN(input)) return input.toISOString();
+  return String(input);
+};
 
-  const parts = new Intl.DateTimeFormat("he-IL", {
-    timeZone: "Asia/Jerusalem",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(d);
-
-  const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
-  // בחלק מסביבות אין hour/minute אם לא מבקשים—הוספנו למעלה
-  return {
-    year: map.year,
-    month: map.month,
-    day: map.day,
-    hour: map.hour ?? "00",
-    minute: map.minute ?? "00",
-  };
+/** 1) YYYY-MM-DD – בלי שינוי אזור זמן (טקסטואלי בלבד) */
+export function formatOnlyDateRaw(input) {
+  const iso = toIsoString(input);
+  // תופס "YYYY-MM-DD" בתחילת המחרוזת
+  const m = iso.match(/^(\d{4}-\d{2}-\d{2})/);
+  return m ? m[1] : "";
 }
 
-/** 1) תאריך ישראלי + שעה: DD/MM/YYYY HH:mm */
-export function formatIsraelDateTime(dateInput) {
-  const p = getILParts(dateInput);
-  return p ? `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}` : "";
+/** 2) YYYY-MM-DD HH:mm – בלי שינוי אזור זמן (טקסטואלי בלבד) */
+export function formatDateAndTimeRaw(input) {
+  const iso = toIsoString(input);
+  // תופס "YYYY-MM-DD" ועוד "HH:mm" אחרי T/רווח
+  const m = iso.match(/^(\d{4}-\d{2}-\d{2})[T ](\d{2}):(\d{2})/);
+  return m ? `${m[1]} ${m[2]}:${m[3]}` : formatOnlyDateRaw(input);
 }
 
-/** 3) רק שעה: HH:mm */
-export function formatOnlyTime(dateInput) {
-  const p = getILParts(dateInput);
-  return p ? `${p.hour}:${p.minute}` : "";
-}
-/** 4) תאריך לפורמט ישראלי: DD/MM/YYYY */
-export function formatDateToIsrael(dateInput) {
-  const p = getILParts(dateInput);
-  return p ? `${p.day}/${p.month}/${p.year}` : "";
+/** 3) HH:mm – בלי שינוי אזור זמן (טקסטואלי בלבד) */
+export function formatOnlyTimeRaw(input) {
+  const iso = toIsoString(input);
+  // תופס "HH:mm" אחרי T/רווח
+  const m = iso.match(/[T ](\d{2}):(\d{2})/);
+  return m ? `${m[1]}:${m[2]}` : "";
 }
