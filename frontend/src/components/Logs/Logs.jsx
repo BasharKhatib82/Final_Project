@@ -108,8 +108,8 @@ export default function Logs() {
     {
       key: "time_date",
       label: "תאריך ושעה",
-      render: (r) => new Date(r.time_date).toLocaleDateString,
-      export: (r) => new Date(r.time_date).toLocaleDateString,
+      render: (r) => r.time_date,
+      export: (r) => r.time_date,
     },
   ];
 
