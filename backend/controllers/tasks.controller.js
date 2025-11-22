@@ -148,11 +148,6 @@ export async function updateTask(req, res) {
       .status(400)
       .json({ success: false, message: "נא למלא את כל שדות החובה" });
   }
-  if (!isValidDate(due_date)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "תאריך יעד לא תקין" });
-  }
 
   try {
     const [result] = await db.query(
