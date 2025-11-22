@@ -41,7 +41,7 @@ cron.schedule(
 /**
  *  DB של ה NOW() : משתמש ב
  */
-cron.schedule("*/10 * * * *", async () => {
+cron.schedule("*/1 * * * *", async () => {
   try {
     const [result] = await db.query(`
       DELETE FROM active_tokens
