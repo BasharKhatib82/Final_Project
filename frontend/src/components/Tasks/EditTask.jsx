@@ -98,6 +98,7 @@ const EditTask = () => {
 
   const handleSubmit = async () => {
     try {
+      console.log("🛠️ נתונים שנשלחים לשרת:", form);
       const res = await api.put(`/tasks/edit/${id}`, form);
 
       if (res.data.success || res.data.Status) {
