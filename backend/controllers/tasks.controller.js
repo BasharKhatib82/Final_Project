@@ -144,31 +144,15 @@ export async function updateTask(req, res) {
   const user_id =
     req.body.user_id != null ? String(req.body.user_id).trim() : null;
 
-  if (!isPositiveInt(id)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "מזהה משימה לא תקין" });
-  }
-  if (!task_title || !due_date || !status) {
+  if (!task_title || !due_date) {
     return res
       .status(400)
       .json({ success: false, message: "נא למלא את כל שדות החובה" });
-  }
-  if (!isValidTaskStatus(status)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "סטטוס משימה לא חוקי" });
   }
   if (!isValidDate(due_date)) {
     return res
       .status(400)
       .json({ success: false, message: "תאריך יעד לא תקין" });
-  }
-  if (user_id && !isNineDigitId(user_id)) {
-    return res.status(400).json({
-      success: false,
-      message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
-    });
   }
 
   try {
