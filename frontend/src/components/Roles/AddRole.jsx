@@ -36,7 +36,7 @@ export default function AddRole() {
   };
 
   // שליחת טופס
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!roleName) {
@@ -59,22 +59,24 @@ export default function AddRole() {
       roleData[perm] = 1;
     });
 
-    try {
-      await api.post("/roles/add", roleData);
-      setPopup({
-        show: true,
-        title: "הצלחה",
-        message: "התפקיד נוסף בהצלחה",
-        mode: "success",
+    api
+      .post("/roles/add", roleData)
+      .then(() => {
+        setPopup({
+          show: true,
+          title: "הצלחה",
+          message: "התפקיד נוסף בהצלחה",
+          mode: "success",
+        });
+      })
+      .catch((err) => {
+        setPopup({
+          show: true,
+          title: "שגיאה",
+          message: extractApiError(err, "שגיאה בהוספת התפקיד"),
+          mode: "error",
+        });
       });
-    } catch (err) {
-      setPopup({
-        show: true,
-        title: "שגיאה",
-        message: extractApiError(err, "שגיאה בהוספת התפקיד"),
-        mode: "error",
-      });
-    }
   };
 
   return (
