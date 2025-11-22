@@ -20,6 +20,8 @@
  */
 
 import { Routes, Route } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import LandingPage from "./Pages/LandingPage";
 import HomePage from "./Pages/HomePage";
 import About from "./Pages/About";
 import Contact from "./Pages/Contact";
@@ -62,74 +64,72 @@ import Footer from "./Pages/Footer";
 import EditTask from "./Tasks/EditTask";
 import TaskDetails from "./Tasks/TaskDetails";
 
-import LandingPage from "./Pages/LandingPage";
-
 import NotFound from "./Pages/NotFound";
 
 import useInactivityLogout from "../utils/useInactivityLogout.js";
 
 function MyRoutes() {
   useInactivityLogout();
+  const location = useLocation();
+
+  // ✅ אם דף נחיתה – תחזיר אותו בלבד בלי שום עטיפה
+  if (location.pathname === "/landingPage/links") {
+    return <LandingPage />;
+  }
+
   return (
-    <>
-      {/* דף נחיתה  */}
-      <Routes>
-        <Route path="/landingPage/links" element={<LandingPage />} />
-      </Routes>
+    <div className="min-h-screen flex flex-col ">
+      {/* Header */}
+      <header className="shrink-0">
+        <Header />
+      </header>
 
-      <div className="min-h-screen flex flex-col ">
-        {/* Header */}
-        <header className="shrink-0">
-          <Header />
-        </header>
+      {/* תוכן ראשי - מתרחב ותופס את רוב המסך */}
+      <main className="grow">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/userlogin" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password/:token" element={<ResetPassword />} />
+          <Route path="/dashboard" element={<Dashboard />}>
+            <Route index element={<Home />} />
+            <Route path="roles" element={<Roles />} />
+            <Route path="add_role" element={<AddRole />} />
+            <Route path="edit_role/:id" element={<EditRole />} />
+            <Route path="users" element={<Users />} />
+            <Route path="add_user" element={<AddUser />} />
+            <Route path="users/edit/:id" element={<EditUser />} />
+            <Route path="attendance" element={<Attendance />} />
+            <Route path="add_attendance" element={<AddAttendance />} />
+            <Route path="edit_attendance/:id" element={<EditAttendance />} />
+            <Route path="leads" element={<Leads />} />
+            <Route path="add_lead" element={<AddLead />} />
+            <Route path="edit_lead/:id" element={<EditLead />} />
+            <Route path="details_lead/:id" element={<LeadDetails />} />
 
-        {/* תוכן ראשי - מתרחב ותופס את רוב המסך */}
-        <main className="grow">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/userlogin" element={<Login />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/dashboard" element={<Dashboard />}>
-              <Route index element={<Home />} />
-              <Route path="roles" element={<Roles />} />
-              <Route path="add_role" element={<AddRole />} />
-              <Route path="edit_role/:id" element={<EditRole />} />
-              <Route path="users" element={<Users />} />
-              <Route path="add_user" element={<AddUser />} />
-              <Route path="users/edit/:id" element={<EditUser />} />
-              <Route path="attendance" element={<Attendance />} />
-              <Route path="add_attendance" element={<AddAttendance />} />
-              <Route path="edit_attendance/:id" element={<EditAttendance />} />
-              <Route path="leads" element={<Leads />} />
-              <Route path="add_lead" element={<AddLead />} />
-              <Route path="edit_lead/:id" element={<EditLead />} />
-              <Route path="details_lead/:id" element={<LeadDetails />} />
+            <Route path="projects" element={<Projects />} />
+            <Route path="add_project" element={<AddProject />} />
+            <Route path="edit_project/:id" element={<EditProject />} />
 
-              <Route path="projects" element={<Projects />} />
-              <Route path="add_project" element={<AddProject />} />
-              <Route path="edit_project/:id" element={<EditProject />} />
+            <Route path="tasks" element={<Tasks />} />
+            <Route path="add_task" element={<AddTask />} />
+            <Route path="edit_task/:id" element={<EditTask />} />
+            <Route path="details_task/:id" element={<TaskDetails />} />
 
-              <Route path="tasks" element={<Tasks />} />
-              <Route path="add_task" element={<AddTask />} />
-              <Route path="edit_task/:id" element={<EditTask />} />
-              <Route path="details_task/:id" element={<TaskDetails />} />
+            <Route path="logs" element={<Logs />} />
+            <Route path="profile" element={<Profile />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
 
-              <Route path="logs" element={<Logs />} />
-              <Route path="profile" element={<Profile />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </main>
-
-        {/* Footer  */}
-        <footer className="shrink-0">
-          <Footer />
-        </footer>
-      </div>
-    </>
+      {/* Footer  */}
+      <footer className="shrink-0">
+        <Footer />
+      </footer>
+    </div>
   );
 }
 
