@@ -43,7 +43,7 @@ export async function addRole(req, res) {
       values
     );
 
-    logAction(`${role_name}הוספת תפקיד : `, req.user?.user_id)(
+    logAction(`הוספת תפקיד : ${role_name}`, req.user?.user_id)(
       req,
       res,
       () => {}
