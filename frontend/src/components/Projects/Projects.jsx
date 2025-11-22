@@ -43,7 +43,14 @@ export default function Projects() {
   const fetchProjects = async () => {
     try {
       const res = await api.get("/projects");
-      setProjects(res.data?.data || []);
+
+      const projects = (res.data?.data || []).map((p) => ({
+        ...p,
+        active: isActive(p.active), // ממיר ל־true / false
+        status_human: isActive(p.active) ? "פעיל" : "לא פעיל",
+      }));
+
+      setProjects(projects);
     } catch (err) {
       setPopup({
         title: "שגיאה",
