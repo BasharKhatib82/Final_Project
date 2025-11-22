@@ -3,7 +3,7 @@
 import { db } from "../utils/dbSingleton.js";
 import { isSpecialStatus, isValidDate } from "../utils/attendanceHelpers.js";
 import { isNineDigitId } from "../utils/fieldValidators.js";
-
+import { nowIsraelFormatted } from "./utils/date.js";
 /**
  * הוספת נוכחות
  * מקבל: { user_id, date, status, check_in?, check_out?, notes? }
@@ -233,19 +233,13 @@ export async function checkIn(req, res) {
   if (!user_id) {
     return res.status(400).json({ success: false, message: "חסר מזהה משתמש" });
   }
-  if (!isNineDigitId(user_id)) {
-    return res.status(400).json({
-      success: false,
-      message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
-    });
-  }
-
-  const today = new Date().toISOString().split("T")[0];
+  
+    const now = nowIsraelFormatted();
 
   try {
     const [rows] = await db.query(
       "SELECT attendance_id, check_out FROM attendance WHERE user_id = ? AND date = ? ORDER BY attendance_id DESC LIMIT 1",
-      [user_id, today]
+      [user_id, now]
     );
 
     // אם יש רשומה פתוחה (כלומר אין check_out) – החתמה חדשה לא תתאפשר
@@ -259,8 +253,8 @@ export async function checkIn(req, res) {
     // אחרת – מוסיפים רשומה חדשה
     const [insert] = await db.query(
       `INSERT INTO attendance (user_id, date, check_in, status)
-       VALUES (?, ?, NOW(), ?)`,
-      [user_id, today, "נוכח"]
+       VALUES (?, ?, ?, ?)`,
+      [user_id, now, now, "נוכח"]
     );
 
     if (insert.affectedRows === 1) {
@@ -294,7 +288,7 @@ export async function checkOut(req, res) {
     });
   }
 
-  const today = new Date().toISOString().split("T")[0];
+    const now = nowIsraelFormatted();
 
   try {
     // שליפת החתמת הכניסה האחרונה להיום – שעדיין אין בה שעת יציאה
@@ -315,8 +309,8 @@ export async function checkOut(req, res) {
     const attendanceId = rows[0].attendance_id;
 
     const [update] = await db.query(
-      `UPDATE attendance SET check_out = NOW() WHERE attendance_id = ?`,
-      [attendanceId]
+      `UPDATE attendance SET check_out = ? WHERE attendance_id = ?`,
+      [now,attendanceId]
     );
 
     if (update.affectedRows === 1) {

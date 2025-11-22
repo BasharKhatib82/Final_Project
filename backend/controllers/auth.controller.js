@@ -222,11 +222,11 @@ export async function resetPassword(req, res) {
       .status(400)
       .json({ success: false, message: "טוקן וסיסמה הם חובה" });
   }
-
+  const now = nowIsraelFormatted();
   try {
     const [resetRows] = await db.query(
-      "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > NOW() ORDER BY id DESC LIMIT 1",
-      [token]
+      "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > ? ORDER BY id DESC LIMIT 1",
+      [token, now]
     );
 
     if (!resetRows.length) {
