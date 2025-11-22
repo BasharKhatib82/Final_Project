@@ -3,6 +3,7 @@
 import cron from "node-cron";
 import checkMissingAttendance from "./checkMissingAttendance.js";
 import { db } from "./dbSingleton.js";
+import {logAction} from "./logAction.js";
 
 /**
  * למערכת CRON מרכז משימות
