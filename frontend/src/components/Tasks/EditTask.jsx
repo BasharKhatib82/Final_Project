@@ -105,7 +105,7 @@ const EditTask = () => {
         due_date: form.due_date,
         user_id: form.user_id || null,
       };
-      console.log("🛠️ נתונים שנשלחים לשרת:", payload);
+
       const res = await api.put(`/tasks/edit/${id}`, payload);
 
       if (res.data.success || res.data.Status) {
