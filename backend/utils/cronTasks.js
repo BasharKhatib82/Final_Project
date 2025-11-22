@@ -3,7 +3,6 @@
 import cron from "node-cron";
 import checkMissingAttendance from "./checkMissingAttendance.js";
 import { db } from "./dbSingleton.js";
-import {logAction} from "./logAction.js";
 
 /**
  * למערכת CRON מרכז משימות
@@ -42,16 +41,15 @@ cron.schedule(
 /**
  *  DB של ה NOW() : משתמש ב
  */
-cron.schedule("*/1 * * * *", async () => {
+cron.schedule("0 * * * *", async () => {
   try {
-    const [result] = await db.query(`
-      DELETE FROM active_tokens
-      WHERE issued_at < (NOW() - INTERVAL 2 MINUTE)
-    `);
+    const [result] = await db.query(
+      "DELETE FROM password_resets WHERE reset_expires < NOW()"
+    );
     if (result?.affectedRows > 0) {
-      logAction("בוצע ניקוי טוקנים שפג תוקפם", "מערכת");
+      console.log(`נמחקו ${result.affectedRows} טוקני איפוס שפג תוקפם`);
     }
   } catch (err) {
-    logAction("שגיאה ניקוי טוקנים שפג תוקפם", "מערכת");
+    console.error("שגיאה בניקוי טוקני איפוס:", err);
   }
 });
