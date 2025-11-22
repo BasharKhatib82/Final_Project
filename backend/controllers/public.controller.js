@@ -1,7 +1,7 @@
 // backend/controllers/public.controller.js
 
 import { db } from "../utils/dbSingleton.js";
-import { isILPhone10} from "../utils/fieldValidators.js";
+import { isILPhone10 } from "../utils/fieldValidators.js";
 import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
 
 /**
@@ -52,14 +52,16 @@ export async function addLandingLead(req, res) {
     await conn.beginTransaction();
 
     // שליפת מזהה קורס לפי שם
-    const [projectRows] = await conn.query(
-      "SELECT project_id FROM projects WHERE project_name = ? AND active = 1",
-      [project_name]
+    const [project] = await db.query(
+      "SELECT project_id FROM projects WHERE project_name = ? LIMIT 1",
+      [course]
     );
-    if (projectRows.length === 0) {
-      throw new Error("קורס לא נמצא");
+
+    if (!project.length) {
+      return res.status(400).json({ success: false, message: "קורס לא נמצא" });
     }
-    const project_id = projectRows[0].project_id;
+
+    req.body.project_id = project[0].project_id;
 
     // יצירה/עדכון לקוח
     const [clientRows] = await conn.query(

@@ -35,27 +35,47 @@ export default function LandingPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      console.log("🟢 שולח נתונים:", form);
+const handleSubmit = async (e) => {
+  e.preventDefault();
 
-      await api.post("/public/landing-leads", form);
-      alert("פנייתך נשלחה בהצלחה!");
-      setForm({
-        first_name: "",
-        last_name: "",
-        phone_number: "",
-        email: "",
-        city: "",
-        project_id: "",
-        source: "דף נחיתה",
-      });
-    } catch (err) {
-      console.error("שגיאה בשליחת פנייה:", err);
-      alert("אירעה שגיאה בשליחת הטופס");
-    }
+  const selectedProject = projects.find((p) => p.project_name === form.course);
+
+  if (!selectedProject) {
+    alert("הקורס שנבחר לא קיים במערכת.");
+    return;
+  }
+
+  const payload = {
+    first_name: form.first_name,
+    last_name: form.last_name,
+    phone: form.phone,
+    email: form.email,
+    city: form.city,
+    source: form.source,
+    project_id: selectedProject.project_id,
   };
+
+  console.log("🟢 שולח נתונים:", payload);
+
+  try {
+    await api.post("/public/landing-leads", payload);
+    alert("פנייתך נשלחה בהצלחה!");
+    // נקה את הטופס
+    setForm({
+      ...form,
+      phone: "",
+      first_name: "",
+      last_name: "",
+      email: "",
+      city: "",
+      course: "",
+    });
+  } catch (err) {
+    console.error("שגיאה בשליחת פנייה:", err);
+    alert("אירעה שגיאה בשליחת הפנייה");
+  }
+};
+
 
   return (
     <div className="max-w-xl mx-auto p-6 bg-white mt-10 rounded shadow text-right">
