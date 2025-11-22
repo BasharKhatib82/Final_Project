@@ -135,7 +135,7 @@ export default function Projects() {
             </button>
           )}
 
-          {user?.permission_delete_project === 1 && r.active === 1 && (
+          {user?.permission_delete_project === 1 && (
             <button
               onClick={() => setProjectToDelete(r.project_id)}
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
