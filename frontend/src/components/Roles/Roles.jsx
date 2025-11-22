@@ -106,14 +106,23 @@ export default function Roles() {
         });
         fetchRoles();
       })
-      .catch((err) =>
+      .catch((err) => {
+        const status = err?.response?.status;
+        const msg =
+          err?.response?.data?.message ||
+          extractApiError(err, "אירעה שגיאה במחיקה");
+
         setPopup({
           show: true,
-          title: "שגיאה",
-          message: extractApiError(err, "אירעה שגיאה במחיקה"),
-          mode: "error",
-        })
-      );
+          title: status === 409 ? "לא ניתן למחוק תפקיד" : "שגיאה",
+          message:
+            status === 409
+              ? msg ||
+                "לא ניתן למחוק תפקיד זה משום שהוא משויך לעובדים. הסר שיוכים לפני מחיקה."
+              : msg,
+          mode: status === 409 ? "warning" : "error",
+        });
+      });
   };
 
   // עמודות הדוח לטבלת התפקידים

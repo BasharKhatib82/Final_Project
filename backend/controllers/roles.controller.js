@@ -210,21 +210,32 @@ export async function deleteRole(req, res) {
       "SELECT role_name FROM roles_permissions WHERE role_id = ?",
       [roleId]
     );
-
     if (roles.length === 0) {
       return res
         .status(404)
         .json({ success: false, message: "תפקיד לא נמצא למחיקה" });
     }
-
     const roleName = roles[0].role_name;
 
+    // ✅ בדיקה אם יש משתמשים עם התפקיד הזה
+    const [cntRows] = await db.query(
+      "SELECT COUNT(*) AS cnt FROM users WHERE role_id = ?",
+      [roleId]
+    );
+    if ((cntRows?.[0]?.cnt || 0) > 0) {
+      return res.status(409).json({
+        success: false,
+        message:
+          "לא ניתן למחוק תפקיד זה משום שהוא משויך לעובדים. יש להסיר את השיוך לעובדים לפני מחיקה.",
+      });
+    }
+
+    // מחיקה לוגית (הפיכה ל'לא פעיל')
     const [result] = await db.query(
       "UPDATE roles_permissions SET active = 0 WHERE role_id = ?",
       [roleId]
     );
 
-    // אם לא שונה כלום – ייתכן שהתפקיד כבר היה לא פעיל
     if (result.affectedRows === 0) {
       return res.status(400).json({
         success: false,
@@ -232,7 +243,7 @@ export async function deleteRole(req, res) {
       });
     }
 
-    // רק אם הצליח – לרשום בלוג ולהחזיר תשובה
+    // לוג פעולה
     logAction(`מחיקת תפקיד: ${roleName}`, req.user?.user_id)(
       req,
       res,
