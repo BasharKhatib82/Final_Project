@@ -11,6 +11,7 @@
 
 import React, { useEffect, useState } from "react";
 import { api, extractApiError } from "utils";
+import { formatDateToIsrael } from "utils/date";
 import { Popup } from "components/Tools";
 import ReportView from "../Reports/ReportView";
 
@@ -107,22 +108,8 @@ export default function Logs() {
     {
       key: "time_date",
       label: "תאריך ושעה",
-      render: (r) =>
-        new Date(r.time_date).toLocaleString("he-IL", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      export: (r) =>
-        new Date(r.time_date).toLocaleString("he-IL", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+      render: (r) => formatDateToIsrael(r.time_date),
+      export: (r) => formatDateToIsrael(r.time_date),
     },
   ];
 
