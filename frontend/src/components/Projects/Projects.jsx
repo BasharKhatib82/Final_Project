@@ -19,6 +19,16 @@ import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
 import ReportView from "../Reports/ReportView";
 
+//פונקציית עזר לבדיקת סטטוס
+const isActive = (v) => v === true || v === 1 || v === "1";
+
+// הצגת סטטוס עם צבעים
+const renderCheckActive = (v) => (
+  <span className={v ? "text-green-600" : "text-red-500"}>
+    {v ? "פעיל" : "לא פעיל"}
+  </span>
+);
+
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [popup, setPopup] = useState(null);
@@ -92,16 +102,11 @@ export default function Projects() {
     {
       key: "active",
       label: "סטטוס",
-      render: (r) =>
-        r.active === 1 ? (
-          <span className="text-green-600 font-semibold">פעיל</span>
-        ) : (
-          <span className="text-red-500 font-semibold">לא פעיל</span>
-        ),
-      export: (r) => (r.active === 1 ? "פעיל" : "לא פעיל"),
+      render: (r) => renderCheckActive(r.active),
+      export: (r) => r.status_human,
     },
   ];
-  const defaultFilters = { active: "true" };
+
   //  תנאי להצגת פעולות רק אם יש הרשאה
   if (
     user?.permission_edit_project === 1 ||
@@ -137,18 +142,21 @@ export default function Projects() {
     });
   }
 
+  // הגדרת פילטרים
   const filtersDef = [
     {
       name: "active",
       label: "סטטוס",
       type: "select",
       options: [
-        { value: "", label: "הצג הכל" },
-        { value: "1", label: "פרויקטים פעילים" },
-        { value: "0", label: "פרויקטים לא פעילים" },
+        { value: "true", label: "פעיל" },
+        { value: "false", label: "לא פעיל" },
+        { value: "", label: "כל הסטטוסים" },
       ],
     },
   ];
+
+  const defaultFilters = { active: "true" };
 
   return (
     <div className="flex flex-col flex-1 p-6 text-right">
