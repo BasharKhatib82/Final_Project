@@ -205,22 +205,40 @@ export async function deleteRole(req, res) {
   }
 
   try {
-    const [result] = await db.query(
-      "UPDATE roles_permissions SET active = 0 WHERE role_id = ?",
+    // שליפת שם התפקיד לפי ID
+    const [roles] = await db.query(
+      "SELECT role_name FROM roles_permissions WHERE role_id = ?",
       [roleId]
     );
 
-    if (result.affectedRows === 0) {
+    if (roles.length === 0) {
       return res
         .status(404)
         .json({ success: false, message: "תפקיד לא נמצא למחיקה" });
     }
 
-    logAction(`מחיקת תפקיד : ${role_name}`, req.user?.user_id)(
+    const roleName = roles[0].role_name;
+
+    const [result] = await db.query(
+      "UPDATE roles_permissions SET active = 0 WHERE role_id = ?",
+      [roleId]
+    );
+
+    // אם לא שונה כלום – ייתכן שהתפקיד כבר היה לא פעיל
+    if (result.affectedRows === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "לא בוצע שינוי – ייתכן שהתפקיד כבר לא פעיל",
+      });
+    }
+
+    // רק אם הצליח – לרשום בלוג ולהחזיר תשובה
+    logAction(`מחיקת תפקיד: ${roleName}`, req.user?.user_id)(
       req,
       res,
       () => {}
     );
+
     return res
       .status(200)
       .json({ success: true, message: "התפקיד הוסר בהצלחה" });
