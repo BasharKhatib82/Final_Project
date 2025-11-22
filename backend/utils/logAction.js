@@ -16,11 +16,9 @@ export default function logAction(actionName, UserIdLog = null) {
       const userId = UserIdLog || req?.user?.user_id;
       if (!userId || !name) return next?.();
 
-      const currentTime = nowIsraelFormatted();
-
       await db.query(
         "INSERT INTO user_activity_log (user_id, action_name, time_date) VALUES (?, ?,?)",
-        [userId, name, currentTime]
+        [userId, name, nowIsraelFormatted()]
       );
     } catch (err) {
       // לא מפיל את הבקשה
