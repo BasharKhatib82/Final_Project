@@ -3,7 +3,7 @@
 import { db } from "../utils/dbSingleton.js";
 import { isSpecialStatus, isValidDate } from "../utils/attendanceHelpers.js";
 import { isNineDigitId } from "../utils/fieldValidators.js";
-import { nowIsraelFormatted } from "./utils/date.js";
+import { nowIsraelFormatted } from "../utils/date.js";
 /**
  * הוספת נוכחות
  * מקבל: { user_id, date, status, check_in?, check_out?, notes? }
@@ -233,8 +233,8 @@ export async function checkIn(req, res) {
   if (!user_id) {
     return res.status(400).json({ success: false, message: "חסר מזהה משתמש" });
   }
-  
-    const now = nowIsraelFormatted();
+
+  const now = nowIsraelFormatted();
 
   try {
     const [rows] = await db.query(
@@ -288,7 +288,7 @@ export async function checkOut(req, res) {
     });
   }
 
-    const now = nowIsraelFormatted();
+  const now = nowIsraelFormatted();
 
   try {
     // שליפת החתמת הכניסה האחרונה להיום – שעדיין אין בה שעת יציאה
@@ -310,7 +310,7 @@ export async function checkOut(req, res) {
 
     const [update] = await db.query(
       `UPDATE attendance SET check_out = ? WHERE attendance_id = ?`,
-      [now,attendanceId]
+      [now, attendanceId]
     );
 
     if (update.affectedRows === 1) {
