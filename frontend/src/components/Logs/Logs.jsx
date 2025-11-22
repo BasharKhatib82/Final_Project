@@ -10,7 +10,8 @@
  */
 
 import React, { useEffect, useState } from "react";
-import { api, extractApiError, formatDateToIsrael } from "utils";
+import { api, extractApiError } from "utils";
+import { formatDateToIsrael } from "utils/date";
 import { Popup } from "components/Tools";
 import ReportView from "../Reports/ReportView";
 
