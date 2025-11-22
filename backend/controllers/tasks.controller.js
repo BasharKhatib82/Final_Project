@@ -3,7 +3,6 @@
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import { isValidTaskStatus } from "../utils/tasksHelpers.js";
-import { isNineDigitId, isPositiveInt } from "../utils/fieldValidators.js";
 import { isValidDate } from "../utils/attendanceHelpers.js";
 
 /**
@@ -194,12 +193,6 @@ export async function updateTask(req, res) {
 export async function cancelTask(req, res) {
   const { id } = req.params;
 
-  if (!isPositiveInt(id)) {
-    return res
-      .status(400)
-      .json({ success: false, message: "מזהה משימה לא תקין" });
-  }
-
   try {
     const [result] = await db.query(
       "UPDATE tasks SET status='בוטלה' WHERE task_id=?",
@@ -230,13 +223,6 @@ export async function updateTaskRep(req, res) {
   const taskId = req.params.id;
   const repUserId =
     req.body.user_id != null ? String(req.body.user_id).trim() : null;
-
-  if (repUserId && !isNineDigitId(repUserId)) {
-    return res.status(400).json({
-      success: false,
-      message: "תעודת זהות של הנציג חייבת להיות מספר בן 9 ספרות",
-    });
-  }
 
   try {
     const [result] = await db.query(
@@ -315,12 +301,6 @@ export async function bulkAssignTasks(req, res) {
   }
 
   const repUserId = user_id != null ? String(user_id).trim() : null;
-  if (repUserId && !isNineDigitId(repUserId)) {
-    return res.status(400).json({
-      success: false,
-      message: "תעודת זהות חייבת להיות מספר בן 9 ספרות",
-    });
-  }
 
   try {
     const [result] = await db.query(

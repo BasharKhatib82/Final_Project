@@ -22,7 +22,7 @@ const EditTask = () => {
   const [form, setForm] = useState({
     task_title: "",
     description: "",
-    status: "חדשה",
+    status: "",
     due_date: "",
     user_id: "",
   });
