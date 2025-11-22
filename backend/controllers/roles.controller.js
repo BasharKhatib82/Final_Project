@@ -43,7 +43,8 @@ export async function addRole(req, res) {
       values
     );
 
-    await logAction("הוספת תפקיד חדש");
+    logAction(`${role_name}הוספת תפקיד : `, user.user_id)(req, res, () => {});
+
     return res.status(201).json({ success: true, result });
   } catch (err) {
     console.error("שגיאת יצירת תפקיד:", err);
