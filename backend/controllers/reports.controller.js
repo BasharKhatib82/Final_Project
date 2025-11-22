@@ -28,6 +28,11 @@ function parseAndValidateBody(req, res) {
 
   //  בדיקה קלה למבנה העמודות: header/key כטקסט
   for (const col of columns) {
+    //   תמיכה ב־label מהפרונט
+    if (!col.header && col.label) {
+      col.header = col.label;
+    }
+
     if (typeof col !== "object" || !col) {
       res.status(400).json({ success: false, message: "מבנה columns לא תקין" });
       return null;
