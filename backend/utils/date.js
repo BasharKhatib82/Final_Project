@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
-import utc from "dayjs/plugin/utc";
-import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc.js";
+import timezone from "dayjs/plugin/timezone.js";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -25,5 +25,3 @@ export function toIsraelTime(date) {
 export function toIsraelTimeFormatted(date, format = "YYYY-MM-DD HH:mm:ss") {
   return dayjs(date).tz(ISRAEL_TZ).format(format);
 }
-
-
