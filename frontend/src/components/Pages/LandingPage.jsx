@@ -45,10 +45,10 @@ export default function LandingPage() {
       setForm({
         first_name: "",
         last_name: "",
-        phone: "",
+        phone_number: "",
         email: "",
         city: "",
-        course: "",
+        project_id: "",
         source: "דף נחיתה",
       });
     } catch (err) {
@@ -93,7 +93,7 @@ export default function LandingPage() {
           <input
             type="tel"
             name="phone"
-            value={form.phone}
+            value={form.phone_number}
             onChange={handleChange}
             className="w-full border rounded px-3 py-2"
             pattern="[0-9]{9,10}"
@@ -134,7 +134,7 @@ export default function LandingPage() {
           <label className="block mb-1">בחר קורס</label>
           <select
             name="course"
-            value={form.course}
+            value={form.project_id}
             onChange={handleChange}
             className="w-full border rounded px-3 py-2"
             required
