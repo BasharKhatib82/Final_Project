@@ -11,5 +11,5 @@ dayjs.extend(timezone);
  * @param {string} format - פורמט להצגה (ברירת מחדל: DD/MM/YYYY HH:mm)
  * @returns {string} תאריך בפורמט ישראלי
  */
-export const formatIsraelTime = (isoDateStr) =>
+export const formatIsraelDateTime = (isoDateStr) =>
   dayjs.utc(isoDateStr).tz("Asia/Jerusalem").format("DD.MM.YYYY, HH:mm");
