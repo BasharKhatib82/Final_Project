@@ -42,15 +42,15 @@ cron.schedule(
  *  DB של ה NOW() : משתמש ב
  */
 cron.schedule("*/10 * * * *", async () => {
-    try {
-      const [result] = await db.query(`
+  try {
+    const [result] = await db.query(`
       DELETE FROM active_tokens
       WHERE issued_at < (NOW() - INTERVAL 2 MINUTE)
     `);
-      if (result?.affectedRows > 0) {
-        logAction("בוצע ניקוי טוקנים שפג תוקפם", "מערכת");
-      }
-    } catch (err) {
-      logAction("שגיאה ניקוי טוקנים שפג תוקפם", "מערכת");
+    if (result?.affectedRows > 0) {
+      logAction("בוצע ניקוי טוקנים שפג תוקפם", "מערכת");
     }
+  } catch (err) {
+    logAction("שגיאה ניקוי טוקנים שפג תוקפם", "מערכת");
+  }
 });
