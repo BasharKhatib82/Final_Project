@@ -453,8 +453,11 @@ export async function bulkAssign(req, res) {
       [repUserId || null, leadIds]
     );
 
+    let repUserName = repUserId
+      ? `${repUserId.first_name} ${repUserId.last_name}`
+      : "ללא נציג";
     logAction(
-      `שיוך ${leadIds.length} פניות לנציג ${repUserId ?? "ללא"}`,
+      `שיוך ${leadIds.length} פניות לנציג ${repUserName ?? "ללא נציג"}`,
       req.user.user_id
     )(req, res, () => {});
     return res.json({
