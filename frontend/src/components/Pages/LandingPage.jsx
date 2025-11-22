@@ -48,11 +48,11 @@ const handleSubmit = async (e) => {
   const payload = {
     first_name: form.first_name,
     last_name: form.last_name,
-    phone: form.phone,
+    phone_number: form.phone,
     email: form.email,
     city: form.city,
     source: form.source,
-    project_id: selectedProject.project_id,
+    project_name: form.course,
   };
 
   console.log("🟢 שולח נתונים:", payload);
@@ -154,7 +154,7 @@ const handleSubmit = async (e) => {
           <label className="block mb-1">בחר קורס</label>
           <select
             name="course"
-            value={form.project_id}
+            value={form.course}
             onChange={handleChange}
             className="w-full border rounded px-3 py-2"
             required
