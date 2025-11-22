@@ -1,3 +1,5 @@
+// \backend\routes\publicRoutes.js
+
 import express from "express";
 import { addLandingLead } from "../controllers/public.controller.js";
 

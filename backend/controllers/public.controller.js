@@ -54,14 +54,14 @@ export async function addLandingLead(req, res) {
     // שליפת מזהה קורס לפי שם
     const [project] = await db.query(
       "SELECT project_id FROM projects WHERE project_name = ? LIMIT 1",
-      [course]
+      [project_name]
     );
 
     if (!project.length) {
       return res.status(400).json({ success: false, message: "קורס לא נמצא" });
     }
 
-    req.body.project_id = project[0].project_id;
+    const project_id = project[0].project_id;
 
     // יצירה/עדכון לקוח
     const [clientRows] = await conn.query(
