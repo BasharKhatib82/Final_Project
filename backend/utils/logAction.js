@@ -1,6 +1,7 @@
 // backend\utils\logAction.js
 
 import { db } from "./dbSingleton.js";
+import { nowIsraelFormatted } from "./date.js";
 
 /**
  *  user_activity_log רושם לוג פעולה לטבלת
@@ -15,9 +16,10 @@ export default function logAction(actionName, forcedUserId = null) {
       const userId = forcedUserId || req?.user?.user_id;
       if (!userId || !name) return next?.();
 
+      const currentTime = nowIsraelFormatted();
       await db.query(
-        "INSERT INTO user_activity_log (user_id, action_name, time_date) VALUES (?, ?, NOW())",
-        [userId, name]
+        "INSERT INTO user_activity_log (user_id, action_name, time_date) VALUES (?, ?,?)",
+        [userId, name, currentTime]
       );
     } catch (err) {
       // לא מפיל את הבקשה
@@ -38,10 +40,10 @@ export async function logActionNow(actionName, userId) {
       .trim()
       .slice(0, 255);
     if (!userId || !name) return;
-
+    const currentTime = nowIsraelFormatted();
     await db.query(
-      "INSERT INTO user_activity_log (user_id, action_name, time_date) VALUES (?, ?, NOW())",
-      [userId, name]
+      "INSERT INTO user_activity_log (user_id, action_name, time_date) VALUES (?, ?, ?)",
+      [userId, name, currentTime]
     );
   } catch (err) {
     console.error("logActionNow error:", err?.message || err);
