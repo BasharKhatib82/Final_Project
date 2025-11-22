@@ -178,7 +178,11 @@ export async function updateRole(req, res) {
         .json({ success: false, message: "תפקיד לא נמצא לעדכון" });
     }
 
-    await logAction(`עדכון תפקיד: ${role_name}`);
+    logAction(`עדכון תפקיד : ${role_name}`, req.user?.user_id)(
+      req,
+      res,
+      () => {}
+    );
     return res.status(200).json({ success: true, message: "עודכן בהצלחה" });
   } catch (err) {
     console.error("שגיאת עדכון תפקיד:", err);
@@ -212,7 +216,11 @@ export async function deleteRole(req, res) {
         .json({ success: false, message: "תפקיד לא נמצא למחיקה" });
     }
 
-    await logAction(`מחיקת תפקיד: ${roleId}`);
+    logAction(`מחיקת תפקיד : ${role_name}`, req.user?.user_id)(
+      req,
+      res,
+      () => {}
+    );
     return res
       .status(200)
       .json({ success: true, message: "התפקיד הוסר בהצלחה" });
