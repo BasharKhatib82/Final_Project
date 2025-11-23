@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
+import { isValidPass, getPasswordErrors } from "utils/password";
 
 export default function AddUser() {
   const navigate = useNavigate();
@@ -107,6 +108,15 @@ export default function AddUser() {
         show: true,
         title: "שגיאה",
         message: "כתובת דואר אלקטרוני לא חוקית",
+        mode: "error",
+      });
+    }
+
+    if (!isValidPass(newUser.password)) {
+      return setPopup({
+        show: true,
+        title: "סיסמה לא תקינה",
+        message: getPasswordErrors(newUser.password).join("\n"),
         mode: "error",
       });
     }
