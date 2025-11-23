@@ -18,7 +18,6 @@ import { useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
-import { validateAndSanitizeEmail } from "utils";
 
 export default function AddUser() {
   const navigate = useNavigate();
@@ -63,7 +62,8 @@ export default function AddUser() {
         });
       });
   };
-
+  const isValidEmail = (v) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((v || "").trim());
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -102,7 +102,7 @@ export default function AddUser() {
       }
     }
 
-    if (!validateAndSanitizeEmail(newUser.email)) {
+    if (!isValidEmail(newUser.email)) {
       return setPopup({
         show: true,
         title: "שגיאה",
@@ -248,7 +248,6 @@ export default function AddUser() {
           <label className="font-rubik block mb-0.5 font-medium">סיסמה</label>
           <input
             type="password"
-            required
             value={newUser.password}
             onChange={(e) =>
               setNewUser({ ...newUser, password: e.target.value })
