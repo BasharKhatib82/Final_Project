@@ -36,7 +36,7 @@ export default function AddRole() {
   };
 
   // שליחת טופס
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!roleName) {
@@ -50,15 +50,17 @@ export default function AddRole() {
     }
     setPopup({
       show: true,
-      title: "אישור יצירת תפקיד",
+      title: "אישור הוספת תפקיד",
       message: "האם להוסיף תפקיד חדש ?",
       mode: "confirm",
     });
-    const roleData = { ...roleDataTemplate, role_name: roleName };
-    selectedPermissions.forEach((perm) => {
-      roleData[perm] = 1;
-    });
+  };
+  const roleData = { ...roleDataTemplate, role_name: roleName };
+  selectedPermissions.forEach((perm) => {
+    roleData[perm] = 1;
+  });
 
+  const confirmCreate = () => {
     api
       .post("/roles/add", roleData)
       .then(() => {
@@ -73,7 +75,7 @@ export default function AddRole() {
         setPopup({
           show: true,
           title: "שגיאה",
-          message: extractApiError(err, "שגיאה בהוספת התפקיד"),
+          message: extractApiError(err, "שגיאה בעדכון המשתמש"),
           mode: "error",
         });
       });
@@ -157,6 +159,7 @@ export default function AddRole() {
               navigate("/dashboard/roles");
             }
           }}
+          onConfirm={popup.mode === "confirm" ? confirmCreate : undefined}
         />
       )}
     </div>
