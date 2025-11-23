@@ -114,7 +114,10 @@ export async function addUser(req, res) {
         .json({ success: false, message: "הוספת המשתמש נכשלה" });
     }
 
-    logAction("הוספת משתמש חדש", req.user?.user_id)(req, res, () => {});
+    logAction(
+      `הוספת משתמש חדש : ${first_name} ${last_name}`,
+      req.user?.user_id
+    )(req, res, () => {});
     return res.json({ success: true, message: "המשתמש נוסף בהצלחה" });
   } catch (err) {
     console.error("שגיאה בהוספת משתמש:", err);
