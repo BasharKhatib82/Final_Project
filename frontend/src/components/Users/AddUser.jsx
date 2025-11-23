@@ -20,7 +20,6 @@ import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
 import { validateAndSanitizeEmail } from "utils";
 
-
 export default function AddUser() {
   const navigate = useNavigate();
   const { user: currentUser } = useUser();
@@ -68,6 +67,18 @@ export default function AddUser() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    // מיפוי שמות שדות לתוויות בעברית
+    const fieldLabels = {
+      user_id: "תעודת זהות",
+      first_name: "שם פרטי",
+      last_name: "שם משפחה",
+      phone_number: "מספר טלפון",
+      email: "אימייל",
+      role_id: "תפקיד",
+      password: "סיסמה",
+    };
+
+    // רשימת שדות חובה
     const requiredFields = [
       "user_id",
       "first_name",
@@ -78,12 +89,14 @@ export default function AddUser() {
       "password",
     ];
 
-    for (let field of requiredFields) {
-      if (!newUser[field]) {
+    // בדיקת שדות חובה
+    for (const field of requiredFields) {
+      const value = (newUser?.[field] ?? "").toString().trim();
+      if (!value) {
         return setPopup({
           show: true,
           title: "שגיאה",
-          message: `שדה חובה חסר: ${field}`,
+          message: `שדה חובה חסר: ${fieldLabels[field] || field}`,
           mode: "error",
         });
       }
