@@ -87,6 +87,14 @@ export default function AddUser() {
       }
     }
 
+    setPopup({
+      show: true,
+      title: "אישור הוספת תפקיד",
+      message: "האם להוסיף תפקיד חדש ?",
+      mode: "confirm",
+    });
+  };
+  const confirmCreate = () => {
     api
       .post("/users/add", newUser)
       .then(() => {
@@ -262,6 +270,7 @@ export default function AddUser() {
               navigate("/dashboard/users");
             }
           }}
+          onConfirm={popup.mode === "confirm" ? confirmCreate : undefined}
         />
       )}
     </div>
