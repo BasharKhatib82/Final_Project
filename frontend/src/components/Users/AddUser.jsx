@@ -18,7 +18,8 @@ import { useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
-import { validateAndSanitizeEmail } from "../../utils/validateAndSanitizeEmail";
+import { validateAndSanitizeEmail } from "utils";
+
 
 export default function AddUser() {
   const navigate = useNavigate();
