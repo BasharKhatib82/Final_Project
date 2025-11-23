@@ -115,7 +115,7 @@ export async function addUser(req, res) {
     }
 
     logAction(
-      `הוספת משתמש חדש : ${first_name} ${last_name}`,
+      `הוספת משתמש חדש : ${last_name} ${first_name}`,
       req.user?.user_id
     )(req, res, () => {});
     return res.json({ success: true, message: "המשתמש נוסף בהצלחה" });
