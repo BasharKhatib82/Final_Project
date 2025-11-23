@@ -216,7 +216,7 @@ export default function AddUser() {
         <div>
           <label className="font-rubik block mb-0.5 font-medium">אימייל</label>
           <input
-            type="email"
+            type="text"
             value={newUser.email}
             onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
