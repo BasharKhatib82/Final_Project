@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
+import { validateAndSanitizeEmail } from "../../utils/validateAndSanitizeEmail";
 
 export default function AddUser() {
   const navigate = useNavigate();
@@ -87,10 +88,18 @@ export default function AddUser() {
       }
     }
 
+    if (!validateAndSanitizeEmail(newUser.email)) {
+      return setPopup({
+        show: true,
+        title: "שגיאה",
+        message: "כתובת דואר אלקטרוני לא חוקית",
+        mode: "error",
+      });
+    }
     setPopup({
       show: true,
-      title: "אישור הוספת תפקיד",
-      message: "האם להוסיף תפקיד חדש ?",
+      title: "אישור הוספת עובד",
+      message: "האם להוסיף עובד חדש ?",
       mode: "confirm",
     });
   };
@@ -137,7 +146,6 @@ export default function AddUser() {
           </label>
           <input
             type="text"
-            required
             maxLength={9}
             inputMode="numeric"
             value={newUser.user_id}
@@ -152,7 +160,6 @@ export default function AddUser() {
           <label className="font-rubik block mb-0.5 font-medium">שם פרטי</label>
           <input
             type="text"
-            required
             value={newUser.first_name}
             onChange={(e) =>
               setNewUser({ ...newUser, first_name: e.target.value })
@@ -168,7 +175,6 @@ export default function AddUser() {
           </label>
           <input
             type="text"
-            required
             value={newUser.last_name}
             onChange={(e) =>
               setNewUser({ ...newUser, last_name: e.target.value })
@@ -184,7 +190,6 @@ export default function AddUser() {
           </label>
           <input
             type="text"
-            required
             value={newUser.phone_number}
             onChange={(e) =>
               setNewUser({ ...newUser, phone_number: e.target.value })
@@ -198,7 +203,6 @@ export default function AddUser() {
           <label className="font-rubik block mb-0.5 font-medium">אימייל</label>
           <input
             type="email"
-            required
             value={newUser.email}
             onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
             className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
