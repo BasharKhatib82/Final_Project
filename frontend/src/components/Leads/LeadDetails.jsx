@@ -263,29 +263,27 @@ const LeadDetails = () => {
           </select>
         </div>
 
-        <div className="flex justify-center">
-          <div className="flex justify-around pt-4">
-            <AppButton
-              label={saving ? "שומר..." : "הוספת תיעוד"}
-              onClick={() => setConfirmPopup(true)}
-              icon={
-                <Icon
-                  icon="fluent:save-edit-20-regular"
-                  width="1.2em"
-                  height="1.2em"
-                />
-              }
-              variant="normal"
-            />
-            <AppButton
-              label="ביטול הוספה"
-              icon={
-                <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
-              }
-              variant="cancel"
-              to={`/leads/progress/${id}`}
-            />
-          </div>
+        <div className="flex justify-around pt-4">
+          <AppButton
+            label={saving ? "שומר..." : "הוספת תיעוד"}
+            onClick={() => setConfirmPopup(true)}
+            icon={
+              <Icon
+                icon="fluent:save-edit-20-regular"
+                width="1.2em"
+                height="1.2em"
+              />
+            }
+            variant="normal"
+          />
+          <AppButton
+            label="ביטול הוספה"
+            icon={
+              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+            }
+            variant="cancel"
+            to={`/dashboard/details_lead/${id}`}
+          />
         </div>
       </div>
 
