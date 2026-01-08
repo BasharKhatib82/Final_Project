@@ -21,7 +21,7 @@ import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import { useUser, Popup } from "components/Tools";
-import { NavigationButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
 import { api, formatDate, formatTime, extractApiError } from "utils";
 
@@ -222,9 +222,13 @@ export default function Attendance() {
           emailApiBase={api.defaults.baseURL}
           addButton={
             user?.permission_add_attendance === 1 ? (
-              <NavigationButton
-                linkTo="/dashboard/add_attendance"
+              <AppButton
                 label="הוספת נוכחות חדשה"
+                icon={
+                  <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+                }
+                variant="navigate"
+                to="/dashboard/add_attendance"
               />
             ) : null
           }
