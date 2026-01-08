@@ -139,7 +139,6 @@ export default function AddRole() {
 
         {/* כפתורים */}
         <div className="flex justify-around pt-4">
-          {/* <AddSaveButton label="הוסף תפקיד" type="submit" /> */}
           <AppButton
             label="הוספת תפקיד"
             type="submit"
@@ -149,11 +148,11 @@ export default function AddRole() {
             variant="normal"
           />
           <AppButton
-            label="ביטול"
+            label="ביטול הוספה"
             icon={
               <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
             }
-            variant="danger"
+            variant="cancel"
             to="/dashboard/roles"
           />
         </div>

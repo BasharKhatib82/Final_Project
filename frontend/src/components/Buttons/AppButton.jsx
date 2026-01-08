@@ -35,6 +35,7 @@ const AppButton = ({
     normal: "bg-blue-500 hover:bg-blue-600",
     changes: "bg-blue-500 hover:bg-blue-600",
     danger: "bg-red-500 hover:bg-red-600",
+    cancel: "bg-amber-500 hover:bg-amber-600",
     navigate: "bg-blue-500 hover:bg-blue-600",
   };
 
@@ -44,11 +45,16 @@ const AppButton = ({
     variants[variant] || variants.normal
   } ${baseClasses} ${className}`;
 
-  const handleClick = () => {
-    if (disabled) return;
-    if (variant === "navigate" && to) navigate(to);
-    else if (onClick) onClick();
-  };
+const handleClick = () => {
+  if (disabled) return;
+
+  if ((variant === "navigate" || variant === "cancel") && to) {
+    navigate(to);
+  } else if (onClick) {
+    onClick();
+  }
+};
+
 
   return (
     <button
