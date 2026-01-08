@@ -25,7 +25,7 @@ import { NavLink, Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import logo from "../../assets/img/logo.png";
 import { useUser } from "components/Tools";
-import { AppButton } from "components/Buttons/AppButton";
+import {AppButton} from "components/Buttons";
 
 function Navbar() {
   const { user, logout } = useUser();
