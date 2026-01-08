@@ -21,6 +21,7 @@ import { useNavigate } from "react-router-dom";
  */
 const AppButton = ({
   label,
+  type = "button",
   variant = "normal",
   onClick,
   to = "",
@@ -51,7 +52,7 @@ const AppButton = ({
 
   return (
     <button
-      type="button"
+      type={type}
       onClick={handleClick}
       disabled={disabled}
       className={`${finalClassName} ${

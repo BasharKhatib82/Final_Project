@@ -139,11 +139,20 @@ export default function AddRole() {
 
         {/* כפתורים */}
         <div className="flex justify-around pt-4">
-          <AddSaveButton label="הוסף תפקיד" type="submit" />
-          {/* <ExitButton label="ביטול" linkTo="/dashboard/roles" /> */}
+          {/* <AddSaveButton label="הוסף תפקיד" type="submit" /> */}
+          <AppButton
+            label="הוספת תפקיד"
+            type="submit"
+            icon={
+              <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+            }
+            variant="normal"
+          />
           <AppButton
             label="ביטול"
-            icon={<Icon icon="iconoir:cancel" width="1.2em" height="1.2em" />}
+            icon={
+              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+            }
             variant="danger"
             to="/dashboard/roles"
           />
