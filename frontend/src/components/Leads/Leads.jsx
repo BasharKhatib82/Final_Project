@@ -13,7 +13,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { useUser, Popup } from "components/Tools";
-import { NavigationButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
 import { api, extractApiError } from "utils";
 import ReportView from "../Reports/ReportView";
 
@@ -403,9 +403,13 @@ export default function Leads() {
         filtersVariant="inline"
         addButton={
           user?.permission_add_lead === 1 && (
-            <NavigationButton
+            <AppButton
               label="הוספת פנייה חדשה"
-              linkTo="/dashboard/add_lead"
+              icon={
+                <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+              }
+              variant="navigate"
+              to="/dashboard/add_lead"
             />
           )
         }
