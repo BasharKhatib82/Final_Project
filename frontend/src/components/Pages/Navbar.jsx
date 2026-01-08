@@ -121,8 +121,8 @@ function Navbar() {
             icon={
               <Icon
                 icon="streamline-cyber:door-exit"
-                width="1.5em"
-                height="1.5em"
+                width="1.2em"
+                height="1.2em"
               />
             }
             variant="danger"
