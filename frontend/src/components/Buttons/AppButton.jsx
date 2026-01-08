@@ -29,7 +29,7 @@ const AppButton = ({
   const navigate = useNavigate();
 
   const variants = {
-    normal: "bg-gray-600 hover:bg-gray-700",
+    normal: "bg-blue-500 hover:bg-blue-600",
     changes: "bg-blue-500 hover:bg-blue-600",
     danger: "bg-red-500 hover:bg-red-600",
     navigate: "bg-blue-500 hover:bg-blue-600",

@@ -119,7 +119,7 @@ function Navbar() {
             label="התנתקות"
             onClick={handleLogout}
             icon={<Icon icon="streamline-cyber:door-exit" />}
-            variant="navigate"
+            variant="danger"
           />
         ) : (
           // <NavLink
