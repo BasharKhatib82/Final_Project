@@ -30,9 +30,9 @@ const AppButton = ({
 
   const variants = {
     normal: "bg-gray-600 hover:bg-gray-700",
-    changes: "bg-blue-600 hover:bg-blue-700",
+    changes: "bg-blue-500 hover:bg-blue-600",
     danger: "bg-red-600 hover:bg-red-700",
-    navigate: "bg-indigo-600 hover:bg-indigo-700",
+    navigate: "bg-blue-500 hover:bg-blue-600",
   };
 
   const baseClasses =
