@@ -1,3 +1,5 @@
+// frontend\src\components\Buttons\AppButton.jsx
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -56,7 +58,9 @@ const AppButton = ({
         disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
-      {icon}
+      {icon && (
+        <span className="w-6 h-6 flex items-center justify-center">{icon}</span>
+      )}
       <span>{label}</span>
     </button>
   );
