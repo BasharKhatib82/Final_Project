@@ -17,6 +17,8 @@
 
 import React, { useEffect, useState } from "react";
 import { Popup, useUser } from "components/Tools";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { api } from "utils";
 
 const Profile = () => {
@@ -78,7 +80,6 @@ const Profile = () => {
         title: "הצלחה",
         message: "פרטי המשתמש עודכנו בהצלחה",
         mode: "success",
-        
       });
     } catch (err) {
       console.error("שגיאה בעדכון פרטי משתמש:", err);
@@ -187,23 +188,35 @@ const Profile = () => {
           />
         </div>
 
-        <button
+        <AppButton
+          label="שמור שינויים"
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition"
-        >
-          עדכון פרטים
-        </button>
+          icon={
+            <Icon
+              icon="fluent:save-edit-20-regular"
+              width="1.2em"
+              height="1.2em"
+            />
+          }
+          variant="normal"
+        />
       </form>
 
       {/* שינוי סיסמה */}
       <div className="mt-6 text-center">
         {!showPasswordForm ? (
-          <button
+          <AppButton
+            label="שינוי סיסמה"
             onClick={() => setShowPasswordForm(true)}
-            className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded"
-          >
-            שינוי סיסמה
-          </button>
+            icon={
+              <Icon
+                icon="fluent:save-edit-20-regular"
+                width="1.2em"
+                height="1.2em"
+              />
+            }
+            variant="danger"
+          />
         ) : (
           <div className="mt-4 p-4 border rounded bg-gray-50 space-y-3">
             <input
@@ -256,6 +269,32 @@ const Profile = () => {
               >
                 ביטול
               </button>
+            </div>
+            <div className="flex justify-around pt-4">
+              <AppButton
+                label="עדכן סיסמה"
+                onClick={handlePasswordChange}
+                icon={
+                  <Icon
+                    icon="fluent:save-edit-20-regular"
+                    width="1.2em"
+                    height="1.2em"
+                  />
+                }
+                variant="normal"
+              />
+              <AppButton
+                label="ביטול עדכון"
+                onClick={() => setShowPasswordForm(false)}
+                icon={
+                  <Icon
+                    icon="hugeicons:cancel-02"
+                    width="1.2em"
+                    height="1.2em"
+                  />
+                }
+                variant="cancel"
+              />
             </div>
           </div>
         )}
