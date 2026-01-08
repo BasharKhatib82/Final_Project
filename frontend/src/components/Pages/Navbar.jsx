@@ -103,18 +103,24 @@ function Navbar() {
         )}
 
         {user ? (
-          <button
+          // <button
+          //   onClick={handleLogout}
+          //   className="flex items-center gap-2 font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded transition"
+          // >
+          //   <Icon
+          //     icon="streamline-cyber:door-exit"
+          //     width="1.5em"
+          //     height="1.5em"
+          //     color="white"
+          //   />
+          //   התנתקות
+          // </button>
+          <AppButton
+            label="התנתקות"
             onClick={handleLogout}
-            className="flex items-center gap-2 font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded transition"
-          >
-            <Icon
-              icon="streamline-cyber:door-exit"
-              width="1.5em"
-              height="1.5em"
-              color="white"
-            />
-            התנתקות
-          </button>
+            icon={<Icon icon="streamline-cyber:door-exit" />}
+            variant="navigate"
+          />
         ) : (
           // <NavLink
           //   to="/userlogin"
