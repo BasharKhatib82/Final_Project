@@ -12,6 +12,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddSaveButton, ExitButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { permissionsSchema, roleDataTemplate } from "constants";
 import { Popup } from "components/Tools";
 import { api, extractApiError } from "utils";
@@ -138,7 +140,13 @@ export default function AddRole() {
         {/* כפתורים */}
         <div className="flex justify-around pt-4">
           <AddSaveButton label="הוסף תפקיד" type="submit" />
-          <ExitButton label="ביטול" linkTo="/dashboard/roles" />
+          {/* <ExitButton label="ביטול" linkTo="/dashboard/roles" /> */}
+          <AppButton
+            label="ביטול"
+            icon={<Icon icon="iconoir:cancel" width="1.2em" height="1.2em" />}
+            variant="danger"
+            to="/dashboard/roles"
+          />
         </div>
       </form>
 
