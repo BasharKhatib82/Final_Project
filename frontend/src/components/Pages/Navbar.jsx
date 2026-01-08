@@ -25,7 +25,7 @@ import { NavLink, Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import logo from "../../assets/img/logo.png";
 import { useUser } from "components/Tools";
-import {AppButton} from "components/Buttons";
+import { AppButton } from "components/Buttons";
 
 function Navbar() {
   const { user, logout } = useUser();
@@ -125,7 +125,7 @@ function Navbar() {
           // </NavLink>
           <AppButton
             label="התחברות"
-            icon="ix:log-in"
+            icon={<Icon icon="mdi:login" />}
             variant="navigate"
             to="/userlogin"
           />
