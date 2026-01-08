@@ -120,7 +120,7 @@ function Navbar() {
             onClick={handleLogout}
             icon={
               <Icon
-                icon="streamline-cyber:door-exit"
+                icon="majesticons:door-exit-line"
                 width="1.2em"
                 height="1.2em"
               />
