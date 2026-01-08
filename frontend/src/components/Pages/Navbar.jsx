@@ -102,7 +102,7 @@ function Navbar() {
           // </Link>
           <AppButton
             label={user.full_name}
-            icon={<Icon mdi:user-check width="1.2em" height="1.2em" />}
+            icon={<Icon icon="mdi:user-check" width="1.2em" height="1.2em" />}
             variant="navigate"
             to="/dashboard"
           />
