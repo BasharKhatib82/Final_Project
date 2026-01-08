@@ -14,7 +14,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { NavigationButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
+import { AppButton } from "components/Buttons";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
 import ReportView from "../Reports/ReportView";
@@ -179,9 +180,13 @@ export default function Projects() {
         filtersVariant="inline"
         addButton={
           user?.permission_add_lead === 1 && (
-            <NavigationButton
+            <AppButton
               label="הוספת פרויקט חדש"
-              linkTo="/dashboard/add_project"
+              icon={
+                <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+              }
+              variant="navigate"
+              to="/dashboard/add_project"
             />
           )
         }
