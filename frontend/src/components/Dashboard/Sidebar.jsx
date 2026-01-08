@@ -32,6 +32,11 @@ const Sidebar = () => {
   const getNavItems = () => {
     if (!user) return [];
 
+    const handleLogout = () => {
+      logout();
+      navigate("/userlogin");
+    };
+
     return [
       user.dashboard_access === 1 && {
         label: "לוח בקרה",
@@ -136,8 +141,7 @@ const Sidebar = () => {
           />
         ),
         onClick: () => {
-          logout();
-          navigate("/userlogin");
+          handleLogout();
         },
       },
     ].filter(Boolean);
