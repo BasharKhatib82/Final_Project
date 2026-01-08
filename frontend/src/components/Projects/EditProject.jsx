@@ -9,7 +9,8 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Popup } from "components/Tools";
-import { ExitButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { api } from "utils";
 
 const EditProject = () => {
@@ -136,14 +137,27 @@ const EditProject = () => {
           </select>
         </div>
 
-        <div className="flex justify-center gap-4 mt-6">
-          <button
+        <div className="flex justify-around pt-4">
+          <AppButton
+            label="שמור שינויים"
             type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
-          >
-            עדכן פרויקט
-          </button>
-          <ExitButton label="ביטול" linkTo="/dashboard/projects" />
+            icon={
+              <Icon
+                icon="fluent:save-edit-20-regular"
+                width="1.2em"
+                height="1.2em"
+              />
+            }
+            variant="normal"
+          />
+          <AppButton
+            label="ביטול עריכה"
+            icon={
+              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+            }
+            variant="cancel"
+            to="/dashboard/projects"
+          />
         </div>
       </form>
 
