@@ -10,7 +10,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AddSaveButton, ExitButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { Popup } from "components/Tools";
 import { api } from "utils";
 
@@ -157,9 +158,23 @@ const AddTask = () => {
           />
         </div>
 
-        <div className="flex justify-center gap-4 mt-6">
-          <AddSaveButton label="שמור משימה" type="submit" />
-          <ExitButton label="ביטול" linkTo="/dashboard/tasks" />
+        <div className="text-center flex justify-center gap-4">
+          <AppButton
+            label="הוספת משימה"
+            type="submit"
+            icon={
+              <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+            }
+            variant="normal"
+          />
+          <AppButton
+            label="ביטול הוספה"
+            icon={
+              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+            }
+            variant="cancel"
+            to="/dashboard/tasks"
+          />
         </div>
       </form>
 

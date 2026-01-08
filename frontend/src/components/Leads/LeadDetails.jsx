@@ -127,7 +127,7 @@ const LeadDetails = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto font-rubik">
-      <div className="flex justify-center mb-2">
+      <div className="flex justify-center mb-4">
         <AppButton
           label="חזרה לרשימת פניות"
           icon={

@@ -14,7 +14,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
-import { NavigationButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
 import { Popup, useUser } from "components/Tools";
 import ReportView from "../Reports/ReportView";
 import { api, extractApiError } from "utils";
@@ -373,9 +373,13 @@ export default function Tasks() {
         searchPlaceholder="חיפוש לפי נושא"
         addButton={
           user?.permission_add_task === 1 && (
-            <NavigationButton
+            <AppButton
               label="הוספת משימה חדשה"
-              linkTo="/dashboard/add_task"
+              icon={
+                <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+              }
+              variant="navigate"
+              to="/dashboard/add_task"
             />
           )
         }

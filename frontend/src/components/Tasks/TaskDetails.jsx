@@ -11,7 +11,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { AddSaveButton, NavigationButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { Popup } from "components/Tools";
 import { api, extractApiError } from "utils";
 
@@ -130,9 +131,13 @@ const TaskDetails = () => {
     <div className="p-6 max-w-4xl mx-auto font-rubik">
       {/* כפתור ניווט */}
       <div className="flex justify-center mb-4">
-        <NavigationButton
+        <AppButton
           label="חזרה לרשימת משימות"
-          linkTo="/dashboard/tasks"
+          icon={
+            <Icon icon="icon-park-outline:back" width="1.2em" height="1.2em" />
+          }
+          variant="navigate"
+          to="/dashboard/tasks"
         />
       </div>
 
@@ -255,11 +260,26 @@ const TaskDetails = () => {
           </select>
         </div>
 
-        <div className="flex justify-center">
-          <AddSaveButton
-            label={saving ? "שומר..." : "שמור תיעוד"}
-            type="button"
+        <div className="flex justify-around pt-4">
+          <AppButton
+            label={saving ? "שומר..." : "הוספת תיעוד"}
             onClick={() => setConfirmPopup(true)}
+            icon={
+              <Icon
+                icon="fluent:save-edit-20-regular"
+                width="1.2em"
+                height="1.2em"
+              />
+            }
+            variant="normal"
+          />
+          <AppButton
+            label="ביטול הוספה"
+            icon={
+              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+            }
+            variant="cancel"
+            to="/dashboard/tasks"
           />
         </div>
       </div>
