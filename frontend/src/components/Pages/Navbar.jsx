@@ -126,9 +126,6 @@ function Navbar() {
           <AppButton
             label="התחברות"
             icon="ix:log-in"
-            width="1.5em"
-            height="1.5em"
-            color="white"
             variant="navigate"
             to="/userlogin"
           />
