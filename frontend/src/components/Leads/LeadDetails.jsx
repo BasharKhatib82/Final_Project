@@ -282,7 +282,7 @@ const LeadDetails = () => {
               <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
             }
             variant="cancel"
-            to={`/dashboard/details_lead/${id}`}
+            to="/dashboard/lead"
           />
         </div>
       </div>
