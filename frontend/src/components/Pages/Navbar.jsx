@@ -88,18 +88,6 @@ function Navbar() {
       {/* אזור משתמש */}
       <div className="flex gap-4 items-center">
         {user && (
-          // <Link
-          //   to="/dashboard"
-          //   className="flex items-center gap-2 text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
-          // >
-          //   <Icon
-          //     icon="mdi:user-check"
-          //     width="1.7em"
-          //     height="1.7em"
-          //     color="white"
-          //   />
-          //   <span className="font-rubik">{user.full_name}</span>
-          // </Link>
           <AppButton
             label={user.full_name}
             icon={<Icon icon="mdi:user-check" width="1.2em" height="1.2em" />}

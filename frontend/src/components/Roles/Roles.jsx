@@ -21,7 +21,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import { Popup, useUser } from "components/Tools";
-import { NavigationButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
 import { permissionsSchema } from "constants";
 import { api, extractApiError } from "utils";
@@ -259,9 +259,13 @@ export default function Roles() {
           emailApiBase={process.env.REACT_APP_API_URL}
           addButton={
             user?.permission_add_role === 1 && (
-              <NavigationButton
-                linkTo="/dashboard/add_role"
+              <AppButton
                 label="הוספת תפקיד חדש"
+                icon={
+                  <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+                }
+                variant="navigate"
+                to="/dashboard/add_role"
               />
             )
           }
