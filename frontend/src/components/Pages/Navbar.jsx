@@ -88,33 +88,27 @@ function Navbar() {
       {/* אזור משתמש */}
       <div className="flex gap-4 items-center">
         {user && (
-          <Link
+          // <Link
+          //   to="/dashboard"
+          //   className="flex items-center gap-2 text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
+          // >
+          //   <Icon
+          //     icon="mdi:user-check"
+          //     width="1.7em"
+          //     height="1.7em"
+          //     color="white"
+          //   />
+          //   <span className="font-rubik">{user.full_name}</span>
+          // </Link>
+          <AppButton
+            label={user.full_name}
+            icon={<Icon mdi:user-check width="1.2em" height="1.2em" />}
+            variant="navigate"
             to="/dashboard"
-            className="flex items-center gap-2 text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
-          >
-            <Icon
-              icon="mdi:user-check"
-              width="1.7em"
-              height="1.7em"
-              color="white"
-            />
-            <span className="font-rubik">{user.full_name}</span>
-          </Link>
+          />
         )}
 
         {user ? (
-          // <button
-          //   onClick={handleLogout}
-          //   className="flex items-center gap-2 font-rubik text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded transition"
-          // >
-          //   <Icon
-          //     icon="streamline-cyber:door-exit"
-          //     width="1.5em"
-          //     height="1.5em"
-          //     color="white"
-          //   />
-          //   התנתקות
-          // </button>
           <AppButton
             label="התנתקות"
             onClick={handleLogout}
@@ -128,13 +122,6 @@ function Navbar() {
             variant="danger"
           />
         ) : (
-          // <NavLink
-          //   to="/userlogin"
-          //   className="flex items-center gap-2 font-rubik text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
-          // >
-          //   <Icon icon="ix:log-in" width="1.5em" height="1.5em" color="white" />{" "}
-          //   התחברות
-          // </NavLink>
           <AppButton
             label="התחברות"
             icon={<Icon icon="mdi:login" width="1.2em" height="1.2em" />}
