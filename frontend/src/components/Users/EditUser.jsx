@@ -15,7 +15,8 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { AddSaveButton, ExitButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
 
@@ -223,9 +224,27 @@ export default function EditUser() {
         {/* כפתורים */}
         <div className="flex justify-around pt-4">
           {currentUser?.permission_edit_user === 1 && (
-            <AddSaveButton label="שמור שינויים" />
+            <AppButton
+              label="שמור שינויים"
+              type="submit"
+              icon={
+                <Icon
+                  icon="fluent:save-edit-20-regular"
+                  width="1.2em"
+                  height="1.2em"
+                />
+              }
+              variant="normal"
+            />
           )}
-          <ExitButton label="ביטול" linkTo="/dashboard/users" />
+          <AppButton
+            label="ביטול עריכה"
+            icon={
+              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+            }
+            variant="cancel"
+            to="/dashboard/roles"
+          />
         </div>
       </form>
 
