@@ -18,7 +18,7 @@
  */
 
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link} from "react-router-dom";
 import Tooltip from "../Tools/Tooltip";
 import { useUser } from "components/Tools";
 import { Icon } from "@iconify/react";
@@ -27,7 +27,7 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false); // mobile
   const [isCollapsed, setIsCollapsed] = useState(false); // desktop
   const { user, logout } = useUser();
-  const navigate = useNavigate();
+  
 
   const getNavItems = () => {
     if (!user) return [];
@@ -137,7 +137,6 @@ const Sidebar = () => {
         ),
         onClick: () => {
           logout();
-          navigate("/userlogin");
         },
       },
     ].filter(Boolean);

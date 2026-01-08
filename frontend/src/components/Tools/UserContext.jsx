@@ -23,7 +23,7 @@
  */
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { getCurrentUser, logoutUser } from "../../utils/auth";
 import Popup from "./Popup";
 
@@ -37,6 +37,7 @@ export const UserProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [popup, setPopup] = useState(null); //   לניהול חלון הודעות state
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const isPublicPage =
@@ -79,11 +80,13 @@ export const UserProvider = ({ children }) => {
     try {
       await logoutUser(user?.user_id);
       setUser(null);
+      navigate("/userlogin");
       setPopup({
         title: "התנתקות",
         message: "התנתקת בהצלחה מהמערכת",
         mode: "success",
       });
+
     } catch (err) {
       setPopup({
         title: "שגיאה",
