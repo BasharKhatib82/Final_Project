@@ -137,7 +137,7 @@ function Navbar() {
           // </NavLink>
           <AppButton
             label="התחברות"
-            icon={<Icon icon="mdi:login" width="1.5em" height="1.5em" />}
+            icon={<Icon icon="mdi:login" width="1.2em" height="1.2em" />}
             variant="navigate"
             to="/userlogin"
           />
