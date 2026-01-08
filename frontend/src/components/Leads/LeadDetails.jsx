@@ -11,7 +11,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { AddSaveButton, NavigationButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
 
@@ -127,7 +128,14 @@ const LeadDetails = () => {
   return (
     <div className="p-6 max-w-4xl mx-auto font-rubik">
       <div className="flex justify-center mb-2">
-        <NavigationButton label="חזרה לרשימת פניות" linkTo="/dashboard/leads" />
+        <AppButton
+          label="חזרה לרשימת פניות"
+          icon={
+            <Icon icon="icon-park-outline:back" width="1.2em" height="1.2em" />
+          }
+          variant="navigate"
+          to="/dashboard/leads"
+        />
       </div>
 
       <div className="bg-white rounded shadow p-6 text-gray-700 mb-6 space-y-4 text-right">
