@@ -11,7 +11,6 @@
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AddSaveButton, ExitButton } from "components/Buttons";
 import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { permissionsSchema, roleDataTemplate } from "constants";

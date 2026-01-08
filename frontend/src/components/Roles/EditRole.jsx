@@ -9,7 +9,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { AddSaveButton, ExitButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { Popup } from "components/Tools";
 import { permissionsSchema, roleDataTemplate } from "constants";
 import { api, extractApiError } from "utils";
@@ -164,8 +165,27 @@ export default function EditRole() {
 
         {/* כפתורים */}
         <div className="flex justify-around pt-4">
-          <AddSaveButton label="שמור שינויים" type="submit" />
-          <ExitButton label="ביטול" linkTo="/dashboard/roles" />
+          
+          <AppButton
+            label="שמור שינויים"
+            type="submit"
+            icon={
+              <Icon
+                icon="fluent:save-edit-20-regular"
+                width="1.2em"
+                height="1.2em"
+              />
+            }
+            variant="normal"
+          />
+          <AppButton
+            label="ביטול עריכה"
+            icon={
+              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+            }
+            variant="cancel"
+            to="/dashboard/roles"
+          />
         </div>
       </form>
 
