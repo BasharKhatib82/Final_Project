@@ -58,9 +58,7 @@ const AppButton = ({
         disabled ? "opacity-50 cursor-not-allowed" : ""
       }`}
     >
-      {icon && (
-        <span className="w-6 h-6 flex items-center justify-center">{icon}</span>
-      )}
+      {icon}
       <span>{label}</span>
     </button>
   );

@@ -118,7 +118,13 @@ function Navbar() {
           <AppButton
             label="התנתקות"
             onClick={handleLogout}
-            icon={<Icon icon="streamline-cyber:door-exit" />}
+            icon={
+              <Icon
+                icon="streamline-cyber:door-exit"
+                width="1.5em"
+                height="1.5em"
+              />
+            }
             variant="danger"
           />
         ) : (
@@ -131,7 +137,7 @@ function Navbar() {
           // </NavLink>
           <AppButton
             label="התחברות"
-            icon={<Icon icon="mdi:login" />}
+            icon={<Icon icon="mdi:login" width="1.5em" height="1.5em" />}
             variant="navigate"
             to="/userlogin"
           />
