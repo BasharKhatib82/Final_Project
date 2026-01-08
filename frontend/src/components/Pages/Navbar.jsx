@@ -25,6 +25,7 @@ import { NavLink, Link } from "react-router-dom";
 import { Icon } from "@iconify/react";
 import logo from "../../assets/img/logo.png";
 import { useUser } from "components/Tools";
+import { AppButton } from "components/Buttons/AppButton";
 
 function Navbar() {
   const { user, logout } = useUser();
@@ -115,13 +116,22 @@ function Navbar() {
             התנתקות
           </button>
         ) : (
-          <NavLink
+          // <NavLink
+          //   to="/userlogin"
+          //   className="flex items-center gap-2 font-rubik text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
+          // >
+          //   <Icon icon="ix:log-in" width="1.5em" height="1.5em" color="white" />{" "}
+          //   התחברות
+          // </NavLink>
+          <AppButton
+            label="התחברות"
+            icon="ix:log-in"
+            width="1.5em"
+            height="1.5em"
+            color="white"
+            variant="navigate"
             to="/userlogin"
-            className="flex items-center gap-2 font-rubik text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded transition"
-          >
-            <Icon icon="ix:log-in" width="1.5em" height="1.5em" color="white" />{" "}
-            התחברות
-          </NavLink>
+          />
         )}
       </div>
     </nav>
