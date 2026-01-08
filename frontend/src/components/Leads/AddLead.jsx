@@ -12,7 +12,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AddSaveButton, ExitButton } from "components/Buttons";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { Popup } from "components/Tools";
 import { api, extractApiError } from "utils";
 
@@ -229,8 +230,22 @@ export default function AddLead() {
         {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
         <div className="text-center flex justify-center gap-4">
-          <AddSaveButton label="שמור פנייה" type="submit" />
-          <ExitButton label="ביטול" linkTo="/dashboard/leads" />
+          <AppButton
+            label="הוספת פנייה"
+            type="submit"
+            icon={
+              <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+            }
+            variant="normal"
+          />
+          <AppButton
+            label="ביטול הוספה"
+            icon={
+              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+            }
+            variant="cancel"
+            to="/dashboard/leads"
+          />
         </div>
       </form>
 
