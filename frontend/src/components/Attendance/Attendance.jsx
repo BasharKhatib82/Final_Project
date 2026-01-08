@@ -148,18 +148,27 @@ export default function Attendance() {
     {
       key: "actions",
       label: "פעולות",
-      render: (r) =>
-        user?.permission_edit_attendance === 1 ? (
-          <button
-            onClick={() =>
-              navigate(`/dashboard/edit_attendance/${r.attendance_id}`)
-            }
-            className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
-          >
-            <Icon icon="fluent-color:edit-32" width="1.2rem" height="1.2rem" />
-            עריכה
-          </button>
-        ) : null,
+      render: (r) => (
+        <div className="flex justify-center">
+          <div className="flex items-center gap-1 text-center">
+            {user?.permission_edit_attendance === 1 && (
+              <button
+                onClick={() =>
+                  navigate(`/dashboard/edit_attendance/${r.attendance_id}`)
+                }
+                className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 ml-1"
+              >
+                <Icon
+                  icon="fluent-color:edit-32"
+                  width="1.2rem"
+                  height="1.2rem"
+                />
+                עריכה
+              </button>
+            )}
+          </div>
+        </div>
+      ),
       export: () => null,
     },
   ];
