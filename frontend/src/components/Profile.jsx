@@ -187,27 +187,10 @@ const Profile = () => {
             className="w-full border rounded px-3 py-2"
           />
         </div>
-
-        <AppButton
-          label="שמור שינויים"
-          type="submit"
-          icon={
-            <Icon
-              icon="fluent:save-edit-20-regular"
-              width="1.2em"
-              height="1.2em"
-            />
-          }
-          variant="normal"
-        />
-      </form>
-
-      {/* שינוי סיסמה */}
-      <div className="mt-6 text-center">
-        {!showPasswordForm ? (
+        <div className="flex justify-around pt-4">
           <AppButton
-            label="שינוי סיסמה"
-            onClick={() => setShowPasswordForm(true)}
+            label="שמור שינויים"
+            type="submit"
             icon={
               <Icon
                 icon="fluent:save-edit-20-regular"
@@ -215,8 +198,28 @@ const Profile = () => {
                 height="1.2em"
               />
             }
-            variant="danger"
+            variant="normal"
           />
+        </div>
+      </form>
+
+      {/* שינוי סיסמה */}
+      <div className="mt-6 text-center">
+        {!showPasswordForm ? (
+          <div className="flex justify-around pt-4">
+            <AppButton
+              label="שינוי סיסמה"
+              onClick={() => setShowPasswordForm(true)}
+              icon={
+                <Icon
+                  icon="fluent:save-edit-20-regular"
+                  width="1.2em"
+                  height="1.2em"
+                />
+              }
+              variant="danger"
+            />{" "}
+          </div>
         ) : (
           <div className="mt-4 p-4 border rounded bg-gray-50 space-y-3">
             <input
@@ -256,20 +259,6 @@ const Profile = () => {
               className="w-full border rounded px-3 py-2"
             />
 
-            <div className="flex gap-3">
-              <button
-                onClick={handlePasswordChange}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded"
-              >
-                עדכן סיסמה
-              </button>
-              <button
-                onClick={() => setShowPasswordForm(false)}
-                className="flex-1 bg-gray-400 hover:bg-gray-500 text-white py-2 rounded"
-              >
-                ביטול
-              </button>
-            </div>
             <div className="flex justify-around pt-4">
               <AppButton
                 label="עדכן סיסמה"
