@@ -26,6 +26,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Popup, useUser } from "components/Tools";
 import { FcApproval, FcHighPriority } from "react-icons/fc";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -213,12 +215,18 @@ function Login() {
               </button>
             </div>
 
-            <button
+            <AppButton
+              label="התחברות"
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition"
-            >
-              התחברות
-            </button>
+              icon={
+                <Icon
+                  icon="fluent:save-edit-20-regular"
+                  width="1.2em"
+                  height="1.2em"
+                />
+              }
+              variant="normal"
+            />
           </form>
 
           {/* כפתור שכחת סיסמה */}
