@@ -37,7 +37,7 @@ function Contact() {
     message: "",
   });
 
-  const [popupData, setPopupData] = useState(null);
+  const [popup, setPopup] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
@@ -51,7 +51,15 @@ function Contact() {
     try {
       await axios.post(`${api}/contact`, formData, { withCredentials: true });
 
-      setPopupData({
+      setPopup({
+        icon: (
+          <Icon
+            icon="streamline:send-email-remix"
+            width="1.5em"
+            height="1.5em"
+            color="green"
+          />
+        ),
         title: "הצלחה",
         message: "הפנייה נשלחה בהצלחה",
         mode: "success",
@@ -65,7 +73,15 @@ function Contact() {
         message: "",
       });
     } catch (err) {
-      setPopupData({
+      setPopup({
+        icon: (
+          <Icon
+            icon="icon-park-outline:error"
+            width="1.5em"
+            height="1.5em"
+            color="red"
+          />
+        ),
         title: "שגיאה",
         message: "לא הצלחנו לשלוח את הפנייה. נסה שוב.",
         mode: "error",
@@ -165,12 +181,13 @@ function Contact() {
       </div>
 
       {/* פופאפ */}
-      {popupData && (
+      {popup && (
         <Popup
-          title={popupData.title}
-          message={popupData.message}
-          mode={popupData.mode}
-          onClose={() => setPopupData(null)}
+          icon={popup.icon}
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
+          onClose={() => setPopup(null)}
         />
       )}
     </div>
