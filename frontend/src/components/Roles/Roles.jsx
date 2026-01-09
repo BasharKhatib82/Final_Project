@@ -101,7 +101,7 @@ export default function Roles() {
         setPopup({
           show: true,
           title: "הצלחה",
-          message: "התפקיד סומן כלא פעיל",
+          message: `התפקיד ${role_id.role_name} הוגדר כלא פעיל`,
           mode: "success",
         });
         fetchRoles();
