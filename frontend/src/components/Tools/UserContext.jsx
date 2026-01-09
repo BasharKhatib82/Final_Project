@@ -146,6 +146,7 @@ export const UserProvider = ({ children }) => {
           autoClose={popup.autoClose}
           redirectOnClose={popup.redirectOnClose}
           onClose={() => setPopup(null)} //  סגירת החלון
+          onConfirm={popup.onConfirm}
         />
       )}
     </UserContext.Provider>
