@@ -18,6 +18,7 @@ import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
+import { fetchFullNameByUserId } from "utils/fullNameUser";
 
 export default function EditAttendance() {
   const { id } = useParams();
@@ -112,7 +113,7 @@ export default function EditAttendance() {
     setForm(updated);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.user_id || !form.date || !form.status) {
@@ -132,40 +133,41 @@ export default function EditAttendance() {
         mode: "error",
       });
     }
-
+    const fullName = await fetchFullNameByUserId(form.user_id);
     setPopup({
       show: true,
       title: "אישור עדכון",
-      message: "האם אתה בטוח שברצונך לעדכן את הנוכחות?",
+      message: `האם לעדכן את רישום הנוכחות עבור : " ${fullName} " ?`,
       mode: "confirm",
     });
   };
 
-  const confirmUpdate = () => {
+  const confirmUpdate = async () => {
     const payload = {
       ...form,
       check_in: isSpecialStatus ? null : form.check_in,
       check_out: isSpecialStatus ? null : form.check_out,
     };
 
-    api
-      .put(`/attendance/edit/${id}`, payload)
-      .then(() => {
-        setPopup({
-          show: true,
-          title: "הצלחה",
-          message: "הנוכחות עודכנה בהצלחה",
-          mode: "success",
-        });
-      })
-      .catch((err) => {
-        setPopup({
-          show: true,
-          title: "שגיאה",
-          message: extractApiError(err, "שגיאה בעדכון הנתונים"),
-          mode: "error",
-        });
+    try {
+      await api.put(`/attendance/edit/${id}`, payload);
+
+      const fullName = await fetchFullNameByUserId(form.user_id); // ⬅️ שליפת שם העובד
+
+      setPopup({
+        show: true,
+        title: "הצלחה",
+        message: `הנוכחות של ${fullName} עודכנה בהצלחה ✅`,
+        mode: "success",
       });
+    } catch (err) {
+      setPopup({
+        show: true,
+        title: "שגיאה",
+        message: extractApiError(err, "שגיאה בעדכון הנתונים"),
+        mode: "error",
+      });
+    }
   };
 
   // הרשאה
