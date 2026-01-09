@@ -27,7 +27,6 @@ export default function EditUser() {
 
   const [userData, setUserData] = useState(null);
   const [roles, setRoles] = useState([]);
-  const [fullName, setFullName] = useState("");
   const [popup, setPopup] = useState({
     show: false,
     title: "",
@@ -44,7 +43,6 @@ export default function EditUser() {
       const res = await api.get(`/users/${id}`);
       const user = res.data.data;
       setUserData(user);
-      setFullName(user.fullName);
       const rolesRes = await api.get(`/roles/active`);
       let activeRoles = rolesRes.data.data.map((r) => ({ ...r, active: true }));
 
@@ -76,7 +74,7 @@ export default function EditUser() {
     const digitsOnly = e.target.value.replace(/[^0-9]/g, "");
     setUserData({ ...userData, phone_number: digitsOnly });
   };
-
+  const fullName = userData.fullName;
   const handleSubmit = (e) => {
     e.preventDefault();
     setPopup({
