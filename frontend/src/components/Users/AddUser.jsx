@@ -124,7 +124,7 @@ export default function AddUser() {
     setPopup({
       show: true,
       title: "אישור הוספת עובד",
-      message: "האם להוסיף עובד חדש ?",
+      message: `האם להוסיף : ${newUser.first_name} ${newUser.last_name} כעובד חדש ?`,
       mode: "confirm",
     });
   };
