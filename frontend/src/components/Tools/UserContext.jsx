@@ -23,8 +23,9 @@
  */
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { data, useLocation} from "react-router-dom";
+import { useLocation} from "react-router-dom";
 import { getCurrentUser, logoutUser } from "../../utils/auth";
+import { fetchFullNameByUserId } from "../../utils/fullNameUser";
 import Popup from "./Popup";
 import { Icon } from "@iconify/react";
 
@@ -76,51 +77,52 @@ export const UserProvider = ({ children }) => {
     fetchUser();
   }, [location.pathname]);
 
-  const logout = () => {
-    setPopup({
-      icon: (
-        <Icon
-          icon="streamline-sharp:logout-2-remix"
-          width="1.5em"
-          height="1.5em"
-          color="#f59e0b"
-        />
-      ),
-      title: `אתה עומד להתנתק`,
-      message: "האם אתה בטוח שברצונך לצאת מהמערכת?",
-      mode: "confirm",
-      onConfirm: () => {
-        // נבצע את הניתוק ישירות כאן
-        logoutUser(user?.user_id)
-          .then(() => {
-            setUser(null);
-            setPopup({
-              icon: (
-                <Icon
-                  icon="streamline-sharp:logout-2-remix"
-                  width="1.5em"
-                  height="1.5em"
-                  color="#f59e0b"
-                />
-              ),
-              title: "התנתקות מהמערכת",
-              message: "התנתקת בהצלחה מהמערכת",
-              mode: "successMessage",
-              autoClose: 3000,
-              redirectOnClose: "/userlogin",
-            });
-          })
-          .catch((err) => {
-            setPopup({
-              title: "שגיאה",
-              message: err.userMessage || "אירעה שגיאה בהתנתקות",
-              mode: "error",
-            });
-          });
-      },
-      onClose: () => setPopup(null),
-    });
-  };
+const logout = async () => {
+  const fullName = await fetchFullNameByUserId(user?.user_id); // שליפת שם מלא
+
+  setPopup({
+    icon: (
+      <Icon
+        icon="streamline-sharp:logout-2-remix"
+        width="1.5em"
+        height="1.5em"
+        color="#f59e0b"
+      />
+    ),
+    title: ` " ${fullName || " "} " : משתמש עומד להתנתק`,
+    message: "האם אתה בטוח שברצונך לצאת מהמערכת ?",
+    mode: "confirm",
+    onConfirm: async () => {
+      try {
+        await logoutUser(user?.user_id);
+        setUser(null);
+
+        setPopup({
+          icon: (
+            <Icon
+              icon="streamline-sharp:logout-2-remix"
+              width="1.5em"
+              height="1.5em"
+              color="#f59e0b"
+            />
+          ),
+          title: "התנתקות מהמערכת",
+          message: `${fullName} : התנתקת בהצלחה מהמערכת`,
+          mode: "successMessage",
+          autoClose: 3000,
+          redirectOnClose: "/userlogin",
+        });
+      } catch (err) {
+        setPopup({
+          title: "שגיאה",
+          message: err.userMessage || "אירעה שגיאה בהתנתקות",
+          mode: "error",
+        });
+      }
+    },
+    onClose: () => setPopup(null),
+  });
+};
 
   return (
     <UserContext.Provider
