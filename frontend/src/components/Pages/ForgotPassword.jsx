@@ -75,6 +75,19 @@ function ForgotPassword() {
             className="w-full"
             variant="normal"
           />
+          <AppButton
+            label="יציאה"
+            icon={
+              <Icon
+                icon="streamline:send-email-remix"
+                width="1.2em"
+                height="1.2em"
+              />
+            }
+            className="w-full"
+            variant="cancel"
+            to="/dashboard/userlogin"
+          />
         </form>
       </div>
 
