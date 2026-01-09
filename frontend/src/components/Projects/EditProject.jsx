@@ -12,7 +12,6 @@ import { Popup } from "components/Tools";
 import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { api } from "utils";
-import { Frown } from "lucide-react";
 
 const EditProject = () => {
   const [form, setForm] = useState({

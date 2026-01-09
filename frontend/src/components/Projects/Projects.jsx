@@ -19,6 +19,7 @@ import { AppButton } from "components/Buttons";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
 import ReportView from "../Reports/ReportView";
+import { fetchProjectNameById } from "../../utils/projectName";
 
 //פונקציית עזר לבדיקת סטטוס
 const isActive = (v) => v === true || v === 1 || v === "1";
@@ -33,6 +34,7 @@ const renderCheckActive = (v) => (
 export default function Projects() {
   const [projects, setProjects] = useState([]);
   const [popup, setPopup] = useState(null);
+  const [projectName, setProjectName] = useState("");
   const [projectToDelete, setProjectToDelete] = useState(null);
   const { user } = useUser();
   const navigate = useNavigate();
@@ -64,14 +66,16 @@ export default function Projects() {
 
   const handleDeleteProject = async () => {
     if (!projectToDelete) return;
-
+    const projectName = await fetchProjectNameById(projectToDelete);
+    setProjectName(projectName);
     try {
       const res = await api.delete(`/projects/delete/${projectToDelete}`);
       if (res.data.success) {
         fetchProjects();
         setPopup({
           title: "הצלחה",
-          message: res.data.message || "הפרויקט סומן כלא פעיל",
+          message:
+            res.data.message || `הפרויקט " ${projectName} " עודכן כלא פעיל !`,
           mode: "success",
           show: true,
         });
@@ -197,7 +201,7 @@ export default function Projects() {
       {projectToDelete && (
         <Popup
           title="אישור מחיקת פרויקט"
-          message="האם אתה בטוח שברצונך למחוק את הפרויקט?"
+          message={`האם אתה בטוח שברצונך למחוק את הפרויקט ${projectName} ?`}
           mode="confirm"
           onConfirm={handleDeleteProject}
           onClose={() => setProjectToDelete(null)}
