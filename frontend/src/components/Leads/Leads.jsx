@@ -470,7 +470,7 @@ export default function Leads() {
       {bulkAssignConfirm && (
         <Popup
           title="אישור שיוך מרובה"
-          message={`האם אתה בטוח שברצונך לשייך ${selectedLeads.length} פניות לנציג שנבחר ?`}
+          message={`האם אתה בטוח שברצונך לשייך ${selectedLeads.length} פניות ל : ${bulkAssignConfirm} ?`}
           mode="confirm"
           onConfirm={handleBulkAssign}
           onClose={() => setBulkAssignConfirm(false)}
