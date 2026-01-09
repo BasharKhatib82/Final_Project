@@ -27,6 +27,7 @@ export default function EditUser() {
 
   const [userData, setUserData] = useState(null);
   const [roles, setRoles] = useState([]);
+  const [fullName, setFullName] = useState("");
   const [popup, setPopup] = useState({
     show: false,
     title: "",
@@ -43,7 +44,7 @@ export default function EditUser() {
       const res = await api.get(`/users/${id}`);
       const user = res.data.data;
       setUserData(user);
-
+      setFullName(user.fullName);
       const rolesRes = await api.get(`/roles/active`);
       let activeRoles = rolesRes.data.data.map((r) => ({ ...r, active: true }));
 
@@ -81,7 +82,7 @@ export default function EditUser() {
     setPopup({
       show: true,
       title: "אישור עדכון",
-      message: "⚠️ האם לעדכן את פרטי המשתמש?",
+      message: `${fullName} : האם לעדכן את פרטי המשתמש ?`,
       mode: "confirm",
     });
   };
@@ -93,7 +94,7 @@ export default function EditUser() {
         setPopup({
           show: true,
           title: "הצלחה",
-          message: "המשתמש עודכן בהצלחה",
+          message: `פרטי המשתמש ${fullName} : עודכנו בהצלחה !`,
           mode: "success",
         });
       })
