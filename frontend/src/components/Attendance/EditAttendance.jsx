@@ -157,7 +157,7 @@ export default function EditAttendance() {
       setPopup({
         show: true,
         title: "הצלחה",
-        message: `הנוכחות של ${fullName} עודכנה בהצלחה ✅`,
+        message: `הנוכחות עבור : " ${fullName} " עודכנה בהצלחה`,
         mode: "success",
       });
     } catch (err) {
