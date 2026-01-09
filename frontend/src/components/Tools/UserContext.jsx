@@ -101,9 +101,7 @@ export const UserProvider = ({ children }) => {
         .then(() => {
           const name = fullName; // שמור שם מראש
           setUser(null);
-          navigate("/userlogin");
-
-          setPopup({
+            setPopup({
             icon: (
               <Icon
                 icon="streamline-sharp:logout-2-remix"
