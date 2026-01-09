@@ -40,21 +40,20 @@ const AppButton = ({
   };
 
   const baseClasses =
-    "flex items-center gap-2 text-white px-4 py-2 rounded transition font-rubik";
+    "flex items-center justify-center gap-2 text-white px-4 py-2 rounded transition font-rubik";
   const finalClassName = `${
     variants[variant] || variants.normal
   } ${baseClasses} ${className}`;
 
-const handleClick = () => {
-  if (disabled) return;
+  const handleClick = () => {
+    if (disabled) return;
 
-  if ((variant === "navigate" || variant === "cancel") && to) {
-    navigate(to);
-  } else if (onClick) {
-    onClick();
-  }
-};
-
+    if ((variant === "navigate" || variant === "cancel") && to) {
+      navigate(to);
+    } else if (onClick) {
+      onClick();
+    }
+  };
 
   return (
     <button
