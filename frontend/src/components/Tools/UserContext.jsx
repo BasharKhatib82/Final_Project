@@ -88,7 +88,7 @@ export const UserProvider = ({ children }) => {
             icon="streamline-sharp:logout-2-remix"
             width="1.5em"
             height="1.5em"
-            color="green"
+            color="amber"
           />
         ),
         title: "התנתקות מהמערכת",
