@@ -45,6 +45,7 @@ export default function Roles() {
     message: "",
     mode: "",
     role_id: null,
+    role_name: "",
   });
 
   const navigate = useNavigate();
@@ -101,7 +102,7 @@ export default function Roles() {
         setPopup({
           show: true,
           title: "הצלחה",
-          message: `התפקיד ${role_id.role_name} הוגדר כלא פעיל`,
+          message: `התפקיד " ${popup.role_name} " הוגדר כלא פעיל`,
           mode: "success",
         });
         fetchRoles();
@@ -209,6 +210,7 @@ export default function Roles() {
                     message: ` האם למחוק את תפקיד : " ${r.role_name} " ?`,
                     mode: "confirm",
                     role_id: r.role_id,
+                    role_name: r.role_name,
                   })
                 }
                 className="flex items-center gap-2 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
