@@ -112,7 +112,13 @@ function Navbar() {
         ) : (
           <AppButton
             label="התחברות"
-            icon={<Icon icon="mdi:login" width="1.2em" height="1.2em" />}
+            icon={
+              <Icon
+                icon="streamline-flex:login-1-remix"
+                width="1.2em"
+                height="1.2em"
+              />
+            }
             variant="navigate"
             to="/userlogin"
           />
