@@ -109,7 +109,7 @@ export default function EditUser() {
   if (!userData) {
     return (
       <div className="text-center text-blue-600 font-rubik text-lg p-6">
-        ...טוען נתוני משתמש
+        ... טוען נתוני משתמש
       </div>
     );
   }
