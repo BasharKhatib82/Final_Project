@@ -12,6 +12,7 @@ import { Popup } from "components/Tools";
 import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { api } from "utils";
+import { Frown } from "lucide-react";
 
 const EditProject = () => {
   const [form, setForm] = useState({
@@ -63,7 +64,7 @@ const EditProject = () => {
       if (res.data?.success || res.data?.Status) {
         setPopupData({
           title: "הצלחה",
-          message: "הפרויקט עודכן בהצלחה!",
+          message: `הפרויקט " ${form.project_name} " עודכן בהצלחה !`,
           mode: "success",
         });
       } else {
@@ -165,7 +166,7 @@ const EditProject = () => {
       {confirmPopup && (
         <Popup
           title="אישור עדכון"
-          message="האם אתה בטוח שברצונך לעדכן את הפרויקט?"
+          message={`האם אתה מאשר לעדכן את הפרויקט : " ${form.project_name} " ?`}
           mode="confirm"
           onConfirm={handleSubmit}
           onClose={() => setConfirmPopup(false)}
