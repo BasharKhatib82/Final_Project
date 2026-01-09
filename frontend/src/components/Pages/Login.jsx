@@ -40,6 +40,7 @@ function Login() {
   const [showPopupErrorLogin, setShowPopupErrorLogin] = useState(false);
   const [showPopupMustChange, setShowPopupMustChange] = useState(false);
   const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
 
   // מצב שינוי סיסמה מאולץ
   const [mustChange, setMustChange] = useState(false);
@@ -73,7 +74,7 @@ function Login() {
       if (loginRes.data.success) {
         const userData = loginRes.data.data;
         userData.full_name = `${userData.first_name} ${userData.last_name}`;
-
+        setFullName(userData.full_name);
         setUser(userData);
         setShowPopupSuccessLogin(true);
         setError(null);
@@ -288,9 +289,14 @@ function Login() {
       {showPopupSuccessLogin && mustChange === false && (
         <Popup
           icon={
-            <Icon icon="simple-icons:norton" width="1.5em" height="1.5em" color="green" />
+            <Icon
+              icon="simple-icons:norton"
+              width="1.5em"
+              height="1.5em"
+              color="green"
+            />
           }
-          title="חשבונך זוהה בהצלחה"
+          title={`${fullName} חשבונך זוהה בהצלחה`}
           message="כעת נעביר אותך לאזור האישי שלך"
           mode="successMessage"
           autoClose={3000}
