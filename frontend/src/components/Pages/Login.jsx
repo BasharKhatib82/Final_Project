@@ -288,7 +288,7 @@ function Login() {
       {showPopupSuccessLogin && mustChange === false && (
         <Popup
           icon={
-            <Icon icon="simple-icons:norton" width="1.5em" height="1.5em" />
+            <Icon icon="simple-icons:norton" width="1.5em" height="1.5em" color="green" />
           }
           title="חשבונך זוהה בהצלחה"
           message="כעת נעביר אותך לאזור האישי שלך"
