@@ -431,7 +431,7 @@ export default function Leads() {
       {repToSave && (
         <Popup
           title="עדכון נציג"
-          message="האם לעדכן את הנציג לפנייה זו?"
+          message={`האם לשייך את ${repToSave} לטיפול בפנייה ?`}
           mode="confirm"
           onConfirm={handleRepSave}
           onClose={() => {
