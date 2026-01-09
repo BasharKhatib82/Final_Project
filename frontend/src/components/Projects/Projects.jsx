@@ -68,7 +68,7 @@ export default function Projects() {
     if (!projectToDelete) return;
 
     try {
-      const projectName = await fetchProjectNameById(projectToDelete);
+      const name = await fetchProjectNameById(projectToDelete);
       setProjectName(projectName);
 
       const res = await api.delete(`/projects/delete/${projectToDelete}`);
@@ -76,7 +76,7 @@ export default function Projects() {
         fetchProjects();
         setPopup({
           title: "הצלחה",
-          message: `הפרויקט " ${projectName} " עודכן כלא פעיל !`,
+          message: `הפרויקט " ${name} " עודכן כלא פעיל !`,
           mode: "success",
           show: true,
         });
