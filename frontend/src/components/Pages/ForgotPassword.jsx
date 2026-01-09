@@ -61,33 +61,29 @@ function ForgotPassword() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <AppButton
-            label={loading ? "שולח..." : "שליחת קישור לשחזור סיסמה"}
-            type="submit"
-            disabled={loading}
-            icon={
-              <Icon
-                icon="streamline:send-email-remix"
-                width="1.2em"
-                height="1.2em"
-              />
-            }
-            className="w-full"
-            variant="normal"
-          />
-          <AppButton
-            label="יציאה"
-            icon={
-              <Icon
-                icon="streamline:send-email-remix"
-                width="1.2em"
-                height="1.2em"
-              />
-            }
-            className="w-full"
-            variant="cancel"
-            to="/dashboard/userlogin"
-          />
+          <div className="flex justify-around pt-4">
+            <AppButton
+              label={loading ? "שולח..." : "שליחת קישור לשחזור סיסמה"}
+              type="submit"
+              disabled={loading}
+              icon={
+                <Icon
+                  icon="streamline:send-email-remix"
+                  width="1.2em"
+                  height="1.2em"
+                />
+              }
+              variant="normal"
+            />
+            <AppButton
+              label="יציאה"
+              icon={
+                <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+              }
+              variant="cancel"
+              to="/dashboard/userlogin"
+            />
+          </div>
         </form>
       </div>
 
