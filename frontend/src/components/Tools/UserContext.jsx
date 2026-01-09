@@ -80,7 +80,7 @@ export const UserProvider = ({ children }) => {
     fetchUser();
   }, [location.pathname]);
 
-  cconst logout = () => {
+  const logout = () => {
   const fullName = `${user?.first_name || ""} ${user?.last_name || ""}`;
 
   setPopup({
