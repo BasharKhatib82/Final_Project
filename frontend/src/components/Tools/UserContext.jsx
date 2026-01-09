@@ -40,7 +40,7 @@ export const UserProvider = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
-const fullName = `${user?.first_name || ""} ${user?.last_name || ""}`;
+
   
 
   useEffect(() => {
@@ -80,35 +80,54 @@ const fullName = `${user?.first_name || ""} ${user?.last_name || ""}`;
     fetchUser();
   }, [location.pathname]);
 
-  const logout = async () => {
-    try {
-      await logoutUser(user?.user_id);
-      setUser(null);
-      navigate("/userlogin");
-      setPopup({
-        icon: (
-          <Icon
-            icon="streamline-sharp:logout-2-remix"
-            width="1.5em"
-            height="1.5em"
-            color="#f59e0b"
-          />
-        ),
-        title: `התנתקות מהמערכת`,
-        message: `${fullName} : התנתקת בהצלחה מהמערכת`,
-        mode: "successMessage",
-        autoClose: 3000,
-        redirectOnClose: "/userlogin",
-      });
-    } catch (err) {
-      setPopup({
-        title: "שגיאה",
-        message: err.userMessage || "אירעה שגיאה בהתנתקות",
-        mode: "error",
-      });
-    } finally {
-      setUser(null);
-    }
+  const logout = () => {
+    const fullName = `${user?.first_name || ""} ${user?.last_name || ""}`;
+
+    setPopup({
+      icon: (
+        <Icon
+          icon="streamline-sharp:logout-2-remix"
+          width="1.5em"
+          height="1.5em"
+          color="#f59e0b"
+        />
+      ),
+      title: `${fullName}, אתה עומד להתנתק`,
+      message: "האם אתה בטוח שברצונך לצאת מהמערכת ?",
+      mode: "confirm",
+     
+      onConfirm: async () => {
+        try {
+          await logoutUser(user?.user_id);
+          const name = fullName; // נשמר מראש
+          setUser(null);
+          navigate("/userlogin");
+
+          setPopup({
+            icon: (
+              <Icon
+                icon="streamline-sharp:logout-2-remix"
+                width="1.5em"
+                height="1.5em"
+                color="#f59e0b"
+              />
+            ),
+            title: `התנתקות מהמערכת`,
+            message: `${name} : התנתקת בהצלחה מהמערכת`,
+            mode: "successMessage",
+            autoClose: 3000,
+            redirectOnClose: "/userlogin",
+          });
+        } catch (err) {
+          setPopup({
+            title: "שגיאה",
+            message: err.userMessage || "אירעה שגיאה בהתנתקות",
+            mode: "error",
+          });
+        }
+      },
+      onClose: () => setPopup(null),
+    });
   };
 
   return (
