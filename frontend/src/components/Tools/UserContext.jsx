@@ -39,9 +39,9 @@ export const UserProvider = ({ children }) => {
   const [popup, setPopup] = useState(null); //   לניהול חלון הודעות state
   const location = useLocation();
   const navigate = useNavigate();
-  const [fullName, setFullName] = useState("");
+  
 
-  setFullName(getCurrentUser.fullName);
+  
 
   useEffect(() => {
     const isPublicPage =
@@ -95,7 +95,7 @@ export const UserProvider = ({ children }) => {
           />
         ),
         title: `התנתקות מהמערכת`,
-        message: `${fullName} : התנתקת בהצלחה מהמערכת`,
+        message: `${123} : התנתקת בהצלחה מהמערכת`,
         mode: "successMessage",
         autoClose: 3000,
         redirectOnClose: "/userlogin",
