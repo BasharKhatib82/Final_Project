@@ -81,7 +81,7 @@ export default function EditUser() {
     setPopup({
       show: true,
       title: "אישור עדכון",
-      message: `" ${userData.first_name} ${userData.last_name} " : האם לעדכן את פרטי המשתמש ? `,
+      message: ` : האם לעדכן את פרטי המשתמש " ${userData.first_name} ${userData.last_name} " ? `,
       mode: "confirm",
     });
   };
@@ -93,7 +93,8 @@ export default function EditUser() {
         setPopup({
           show: true,
           title: "הצלחה",
-          message: "המשתמש עודכן בהצלחה",
+          message:
+            `פרטי המשתמש : " ${userData.first_name} ${userData.last_name} " ! עודכו בהצלחה `,
           mode: "success",
         });
       })
