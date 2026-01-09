@@ -95,7 +95,7 @@ export const UserProvider = ({ children }) => {
           />
         ),
         title: `התנתקות מהמערכת`,
-        message: `${123} : התנתקת בהצלחה מהמערכת`,
+        message: `${user?.first_name} ${user?.last_name} : התנתקת בהצלחה מהמערכת`,
         mode: "successMessage",
         autoClose: 3000,
         redirectOnClose: "/userlogin",
