@@ -8,6 +8,7 @@ import axios from "axios";
 export const fetchFullNameByUserId = async (userId) => {
   try {
     const res = await axios.get(`/users/${userId}`);
+    console.log("response data:", res.data);
     const { first_name, last_name } = res.data;
     return `${first_name} ${last_name}`.trim();
   } catch (err) {
