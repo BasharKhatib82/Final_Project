@@ -19,6 +19,7 @@ import { AppButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
 import { api, extractApiError } from "utils";
 
+
 //פונקציית עזר לבדיקת סטטוס
 const isActive = (v) => v === true || v === 1 || v === "1";
 
@@ -86,10 +87,11 @@ export default function Users() {
     api
       .put(`/users/delete/${user_id}`, { active: 0 })
       .then(() => {
+        
         setPopup({
           show: true,
           title: "הצלחה",
-          message: "המשתמש סומן כלא פעיל",
+          message: `המשתמש : ${user.first_name} הוגדר כלא פעיל`,
           mode: "success",
         });
         fetchUsers();
@@ -146,7 +148,7 @@ export default function Users() {
                   setPopup({
                     show: true,
                     title: "אישור מחיקה",
-                    message: "להפוך את המשתמש ללא פעיל ?",
+                    message: `האם למחוק את משתמש : " ${u.first_name} ${u.last_name}" ?`,
                     mode: "confirm",
                     user_id: u.user_id,
                   })
