@@ -43,6 +43,7 @@ export default function EditUser() {
       const res = await api.get(`/users/${id}`);
       const user = res.data.data;
       setUserData(user);
+
       const rolesRes = await api.get(`/roles/active`);
       let activeRoles = rolesRes.data.data.map((r) => ({ ...r, active: true }));
 
@@ -74,13 +75,13 @@ export default function EditUser() {
     const digitsOnly = e.target.value.replace(/[^0-9]/g, "");
     setUserData({ ...userData, phone_number: digitsOnly });
   };
-  const fullName = userData.fullName;
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setPopup({
       show: true,
       title: "אישור עדכון",
-      message: `${fullName} : האם לעדכן את פרטי המשתמש ?`,
+      message: "⚠️ האם לעדכן את פרטי המשתמש?",
       mode: "confirm",
     });
   };
@@ -92,7 +93,7 @@ export default function EditUser() {
         setPopup({
           show: true,
           title: "הצלחה",
-          message: `פרטי המשתמש ${fullName} : עודכנו בהצלחה !`,
+          message: "המשתמש עודכן בהצלחה",
           mode: "success",
         });
       })
@@ -109,7 +110,7 @@ export default function EditUser() {
   if (!userData) {
     return (
       <div className="text-center text-blue-600 font-rubik text-lg p-6">
-        ... טוען נתוני משתמש
+        ...טוען נתוני משתמש
       </div>
     );
   }
