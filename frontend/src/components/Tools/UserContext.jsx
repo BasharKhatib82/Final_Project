@@ -40,7 +40,7 @@ export const UserProvider = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
-
+const fullName = `${user?.first_name || ""} ${user?.last_name || ""}`;
   
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export const UserProvider = ({ children }) => {
           />
         ),
         title: `התנתקות מהמערכת`,
-        message: `${user?.first_name} ${user?.last_name} : התנתקת בהצלחה מהמערכת`,
+        message: `${fullName} : התנתקת בהצלחה מהמערכת`,
         mode: "successMessage",
         autoClose: 3000,
         redirectOnClose: "/userlogin",
