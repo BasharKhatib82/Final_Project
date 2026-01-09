@@ -22,6 +22,8 @@
 
 import React, { useState } from "react";
 import axios from "axios";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 import { Popup } from "components/Tools";
 
 const api = process.env.REACT_APP_API_URL;
@@ -143,14 +145,22 @@ function Contact() {
               className="w-full border border-gray-300 rounded px-3 py-2"
             ></textarea>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded transition"
-          >
-            {loading ? "שולח..." : "שלח פנייה"}
-          </button>
+          <div className="flex justify-around pt-4">
+            <AppButton
+              label={loading ? "שולח..." : "שליחת פנייה"}
+              type="submit"
+              disabled={loading}
+              icon={
+                <Icon
+                  icon="streamline-flex:login-1-remix"
+                  width="1.2em"
+                  height="1.2em"
+                />
+              }
+              className="w-full"
+              variant="normal"
+            />
+          </div>
         </form>
       </div>
 
