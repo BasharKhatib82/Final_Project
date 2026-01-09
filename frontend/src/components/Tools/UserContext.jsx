@@ -85,13 +85,13 @@ export const UserProvider = ({ children }) => {
       setPopup({
         icon: (
           <Icon
-            icon="lets-icons:sign-out-squre"
+            icon="streamline-sharp:logout-2-remix"
             width="1.5em"
             height="1.5em"
             color="green"
           />
         ),
-        title: "התנתקות",
+        title: "התנתקות מהמערכת",
         message: "התנתקת בהצלחה מהמערכת",
         mode: "successMessage",
         autoClose: 3000,
