@@ -122,7 +122,7 @@ const AddProject = () => {
       {showConfirmPopup && (
         <Popup
           title="אישור שמירה"
-          message="האם אתה בטוח שברצונך לשמור את הפרויקט?"
+          message={`האם אתה בטוח שברצונך ליצור את הפרויקט : " ${form.project_name} " ?`}
           mode="confirm"
           onConfirm={handleSubmit}
           onClose={() => setShowConfirmPopup(false)}
@@ -133,7 +133,7 @@ const AddProject = () => {
       {successPopup && (
         <Popup
           title="הצלחה"
-          message="הפרויקט נשמר בהצלחה!"
+          message={`הפרויקט : " ${form.project_name} " נוצר בהצלחה !`}
           mode="success"
           onClose={() => {
             setSuccessPopup(false);
