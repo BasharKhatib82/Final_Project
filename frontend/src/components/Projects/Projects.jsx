@@ -76,8 +76,7 @@ export default function Projects() {
         fetchProjects();
         setPopup({
           title: "הצלחה",
-          message:
-            res.data.message || `הפרויקט " ${projectName} " עודכן כלא פעיל !`,
+          message: `הפרויקט " ${projectName} " עודכן כלא פעיל !`,
           mode: "success",
           show: true,
         });
