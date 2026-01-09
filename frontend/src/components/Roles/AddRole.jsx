@@ -25,6 +25,7 @@ export default function AddRole() {
     title: "",
     message: "",
     mode: "info",
+    role_name: "",
   });
 
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export default function AddRole() {
     setPopup({
       show: true,
       title: "אישור הוספת תפקיד",
-      message: "האם להוסיף תפקיד חדש ?",
+      message: `האם להוסיף את התפקיד ${roleName} ?`,
       mode: "confirm",
     });
   };
@@ -76,7 +77,7 @@ export default function AddRole() {
         setPopup({
           show: true,
           title: "שגיאה",
-          message: extractApiError(err, "שגיאה בעדכון המשתמש"),
+          message: extractApiError(err, "שגיאה בעדכון התפקיד"),
           mode: "error",
         });
       });
