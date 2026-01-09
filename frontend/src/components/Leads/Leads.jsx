@@ -431,7 +431,7 @@ export default function Leads() {
       {repToSave && (
         <Popup
           title="עדכון נציג"
-          message={`האם לשייך את ${repToSave} לטיפול בפנייה ?`}
+          message="האם לעדכן את הנציג לפנייה זו?"
           mode="confirm"
           onConfirm={handleRepSave}
           onClose={() => {
@@ -470,7 +470,7 @@ export default function Leads() {
       {bulkAssignConfirm && (
         <Popup
           title="אישור שיוך מרובה"
-          message={`האם אתה בטוח שברצונך לשייך ${selectedLeads.length} פניות ל : ${bulkAssignConfirm} ?`}
+          message={`האם אתה בטוח שברצונך לשייך ${selectedLeads.length} פניות לנציג שנבחר ?`}
           mode="confirm"
           onConfirm={handleBulkAssign}
           onClose={() => setBulkAssignConfirm(false)}
