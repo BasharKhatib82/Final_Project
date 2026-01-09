@@ -94,7 +94,7 @@ export default function EditUser() {
           show: true,
           title: "הצלחה",
           message:
-            `פרטי המשתמש : " ${userData.first_name} ${userData.last_name} " ! עודכו בהצלחה `,
+            `פרטי המשתמש : " ${userData.first_name} ${userData.last_name} " עודכו בהצלחה !`,
           mode: "success",
         });
       })
