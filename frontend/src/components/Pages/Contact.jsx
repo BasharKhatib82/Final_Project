@@ -78,7 +78,7 @@ function Contact() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-12 text-right font-rubik">
       <div className="bg-white/90 shadow-md rounded-2xl p-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+        <h1 className="text-3xl font-bold text-gray-800 mb-5 text-center">
           צור קשר
         </h1>
 
@@ -91,7 +91,7 @@ function Contact() {
               value={formData.fullName}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-1.5"
             />
           </div>
 
@@ -103,7 +103,7 @@ function Contact() {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-1.5"
             />
           </div>
 
@@ -115,7 +115,7 @@ function Contact() {
               value={formData.phone}
               onChange={handleChange}
               required
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-1.5"
             />
           </div>
 
@@ -125,7 +125,7 @@ function Contact() {
               name="subject"
               value={formData.subject}
               onChange={handleChange}
-              className="w-full border border-gray-300 rounded px-3 py-2"
+              className="w-full border border-gray-300 rounded px-3 py-1.5"
             >
               <option>התעניינות במערכת</option>
               <option>תמיכה טכנית</option>
@@ -145,7 +145,7 @@ function Contact() {
               className="w-full border border-gray-300 rounded px-3 py-2"
             ></textarea>
           </div>
-          <div className="flex justify-around pt-4">
+          <div className="flex justify-around pt-2">
             <AppButton
               label={loading ? "שולח..." : "שליחת פנייה"}
               type="submit"
