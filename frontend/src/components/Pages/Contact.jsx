@@ -152,7 +152,7 @@ function Contact() {
               disabled={loading}
               icon={
                 <Icon
-                  icon="streamline-flex:login-1-remix"
+                  icon="streamline:send-email-remix"
                   width="1.2em"
                   height="1.2em"
                 />
