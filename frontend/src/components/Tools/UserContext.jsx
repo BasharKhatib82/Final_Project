@@ -89,7 +89,7 @@ const logout = async () => {
         color="#f59e0b"
       />
     ),
-    title: ` " ${fullName || " "} " : משתמש עומד להתנתק`,
+    title: ` " ${fullName || " "} " אתה עומד להתנתק`,
     message: "האם אתה בטוח שברצונך לצאת מהמערכת ?",
     mode: "confirm",
     onConfirm: async () => {
