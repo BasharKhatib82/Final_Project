@@ -23,6 +23,8 @@
 import { useState } from "react";
 import axios from "axios";
 import { Popup } from "components/Tools";
+import { AppButton } from "components/Buttons";
+import { Icon } from "@iconify/react";
 
 const api = process.env.REACT_APP_API_URL;
 
@@ -59,17 +61,20 @@ function ForgotPassword() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <button
+          <AppButton
+            label={loading ? "שולח..." : "שליחת קישור לשחזור סיסמה"}
             type="submit"
             disabled={loading}
-            className={`w-full font-semibold py-2 rounded transition ${
-              loading
-                ? "bg-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
-            }`}
-          >
-            {loading ? "שולח..." : "שלח קישור לאיפוס"}
-          </button>
+            icon={
+              <Icon
+                icon="streamline:send-email-remix"
+                width="1.2em"
+                height="1.2em"
+              />
+            }
+            className="w-full"
+            variant="normal"
+          />
         </form>
       </div>
 
