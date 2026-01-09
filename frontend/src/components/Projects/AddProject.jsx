@@ -122,7 +122,7 @@ const AddProject = () => {
       {showConfirmPopup && (
         <Popup
           title="אישור שמירה"
-          message={`האם אתה בטוח שברצונך ליצור את הפרויקט : " ${form.project_name} " ?`}
+          message={`האם אתה מאשר ליצור את הפרויקט בשם : " ${form.project_name} " ?`}
           mode="confirm"
           onConfirm={handleSubmit}
           onClose={() => setShowConfirmPopup(false)}
