@@ -56,7 +56,7 @@ function ForgotPassword() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="email"
-            placeholder="הקלד את כתובת האימייל שלך"
+            placeholder="נא להקליד את כתובת האימייל שלך"
             className="w-full border px-3 py-2 rounded"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
