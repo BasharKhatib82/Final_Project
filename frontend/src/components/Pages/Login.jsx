@@ -214,19 +214,20 @@ function Login() {
                 )}
               </button>
             </div>
-
-            <AppButton
-              label="התחברות"
-              type="submit"
-              icon={
-                <Icon
-                  icon="fluent:save-edit-20-regular"
-                  width="1.2em"
-                  height="1.2em"
-                />
-              }
-              variant="normal"
-            />
+            <div className="flex justify-around pt-4">
+              <AppButton
+                label="התחברות"
+                type="submit"
+                icon={
+                  <Icon
+                    icon="streamline-flex:login-1-remix"
+                    width="1.2em"
+                    height="1.2em"
+                  />
+                }
+                variant="normal"
+              />
+            </div>
           </form>
 
           {/* כפתור שכחת סיסמה */}
