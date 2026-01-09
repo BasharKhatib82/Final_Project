@@ -199,12 +199,13 @@ const Profile = () => {
               />
             }
             variant="normal"
+            className="w-full"
           />
         </div>
       </form>
 
       {/* שינוי סיסמה */}
-      <div className="mt-6 text-center">
+      <div className="mt-4 text-center">
         {!showPasswordForm ? (
           <div className="flex justify-around pt-4">
             <AppButton
@@ -217,6 +218,7 @@ const Profile = () => {
                   height="1.2em"
                 />
               }
+              className="w-full"
               variant="danger"
             />{" "}
           </div>
