@@ -445,7 +445,7 @@ export default function Leads() {
       {statusToSave && (
         <Popup
           title="עדכון סטטוס"
-          message="האם לעדכן את הסטטוס?"
+          message={`האם לעדכן את סטטוס פנייה מספר [ ${statusToSave} ] ?`}
           mode="confirm"
           onConfirm={handleStatusSave}
           onClose={() => {
