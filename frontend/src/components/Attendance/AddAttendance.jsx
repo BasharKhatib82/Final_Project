@@ -19,6 +19,7 @@ import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
+import { fetchFullNameByUserId } from "../../utils/fullNameUser";
 
 export default function AddAttendance() {
   const navigate = useNavigate();
@@ -75,7 +76,7 @@ export default function AddAttendance() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const required = ["user_id", "date", "status"];
@@ -99,34 +100,36 @@ export default function AddAttendance() {
       });
     }
 
+    const fullName = await fetchFullNameByUserId(form.user_id);
     setPopup({
       show: true,
       title: "אישור הוספה",
-      message: "להוסיף את רישום הנוכחות?",
+      message: `להוסיף את רישום הנוכחות עבור : "${fullName}" ?`,
       mode: "confirm",
     });
   };
 
-  const confirmAdd = () => {
-    api
-      .post("/attendance/add", form)
-      .then(() => {
-        setPopup({
-          show: true,
-          title: "הצלחה",
-          message: "✅ רישום הנוכחות נשמר",
-          mode: "success",
-        });
-      })
-      .catch((err) => {
-        setPopup({
-          show: true,
-          title: "שגיאה",
-          message: extractApiError(err, "שגיאה בשמירה"),
-          mode: "error",
-        });
-      });
-  };
+const confirmAdd = async () => {
+  try {
+    await api.post("/attendance/add", form);
+
+    const fullName = await fetchFullNameByUserId(form.user_id); // שליפת שם מלא
+
+    setPopup({
+      show: true,
+      title: "הצלחה",
+      message: `רישום הנוכחות עבור : " ${fullName} " נשמר בהצלחה`,
+      mode: "success",
+    });
+  } catch (err) {
+    setPopup({
+      show: true,
+      title: "שגיאה",
+      message: extractApiError(err, "שגיאה בשמירה"),
+      mode: "error",
+    });
+  }
+};
 
   //  חסימת קומפוננטה אם אין הרשאה
   if (currentUser?.permission_add_attendance !== 1) {
