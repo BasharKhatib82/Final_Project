@@ -296,7 +296,7 @@ function Login() {
               color="green"
             />
           }
-          title={`${fullName} חשבונך זוהה בהצלחה`}
+          title={`${fullName} : חשבונך זוהה בהצלחה`}
           message="כעת נעביר אותך לאזור האישי שלך"
           mode="successMessage"
           autoClose={3000}

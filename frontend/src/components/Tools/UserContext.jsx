@@ -91,8 +91,8 @@ export const UserProvider = ({ children }) => {
             color="#f59e0b"
           />
         ),
-        title: "התנתקות מהמערכת",
-        message: "התנתקת בהצלחה מהמערכת",
+        title: `התנתקות מהמערכת`,
+        message: `${useUser.fullName} : התנתקת בהצלחה מהמערכת`,
         mode: "successMessage",
         autoClose: 3000,
         redirectOnClose: "/userlogin",
