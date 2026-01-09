@@ -24,6 +24,7 @@ export default function EditRole() {
     title: "",
     message: "",
     mode: "info",
+    role_name: "",
   });
 
   const [roleName, setRoleName] = useState("");
@@ -62,7 +63,7 @@ export default function EditRole() {
     setPopup({
       show: true,
       title: "אישור עדכון",
-      message: "האם לעדכן את פרטי התפקיד ?",
+      message: `האם לעדכן את התפקיד : "${roleName}" ?`,
       mode: "confirm",
     });
   };
@@ -82,7 +83,7 @@ export default function EditRole() {
         setPopup({
           show: true,
           title: "הצלחה",
-          message: "התפקיד עודכן בהצלחה!",
+          message: `פרטי התפקיד: "${roleName}" עודכנו בהצלחה !`,
           mode: "success",
         });
       })
@@ -165,7 +166,6 @@ export default function EditRole() {
 
         {/* כפתורים */}
         <div className="flex justify-around pt-4">
-          
           <AppButton
             label="שמור שינויים"
             type="submit"
