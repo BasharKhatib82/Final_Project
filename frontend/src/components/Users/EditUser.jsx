@@ -81,7 +81,7 @@ export default function EditUser() {
     setPopup({
       show: true,
       title: "אישור עדכון",
-      message: "⚠️ האם לעדכן את פרטי המשתמש?",
+      message: `" ${userData.first_name} ${userData.last_name} " : האם לעדכן את פרטי המשתמש ? `,
       mode: "confirm",
     });
   };
