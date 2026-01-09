@@ -53,7 +53,7 @@ export default function AddRole() {
     setPopup({
       show: true,
       title: "אישור הוספת תפקיד",
-      message: `האם להוסיף את התפקיד ${roleName} ?`,
+      message: `האם להוסיף את התפקיד : " ${roleName} " ?`,
       mode: "confirm",
     });
   };
@@ -69,7 +69,7 @@ export default function AddRole() {
         setPopup({
           show: true,
           title: "הצלחה",
-          message: "התפקיד נוסף בהצלחה",
+          message: ` התפקיד : " ${roleName} " נוסף בהצלחה !`,
           mode: "success",
         });
       })
