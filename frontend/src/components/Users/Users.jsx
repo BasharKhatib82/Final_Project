@@ -95,7 +95,7 @@ export default function Users() {
       setPopup({
         show: true,
         title: "הצלחה",
-        message: `המשתמש ${fullName} הוגדר כלא פעיל`,
+        message: `המשתמש : " ${fullName} " הוגדר כלא פעיל`,
         mode: "success",
       });
 
