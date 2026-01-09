@@ -459,7 +459,7 @@ export default function Leads() {
       {leadToDelete && (
         <Popup
           title="אישור ביטול פנייה"
-          message="האם אתה בטוח שברצונך לבטל את הפנייה ?"
+          message={`האם אתה בטוח שברצונך לבטל פנייה מספר [ ${leadToDelete} ] ?`}
           mode="confirm"
           onConfirm={handleDelete}
           onClose={() => setLeadToDelete(null)}

@@ -145,7 +145,7 @@ const TaskDetails = () => {
       <div className="bg-white rounded shadow p-6 text-gray-700 mb-6 text-right space-y-4">
         <div className="text-xl font-semibold text-blue-700 text-center">
           {" "}
-          פרטי משימה מספר - {task.task_id}
+          פרטי משימה מספר [ {task.task_id} ]
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
