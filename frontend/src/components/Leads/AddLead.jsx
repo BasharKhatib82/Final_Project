@@ -253,7 +253,7 @@ export default function AddLead() {
       {showConfirmPopup && (
         <Popup
           title="אישור שמירה"
-          message="האם לשמור את הפנייה?"
+          message={`האם להוסיף פנייה חדשה עבור : " ${form.first_name} ${form.last_name} " ?`}
           mode="confirm"
           onConfirm={handleSubmit}
           onClose={() => setShowConfirmPopup(false)}
@@ -264,7 +264,7 @@ export default function AddLead() {
       {successPopup && (
         <Popup
           title="הצלחה"
-          message="הפנייה נשמרה בהצלחה!"
+          message={`פנייה חדשה עבור : " ${form.first_name} ${form.last_name} " נוספה בהצלחה !`}
           mode="success"
           onClose={() => {
             setSuccessPopup(false);
