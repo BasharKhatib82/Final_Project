@@ -179,8 +179,8 @@ function Login() {
               <button
                 type="button"
                 onClick={() => setShowPwd((s) => !s)}
-                aria-label={showPwd ? "הסתר סיסמה" : "הצג סיסמה"}
-                title={showPwd ? "הסתר סיסמה" : "הצג סיסמה"}
+                aria-label={showPwd ? "הסתרת סיסמה" : "הצגת סיסמה"}
+                title={showPwd ? "הסתרת סיסמה" : "הצגת סיסמה"}
                 className="absolute inset-y-[30px] left-2 grid place-items-center h-8 w-8 rounded hover:bg-gray-100 focus:outline-none"
               >
                 {showPwd ? (
@@ -231,7 +231,7 @@ function Login() {
             </div>
           </form>
 
-          {/* כפתור שכחת סיסמה */}
+          {/* כפתור שכחתי סיסמה */}
           <div className="text-center mt-4">
             <button
               type="button"
@@ -279,7 +279,7 @@ function Login() {
             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-md transition"
             onClick={handleForcePasswordChange}
           >
-            שמור סיסמה חדשה
+            שמירת סיסמה חדשה
           </button>
         </div>
       )}
@@ -287,7 +287,9 @@ function Login() {
       {/* פופאפ התחברות רגילה */}
       {showPopupSuccessLogin && mustChange === false && (
         <Popup
-          icon={<FcApproval className="text-5xl" />}
+          icon={
+            <Icon icon="simple-icons:norton" width="1.5em" height="1.5em" />
+          }
           title="חשבונך זוהה בהצלחה"
           message="כעת נעביר אותך לאזור האישי שלך"
           mode="successMessage"
