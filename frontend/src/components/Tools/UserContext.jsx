@@ -23,7 +23,7 @@
  */
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { data, useLocation, useNavigate } from "react-router-dom";
+import { data, useLocation} from "react-router-dom";
 import { getCurrentUser, logoutUser } from "../../utils/auth";
 import Popup from "./Popup";
 import { Icon } from "@iconify/react";
@@ -87,7 +87,7 @@ export const UserProvider = ({ children }) => {
           color="#f59e0b"
         />
       ),
-      title: `${data.fullName}, אתה עומד להתנתק`,
+      title: `אתה עומד להתנתק`,
       message: "האם אתה בטוח שברצונך לצאת מהמערכת?",
       mode: "confirm",
       onConfirm: () => {
@@ -105,7 +105,7 @@ export const UserProvider = ({ children }) => {
                 />
               ),
               title: "התנתקות מהמערכת",
-              message: `${data.fullName} : התנתקת בהצלחה מהמערכת`,
+              message: "התנתקת בהצלחה מהמערכת",
               mode: "successMessage",
               autoClose: 3000,
               redirectOnClose: "/userlogin",
