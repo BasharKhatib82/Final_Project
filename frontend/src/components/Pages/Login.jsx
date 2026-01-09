@@ -308,7 +308,7 @@ function Login() {
           title="הסיסמה הוחלפה בהצלחה"
           message="כעת ניתן להתחבר מחדש עם הסיסמה החדשה"
           mode="successMessage"
-          autoClose={2500}
+          autoClose={3000}
           redirectOnClose="/userlogin"
           onClose={() => {
             setShowPopupMustChange(false);

@@ -26,6 +26,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getCurrentUser, logoutUser } from "../../utils/auth";
 import Popup from "./Popup";
+import { Icon } from "@iconify/react";
 
 const UserContext = createContext();
 
@@ -82,11 +83,20 @@ export const UserProvider = ({ children }) => {
       setUser(null);
       navigate("/userlogin");
       setPopup({
+        icon: (
+          <Icon
+            icon="lets-icons:sign-out-squre"
+            width="1.5em"
+            height="1.5em"
+            color="green"
+          />
+        ),
         title: "התנתקות",
         message: "התנתקת בהצלחה מהמערכת",
-        mode: "success",
+        mode: "successMessage",
+        autoClose: 3000,
+        redirectOnClose: "/userlogin",
       });
-
     } catch (err) {
       setPopup({
         title: "שגיאה",
@@ -105,9 +115,12 @@ export const UserProvider = ({ children }) => {
       {children}
       {popup && (
         <Popup
+          icon={popup.icon}
           title={popup.title}
           message={popup.message}
           mode={popup.mode}
+          autoClose={popup.autoClose}
+          redirectOnClose={popup.redirectOnClose}
           onClose={() => setPopup(null)} //  סגירת החלון
         />
       )}
