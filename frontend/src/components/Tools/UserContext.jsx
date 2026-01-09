@@ -23,7 +23,7 @@
  */
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { data, useLocation} from "react-router-dom";
+import { data, useLocation } from "react-router-dom";
 import { getCurrentUser, logoutUser } from "../../utils/auth";
 import Popup from "./Popup";
 import { Icon } from "@iconify/react";
@@ -77,7 +77,6 @@ export const UserProvider = ({ children }) => {
   }, [location.pathname]);
 
   const logout = () => {
-    console.log(data.fullName);
     setPopup({
       icon: (
         <Icon
