@@ -55,8 +55,8 @@ function Contact() {
         icon: (
           <Icon
             icon="streamline:send-email-remix"
-            width="1.5em"
-            height="1.5em"
+            width="1.3em"
+            height="1.3em"
             color="green"
           />
         ),
@@ -77,8 +77,8 @@ function Contact() {
         icon: (
           <Icon
             icon="icon-park-outline:error"
-            width="1.5em"
-            height="1.5em"
+            width="1.3em"
+            height="1.3em"
             color="red"
           />
         ),
