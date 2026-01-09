@@ -66,9 +66,11 @@ export default function Projects() {
 
   const handleDeleteProject = async () => {
     if (!projectToDelete) return;
-    const projectName = await fetchProjectNameById(projectToDelete);
-    setProjectName(projectName);
+
     try {
+      const projectName = await fetchProjectNameById(projectToDelete);
+      setProjectName(projectName);
+
       const res = await api.delete(`/projects/delete/${projectToDelete}`);
       if (res.data.success) {
         fetchProjects();
