@@ -18,6 +18,7 @@ import { Popup, useUser } from "components/Tools";
 import { AppButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
 import { api, extractApiError } from "utils";
+import { fetchFullNameByUserId } from "../../utils/api";
 
 
 //פונקציית עזר לבדיקת סטטוס
@@ -83,28 +84,33 @@ export default function Users() {
   };
 
   // סימון משתמש כלא פעיל
-  const confirmDelete = (user_id) => {
-    api
-      .put(`/users/delete/${user_id}`, { active: 0 })
-      .then(() => {
-        
-        setPopup({
-          show: true,
-          title: "הצלחה",
-          message: `המשתמש : ${user.first_name} הוגדר כלא פעיל`,
-          mode: "success",
-        });
-        fetchUsers();
-      })
-      .catch((err) =>
-        setPopup({
-          show: true,
-          title: "שגיאה",
-          message: extractApiError(err, "אירעה שגיאה במחיקה"),
-          mode: "error",
-        })
-      );
-  };
+const confirmDelete = async (user_id) => {
+  try {
+    // שליפת שם מלא לפי user_id
+    const fullName = await fetchFullNameByUserId(user_id);
+
+    // מחיקת המשתמש
+    await api.put(`/users/delete/${user_id}`, { active: 0 });
+
+    // פופאפ הצלחה עם השם
+    setPopup({
+      show: true,
+      title: "הצלחה",
+      message: `המשתמש ${fullName} הוגדר כלא פעיל`,
+      mode: "success",
+    });
+
+    fetchUsers();
+  } catch (err) {
+    setPopup({
+      show: true,
+      title: "שגיאה",
+      message: extractApiError(err, "אירעה שגיאה במחיקה"),
+      mode: "error",
+    });
+  }
+};
+
 
   // עמודות הדוח לטבלת המשתמשים
   const columns = [
