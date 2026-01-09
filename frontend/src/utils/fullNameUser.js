@@ -8,9 +8,8 @@ import { api } from "./api";
 export const fetchFullNameByUserId = async (userId) => {
   try {
     const res = await api.get(`/users/${userId}`);
-    console.log("response data:", res.data);
-    const { first_name, last_name } = res.data;
-    return `${first_name} ${last_name}`.trim();
+    const { first_name, last_name } = res.data.data || {};
+    return `${first_name || ""} ${last_name || ""}`.trim();
   } catch (err) {
     console.error("שגיאה בשליפת שם:", err);
     return "";
