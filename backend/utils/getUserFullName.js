@@ -1,4 +1,4 @@
-// backend/utils/getUserFullNameById.js
+// backend/utils/getUserFullName.js
 import { db } from "./dbSingleton.js";
 
 /**
@@ -6,11 +6,11 @@ import { db } from "./dbSingleton.js";
  * @param {string|number} userId - תעודת זהות / מזהה משתמש
  * @returns {Promise<string|null>} - fullName או null אם לא נמצא
  */
-export async function getUserFullName(userId) {
+export default function getUserFullName(userId) {
   if (!userId) return null;
 
   try {
-    const [rows] = await db.query(
+    const [rows] = db.query(
       `SELECT first_name, last_name 
        FROM users 
        WHERE user_id = ?`,
@@ -26,7 +26,7 @@ export async function getUserFullName(userId) {
 
     return fullName || null;
   } catch (err) {
-    console.error("getUserFullNameById error:", err);
+    console.error("getUserFullName error:", err);
     return null;
   }
 }
