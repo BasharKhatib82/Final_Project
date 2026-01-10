@@ -10,6 +10,7 @@ import {
   isNineDigitId,
 } from "../utils/fieldValidators.js";
 import getLastLeadIdByPhone from "../utils/getLastLeadIdByPhone.js";
+import getUserFullName from "../utils/getUserFullName.js";
 
 /**
  * data_scopeשליפת פניות עם תמיכה ב־
@@ -459,11 +460,9 @@ export async function bulkAssign(req, res) {
       [repUserId || null, leadIds]
     );
 
-    let repUserName = repUserId
-      ? `${repUserId.first_name} ${repUserId.last_name}`
-      : "ללא נציג";
+   const fullName = await getUserFullName(user_id);
     logAction(
-      `שיוך ${leadIds.length} פניות לנציג ${repUserName ?? "ללא נציג"}`,
+      `שיוך ${leadIds.length} פניות לנציג ${fullName ?? "ללא נציג"}`,
       req.user.user_id
     )(req, res, () => {});
     return res.json({
