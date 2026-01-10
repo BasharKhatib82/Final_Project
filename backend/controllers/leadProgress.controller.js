@@ -4,7 +4,6 @@ import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import { isValidLeadStatus } from "../utils/leadsHelpers.js";
 import { isPositiveInt } from "../utils/fieldValidators.js";
-import getUserFullName from "../utils/getUserFullName.js";
 
 /**
  * שליפת כל תיעודי ההתקדמות לפנייה מסוימת
@@ -100,8 +99,7 @@ export async function addLeadProgress(req, res) {
     }
 
     await conn.commit();
-    const fullName = await getUserFullName(user_id);
-    logAction(`עדכון פנייה מספר : [ ${lead_id} ] ע"י " ${fullName} "`, user_id)(
+    logAction(`הוספת תיעוד לפנייה מספר : [ ${lead_id} ]`, user_id)(
       req,
       res,
       () => {}

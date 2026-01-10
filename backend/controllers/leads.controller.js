@@ -391,7 +391,7 @@ export async function cancelLead(req, res) {
         .json({ success: false, message: "פנייה לא נמצאה" });
     }
 
-    logAction(` מחיקת פנייה מספר[ ${leadId} ]`, req.user.user_id)(req, res, () => {});
+    logAction(`מחיקת פנייה מספר [ ${leadId} ]`, req.user.user_id)(req, res, () => {});
     return res.json({ success: true, message: "הפנייה סומנה כמבוטלת" });
   } catch (err) {
     console.error("cancelLead:", err);
@@ -463,7 +463,7 @@ export async function bulkAssign(req, res) {
       ? `${repUserId.first_name} ${repUserId.last_name}`
       : "ללא נציג";
     logAction(
-      `שיוך ${leadIds.length} : פניות לנציג ${repUserName ?? "ללא נציג"}`,
+      `שיוך ${leadIds.length} פניות לנציג ${repUserName ?? "ללא נציג"}`,
       req.user.user_id
     )(req, res, () => {});
     return res.json({
