@@ -148,6 +148,7 @@ function Login() {
                 placeholder="הקלד תעודת זהות"
                 className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                 maxLength={9}
+                autoComplete="username"
                 value={values.user_id}
                 onChange={(e) => {
                   const onlyDigits = e.target.value.replace(/\D/g, "");

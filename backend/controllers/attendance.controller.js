@@ -143,6 +143,7 @@ export async function getAttendanceById(req, res) {
  * מחזיר: הצלחה/שגיאה
  */
 export async function updateAttendance(req, res) {
+  const user = req.user;
   const attendanceId = req.params.id;
   const { user_id, date, check_in, check_out, status, notes } = req.body;
 
