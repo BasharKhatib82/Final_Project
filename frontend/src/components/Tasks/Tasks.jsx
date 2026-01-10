@@ -18,6 +18,7 @@ import { AppButton } from "components/Buttons";
 import { Popup, useUser } from "components/Tools";
 import ReportView from "../Reports/ReportView";
 import { api, extractApiError } from "utils";
+import { fetchFullNameByUserId } from "../../utils/fullNameUser";
 
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
@@ -70,11 +71,13 @@ export default function Tasks() {
 
   const handleRepSave = async () => {
     try {
+      const fullName = await fetchFullNameByUserId(newRepId);
+
       await api.put(`/tasks/update-rep/${repToSave}`, { user_id: newRepId });
       fetchTasks();
       setPopup({
         title: "הצלחה",
-        message: "הנציג עודכן בהצלחה",
+        message: `הנציג/ה ${fullName} עודכן בהצלחה`,
         mode: "success",
       });
     } catch (err) {
@@ -225,7 +228,7 @@ export default function Tasks() {
     },
     {
       key: "user_id",
-      label: "נציג",
+      label: "נציג/ה",
       render: (r) => (
         <select
           value={r.selectedRepId}

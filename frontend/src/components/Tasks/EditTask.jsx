@@ -112,7 +112,7 @@ const EditTask = () => {
       if (res.data.success || res.data.Status) {
         setPopupData({
           title: "הצלחה",
-          message: `"פרטי משימה מספר [ ${id} ] עודכנו בהצלחה !"`,
+          message: `פרטי משימה מספר [ ${id} ] עודכנו בהצלחה !`,
           mode: "success",
         });
       } else {
