@@ -217,7 +217,7 @@ export async function deleteRole(req, res) {
     }
     const roleName = roles[0].role_name;
 
-    // ✅ בדיקה אם יש משתמשים עם התפקיד הזה
+    //  בדיקה אם יש משתמשים עם התפקיד הזה
     const [cntRows] = await db.query(
       "SELECT COUNT(*) AS cnt FROM users WHERE role_id = ?",
       [roleId]
@@ -244,7 +244,7 @@ export async function deleteRole(req, res) {
     }
 
     // לוג פעולה
-    logAction(`מחיקת תפקיד: ${roleName}`, req.user?.user_id)(
+    logAction(`מחיקת תפקיד : ${roleName}`, req.user?.user_id)(
       req,
       res,
       () => {}

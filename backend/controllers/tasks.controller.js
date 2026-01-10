@@ -4,6 +4,7 @@ import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import { isValidTaskStatus } from "../utils/tasksHelpers.js";
 import { isValidDate } from "../utils/attendanceHelpers.js";
+import getUserFullName from "../utils/getUserFullName.js";
 
 /**
  * data_scope שליפת משימות עם תמיכה ב־
@@ -120,7 +121,14 @@ export async function addTask(req, res) {
       [task_title, description || null, status, due_date, user_id || null]
     );
 
-    logAction("הוספת משימה חדשה", req.user?.user_id)(req, res, () => {});
+    const fullName = await getUserFullName(user_id);
+
+    logAction(`הוספת משימה חדשה עבור : ${fullName}`, req.user?.user_id)(
+      req,
+      res,
+      () => {}
+    );
+
     return res.json({ success: true, message: "המשימה נוספה בהצלחה" });
   } catch (err) {
     return res
@@ -170,7 +178,11 @@ export async function updateTask(req, res) {
         .json({ success: false, message: "משימה לא נמצאה" });
     }
 
-    logAction(`עדכון משימה #${id}`, req.user?.user_id)(req, res, () => {});
+    logAction(`עדכון משימה מספר [ ${id} ] `, req.user?.user_id)(
+      req,
+      res,
+      () => {}
+    );
     return res.json({ success: true, message: "המשימה עודכנה בהצלחה" });
   } catch (err) {
     console.error("updateTask:", err);
@@ -200,7 +212,11 @@ export async function cancelTask(req, res) {
         .json({ success: false, message: "משימה לא נמצאה" });
     }
 
-    logAction(`ביטול משימה #${id}`, req.user?.user_id)(req, res, () => {});
+    logAction(`ביטול משימה מספר [ ${id} ] `, req.user?.user_id)(
+      req,
+      res,
+      () => {}
+    );
     return res.json({ success: true, message: "המשימה בוטלה בהצלחה" });
   } catch (err) {
     console.error("cancelTask:", err);
@@ -231,7 +247,7 @@ export async function updateTaskRep(req, res) {
         .json({ success: false, message: "משימה לא נמצאה" });
     }
 
-    logAction(`עדכון נציג למשימה #${taskId}`, req.user.user_id)(
+    logAction(`עדכון נציג למשימה [ ${taskId} ]`, req.user.user_id)(
       req,
       res,
       () => {}
@@ -270,7 +286,7 @@ export async function updateTaskStatus(req, res) {
         .json({ success: false, message: "משימה לא נמצאה" });
     }
 
-    logAction(`עדכון סטטוס למשימה #${taskId}`, req.user.user_id)(
+    logAction(`עדכון סטטוס למשימה [ ${taskId} ]`, req.user.user_id)(
       req,
       res,
       () => {}
@@ -303,11 +319,11 @@ export async function bulkAssignTasks(req, res) {
       [repUserId || null, taskIds]
     );
 
-    logAction(`שיוך מרובה למשימות (${taskIds.length})`, req.user?.user_id)(
-      req,
-      res,
-      () => {}
-    );
+    const fullName = await getUserFullName(user_id);
+    logAction(
+      `שיוך (${taskIds.length}) משימות עבור : ${fullName}`,
+      req.user?.user_id
+    )(req, res, () => {});
     return res.json({
       success: true,
       message: "שיוך מרובה עודכן בהצלחה",
