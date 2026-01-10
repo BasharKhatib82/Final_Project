@@ -138,7 +138,7 @@ export async function archiveProject(req, res) {
         .json({ success: false, message: "פרויקט לא נמצא" });
     }
     const projectName = await getProjectById(id);
-    logAction(`מחיקת פרויקט : ${projectName}`, req.user?.user_id)(
+    logAction(`מחיקת פרויקט : ${projectName.project_name}`, req.user?.user_id)(
       req,
       res,
       () => {}
