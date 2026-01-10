@@ -54,15 +54,24 @@ const Home = () => {
     }
   };
 
-  const fetchAttendanceStatus = async () => {
-    try {
-      const res = await api.get("/attendance/status");
-      setAttendanceStatus(res.data?.data.status || null);
-    } catch (err) {
-      console.error("שגיאה בשליפת סטטוס החתמה:", err);
-      setAttendanceStatus(null);
-    }
-  };
+ const fetchAttendanceStatus = async () => {
+   try {
+     const res = await api.get("/attendance/status");
+
+     // כאן התשובה היא: { success, status, last_check_in }
+     if (res.data?.success) {
+       setAttendanceStatus({
+         status: res.data.status || "none",
+         last_check_in: res.data.last_check_in || null,
+       });
+     } else {
+       setAttendanceStatus(null);
+     }
+   } catch (err) {
+     console.error("שגיאה בשליפת סטטוס החתמה:", err);
+     setAttendanceStatus(null);
+   }
+ };
 
   const confirmCheckIn = () => {
     setPopup({
@@ -135,9 +144,8 @@ const Home = () => {
   };
 
   const renderAttendanceButtons = () => {
-    const status = attendanceStatus?.status;
-    const showCheckIn =
-      !status || status === "none" || status === "checked_out";
+    const status = attendanceStatus?.status || "none";
+    const showCheckIn = status === "none" || status === "checked_out";
     const showCheckOut = status === "checked_in";
 
     return (

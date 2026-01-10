@@ -240,11 +240,7 @@ export async function generateAbsenceReport(_req, res) {
   }
 }
 
-/**
- * החתמת כניסה
- * מקבל: { user_id }
- * מחזיר: הצלחה/שגיאה
- */
+
 /**
  * החתמת כניסה
  * מקבל: { user_id }
@@ -308,25 +304,12 @@ export async function checkIn(req, res) {
  * מקבל: { user_id }
  * מחזיר: הצלחה/שגיאה
  */
-/**
- * החתמת יציאה
- * מקבל: { user_id }
- * מחזיר: הצלחה/שגיאה
- */
 export async function checkOut(req, res) {
   const { user_id } = req.body;
 
   // בדיקות תקינות
   if (!user_id) {
     return res.status(400).json({ success: false, message: "חסר מזהה משתמש" });
-  }
-
-  //  בדיקת תקינות תעודת זהות
-  if (!isNineDigitId(user_id)) {
-    return res.status(400).json({
-      success: false,
-      message: "מספר תעודת זהות חייב להיות מספר בן 9 ספרות",
-    });
   }
 
   // קבלת תאריך ושעה נוכחיים בישראל
@@ -382,7 +365,11 @@ export async function checkOut(req, res) {
   }
 }
 
-// בדיקת מצב נוכחות להיום למשתמש המחובר
+/**
+ * סטטוס נוכחות ליום הנוכחי
+ * מחזיר: { success, status, last_check_in? }
+ *  - status: "none" | "checked_in" | "checked_out"
+ */
 export async function getTodayAttendanceStatus(req, res) {
   const user_id = req.user?.user_id;
 
@@ -391,7 +378,7 @@ export async function getTodayAttendanceStatus(req, res) {
   }
 
   const now = nowIsraelFormatted();
-  const today = now.split(" ")[0]; // תאריך בלבד
+  const today = now.split(" ")[0];
 
   try {
     const [rows] = await db.query(
@@ -404,44 +391,40 @@ export async function getTodayAttendanceStatus(req, res) {
     );
 
     if (rows.length === 0) {
-      // אין שום רשומת נוכחות להיום
       return res.json({
         success: true,
-        data: { status: "none" },
+        status: "none",
       });
     }
 
-    // יש רשומות נוכחות להיום – בדוק אם יש "נוכח"
+    // רק רשומות נוכחות (נוכח)
     const presentRows = rows.filter((r) => r.status === "נוכח");
 
     if (!presentRows.length) {
-      //  אין רשומות "נוכח" להיום
       return res.json({
         success: true,
-        data: { status: "none" },
+        status: "none",
       });
     }
 
-    //  יש רשומות "נוכח" להיום – בדוק אם יש פתוחה (בלי יציאה)
-    const open = presentRows.find((r) => r.check_in && r.check_out === null);
+    // רשומה פתוחה: יש כניסה, אין יציאה
+    const open = presentRows.find(
+      (r) => r.check_in && r.check_out === null
+    );
 
     if (open) {
       return res.json({
         success: true,
-        data: {
-          status: "checked_in",
-          last_check_in: open.check_in,
-        },
+        status: "checked_in",
+        last_check_in: open.check_in,
       });
     }
 
-    // כל הרשומות "נוכח" סגורות (עם יציאה)
+    // אין פתוחה → כל ההחתמות "נוכח" נסגרו כבר
     return res.json({
       success: true,
-      data: {
-        status: "checked_out",
-        last_check_in: presentRows[0].check_in,
-      },
+      status: "checked_out",
+      last_check_in: presentRows[0].check_in,
     });
   } catch (err) {
     console.error("getTodayAttendanceStatus:", err);
