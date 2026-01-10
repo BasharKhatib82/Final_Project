@@ -4,6 +4,7 @@ import { db } from "../utils/dbSingleton.js";
 import { isSpecialStatus, isValidDate } from "../utils/attendanceHelpers.js";
 import { isNineDigitId } from "../utils/fieldValidators.js";
 import { nowIsraelFormatted } from "../utils/date.js";
+import logAction from "../utils/logAction.js";
 /**
  * הוספת נוכחות
  * מקבל: { user_id, date, status, check_in?, check_out?, notes? }
@@ -54,6 +55,10 @@ export async function addAttendance(req, res) {
     );
 
     if (insert.affectedRows === 1) {
+      await logAction(
+        `הוספת רישום נוכחות לעובד ${user_id}`,
+        req.user?.user_id
+      )(req, res, () => {});
       return res.json({ success: true, message: "הנוכחות נוספה בהצלחה" });
     }
     return res
