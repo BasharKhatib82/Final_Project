@@ -92,8 +92,7 @@ const Profile = () => {
   };
 
   //  שליחת בקשה לשינוי סיסמה
-  const handlePasswordChange = async (e) => {
-    e.preventDefault();
+  const handlePasswordChange = async () => {
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       return setPopupData({
         title: "שגיאה",
