@@ -57,6 +57,7 @@ export async function addAttendance(req, res) {
 
     if (insert.affectedRows === 1) {
       const fullName = await getUserFullName(user_id);
+      console.log("fullName from getUserFullName:", fullName);
       await logAction(`הוספת רישום נוכחות לעובד : ${fullName}`, user.user_id)(
         req,
         res,
