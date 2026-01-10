@@ -115,7 +115,7 @@ export async function addTaskProgress(req, res) {
 
     await conn.commit();
 
-    logAction(`הוספת תיעוד למשימה #${task_id} (סטטוס: ${status})`, user_id)(
+    logAction(`הוספת תיעוד למשימה [ ${task_id} ] `, user_id)(
       req,
       res,
       () => {}

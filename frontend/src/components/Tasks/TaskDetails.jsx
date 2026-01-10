@@ -78,11 +78,13 @@ const TaskDetails = () => {
 
   const handleSaveNote = async () => {
     if (!newNote.trim()) {
-      return setPopupData({
+      setPopupData({
         title: "שגיאה",
         message: "לא ניתן לשמור תיעוד ריק",
         mode: "error",
       });
+      setConfirmPopup(false);
+      return;
     }
 
     setSaving(true);
