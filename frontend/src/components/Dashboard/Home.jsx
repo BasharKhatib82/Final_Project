@@ -54,24 +54,24 @@ const Home = () => {
     }
   };
 
- const fetchAttendanceStatus = async () => {
-   try {
-     const res = await api.get("/attendance/status");
-
-     // כאן התשובה היא: { success, status, last_check_in }
-     if (res.data?.success) {
-       setAttendanceStatus({
-         status: res.data.status || "none",
-         last_check_in: res.data.last_check_in || null,
-       });
-     } else {
-       setAttendanceStatus(null);
-     }
-   } catch (err) {
-     console.error("שגיאה בשליפת סטטוס החתמה:", err);
-     setAttendanceStatus(null);
-   }
- };
+  const fetchAttendanceStatus = async () => {
+    try {
+      const res = await api.get("/attendance/status");
+      console.log("Attendance status:", res.data);
+      // כאן התשובה היא: { success, status, last_check_in }
+      if (res.data?.success) {
+        setAttendanceStatus({
+          status: res.data.status || "none",
+          last_check_in: res.data.last_check_in || null,
+        });
+      } else {
+        setAttendanceStatus(null);
+      }
+    } catch (err) {
+      console.error("שגיאה בשליפת סטטוס החתמה:", err);
+      setAttendanceStatus(null);
+    }
+  };
 
   const confirmCheckIn = () => {
     setPopup({
