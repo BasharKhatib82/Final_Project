@@ -4,7 +4,7 @@ import { db } from "../utils/dbSingleton.js";
 import { isSpecialStatus, isValidDate } from "../utils/attendanceHelpers.js";
 import { isNineDigitId } from "../utils/fieldValidators.js";
 import { nowIsraelFormatted } from "../utils/date.js";
-import { getUserFullName } from "../utils/getUserFullName.js";
+import getUserFullName from "../utils/getUserFullName.js";
 import logAction from "../utils/logAction.js";
 /**
  * הוספת נוכחות
