@@ -245,42 +245,54 @@ export async function generateAbsenceReport(_req, res) {
  * מקבל: { user_id }
  * מחזיר: הצלחה/שגיאה
  */
+/**
+ * החתמת כניסה
+ * מקבל: { user_id }
+ * מחזיר: הצלחה/שגיאה
+ */
 export async function checkIn(req, res) {
   const { user_id } = req.body;
   if (!user_id) {
     return res.status(400).json({ success: false, message: "חסר מזהה משתמש" });
   }
 
-  const now = nowIsraelFormatted(); // תאריך ושעה למשל : "2025-01-10 14:37:12"
-  const today = now.split(" ")[0]; // "2025-01-10"   רק התאריך
+  const now = nowIsraelFormatted(); // למשל "2026-01-10 21:25:13"
+  const today = now.split(" ")[0]; //   תאריך בלבד "2026-01-10"
 
   try {
-    // בדיקה אם יש כבר החתמת כניסה פתוחה להיום
+    // בדיקת אם קיימת כבר החתמת כניסה פתוחה להיום
     const [rows] = await db.query(
-      `SELECT attendance_id, check_out
-       FROM attendance
-       WHERE user_id = ? AND date = ?
+      `SELECT attendance_id 
+       FROM attendance 
+       WHERE user_id = ? 
+         AND date = ? 
+         AND status = 'נוכח'
+         AND check_out IS NULL
        ORDER BY attendance_id DESC
        LIMIT 1`,
-      [user_id, today] //   לפי תאריך בלבד
+      [user_id, today]
     );
 
-    if (rows.length > 0 && rows[0].check_out === null) {
+    // אם יש רשומה פתוחה (נוכח בלי יציאה) – לא מאפשרים החתמה חדשה
+    if (rows.length > 0) {
       return res.status(400).json({
         success: false,
         message: "כבר קיימת החתמת כניסה ללא יציאה – אנא בצע החתמת יציאה",
       });
     }
 
-    // החתמה חדשה
+    // הוספת החתמת כניסה חדשה
     const [insert] = await db.query(
       `INSERT INTO attendance (user_id, date, check_in, status)
        VALUES (?, ?, ?, ?)`,
-      [user_id, today, now, "נוכח"] //  date = today, check_in = now
+      [user_id, today, now, "נוכח"]
     );
 
     if (insert.affectedRows === 1) {
-      return res.json({ success: true, message: "שעת כניסה נרשמה בהצלחה" });
+      return res.json({
+        success: true,
+        message: "שעת כניסה נרשמה בהצלחה",
+      });
     }
     return res
       .status(500)
@@ -296,25 +308,44 @@ export async function checkIn(req, res) {
  * מקבל: { user_id }
  * מחזיר: הצלחה/שגיאה
  */
+/**
+ * החתמת יציאה
+ * מקבל: { user_id }
+ * מחזיר: הצלחה/שגיאה
+ */
 export async function checkOut(req, res) {
   const { user_id } = req.body;
 
+  // בדיקות תקינות
   if (!user_id) {
     return res.status(400).json({ success: false, message: "חסר מזהה משתמש" });
   }
 
+  //  בדיקת תקינות תעודת זהות
+  if (!isNineDigitId(user_id)) {
+    return res.status(400).json({
+      success: false,
+      message: "מספר תעודת זהות חייב להיות מספר בן 9 ספרות",
+    });
+  }
+
+  // קבלת תאריך ושעה נוכחיים בישראל
   const now = nowIsraelFormatted();
+  //    הפקת תאריך בלבד
   const today = now.split(" ")[0];
 
   try {
-    // שליפת החתמת הכניסה הפתוחה להיום
+    // חיפוש החתמת כניסה פתוחה להיום
     const [rows] = await db.query(
       `SELECT attendance_id
        FROM attendance
-       WHERE user_id = ? AND date = ? AND check_out IS NULL
+       WHERE user_id = ?
+         AND date = ?
+         AND status = 'נוכח'
+         AND check_out IS NULL
        ORDER BY attendance_id DESC
        LIMIT 1`,
-      [user_id, today] 
+      [user_id, today]
     );
 
     if (rows.length === 0) {
@@ -324,15 +355,21 @@ export async function checkOut(req, res) {
       });
     }
 
+    //  עדכון רשומת הנוכחות עם שעת היציאה
     const attendanceId = rows[0].attendance_id;
 
     const [update] = await db.query(
-      `UPDATE attendance SET check_out = ? WHERE attendance_id = ?`,
+      `UPDATE attendance 
+       SET check_out = ?
+       WHERE attendance_id = ?`,
       [now, attendanceId]
     );
 
     if (update.affectedRows === 1) {
-      return res.json({ success: true, message: "שעת יציאה נרשמה בהצלחה" });
+      return res.json({
+        success: true,
+        message: "שעת יציאה נרשמה בהצלחה",
+      });
     }
 
     return res.status(500).json({
@@ -345,41 +382,65 @@ export async function checkOut(req, res) {
   }
 }
 
-
-// בדיקת סטטוס נוכחות להיום למשתמש המחובר
+// בדיקת מצב נוכחות להיום למשתמש המחובר
 export async function getTodayAttendanceStatus(req, res) {
   const user_id = req.user?.user_id;
 
-  if(!user_id) {
+  if (!user_id) {
     return res.status(401).json({ success: false, message: "לא מחובר" });
   }
 
   const now = nowIsraelFormatted();
-  const today = now.split(" ")[0];  // "YYYY-MM-DD"
+  const today = now.split(" ")[0]; // תאריך בלבד
 
   try {
     const [rows] = await db.query(
-      `SELECT attendance_id, check_in, check_out
+      `SELECT attendance_id, check_in, check_out, status
        FROM attendance
-       WHERE user_id = ? AND date = ?
+       WHERE user_id = ?
+         AND date = ?
        ORDER BY attendance_id DESC`,
       [user_id, today]
     );
 
     if (rows.length === 0) {
+      // אין שום רשומת נוכחות להיום
       return res.json({
         success: true,
-        data: { status: "none" }, // אין החתמה כלל
+        data: { status: "none" },
       });
     }
 
-    const open = rows.find((r) => !r.check_out);
+    // יש רשומות נוכחות להיום – בדוק אם יש "נוכח"
+    const presentRows = rows.filter((r) => r.status === "נוכח");
 
+    if (!presentRows.length) {
+      //  אין רשומות "נוכח" להיום
+      return res.json({
+        success: true,
+        data: { status: "none" },
+      });
+    }
+
+    //  יש רשומות "נוכח" להיום – בדוק אם יש פתוחה (בלי יציאה)
+    const open = presentRows.find((r) => r.check_in && r.check_out === null);
+
+    if (open) {
+      return res.json({
+        success: true,
+        data: {
+          status: "checked_in",
+          last_check_in: open.check_in,
+        },
+      });
+    }
+
+    // כל הרשומות "נוכח" סגורות (עם יציאה)
     return res.json({
       success: true,
       data: {
-        status: open ? "checked_in" : "checked_out",
-        last_check_in: open?.check_in || rows[0]?.check_in,
+        status: "checked_out",
+        last_check_in: presentRows[0].check_in,
       },
     });
   } catch (err) {
@@ -387,4 +448,3 @@ export async function getTodayAttendanceStatus(req, res) {
     return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 }
-
