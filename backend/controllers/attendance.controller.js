@@ -57,7 +57,7 @@ export async function addAttendance(req, res) {
 
     if (insert.affectedRows === 1) {
       const fullName = await getUserFullName(user_id);
-      console.log("fullName from getUserFullName:", fullName);
+
       await logAction(`הוספת רישום נוכחות לעובד : ${fullName}`, user.user_id)(
         req,
         res,
@@ -195,7 +195,13 @@ export async function updateAttendance(req, res) {
         .status(404)
         .json({ success: false, message: "הרשומה לא נמצאה לעדכון" });
     }
+    const fullName = await getUserFullName(user_id);
 
+    await logAction(`עריכת רישום נוכחות לעובד : ${fullName}`, user.user_id)(
+      req,
+      res,
+      () => {}
+    );
     return res.json({ success: true, message: "הנוכחות עודכנה בהצלחה" });
   } catch (err) {
     console.error("updateAttendance:", err);
