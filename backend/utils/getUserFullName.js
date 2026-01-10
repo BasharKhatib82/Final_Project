@@ -6,7 +6,7 @@ import { db } from "./dbSingleton.js";
  * @param {string|number} userId - תעודת זהות / מזהה משתמש
  * @returns {Promise<string|null>} - fullName או null אם לא נמצא
  */
-export async function getUserFullNameById(userId) {
+export async function getUserFullNameBy(userId) {
   if (!userId) return null;
 
   try {
