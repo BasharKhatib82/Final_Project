@@ -9,7 +9,7 @@ import {
   isPositiveInt,
   isNineDigitId,
 } from "../utils/fieldValidators.js";
-import { getLastLeadIdByPhone } from "../utils/getLastLeadIdByPhone.js";
+import getLastLeadIdByPhone from "../utils/getLastLeadIdByPhone.js";
 
 /**
  * data_scopeשליפת פניות עם תמיכה ב־
