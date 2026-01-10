@@ -121,9 +121,14 @@ export async function addTask(req, res) {
       [task_title, description || null, status, due_date, user_id || null]
     );
 
-    const fullName = await getUserFullName(user_id);
+    let fullName = null;
+    if (user_id) {
+      fullName = await getUserFullName(user_id);
+    }
 
-    logAction(`הוספת משימה חדשה עבור : ${fullName}`, req.user?.user_id)(
+    const targetLabel = fullName || "ללא נציג";
+
+    logAction(`הוספת משימה חדשה עבור : ${targetLabel}`, req.user?.user_id)(
       req,
       res,
       () => {}
