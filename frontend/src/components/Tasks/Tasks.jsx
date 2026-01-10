@@ -75,7 +75,7 @@ export default function Tasks() {
       fetchTasks();
       setPopup({
         title: "הצלחה",
-        message: `הנציג/ה ${fullName} עודכן בהצלחה`,
+        message: `הנציג/ה " ${fullName} " עודכן בהצלחה`,
         mode: "success",
       });
       setFullName("");
@@ -99,7 +99,7 @@ export default function Tasks() {
       fetchTasks();
       setPopup({
         title: "הצלחה",
-        message: "הסטטוס עודכן בהצלחה",
+        message: `" משימה סטטוס " ${newStatus} " עודכן בהצלחה"`,
         mode: "success",
       });
     } catch (err) {
@@ -405,7 +405,7 @@ export default function Tasks() {
       {repToSave && (
         <Popup
           title="עדכון נציג"
-          message={`"האם לעדכן את הנציג/ה ${fullName} למשימה זו ?"`}
+          message={`"האם לעדכן את " ${fullName} " כמטפל במשימה זו ?"`}
           mode="confirm"
           onConfirm={handleRepSave}
           onClose={() => {
@@ -418,7 +418,7 @@ export default function Tasks() {
       {statusToSave && (
         <Popup
           title="עדכון סטטוס"
-          message="האם לעדכן את הסטטוס?"
+          message={` האם לעדכן את סטטוס משימה " ${newStatus} " ?`}
           mode="confirm"
           onConfirm={handleStatusSave}
           onClose={() => {
