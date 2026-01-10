@@ -57,7 +57,7 @@ const Home = () => {
   const fetchAttendanceStatus = async () => {
     try {
       const res = await api.get("/attendance/status");
-      setAttendanceStatus(res.data?.status || null);
+      setAttendanceStatus(res.data?.data.status || null);
     } catch (err) {
       console.error("שגיאה בשליפת סטטוס החתמה:", err);
       setAttendanceStatus(null);
