@@ -325,7 +325,11 @@ export async function editLead(req, res) {
 
     await conn.commit();
 
-    logAction(`עדכון פרטי פנייה מספר [ ${id} ]`, req.user.user_id)(req, res, () => {});
+    logAction(`עדכון פרטי פנייה מספר [ ${id} ]`, req.user.user_id)(
+      req,
+      res,
+      () => {}
+    );
     return res.json({ success: true, message: "הפנייה עודכנה בהצלחה" });
   } catch (err) {
     await conn.rollback();
@@ -392,7 +396,11 @@ export async function cancelLead(req, res) {
         .json({ success: false, message: "פנייה לא נמצאה" });
     }
 
-    logAction(`מחיקת פנייה מספר [ ${leadId} ]`, req.user.user_id)(req, res, () => {});
+    logAction(`מחיקת פנייה מספר [ ${leadId} ]`, req.user.user_id)(
+      req,
+      res,
+      () => {}
+    );
     return res.json({ success: true, message: "הפנייה סומנה כמבוטלת" });
   } catch (err) {
     console.error("cancelLead:", err);
@@ -460,9 +468,9 @@ export async function bulkAssign(req, res) {
       [repUserId || null, leadIds]
     );
 
-   const fullName = await getUserFullName(user_id);
+    const fullName = await getUserFullName(user_id);
     logAction(
-      `שיוך ${leadIds.length} פניות לנציג ${fullName ?? "ללא נציג"}`,
+      `שיוך ${leadIds.length} פניות לנציג " ${fullName} "`,
       req.user.user_id
     )(req, res, () => {});
     return res.json({

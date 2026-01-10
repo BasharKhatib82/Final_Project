@@ -99,7 +99,7 @@ export async function addLeadProgress(req, res) {
     }
 
     await conn.commit();
-    logAction(`הוספת תיעוד לפנייה מספר : [ ${lead_id} ]`, user_id)(
+    logAction(`הוספת תיעוד לפנייה מספר [ ${lead_id} ]`, user_id)(
       req,
       res,
       () => {}
