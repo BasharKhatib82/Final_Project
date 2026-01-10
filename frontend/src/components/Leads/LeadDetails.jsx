@@ -91,7 +91,7 @@ const LeadDetails = () => {
       const res = await api.post("/leads/progress/add", {
         lead_id: id,
         lead_note: newNote.trim(),
-        status: newStatus,
+        status: newStatus || lead.status,
         user_id: user.user_id,
       });
 
@@ -140,7 +140,7 @@ const LeadDetails = () => {
 
       <div className="bg-white rounded shadow p-6 text-gray-700 mb-6 space-y-4 text-right">
         <div className="text-xl font-semibold text-blue-700 mb-4 text-center">
-          פרטי פנייה מספר [ {lead.lead_id} ] 
+          פרטי פנייה מספר [ {lead.lead_id} ]
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
