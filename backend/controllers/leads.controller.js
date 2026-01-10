@@ -9,6 +9,7 @@ import {
   isPositiveInt,
   isNineDigitId,
 } from "../utils/fieldValidators.js";
+import { getLastLeadIdByPhone } from "../utils/getLastLeadIdByPhone.js";
 
 /**
  * data_scopeשליפת פניות עם תמיכה ב־
@@ -177,8 +178,13 @@ export async function addLead(req, res) {
     if (insLead.affectedRows !== 1) throw new Error("שמירת פנייה נכשלה");
 
     await conn.commit();
+    const leadId = await getLastLeadIdByPhone(phone_number);
 
-    logAction("הוספת פנייה חדשה", req.user.user_id)(req, res, () => {});
+    logAction(`הוספת פנייה חדשה מספר [ ${leadId} ]`, req.user.user_id)(
+      req,
+      res,
+      () => {}
+    );
     return res.json({ success: true, message: "הפנייה נשמרה בהצלחה" });
   } catch (err) {
     await conn.rollback();
