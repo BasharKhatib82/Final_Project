@@ -32,6 +32,8 @@ const Home = () => {
   const [stats, setStats] = useState(null);
   const [popup, setPopup] = useState(null);
   const [attendanceStatus, setAttendanceStatus] = useState(null);
+  const [checkInLoading, setCheckInLoading] = useState(false);
+  const [checkOutLoading, setCheckOutLoading] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -58,71 +60,113 @@ const Home = () => {
     }
   };
 
+  const confirmCheckIn = () => {
+    setPopup({
+      title: "אישור החתמת כניסה",
+      message: "האם אתה בטוח שברצונך לבצע החתמת כניסה?",
+      mode: "confirm",
+      onConfirm: handleCheckIn,
+    });
+  };
+
   const handleCheckIn = async () => {
     try {
-      await api.post("/attendance/check-in", {user_id :user.user_id} );
+      setCheckInLoading(true);
+
+      await api.post("/attendance/check-in", { user_id: user.user_id });
+
       setPopup({
         title: "הצלחה",
         message: "החתמת כניסה בוצעה בהצלחה",
         mode: "success",
-        autoClose: true,
+        autoClose: 2500,
       });
-      fetchAttendanceStatus();
+
+      await fetchAttendanceStatus();
     } catch (err) {
       setPopup({
         title: "שגיאה",
         message: err?.response?.data?.message || "שגיאה בהחתמת כניסה",
         mode: "error",
       });
+    } finally {
+      setCheckInLoading(false);
     }
   };
 
+  const confirmCheckOut = () => {
+    setPopup({
+      title: "אישור החתמת יציאה",
+      message: "האם אתה בטוח שברצונך לבצע החתמת יציאה?",
+      mode: "confirm",
+      onConfirm: handleCheckOut,
+    });
+  };
+
+
   const handleCheckOut = async () => {
     try {
+      setCheckOutLoading(true);
+
       await api.post("/attendance/check-out");
+
       setPopup({
         title: "הצלחה",
         message: "החתמת יציאה בוצעה בהצלחה",
         mode: "success",
-        autoClose: true,
+        autoClose: 2500,
       });
-      fetchAttendanceStatus();
+
+      await fetchAttendanceStatus();
     } catch (err) {
       setPopup({
         title: "שגיאה",
         message: err?.response?.data?.message || "שגיאה בהחתמת יציאה",
         mode: "error",
       });
+    } finally {
+      setCheckOutLoading(false);
     }
   };
+
 
   const renderAttendanceButtons = () => {
     const latest = attendanceStatus?.latest;
     const showCheckIn = !latest || (latest?.check_in && latest?.check_out);
-
     const showCheckOut = latest?.check_in && !latest?.check_out;
 
     return (
-      <div className="flex justify-center">
+      <div className="flex justify-center gap-3">
         {showCheckIn && (
           <button
-            onClick={handleCheckIn}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
+            onClick={confirmCheckIn}
+            disabled={checkInLoading}
+            className={`px-4 py-2 rounded shadow text-white ${
+              checkInLoading
+                ? "bg-green-400 cursor-not-allowed"
+                : "bg-green-600 hover:bg-green-700"
+            }`}
           >
-            החתמת כניסה
+            {checkInLoading ? "שולח..." : "החתמת כניסה"}
           </button>
         )}
         {showCheckOut && (
           <button
-            onClick={handleCheckOut}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow"
+            onClick={confirmCheckOut}
+            disabled={checkOutLoading}
+            className={`px-4 py-2 rounded shadow text-white ${
+              checkOutLoading
+                ? "bg-red-400 cursor-not-allowed"
+                : "bg-red-600 hover:bg-red-700"
+            }`}
           >
-            החתמת יציאה
+            {checkOutLoading ? "שולח..." : "החתמת יציאה"}
           </button>
         )}
       </div>
     );
   };
+
 
   if (!stats)
     return (
@@ -500,7 +544,7 @@ const Home = () => {
           </div>
         )}
       </div>
-      {/* 🔔 פופאפ */}
+      {/*  פופאפ */}
       {popup && (
         <Popup
           title={popup.title}
@@ -508,6 +552,7 @@ const Home = () => {
           mode={popup.mode}
           autoClose={popup.autoClose}
           onClose={() => setPopup(null)}
+          onConfirm={popup.onConfirm}
         />
       )}
     </div>
