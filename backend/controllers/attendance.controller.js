@@ -10,8 +10,6 @@ import logAction from "../utils/logAction.js";
  * מקבל: { user_id, date, status, check_in?, check_out?, notes? }
  * מחזיר: הצלחה/שגיאה
  */
-const user = req.user;
-
 export async function addAttendance(req, res) {
   const { user_id, date, check_in, check_out, status, notes } = req.body;
 
@@ -57,11 +55,10 @@ export async function addAttendance(req, res) {
     );
 
     if (insert.affectedRows === 1) {
-      await logAction(`הוספת רישום נוכחות לעובד : ${user_id}`, user?.user_id)(
-        req,
-        res,
-        () => {}
-      );
+      await logAction(
+        `הוספת רישום נוכחות לעובד : ${user_id}`,
+        req.user?.user_id
+      )(req, res, () => {});
 
       return res.json({ success: true, message: "הנוכחות נוספה בהצלחה" });
     }
