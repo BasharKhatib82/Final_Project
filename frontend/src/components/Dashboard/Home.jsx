@@ -116,15 +116,13 @@ const Home = () => {
       setCheckOutLoading(true);
 
       await api.post("/attendance/check-out", { user_id: user.user_id });
-await fetchAttendanceStatus();
+      await fetchAttendanceStatus();
       setPopup({
         title: "הצלחה",
         message: "החתמת יציאה בוצעה בהצלחה",
         mode: "success",
         autoClose: 2500,
       });
-
-      
     } catch (err) {
       setPopup({
         title: "שגיאה",
@@ -138,7 +136,8 @@ await fetchAttendanceStatus();
 
   const renderAttendanceButtons = () => {
     const status = attendanceStatus?.status;
-    const showCheckIn = !status || status === "none" || status  === "checked_out";
+    const showCheckIn =
+      !status || status === "none" || status === "checked_out";
     const showCheckOut = status === "checked_in";
 
     return (
