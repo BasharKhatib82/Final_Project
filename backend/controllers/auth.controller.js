@@ -5,12 +5,12 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { setAuthCookie, clearAuthCookie } from "../utils/authCookies.js";
 import logAction from "../utils/logAction.js";
+import getUserFullName from "../utils/getUserFullName.js";
 import { roleFields, roleFieldsSQL } from "../utils/permissions.js";
 import { sendResetPasswordEmail } from "../services/email.service.js";
 import { getDaysSince, generateResetToken } from "../utils/passwordHelpers.js";
 import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
 import { nowIsraelFormatted } from "../utils/date.js";
-
 
 /**
  * התחברות משתמש
@@ -203,6 +203,11 @@ export async function forgotPassword(req, res) {
         .status(500)
         .json({ success: false, message: "שגיאה ביצירת טוקן איפוס" });
     }
+    const fullName = await getUserFullName(user.user_id);
+    await logAction(
+      fullName`נשלחה בקשת איפוס סיסמה עבור ${fullName}`,
+      user.user_id
+    )(req, res, () => {});
 
     await sendResetPasswordEmail(email, resetToken);
     return res.json({ success: true, message: "נשלח מייל לאיפוס סיסמה" });
