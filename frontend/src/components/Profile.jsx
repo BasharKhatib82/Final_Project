@@ -72,28 +72,36 @@ const Profile = () => {
   };
 
   //  שליחת עדכון פרטי משתמש
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    try {
-      await api.put(`/users/${user.user_id}`, formData);
-      setPopupData({
-        title: "הצלחה",
-        message: "פרטי המשתמש עודכנו בהצלחה",
-        mode: "success",
-      });
-    } catch (err) {
-      console.error("שגיאה בעדכון פרטי משתמש:", err);
-      setPopupData({
-        title: "שגיאה",
-        message: "שגיאה בעדכון פרטי המשתמש",
-        mode: "error",
-      });
-    }
+
+    setPopupData({
+      title: "עדכון פרטי משתמש",
+      message: "האם ברצונך לשמור את השינויים ?",
+      mode: "confirm",
+      onConfirm: async () => {
+        try {
+          await api.put(`/users/${user.user_id}`, formData);
+          setPopupData({
+            title: "הצלחה",
+            message: "פרטי המשתמש עודכנו בהצלחה",
+            mode: "success",
+          });
+        } catch (err) {
+          console.error("שגיאה בעדכון פרטי משתמש:", err);
+          setPopupData({
+            title: "שגיאה",
+            message: "שגיאה בעדכון פרטי המשתמש",
+            mode: "error",
+          });
+        }
+      },
+    });
   };
 
   //  שליחת בקשה לשינוי סיסמה
-  const handlePasswordChange = async (e) => {
-    e.preventDefault(); // כי עכשיו זה onSubmit של form
+  const handlePasswordChange = (e) => {
+    e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       return setPopupData({
@@ -103,27 +111,35 @@ const Profile = () => {
       });
     }
 
-    try {
-      await api.put(`/users/change-password/${user.user_id}`, passwordData);
-      setPopupData({
-        title: "הצלחה",
-        message: "הסיסמה עודכנה בהצלחה",
-        mode: "success",
-      });
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-      setShowPasswordForm(false);
-    } catch (err) {
-      setPopupData({
-        title: "שגיאה",
-        message: err.response?.data?.message || "שגיאה בשינוי סיסמה",
-        mode: "error",
-      });
-    }
+    setPopupData({
+      title: "אישור שינוי סיסמה",
+      message: "האם אתה בטוח שברצונך לעדכן את הסיסמה?",
+      mode: "confirm",
+      onConfirm: async () => {
+        try {
+          await api.put(`/users/change-password/${user.user_id}`, passwordData);
+          setPopupData({
+            title: "הצלחה",
+            message: "הסיסמה עודכנה בהצלחה",
+            mode: "success",
+          });
+          setPasswordData({
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: "",
+          });
+          setShowPasswordForm(false);
+        } catch (err) {
+          setPopupData({
+            title: "שגיאה",
+            message: err.response?.data?.message || "שגיאה בשינוי סיסמה",
+            mode: "error",
+          });
+        }
+      },
+    });
   };
+
   const handleClosePopup = () => setPopupData(null);
 
   if (loading) return <p className="text-center text-blue-600">טוען...</p>;
@@ -308,7 +324,8 @@ const Profile = () => {
           message={popupData.message}
           mode={popupData.mode}
           onClose={handleClosePopup}
-          autoClose={2500}
+          onConfirm={popupData.onConfirm}
+          autoClose={popupData.mode === "confirm" ? undefined : 3000}
         />
       )}
     </div>
