@@ -24,9 +24,6 @@ router.post("/add", addAttendance);
 /** GET /attendance – שליפת כל הנוכחויות (עם פרטי עובדים) */
 router.get("/", listAttendances);
 
-/** GET /attendance/:id – שליפת נוכחות לפי מזהה */
-router.get("/:id", getAttendanceById);
-
 /** PUT /attendance/edit/:id – עדכון רשומת נוכחות */
 router.put("/edit/:id", updateAttendance);
 
@@ -41,6 +38,7 @@ router.post("/check-out", checkOut);
 
 /** GET /attendance/status – החתמה יומית נוכחית */
 router.get("/status", getTodayAttendanceStatus);
-
+/** GET /attendance/:id – שליפת נוכחות לפי מזהה */
+router.get("/:id", getAttendanceById);
 
 export default router;
