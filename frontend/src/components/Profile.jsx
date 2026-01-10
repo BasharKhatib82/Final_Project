@@ -92,7 +92,9 @@ const Profile = () => {
   };
 
   //  שליחת בקשה לשינוי סיסמה
-  const handlePasswordChange = async () => {
+  const handlePasswordChange = async (e) => {
+    e.preventDefault(); // כי עכשיו זה onSubmit של form
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       return setPopupData({
         title: "שגיאה",
@@ -122,7 +124,6 @@ const Profile = () => {
       });
     }
   };
-
   const handleClosePopup = () => setPopupData(null);
 
   if (loading) return <p className="text-center text-blue-600">טוען...</p>;
@@ -219,10 +220,13 @@ const Profile = () => {
               }
               className="w-full"
               variant="danger"
-            />{" "}
+            />
           </div>
         ) : (
-          <div className="mt-4 p-4 border rounded bg-gray-50 space-y-3">
+          <form
+            className="mt-4 p-4 border rounded bg-gray-50 space-y-3"
+            onSubmit={handlePasswordChange}
+          >
             <input
               type="password"
               placeholder="סיסמה נוכחית"
@@ -234,6 +238,8 @@ const Profile = () => {
                 })
               }
               className="w-full border rounded px-3 py-2"
+              autoComplete="current-password"
+              name="currentPassword"
             />
             <input
               type="password"
@@ -246,6 +252,8 @@ const Profile = () => {
                 })
               }
               className="w-full border rounded px-3 py-2"
+              autoComplete="new-password"
+              name="newPassword"
             />
             <input
               type="password"
@@ -258,12 +266,14 @@ const Profile = () => {
                 })
               }
               className="w-full border rounded px-3 py-2"
+              autoComplete="new-password"
+              name="confirmPassword"
             />
 
             <div className="flex justify-around pt-4">
               <AppButton
                 label="עדכן סיסמה"
-                onClick={handlePasswordChange}
+                type="submit"
                 icon={
                   <Icon
                     icon="fluent:save-edit-20-regular"
@@ -275,6 +285,7 @@ const Profile = () => {
               />
               <AppButton
                 label="ביטול עדכון"
+                type="button"
                 onClick={() => setShowPasswordForm(false)}
                 icon={
                   <Icon
@@ -286,7 +297,7 @@ const Profile = () => {
                 variant="cancel"
               />
             </div>
-          </div>
+          </form>
         )}
       </div>
 
