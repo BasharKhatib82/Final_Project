@@ -69,8 +69,9 @@ export default function Projects() {
 
     try {
       const name = await fetchProjectNameById(projectToDelete);
-      setProjectName(projectName);
-
+      console.log(name);
+      setProjectName(name);
+      console.log(projectName);
       const res = await api.delete(`/projects/delete/${projectToDelete}`);
       if (res.data.success) {
         fetchProjects();
@@ -202,7 +203,7 @@ export default function Projects() {
       {projectToDelete && (
         <Popup
           title="אישור מחיקת פרויקט"
-          message={`האם אתה בטוח שברצונך למחוק את הפרויקט ${projectName} ?`}
+          message={`האם אתה מאשר למחוק את הפרויקט : " ${projectName} " ?`}
           mode="confirm"
           onConfirm={handleDeleteProject}
           onClose={() => setProjectToDelete(null)}
