@@ -137,8 +137,15 @@ export async function archiveProject(req, res) {
         .status(404)
         .json({ success: false, message: "פרויקט לא נמצא" });
     }
-    const projectName = await getProjectById(id);
-    logAction(`מחיקת פרויקט : ${projectName.project_name}`, req.user?.user_id)(
+
+    // שליפת שם הפרויקט לצורך הלוג
+    const [rows] = await db.query(
+      "SELECT project_name FROM projects WHERE project_id = ?",
+      [Number(id)]
+    );
+    const projectName = rows[0].project_name;
+
+    logAction(`מחיקת פרויקט : ${projectName}`, req.user?.user_id)(
       req,
       res,
       () => {}
