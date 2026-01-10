@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
+import getUserFullName from "../utils/getUserFullName.js";
 import {
   isNineDigitId,
   isILPhone10,
@@ -238,8 +239,12 @@ export async function updateUser(req, res) {
     if (result.affectedRows === 0) {
       return res.status(404).json({ success: false, message: "משתמש לא נמצא" });
     }
-
-    logAction(`עדכון משתמש #${userId}`, req.user?.user_id)(req, res, () => {});
+    const fullName = await getUserFullName(userId);
+    logAction(`עדכון פרטי משתמש : " ${fullName} "`, req.user?.user_id)(
+      req,
+      res,
+      () => {}
+    );
     return res.json({ success: true, message: "המשתמש עודכן בהצלחה" });
   } catch (err) {
     console.error("שגיאה בעדכון משתמש:", err);
@@ -400,11 +405,7 @@ export async function changeUserPassword(req, res) {
         .json({ success: false, message: "משתמש לא נמצא לעדכון" });
     }
 
-    logAction(`שינוי סיסמה למשתמש #${id}`, req.user?.user_id)(
-      req,
-      res,
-      () => {}
-    );
+    logAction(`בוצע איפוס סיסמה למשתמש`, req.user?.user_id)(req, res, () => {});
     return res.json({ success: true, message: "הסיסמה עודכנה בהצלחה" });
   } catch (err) {
     console.error("שגיאה בשינוי סיסמה:", err);

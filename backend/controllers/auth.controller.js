@@ -5,7 +5,6 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { setAuthCookie, clearAuthCookie } from "../utils/authCookies.js";
 import logAction from "../utils/logAction.js";
-import getUserFullName from "../utils/getUserFullName.js";
 import { roleFields, roleFieldsSQL } from "../utils/permissions.js";
 import { sendResetPasswordEmail } from "../services/email.service.js";
 import { getDaysSince, generateResetToken } from "../utils/passwordHelpers.js";
