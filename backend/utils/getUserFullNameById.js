@@ -1,4 +1,4 @@
-// backend/utils/getUserFullName.js
+// backend/utils/getUserFullNameById.js
 import { db } from "./dbSingleton.js";
 
 /**
