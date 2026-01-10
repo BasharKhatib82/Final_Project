@@ -112,7 +112,7 @@ const EditTask = () => {
       if (res.data.success || res.data.Status) {
         setPopupData({
           title: "הצלחה",
-          message: "המשימה עודכנה בהצלחה!",
+          message: `"פרטי משימה מספר [ ${id} ] עודכנו בהצלחה !"`,
           mode: "success",
         });
       } else {
@@ -251,7 +251,7 @@ const EditTask = () => {
       {confirmPopup && (
         <Popup
           title="אישור עדכון משימה"
-          message={`"האם אתה מאשר לעדכן את משימה מספר [ ${id} ] ? "`}
+          message={`"האם אתה מאשר לעדכן פרטי משימה מספר [ ${id} ] ? "`}
           mode="confirm"
           onConfirm={handleSubmit}
           onClose={() => setConfirmPopup(false)}
