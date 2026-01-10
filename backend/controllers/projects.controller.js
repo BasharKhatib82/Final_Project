@@ -46,7 +46,7 @@ export async function addProject(req, res) {
       [name, desc || null, convertToBit(active)]
     );
 
-    logAction(`הוספת פרויקט חדש: ${name}`, req.user?.user_id)(
+    logAction(`הוספת פרויקט חדש : ${name}`, req.user?.user_id)(
       req,
       res,
       () => {}
@@ -98,7 +98,11 @@ export async function updateProject(req, res) {
         .json({ success: false, message: "פרויקט לא נמצא" });
     }
 
-    logAction(`עדכון פרויקט #${id}`, req.user?.user_id)(req, res, () => {});
+    logAction(`עדכון פרטי פרויקט : ${name}`, req.user?.user_id)(
+      req,
+      res,
+      () => {}
+    );
     return res.json({ success: true, message: "הפרויקט עודכן בהצלחה" });
   } catch (err) {
     console.error("updateProject:", err);
@@ -133,8 +137,8 @@ export async function archiveProject(req, res) {
         .status(404)
         .json({ success: false, message: "פרויקט לא נמצא" });
     }
-
-    logAction(`מחיקת פרויקט #${id} (לוגית)`, req.user?.user_id)(
+    const projectName = await getProjectById(id);
+    logAction(`מחיקת פרויקט : ${projectName}`, req.user?.user_id)(
       req,
       res,
       () => {}
