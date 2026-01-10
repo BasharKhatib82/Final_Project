@@ -65,15 +65,15 @@ export default function Projects() {
   };
 
   const handleDeleteProject = async () => {
-    if (!projectToDelete.id) return;
+    if (!projectToDelete) return;
 
     try {
-      const res = await api.delete(`/projects/delete/${projectToDelete.id}`);
+      const res = await api.delete(`/projects/delete/${projectToDelete}`);
       if (res.data.success) {
         fetchProjects();
         setPopup({
           title: "הצלחה",
-          message: `הפרויקט " ${projectToDelete.name} " עודכן כלא פעיל !`,
+          message: `הפרויקט " ${projectName} " עודכן כלא פעיל !`,
           mode: "success",
           show: true,
         });
@@ -142,10 +142,8 @@ export default function Projects() {
             <button
               onClick={async () => {
                 const name = await fetchProjectNameById(r.project_id);
-                setProjectToDelete({
-                  id: r.project_id,
-                  name,
-                });
+                setProjectName(name);
+                setProjectToDelete(r.project_id);
               }}
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
             >
@@ -205,7 +203,7 @@ export default function Projects() {
       {projectToDelete && (
         <Popup
           title="אישור מחיקת פרויקט"
-          message={`האם אתה מאשר למחוק את הפרויקט : " ${projectToDelete.name} " ?`}
+          message={`האם אתה מאשר למחוק את הפרויקט : " ${projectName} " ?`}
           mode="confirm"
           onConfirm={handleDeleteProject}
           onClose={() => setProjectToDelete(null)}
