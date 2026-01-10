@@ -23,7 +23,7 @@ const LeadDetails = () => {
   const [lead, setLead] = useState(null);
   const [progress, setProgress] = useState([]);
   const [newNote, setNewNote] = useState("");
-  const [newStatus, setNewStatus] = useState("חדש");
+  const [newStatus, setNewStatus] = useState("חדשה");
   const [saving, setSaving] = useState(false);
   const [popupData, setPopupData] = useState(null);
   const [confirmPopup, setConfirmPopup] = useState(false);
@@ -91,7 +91,7 @@ const LeadDetails = () => {
       const res = await api.post("/leads/progress/add", {
         lead_id: id,
         lead_note: newNote.trim(),
-        status: newStatus || lead.status,
+        status: newStatus ?? lead.status,
         user_id: user.user_id,
       });
 
