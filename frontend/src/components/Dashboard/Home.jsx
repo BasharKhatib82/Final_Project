@@ -139,7 +139,7 @@ await fetchAttendanceStatus();
   const renderAttendanceButtons = () => {
     const status = attendanceStatus?.status;
     const showCheckIn = !status || status === "none" || status  === "checked_out";
-    const showCheckOut = status === "checked_out";
+    const showCheckOut = status === "checked_in";
 
     return (
       <div className="flex justify-center gap-3">
