@@ -37,10 +37,13 @@ const Home = () => {
 
   useEffect(() => {
     fetchDashboardData();
+  }, []);
+
+  useEffect(() => {
     if (user?.permission_check_in_out) {
       fetchAttendanceStatus();
     }
-  }, []);
+  }, [user?.permission_check_in_out]);
 
   const fetchDashboardData = async () => {
     try {
@@ -57,23 +60,28 @@ const Home = () => {
       setAttendanceStatus(res.data?.data || null);
     } catch (err) {
       console.error("שגיאה בשליפת סטטוס החתמה:", err);
+      setAttendanceStatus(null);
     }
   };
 
   const confirmCheckIn = () => {
     setPopup({
       title: "אישור החתמת כניסה",
-      message: "האם אתה בטוח שברצונך לבצע החתמת כניסה?",
+      message: "האם אתה בטוח שברצונך לבצע החתמת כניסה ?",
       mode: "confirm",
       onConfirm: handleCheckIn,
     });
   };
 
   const handleCheckIn = async () => {
+    setPopup(null);
+
     try {
       setCheckInLoading(true);
 
       await api.post("/attendance/check-in", { user_id: user.user_id });
+
+      await fetchAttendanceStatus();
 
       setPopup({
         title: "הצלחה",
@@ -81,8 +89,6 @@ const Home = () => {
         mode: "success",
         autoClose: 2500,
       });
-
-      await fetchAttendanceStatus();
     } catch (err) {
       setPopup({
         title: "שגיאה",
@@ -103,13 +109,14 @@ const Home = () => {
     });
   };
 
-
   const handleCheckOut = async () => {
+    setPopup(null);
+
     try {
       setCheckOutLoading(true);
 
-      await api.post("/attendance/check-out");
-
+      await api.post("/attendance/check-out", { user_id: user.user_id });
+await fetchAttendanceStatus();
       setPopup({
         title: "הצלחה",
         message: "החתמת יציאה בוצעה בהצלחה",
@@ -117,7 +124,7 @@ const Home = () => {
         autoClose: 2500,
       });
 
-      await fetchAttendanceStatus();
+      
     } catch (err) {
       setPopup({
         title: "שגיאה",
@@ -129,11 +136,10 @@ const Home = () => {
     }
   };
 
-
   const renderAttendanceButtons = () => {
-    const latest = attendanceStatus?.latest;
-    const showCheckIn = !latest || (latest?.check_in && latest?.check_out);
-    const showCheckOut = latest?.check_in && !latest?.check_out;
+    const status = attendanceStatus?.status;
+    const showCheckIn = !status || status === "none" || status  === "checked_out";
+    const showCheckOut = status === "checked_out";
 
     return (
       <div className="flex justify-center gap-3">
@@ -166,7 +172,6 @@ const Home = () => {
       </div>
     );
   };
-
 
   if (!stats)
     return (
