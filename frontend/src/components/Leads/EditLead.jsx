@@ -26,7 +26,7 @@ export default function EditLead() {
     last_name: "",
     email: "",
     city: "",
-    status: "חדשה",
+    status: "החדש",
     project_id: "",
     user_id: "",
     created_at: "",
