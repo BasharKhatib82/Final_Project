@@ -70,8 +70,6 @@ export default function Tasks() {
   };
 
   const handleRepSave = async () => {
-    const fullName = await fetchFullNameByUserId(newRepId);
-    setFullName(fullName);
     try {
       await api.put(`/tasks/update-rep/${repToSave}`, { user_id: newRepId });
       fetchTasks();
@@ -233,9 +231,12 @@ export default function Tasks() {
       render: (r) => (
         <select
           value={r.selectedRepId}
-          onChange={(e) => {
+          onChange={async (e) => {
+            const selectedId = e.target.value;
+            const fullName = await fetchFullNameByUserId(selectedId);
+            setFullName(fullName);
             setRepToSave(r.task_id);
-            setNewRepId(e.target.value);
+            setNewRepId(selectedId);
           }}
           className="border border-gray-300 rounded px-2 py-1 text-sm"
         >
