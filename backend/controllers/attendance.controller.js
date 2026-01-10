@@ -4,6 +4,7 @@ import { db } from "../utils/dbSingleton.js";
 import { isSpecialStatus, isValidDate } from "../utils/attendanceHelpers.js";
 import { isNineDigitId } from "../utils/fieldValidators.js";
 import { nowIsraelFormatted } from "../utils/date.js";
+import { getUserFullName } from "../controllers/users.controller.js";
 import logAction from "../utils/logAction.js";
 /**
  * הוספת נוכחות
@@ -55,7 +56,8 @@ export async function addAttendance(req, res) {
     );
 
     if (insert.affectedRows === 1) {
-      await logAction(`הוספת רישום נוכחות לעובד : ${user_id}`, user.user_id)(
+      const fullName = await getUserFullName(user_id);
+      await logAction(`הוספת רישום נוכחות לעובד : ${fullName}`, user.user_id)(
         req,
         res,
         () => {}
