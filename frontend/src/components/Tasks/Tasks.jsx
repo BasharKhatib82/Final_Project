@@ -71,13 +71,13 @@ export default function Tasks() {
 
   const handleRepSave = async () => {
     try {
-      const fullName = await fetchFullNameByUserId(newRepId);
-      setFullName(fullName);
+      const fullNameU = await fetchFullNameByUserId(newRepId);
+      setFullName(fullNameU);
       await api.put(`/tasks/update-rep/${repToSave}`, { user_id: newRepId });
       fetchTasks();
       setPopup({
         title: "הצלחה",
-        message: `הנציג/ה ${fullName} עודכן בהצלחה`,
+        message: `הנציג/ה ${fullNameU} עודכן בהצלחה`,
         mode: "success",
       });
     } catch (err) {
