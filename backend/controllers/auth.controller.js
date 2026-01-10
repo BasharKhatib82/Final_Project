@@ -204,10 +204,11 @@ export async function forgotPassword(req, res) {
         .json({ success: false, message: "שגיאה ביצירת טוקן איפוס" });
     }
     const fullName = await getUserFullName(user.user_id);
-    await logAction(
-      fullName`נשלחה בקשת איפוס סיסמה עבור ${fullName}`,
-      user.user_id
-    )(req, res, () => {});
+    await logAction(`נשלחה בקשת איפוס סיסמה עבור ${fullName}`, user.user_id)(
+      req,
+      res,
+      () => {}
+    );
 
     await sendResetPasswordEmail(email, resetToken);
     return res.json({ success: true, message: "נשלח מייל לאיפוס סיסמה" });
