@@ -31,7 +31,7 @@ export default function Tasks() {
   const [newRepId, setNewRepId] = useState(null);
   const [statusToSave, setStatusToSave] = useState(null);
   const [newStatus, setNewStatus] = useState(null);
-
+  const [fullName, setFullName] = useState("");
   const [selectedTasks, setSelectedTasks] = useState([]);
   const [bulkUserId, setBulkUserId] = useState("");
   const [bulkAssignConfirm, setBulkAssignConfirm] = useState(false);
@@ -72,7 +72,7 @@ export default function Tasks() {
   const handleRepSave = async () => {
     try {
       const fullName = await fetchFullNameByUserId(newRepId);
-
+      setFullName(fullName);
       await api.put(`/tasks/update-rep/${repToSave}`, { user_id: newRepId });
       fetchTasks();
       setPopup({
@@ -403,7 +403,7 @@ export default function Tasks() {
       {repToSave && (
         <Popup
           title="עדכון נציג"
-          message="האם לעדכן את הנציג למשימה זו?"
+          message={`"האם לעדכן את הנציג/ה ${fullName} למשימה זו ?"`}
           mode="confirm"
           onConfirm={handleRepSave}
           onClose={() => {
