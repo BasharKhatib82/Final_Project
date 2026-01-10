@@ -35,7 +35,6 @@ export default function AddLead() {
     last_name: "",
     email: "",
     city: "",
-    user_id: null,
   });
 
   useEffect(() => {
@@ -106,8 +105,12 @@ export default function AddLead() {
   const handleSubmit = async () => {
     try {
       const leadData = {
-        ...form,
-        user_id: form.user_id || null,
+        phone_number: form.phone_number,
+        project_id: form.project_id,
+        first_name: form.first_name,
+        last_name: form.last_name,
+        email: form.email,
+        city: form.city,
       };
 
       const res = await api.post("/leads/add", leadData);
@@ -206,22 +209,6 @@ export default function AddLead() {
             {projects.map((p) => (
               <option key={p.project_id} value={p.project_id}>
                 {p.project_name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block mb-1 font-semibold">נציג מטפל:</label>
-          <select
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            value={form.user_id || ""}
-            onChange={(e) => setForm({ ...form, user_id: e.target.value })}
-          >
-            <option value="">ללא נציג</option>
-            {users.map((u) => (
-              <option key={u.user_id} value={u.user_id}>
-                {u.first_name} {u.last_name}
               </option>
             ))}
           </select>
