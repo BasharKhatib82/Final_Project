@@ -120,7 +120,7 @@ export default function Tasks() {
       fetchTasks();
       setPopup({
         title: "הצלחה",
-        message: "המשימה בוטלה בהצלחה",
+        message: `משימה מספר [ ${taskToDelete} ] בוטלה בהצלחה !`,
         mode: "success",
       });
     } catch (err) {
@@ -418,7 +418,7 @@ export default function Tasks() {
       {statusToSave && (
         <Popup
           title="עדכון סטטוס"
-          message={` האם לעדכן את סטטוס משימה ל" ${newStatus} " ?`}
+          message={`האם לעדכן את סטטוס משימה ל " ${newStatus} " ?`}
           mode="confirm"
           onConfirm={handleStatusSave}
           onClose={() => {
@@ -431,7 +431,7 @@ export default function Tasks() {
       {taskToDelete && (
         <Popup
           title="ביטול משימה"
-          message="האם לבטל משימה זו?"
+          message={`האם לבטל משימה מספר [ ${taskToDelete} ] ?`}
           mode="confirm"
           onConfirm={handleDelete}
           onClose={() => setTaskToDelete(null)}
