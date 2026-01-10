@@ -4,7 +4,7 @@ import { db } from "../utils/dbSingleton.js";
 import logAction from "../utils/logAction.js";
 import { isValidLeadStatus } from "../utils/leadsHelpers.js";
 import { isPositiveInt } from "../utils/fieldValidators.js";
-import { getUserFullName } from "../utils/getUserFullName.js";
+import getUserFullName from "../utils/getUserFullName.js";
 
 /**
  * שליפת כל תיעודי ההתקדמות לפנייה מסוימת
