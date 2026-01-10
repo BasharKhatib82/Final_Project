@@ -80,6 +80,7 @@ export default function Tasks() {
         message: `הנציג/ה ${fullName} עודכן בהצלחה`,
         mode: "success",
       });
+      setFullName("");
     } catch (err) {
       setPopup({
         title: "שגיאה",
