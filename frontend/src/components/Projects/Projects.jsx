@@ -66,17 +66,14 @@ export default function Projects() {
 
   const handleDeleteProject = async () => {
     if (!projectToDelete) return;
-    const name = await fetchProjectNameById(projectToDelete);
-    console.log(name);
-    setProjectName(name);
-    console.log(projectName);
+
     try {
       const res = await api.delete(`/projects/delete/${projectToDelete}`);
       if (res.data.success) {
         fetchProjects();
         setPopup({
           title: "הצלחה",
-          message: `הפרויקט " ${name} " עודכן כלא פעיל !`,
+          message: `הפרויקט " ${projectName} " עודכן כלא פעיל !`,
           mode: "success",
           show: true,
         });
@@ -143,7 +140,11 @@ export default function Projects() {
 
           {user?.permission_delete_project === 1 && r.active && (
             <button
-              onClick={() => setProjectToDelete(r.project_id)}
+              onClick={async () => {
+                const name = await fetchProjectNameById(r.project_id);
+                setProjectName(name);
+                setProjectToDelete(r.project_id);
+              }}
               className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
             >
               מחיקה
