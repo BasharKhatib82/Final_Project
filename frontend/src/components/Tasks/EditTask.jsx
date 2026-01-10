@@ -251,7 +251,7 @@ const EditTask = () => {
       {confirmPopup && (
         <Popup
           title="אישור עדכון משימה"
-          message="האם אתה בטוח שברצונך לעדכן את המשימה?"
+          message={`"האם אתה מאשר לעדכן את משימה מספר [ ${id} ] ? "`}
           mode="confirm"
           onConfirm={handleSubmit}
           onClose={() => setConfirmPopup(false)}
