@@ -99,7 +99,7 @@ export default function Tasks() {
       fetchTasks();
       setPopup({
         title: "הצלחה",
-        message: `" משימה סטטוס " ${newStatus} " עודכן בהצלחה"`,
+        message: `סטטוס משימה  " ${newStatus} " עודכן בהצלחה`,
         mode: "success",
       });
     } catch (err) {
@@ -418,7 +418,7 @@ export default function Tasks() {
       {statusToSave && (
         <Popup
           title="עדכון סטטוס"
-          message={` האם לעדכן את סטטוס משימה " ${newStatus} " ?`}
+          message={` האם לעדכן את סטטוס משימה ל" ${newStatus} " ?`}
           mode="confirm"
           onConfirm={handleStatusSave}
           onClose={() => {
