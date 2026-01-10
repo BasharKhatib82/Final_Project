@@ -83,6 +83,7 @@ const LeadDetails = () => {
         message: "לא ניתן לשמור תיעוד ריק",
         mode: "error",
       });
+      setConfirmPopup(false);
       return;
     }
 
@@ -101,7 +102,7 @@ const LeadDetails = () => {
         await fetchLead();
         setPopupData({
           title: "הצלחה",
-          message: "התיעוד נשמר בהצלחה!",
+          message: "התיעוד נשמר בהצלחה !",
           mode: "success",
         });
       } else {
