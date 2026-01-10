@@ -324,7 +324,7 @@ export async function editLead(req, res) {
 
     await conn.commit();
 
-    logAction(`עדכון פנייה #${id}`, req.user.user_id)(req, res, () => {});
+    logAction(`עדכון פרטי פנייה מספר [ ${id} ]`, req.user.user_id)(req, res, () => {});
     return res.json({ success: true, message: "הפנייה עודכנה בהצלחה" });
   } catch (err) {
     await conn.rollback();
@@ -362,7 +362,7 @@ export async function updateLeadRep(req, res) {
         .json({ success: false, message: "פנייה לא נמצאה" });
     }
 
-    logAction(`עדכון נציג לפנייה #${leadId}`, req.user.user_id)(
+    logAction(`עדכון נציג מטפל לפנייה [ ${leadId}]`, req.user.user_id)(
       req,
       res,
       () => {}
@@ -391,7 +391,7 @@ export async function cancelLead(req, res) {
         .json({ success: false, message: "פנייה לא נמצאה" });
     }
 
-    logAction(`מחיקת פנייה #${leadId}`, req.user.user_id)(req, res, () => {});
+    logAction(` מחיקת פנייה מספר[ ${leadId} ]`, req.user.user_id)(req, res, () => {});
     return res.json({ success: true, message: "הפנייה סומנה כמבוטלת" });
   } catch (err) {
     console.error("cancelLead:", err);
@@ -422,7 +422,7 @@ export async function updateLeadStatus(req, res) {
         .json({ success: false, message: "פנייה לא נמצאה" });
     }
 
-    logAction(`עדכון סטטוס לפנייה #${leadId}`, req.user.user_id)(
+    logAction(`עדכון סטטוס פנייה מספר [ ${leadId} ]`, req.user.user_id)(
       req,
       res,
       () => {}
@@ -463,7 +463,7 @@ export async function bulkAssign(req, res) {
       ? `${repUserId.first_name} ${repUserId.last_name}`
       : "ללא נציג";
     logAction(
-      `שיוך ${leadIds.length} פניות לנציג ${repUserName ?? "ללא נציג"}`,
+      `שיוך ${leadIds.length} : פניות לנציג ${repUserName ?? "ללא נציג"}`,
       req.user.user_id
     )(req, res, () => {});
     return res.json({
