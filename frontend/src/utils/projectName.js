@@ -8,7 +8,7 @@ import { api } from "./api";
 export const fetchProjectNameById = async (projectId) => {
   try {
     const res = await api.get(`/projects/${projectId}`);
-    const { name } = res.data || {};
+    const { name } = res.data.data.project_name || {};
     return name || "";
   } catch (err) {
     console.error("שגיאה בשליפת שם:", err);
