@@ -251,15 +251,20 @@ export async function checkIn(req, res) {
     return res.status(400).json({ success: false, message: "חסר מזהה משתמש" });
   }
 
-  const now = nowIsraelFormatted();
+  const now = nowIsraelFormatted(); // תאריך ושעה למשל : "2025-01-10 14:37:12"
+  const today = now.split(" ")[0]; // "2025-01-10"   רק התאריך
 
   try {
+    // בדיקה אם יש כבר החתמת כניסה פתוחה להיום
     const [rows] = await db.query(
-      "SELECT attendance_id, check_out FROM attendance WHERE user_id = ? AND date = ? ORDER BY attendance_id DESC LIMIT 1",
-      [user_id, now]
+      `SELECT attendance_id, check_out
+       FROM attendance
+       WHERE user_id = ? AND date = ?
+       ORDER BY attendance_id DESC
+       LIMIT 1`,
+      [user_id, today] //   לפי תאריך בלבד
     );
 
-    // אם יש רשומה פתוחה (כלומר אין check_out) – החתמה חדשה לא תתאפשר
     if (rows.length > 0 && rows[0].check_out === null) {
       return res.status(400).json({
         success: false,
@@ -267,11 +272,11 @@ export async function checkIn(req, res) {
       });
     }
 
-    // אחרת – מוסיפים רשומה חדשה
+    // החתמה חדשה
     const [insert] = await db.query(
       `INSERT INTO attendance (user_id, date, check_in, status)
        VALUES (?, ?, ?, ?)`,
-      [user_id, now, now, "נוכח"]
+      [user_id, today, now, "נוכח"] //  date = today, check_in = now
     );
 
     if (insert.affectedRows === 1) {
@@ -298,22 +303,18 @@ export async function checkOut(req, res) {
     return res.status(400).json({ success: false, message: "חסר מזהה משתמש" });
   }
 
-  if (!isNineDigitId(user_id)) {
-    return res.status(400).json({
-      success: false,
-      message: "מספר תעודת זהות חייב להיות מספר בן 9 ספרות",
-    });
-  }
-
   const now = nowIsraelFormatted();
+  const today = now.split(" ")[0];
 
   try {
-    // שליפת החתמת הכניסה האחרונה להיום – שעדיין אין בה שעת יציאה
+    // שליפת החתמת הכניסה הפתוחה להיום
     const [rows] = await db.query(
-      `SELECT attendance_id FROM attendance
+      `SELECT attendance_id
+       FROM attendance
        WHERE user_id = ? AND date = ? AND check_out IS NULL
-       ORDER BY attendance_id DESC LIMIT 1`,
-      [user_id, today]
+       ORDER BY attendance_id DESC
+       LIMIT 1`,
+      [user_id, today] 
     );
 
     if (rows.length === 0) {
@@ -344,18 +345,22 @@ export async function checkOut(req, res) {
   }
 }
 
+
+// בדיקת סטטוס נוכחות להיום למשתמש המחובר
 export async function getTodayAttendanceStatus(req, res) {
   const user_id = req.user?.user_id;
 
-  if (!user_id) {
+  if(!user_id) {
     return res.status(401).json({ success: false, message: "לא מחובר" });
   }
 
-  const today = new Date().toISOString().split("T")[0];
+  const now = nowIsraelFormatted();
+  const today = now.split(" ")[0];  // "YYYY-MM-DD"
 
   try {
     const [rows] = await db.query(
-      `SELECT attendance_id, check_in, check_out FROM attendance
+      `SELECT attendance_id, check_in, check_out
+       FROM attendance
        WHERE user_id = ? AND date = ?
        ORDER BY attendance_id DESC`,
       [user_id, today]
@@ -368,13 +373,13 @@ export async function getTodayAttendanceStatus(req, res) {
       });
     }
 
-    const last = rows.find((r) => !r.check_out);
+    const open = rows.find((r) => !r.check_out);
 
     return res.json({
       success: true,
       data: {
-        status: last ? "checked_in" : "checked_out",
-        last_check_in: last?.check_in || rows[0]?.check_in,
+        status: open ? "checked_in" : "checked_out",
+        last_check_in: open?.check_in || rows[0]?.check_in,
       },
     });
   } catch (err) {
@@ -382,3 +387,4 @@ export async function getTodayAttendanceStatus(req, res) {
     return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 }
+
