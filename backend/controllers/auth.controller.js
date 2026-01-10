@@ -203,8 +203,8 @@ export async function forgotPassword(req, res) {
         .status(500)
         .json({ success: false, message: "שגיאה ביצירת טוקן איפוס" });
     }
-    const fullName = await getUserFullName(user.user_id);
-    await logAction(`נשלחה בקשת איפוס סיסמה עבור ${fullName}`, user.user_id)(
+
+    await logAction("נשלחה בקשת איפוס סיסמה  ", user.user_id)(
       req,
       res,
       () => {}
@@ -256,6 +256,7 @@ export async function resetPassword(req, res) {
         .status(404)
         .json({ success: false, message: "המשתמש לא נמצא לעדכון" });
     }
+    await logAction("בוצע איפוס סיסמה", user.user_id)(req, res, () => {});
 
     await db.query("DELETE FROM password_resets WHERE id = ?", [resetData.id]);
     return res.json({ success: true, message: "הסיסמה שונתה בהצלחה" });
