@@ -191,7 +191,11 @@ export async function forgotPassword(req, res) {
 
     const user = users[0];
     const { token: resetToken, expires } = generateResetToken();
-    const resetExpireAt = expires.toISOString().slice(0, 19).replace("T", " ");
+    const resetExpireAt = new Date(expires)
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ");
+
 
     // מחיקת טוקנים ישנים של אותו משתמש
     await db.query(`DELETE FROM password_resets WHERE user_id = ?`, [
@@ -235,7 +239,7 @@ export async function resetPassword(req, res) {
       .status(400)
       .json({ success: false, message: "טוקן וסיסמה הם חובה" });
   }
-  const nowUTC = new Date().toISOString();
+  const nowUTC = new Date().toISOString().slice(0, 19).replace("T", " ");
   try {
     const [resetRows] = await db.query(
       "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > ? ORDER BY id DESC LIMIT 1",

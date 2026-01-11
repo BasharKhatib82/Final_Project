@@ -42,8 +42,7 @@ function ForgotPassword() {
       setMessage(res.data.message);
       setShowPopup(true); //  פתיחת הפופאפ אחרי הצלחה
     } catch (err) {
-      const res = await axios.post(`${api}/auth/forgot-password`, { email });
-      setMessage(res.data.message);
+      setMessage("שגיאה");
       setShowPopup(true); // גם במקרה של שגיאה נציג פופאפ
     } finally {
       setLoading(false);
