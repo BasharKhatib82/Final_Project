@@ -16,6 +16,7 @@ import { Popup } from "components/Tools";
 import { useNavigate } from "react-router-dom";
 import ReportView from "../Reports/ReportView";
 import { useUser } from "components/Tools";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 export default function Logs() {
   const [logs, setLogs] = useState([]);
@@ -155,31 +156,33 @@ export default function Logs() {
   ];
 
   return (
-    <div className="flex flex-col flex-1 p-6 text-right">
-      {loading || users.length === 0 ? (
-        <div className="text-center text-gray-600">טוען יומן פעולות...</div>
-      ) : (
-        <ReportView
-          title="יומן פעולות - תיעוד מערכת"
-          columns={columns}
-          rows={logs}
-          filtersDef={filtersDef}
-          searchableKeys={["full_name", "action"]}
-          pageSize={12}
-          emailApiBase={api.defaults.baseURL}
-          defaultFilters={{}}
-          searchPlaceholder="חיפוש לפי שם עובד או פעולה..."
-          filtersVariant="inline"
-        />
-      )}
-      {popup?.show && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() => setPopup(null)}
-        />
-      )}
-    </div>
+    <ProtectedRoute permission="logs_page_access">
+      <div className="flex flex-col flex-1 p-6 text-right">
+        {loading || users.length === 0 ? (
+          <div className="text-center text-gray-600">טוען יומן פעולות...</div>
+        ) : (
+          <ReportView
+            title="יומן פעולות - תיעוד מערכת"
+            columns={columns}
+            rows={logs}
+            filtersDef={filtersDef}
+            searchableKeys={["full_name", "action"]}
+            pageSize={12}
+            emailApiBase={api.defaults.baseURL}
+            defaultFilters={{}}
+            searchPlaceholder="חיפוש לפי שם עובד או פעולה..."
+            filtersVariant="inline"
+          />
+        )}
+        {popup?.show && (
+          <Popup
+            title={popup.title}
+            message={popup.message}
+            mode={popup.mode}
+            onClose={() => setPopup(null)}
+          />
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }
