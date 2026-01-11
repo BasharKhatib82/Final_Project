@@ -23,13 +23,19 @@ export default function Logs() {
   const [loading, setLoading] = useState(true);
   const [popup, setPopup] = useState(null);
   const { user } = useUser();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchLogs();
     fetchUsers();
   }, []);
 
-  const navigate = useNavigate();
+  // הפניה אוטומטית אם אין הרשאה
+  useEffect(() => {
+    if (!user && user.logs_page_access !== 1) {
+      navigate("/unauthorized");
+    }
+  }, [user, navigate]);
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -141,33 +147,31 @@ export default function Logs() {
   ];
 
   return (
-    user.logs_page_access === 1 && (
-      <div className="flex flex-col flex-1 p-6 text-right">
-        {loading || users.length === 0 ? (
-          <div className="text-center text-gray-600">טוען יומן פעולות...</div>
-        ) : (
-          <ReportView
-            title="יומן פעולות - תיעוד מערכת"
-            columns={columns}
-            rows={logs}
-            filtersDef={filtersDef}
-            searchableKeys={["full_name", "action"]}
-            pageSize={12}
-            emailApiBase={api.defaults.baseURL}
-            defaultFilters={{}}
-            searchPlaceholder="חיפוש לפי שם עובד או פעולה..."
-            filtersVariant="inline"
-          />
-        )}
-        {popup?.show && (
-          <Popup
-            title={popup.title}
-            message={popup.message}
-            mode={popup.mode}
-            onClose={() => setPopup(null)}
-          />
-        )}
-      </div>
-    )
+    <div className="flex flex-col flex-1 p-6 text-right">
+      {loading || users.length === 0 ? (
+        <div className="text-center text-gray-600">טוען יומן פעולות...</div>
+      ) : (
+        <ReportView
+          title="יומן פעולות - תיעוד מערכת"
+          columns={columns}
+          rows={logs}
+          filtersDef={filtersDef}
+          searchableKeys={["full_name", "action"]}
+          pageSize={12}
+          emailApiBase={api.defaults.baseURL}
+          defaultFilters={{}}
+          searchPlaceholder="חיפוש לפי שם עובד או פעולה..."
+          filtersVariant="inline"
+        />
+      )}
+      {popup?.show && (
+        <Popup
+          title={popup.title}
+          message={popup.message}
+          mode={popup.mode}
+          onClose={() => setPopup(null)}
+        />
+      )}
+    </div>
   );
 }
