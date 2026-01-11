@@ -65,10 +65,10 @@ export default function Tasks() {
       );
     } catch (err) {
       console.error("שגיאה בטעינת משימות:", err);
-
       if (err.response?.status === 401) {
-    navigate("/", { replace: true });
-    return;
+        navigate("/", { replace: true });
+        return;
+      }
     }
   };
 
