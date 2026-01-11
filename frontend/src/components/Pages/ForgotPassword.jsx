@@ -25,8 +25,7 @@ import axios from "axios";
 import { Popup } from "components/Tools";
 import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
-
-const api = process.env.REACT_APP_API_URL;
+import { api, extractApiError } from "utils";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -42,7 +41,7 @@ function ForgotPassword() {
       setMessage(res.data.message);
       setShowPopup(true); //  פתיחת הפופאפ אחרי הצלחה
     } catch (err) {
-      setMessage("שגיאה בשליחת בקשת איפוס סיסמה");
+      setMessage(extractApiError(err, "שגיאה בשליחת בקשת איפוס סיסמה"));
       setShowPopup(true); // גם במקרה של שגיאה נציג פופאפ
     } finally {
       setLoading(false);
