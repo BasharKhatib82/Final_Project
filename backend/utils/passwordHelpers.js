@@ -1,7 +1,7 @@
 // backend\utils\passwordHelpers.js
 
 import { randomBytes } from "crypto";
-import { format, utcToZonedTime } from "date-fns-tz";
+import { format, toZonedTime } from "date-fns-tz";
 
 /**
  * מחשב כמה ימים עברו מתאריך מסוים עד עכשיו
@@ -22,7 +22,7 @@ export function generateResetToken(ttlMs = 15 * 60 * 1000) {
   const token = randomBytes(32).toString("hex");
 
   const utcExpire = new Date(Date.now() + ttlMs);
-  const zoned = utcToZonedTime(utcExpire, ISRAEL_TZ);
+  const zoned = toZonedTime(utcExpire, ISRAEL_TZ);
   const formattedExpire = format(zoned, "yyyy-MM-dd HH:mm:ss", {
     timeZone: ISRAEL_TZ,
   });
