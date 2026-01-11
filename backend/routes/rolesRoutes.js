@@ -1,7 +1,6 @@
 // backend\routes\rolesRoutes.js
 
 import express from "express";
-import requirePermission from "../middlewares/permissions.js";
 import verifyToken from "../utils/verifyToken.js";
 import {
   addRole,
@@ -17,9 +16,6 @@ const router = express.Router();
 
 // החלת אימות טוקן על כל הראוטים
 router.use(verifyToken);
-
-// הוספת בדיקת הרשאות על כל הראוטים
-router.use(requirePermission);
 
 /** הוספת תפקיד חדש ==> POST /roles/add */
 router.post("/add", addRole);
