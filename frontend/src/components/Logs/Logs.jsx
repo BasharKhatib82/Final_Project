@@ -57,7 +57,7 @@ export default function Logs() {
       console.error("שגיאה בטעינת יומן פעילות:", err);
 
       if (err.response?.status === 401) {
-        navigate("/", { replace: true }); // או window.location.href = "/";
+        navigate("/", { replace: true });
         return;
       }
 

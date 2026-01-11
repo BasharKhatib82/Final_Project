@@ -44,6 +44,14 @@ export default function Tasks() {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    if (user === undefined) return; // עדיין טוען את המשתמש
+    if (!user) return; // לא מחובר - לא עושים כלום
+    if (user.tasks_page_access !== 1) {
+      navigate("/unauthorized", { replace: true });
+    }
+  }, [user, navigate]);
+
   const fetchTasks = async () => {
     try {
       const res = await api.get("/tasks");
@@ -57,6 +65,10 @@ export default function Tasks() {
       );
     } catch (err) {
       console.error("שגיאה בטעינת משימות:", err);
+
+      if (err.response?.status === 401) {
+    navigate("/", { replace: true });
+    return;
     }
   };
 
