@@ -17,6 +17,9 @@ const router = express.Router();
 // החלת אימות טוקן על כל הראוטים
 router.use(verifyToken);
 
+// הוספת בדיקת הרשאות על כל הראוטים
+router.use(requirePermission);
+
 /** הוספת תפקיד חדש ==> POST /roles/add */
 router.post("/add", addRole);
 
