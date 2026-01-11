@@ -55,6 +55,12 @@ export default function Logs() {
       );
     } catch (err) {
       console.error("שגיאה בטעינת יומן פעילות:", err);
+
+      if (err.response?.status === 401) {
+        navigate("/", { replace: true }); // או window.location.href = "/";
+        return;
+      }
+
       setPopup({
         title: "שגיאה",
         message: extractApiError(err, "שגיאה בטעינת יומן פעילות"),
