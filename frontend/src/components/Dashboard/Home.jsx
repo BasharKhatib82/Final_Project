@@ -148,7 +148,7 @@ const Home = () => {
     const showCheckOut = status === "checked_in";
 
     return (
-      <div className="flex items-center justify-center gap-4 bg-gray-100 border border-gray-300 rounded-lg p-4 shadow-sm">
+      <div className="flex items-center justify-center gap-4 bg-gray-100 border border-gray-300 rounded-lg p-2 mt-2 mb-2 shadow-sm">
         {showCheckIn && (
           <>
             <span className="text-gray-700 font-medium">נא לחתום כניסה</span>
