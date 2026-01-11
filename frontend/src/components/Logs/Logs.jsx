@@ -15,12 +15,14 @@ import { formatDateAndTimeRaw } from "utils/date";
 import { Popup } from "components/Tools";
 import { useNavigate } from "react-router-dom";
 import ReportView from "../Reports/ReportView";
+import { useUser } from "components/Tools";
 
 export default function Logs() {
   const [logs, setLogs] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [popup, setPopup] = useState(null);
+  const { user } = useUser();
 
   useEffect(() => {
     fetchLogs();
@@ -44,26 +46,13 @@ export default function Logs() {
         }))
       );
     } catch (err) {
-      const status = err.response?.status;
-      const message = extractApiError(err, "שגיאה בטעינת יומן פעילות");
-
-      if (status === 403) {
-        setPopup({
-          title: "אין הרשאה",
-          message,
-          mode: "error",
-          show: true,
-          onClose: () => navigate("/unauthorized"),
-          onConfirm: () => navigate("/unauthorized"),
-        });
-      } else {
-        setPopup({
-          title: "שגיאה",
-          message,
-          mode: "error",
-          show: true,
-        });
-      }
+      console.error("שגיאה בטעינת יומן פעילות:", err);
+      setPopup({
+        title: "שגיאה",
+        message: extractApiError(err, "שגיאה בטעינת יומן פעילות"),
+        mode: "error",
+        show: true,
+      });
     } finally {
       setLoading(false);
     }
@@ -152,31 +141,33 @@ export default function Logs() {
   ];
 
   return (
-    <div className="flex flex-col flex-1 p-6 text-right">
-      {loading || users.length === 0 ? (
-        <div className="text-center text-gray-600">טוען יומן פעולות...</div>
-      ) : (
-        <ReportView
-          title="יומן פעולות - תיעוד מערכת"
-          columns={columns}
-          rows={logs}
-          filtersDef={filtersDef}
-          searchableKeys={["full_name", "action"]}
-          pageSize={12}
-          emailApiBase={api.defaults.baseURL}
-          defaultFilters={{}}
-          searchPlaceholder="חיפוש לפי שם עובד או פעולה..."
-          filtersVariant="inline"
-        />
-      )}
-      {popup?.show && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() => setPopup(null)}
-        />
-      )}
-    </div>
+    user.logs_page_access === 1 && (
+      <div className="flex flex-col flex-1 p-6 text-right">
+        {loading || users.length === 0 ? (
+          <div className="text-center text-gray-600">טוען יומן פעולות...</div>
+        ) : (
+          <ReportView
+            title="יומן פעולות - תיעוד מערכת"
+            columns={columns}
+            rows={logs}
+            filtersDef={filtersDef}
+            searchableKeys={["full_name", "action"]}
+            pageSize={12}
+            emailApiBase={api.defaults.baseURL}
+            defaultFilters={{}}
+            searchPlaceholder="חיפוש לפי שם עובד או פעולה..."
+            filtersVariant="inline"
+          />
+        )}
+        {popup?.show && (
+          <Popup
+            title={popup.title}
+            message={popup.message}
+            mode={popup.mode}
+            onClose={() => setPopup(null)}
+          />
+        )}
+      </div>
+    )
   );
 }
