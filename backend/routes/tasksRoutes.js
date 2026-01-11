@@ -2,6 +2,7 @@
 
 import express from "express";
 import verifyToken from "../utils/verifyToken.js";
+import checkTasksPermission from "../middleware/checkTasksPermission.js";
 import {
   listTasks,
   getTaskById,
@@ -17,7 +18,7 @@ const router = express.Router();
 
 // אימות טוקן לכל הראוטים
 router.use(verifyToken);
-
+router.use(checkTasksPermission);
 /** GET /tasks – שליפת כל המשימות */
 router.get("/", listTasks);
 /** GET /tasks/:id – שליפת משימה לפי מזהה */
