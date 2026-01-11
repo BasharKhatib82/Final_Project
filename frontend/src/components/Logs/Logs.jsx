@@ -41,13 +41,26 @@ export default function Logs() {
         }))
       );
     } catch (err) {
-      console.error("שגיאה בטעינת יומן פעילות:", err);
-      setPopup({
-        title: "שגיאה",
-        message: extractApiError(err, "שגיאה בטעינת יומן פעילות"),
-        mode: "error",
-        show: true,
-      });
+      const status = err.response?.status;
+      const message = extractApiError(err, "שגיאה בטעינת יומן פעילות");
+
+      if (status === 403) {
+        setPopup({
+          title: "אין הרשאה",
+          message,
+          mode: "error",
+          show: true,
+          onClose: () => (window.location.href = "/unauthorized"),
+          onConfirm: () => (window.location.href = "/unauthorized"),
+        });
+      } else {
+        setPopup({
+          title: "שגיאה",
+          message,
+          mode: "error",
+          show: true,
+        });
+      }
     } finally {
       setLoading(false);
     }

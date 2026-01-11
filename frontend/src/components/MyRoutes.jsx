@@ -27,6 +27,7 @@ import About from "./Pages/About";
 import Contact from "./Pages/Contact";
 import Header from "./Pages/Header";
 import Login from "./Pages/Login";
+import Unauthorized from "./pages/Unauthorized";
 import ForgotPassword from "./Pages/ForgotPassword";
 import ResetPassword from "./Pages/ResetPassword";
 
@@ -91,6 +92,7 @@ function MyRoutes() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/userlogin" element={<Login />} />
+          <Route path="/unauthorized" element={<Unauthorized />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password/:token" element={<ResetPassword />} />
           <Route path="/dashboard" element={<Dashboard />}>
