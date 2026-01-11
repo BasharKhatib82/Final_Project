@@ -32,8 +32,10 @@ export default function Logs() {
 
   // הפניה אוטומטית אם אין הרשאה
   useEffect(() => {
-    if (!user || user.logs_page_access !== 1) {
-      navigate("/unauthorized");
+    if (user === undefined) return; // המערכת עוד טוענת את המשתמש
+    if (!user) return; // לא מחובר (או בדיוק התנתק) → לא עושים כלום
+    if (user.logs_page_access !== 1) {
+      navigate("/unauthorized", { replace: true });
     }
   }, [user, navigate]);
 
