@@ -190,7 +190,13 @@ export async function forgotPassword(req, res) {
         .json({ success: false, message: "לא נמצא משתמש עם האימייל הזה" });
 
     const user = users[0];
-    const { token: resetToken, expires: resetExpireAt } = generateResetToken();
+    const { token: resetToken, expires } = generateResetToken();
+    const resetExpireAt = expires.toISOString().slice(0, 19).replace("T", " ");
+
+    // מחיקת טוקנים ישנים של אותו משתמש
+    await db.query(`DELETE FROM password_resets WHERE user_id = ?`, [
+      user.user_id,
+    ]);
 
     const [insertReset] = await db.query(
       "INSERT INTO password_resets (user_id, reset_token, reset_expires) VALUES (?, ?, ?)",

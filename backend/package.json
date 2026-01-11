@@ -4,7 +4,7 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "TZ='Asia/Jerusalem' node server.js"
   },
   "keywords": [],
   "author": "",
