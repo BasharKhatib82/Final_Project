@@ -9,7 +9,16 @@ import { roleFields, roleFieldsSQL } from "../utils/permissions.js";
 import { sendResetPasswordEmail } from "../services/email.service.js";
 import { getDaysSince, generateResetToken } from "../utils/passwordHelpers.js";
 import { validateAndSanitizeEmail } from "../utils/validateAndSanitizeEmail.js";
-import { nowIsraelFormatted } from "../utils/date.js";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc.js";
+import timezone from "dayjs/plugin/timezone.js";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+
+
+
 
 /**
  * התחברות משתמש
@@ -241,12 +250,12 @@ export async function resetPassword(req, res) {
       .status(400)
       .json({ success: false, message: "טוקן וסיסמה הם חובה" });
   }
-  const nowUTC = new Date().toISOString().slice(0, 19).replace("T", " ");
+  const nowIsrael = dayjs().tz("Asia/Jerusalem").format("YYYY-MM-DD HH:mm:ss");
   try {
-    const [resetRows] = await db.query(
-      "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > ? ORDER BY id DESC LIMIT 1",
-      [token, nowUTC]
-    );
+   const [resetRows] = await db.query(
+     "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > ? ORDER BY id DESC LIMIT 1",
+     [token, nowIsrael]
+   );
 
     if (!resetRows.length) {
       return res

@@ -42,7 +42,9 @@ function ForgotPassword() {
       setMessage(res.data.message);
       setShowPopup(true); //  פתיחת הפופאפ אחרי הצלחה
     } catch (err) {
-      setMessage("שגיאה");
+      const errorMsg =
+        err?.response?.data?.message || "שגיאה כללית בשליחת הבקשה";
+      setMessage(errorMsg);
       setShowPopup(true); // גם במקרה של שגיאה נציג פופאפ
     } finally {
       setLoading(false);

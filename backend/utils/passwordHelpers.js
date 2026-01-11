@@ -1,8 +1,12 @@
 // backend\utils\passwordHelpers.js
 
 import { randomBytes } from "crypto";
-import { nowIsraelFormatted } from "../utils/date.js";
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc.js";
+import timezone from "dayjs/plugin/timezone.js";
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 /**
  * מחשב כמה ימים עברו מתאריך מסוים עד עכשיו
@@ -18,11 +22,15 @@ export function getDaysSince(dateLike) {
 
 /**
  * יוצר טוקן איפוס סיסמה עם תאריך תפוגה לפי שעון ישראל
+ * נשמר בפורמט SQL תקני
  */
 export function generateResetToken(ttlMs = 15 * 60 * 1000) {
   const token = randomBytes(32).toString("hex");
-  const now = nowIsraelFormatted();
-  const dateExpires = new Date(now + ttlMs);
 
-  return { token, dateExpires };
+  const expiresIsrael = dayjs()
+    .tz("Asia/Jerusalem")
+    .add(ttlMs, "millisecond")
+    .format("YYYY-MM-DD HH:mm:ss");
+
+  return { token, expires: expiresIsrael };
 }
