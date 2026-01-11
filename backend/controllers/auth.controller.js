@@ -238,7 +238,7 @@ export async function forgotPassword(req, res) {
  * מחזיר: סטטוס הצלחה או שגיאה
  */
 export async function resetPassword(req, res) {
-  console.log("📥 resetPassword body:", req.body);
+  ;
 
   const { token, password } = req.body;
   if (!token || !password) {
@@ -254,8 +254,7 @@ export async function resetPassword(req, res) {
   }
 
   const nowIsrael = dayjs().tz("Asia/Jerusalem").format("YYYY-MM-DD HH:mm:ss");
-  console.log("🕒 זמן נוכחי ישראל:", nowIsrael);
-  console.log("🔐 טוקן שנשלח:", token);
+  
   try {
     const [resetRows] = await db.query(
       "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > ? ORDER BY id DESC LIMIT 1",
