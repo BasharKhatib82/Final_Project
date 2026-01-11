@@ -1,9 +1,9 @@
 // backend\utils\passwordHelpers.js
 
 import { randomBytes } from "crypto";
+import { nowIsraelFormatted } from "../utils/date.js";
 
-// שעון ישראל
-const ISRAEL_TZ = "Asia/Jerusalem";
+
 /**
  * מחשב כמה ימים עברו מתאריך מסוים עד עכשיו
  * מקבל: תאריך
@@ -21,7 +21,8 @@ export function getDaysSince(dateLike) {
  */
 export function generateResetToken(ttlMs = 15 * 60 * 1000) {
   const token = randomBytes(32).toString("hex");
-  const utcDateExpires = new Date(Date.now() + ttlMs);
+  const now = nowIsraelFormatted();
+  const dateExpires = new Date(now + ttlMs);
 
-  return { token, utcDateExpires };
+  return { token, dateExpires };
 }

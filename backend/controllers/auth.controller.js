@@ -190,8 +190,8 @@ export async function forgotPassword(req, res) {
         .json({ success: false, message: "לא נמצא משתמש עם האימייל הזה" });
 
     const user = users[0];
-    const { token: resetToken, utcDateExpires } = generateResetToken();
-    const resetExpireAt = new Date(utcDateExpires)
+    const { token: resetToken, dateExpires } = generateResetToken();
+    const resetExpireAt = new Date(dateExpires)
       .toISOString()
       .slice(0, 19)
       .replace("T", " ");
