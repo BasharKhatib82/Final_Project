@@ -12,11 +12,12 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
-import { Popup } from "components/Tools";
+import { Popup, useUser } from "components/Tools";
 import { api } from "utils";
 
 const AddTask = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
 
   const [form, setForm] = useState({
     task_title: "",
@@ -29,6 +30,14 @@ const AddTask = () => {
   const [users, setUsers] = useState([]);
   const [popupData, setPopupData] = useState(null);
   const [confirmPopup, setConfirmPopup] = useState(false);
+
+  useEffect(() => {
+    if (user === undefined) return; // עדיין טוען את המשתמש
+    if (!user) return; // לא מחובר - לא עושים כלום
+    if (user.tasks_page_access !== 1) {
+      navigate("/unauthorized", { replace: true });
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     fetchUsers();
@@ -92,6 +101,10 @@ const AddTask = () => {
         });
       }
     } catch (err) {
+      if (err.response?.status === 401) {
+        navigate("/", { replace: true });
+        return;
+      }
       setConfirmPopup(false);
       setPopupData({
         title: "שגיאה",
