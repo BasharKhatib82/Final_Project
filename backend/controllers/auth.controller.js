@@ -216,7 +216,7 @@ export async function forgotPassword(req, res) {
     );
 
     await sendResetPasswordEmail(email, resetToken);
-    return res.json({ success: true, message: "נשלח מייל לאיפוס סיסמה" });
+    return res.json({ success: true, message: "נשלח מייל לאיפוס סיסמה - תקף ל 15 דקות" });
   } catch (err) {
     console.error("forgotPassword:", err);
     return res.status(500).json({ success: false, message: "שגיאת שרת" });
@@ -235,11 +235,11 @@ export async function resetPassword(req, res) {
       .status(400)
       .json({ success: false, message: "טוקן וסיסמה הם חובה" });
   }
-  const now = nowIsraelFormatted();
+  const nowUTC = new Date().toISOString();
   try {
     const [resetRows] = await db.query(
       "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > ? ORDER BY id DESC LIMIT 1",
-      [token, now]
+      [token, nowUTC]
     );
 
     if (!resetRows.length) {
