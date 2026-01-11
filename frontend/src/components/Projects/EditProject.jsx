@@ -25,7 +25,6 @@ const EditProject = () => {
   const [confirmPopup, setConfirmPopup] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
-
   const { user } = useUser();
 
   useEffect(() => {
@@ -49,11 +48,11 @@ const EditProject = () => {
         setError("לא ניתן לטעון את נתוני הפרויקט");
       }
     } catch (err) {
+      console.error("שגיאה בטעינת פרויקט:", err);
       if (err.response?.status === 401) {
         navigate("/", { replace: true });
         return;
       }
-      console.error("שגיאה בטעינת פרויקט:", err);
       setError("שגיאה בטעינת נתונים מהשרת");
     }
   };
