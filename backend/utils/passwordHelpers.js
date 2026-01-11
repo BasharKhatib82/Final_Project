@@ -3,6 +3,8 @@
 import { randomBytes } from "crypto";
 import { format, toZonedTime } from "date-fns-tz";
 
+// שעון ישראל
+const ISRAEL_TZ = "Asia/Jerusalem";
 /**
  * מחשב כמה ימים עברו מתאריך מסוים עד עכשיו
  * מקבל: תאריך
