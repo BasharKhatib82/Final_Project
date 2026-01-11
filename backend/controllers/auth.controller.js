@@ -238,13 +238,23 @@ export async function forgotPassword(req, res) {
  * מחזיר: סטטוס הצלחה או שגיאה
  */
 export async function resetPassword(req, res) {
+  console.log("📥 resetPassword body:", req.body);
+
   const { token, password } = req.body;
   if (!token || !password) {
     return res
       .status(400)
       .json({ success: false, message: "טוקן וסיסמה הם חובה" });
   }
+
+  if (typeof token !== "string" || typeof password !== "string") {
+    return res
+      .status(400)
+      .json({ success: false, message: "הטוקן והסיסמה חייבים להיות מחרוזות" });
+  }
+
   const nowIsrael = dayjs().tz("Asia/Jerusalem").format("YYYY-MM-DD HH:mm:ss");
+
   try {
     const [resetRows] = await db.query(
       "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > ? ORDER BY id DESC LIMIT 1",
@@ -270,12 +280,13 @@ export async function resetPassword(req, res) {
         .status(404)
         .json({ success: false, message: "המשתמש לא נמצא לעדכון" });
     }
-    await logAction("בוצע איפוס סיסמה", user.user_id)(req, res, () => {});
 
+    await logAction("בוצע איפוס סיסמה", resetData.user_id)(req, res, () => {});
     await db.query("DELETE FROM password_resets WHERE id = ?", [resetData.id]);
+
     return res.json({ success: true, message: "הסיסמה שונתה בהצלחה" });
   } catch (err) {
-    console.error("resetPassword:", err);
+    console.error("resetPassword error:", err);
     return res.status(500).json({ success: false, message: "שגיאת שרת" });
   }
 }
