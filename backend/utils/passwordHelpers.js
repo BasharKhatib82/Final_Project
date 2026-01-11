@@ -1,6 +1,7 @@
 // backend\utils\passwordHelpers.js
 
 import { randomBytes } from "crypto";
+import { format, utcToZonedTime } from "date-fns-tz";
 
 /**
  * מחשב כמה ימים עברו מתאריך מסוים עד עכשיו
@@ -15,11 +16,16 @@ export function getDaysSince(dateLike) {
 }
 
 /**
- * יוצר טוקן אקראי לאיפוס סיסמה
- * מחזיר: { token, expires }
+ * יוצר טוקן איפוס סיסמה עם תאריך תפוגה לפי שעון ישראל
  */
 export function generateResetToken(ttlMs = 15 * 60 * 1000) {
   const token = randomBytes(32).toString("hex");
-  const expires = new Date(Date.now() + ttlMs);
-  return { token, expires };
+
+  const utcExpire = new Date(Date.now() + ttlMs);
+  const zoned = utcToZonedTime(utcExpire, ISRAEL_TZ);
+  const formattedExpire = format(zoned, "yyyy-MM-dd HH:mm:ss", {
+    timeZone: ISRAEL_TZ,
+  });
+
+  return { token, expires: formattedExpire }; // תואם 100% ל־MySQL
 }
