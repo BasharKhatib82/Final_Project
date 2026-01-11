@@ -190,12 +190,11 @@ export async function forgotPassword(req, res) {
         .json({ success: false, message: "לא נמצא משתמש עם האימייל הזה" });
 
     const user = users[0];
-    const { token: resetToken, expires } = generateResetToken();
-    const resetExpireAt = new Date(expires)
+    const { token: resetToken, utcDateExpires } = generateResetToken();
+    const resetExpireAt = new Date(utcDateExpires)
       .toISOString()
       .slice(0, 19)
       .replace("T", " ");
-
 
     // מחיקת טוקנים ישנים של אותו משתמש
     await db.query(`DELETE FROM password_resets WHERE user_id = ?`, [
@@ -220,7 +219,10 @@ export async function forgotPassword(req, res) {
     );
 
     await sendResetPasswordEmail(email, resetToken);
-    return res.json({ success: true, message: "נשלח מייל לאיפוס סיסמה - תקף ל 15 דקות" });
+    return res.json({
+      success: true,
+      message: "נשלח מייל לאיפוס סיסמה - תקף ל 15 דקות",
+    });
   } catch (err) {
     console.error("forgotPassword:", err);
     return res.status(500).json({ success: false, message: "שגיאת שרת" });
