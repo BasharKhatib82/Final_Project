@@ -50,6 +50,10 @@ const AddTask = () => {
         setUsers(res.data.data || []);
       }
     } catch (err) {
+      if (err.response?.status === 401) {
+        navigate("/", { replace: true });
+        return;
+      }
       console.error("שגיאה בטעינת נציגים:", err);
     }
   };
