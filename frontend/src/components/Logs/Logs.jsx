@@ -13,6 +13,7 @@ import React, { useEffect, useState } from "react";
 import { api, extractApiError } from "utils";
 import { formatDateAndTimeRaw } from "utils/date";
 import { Popup } from "components/Tools";
+import { useNavigate } from "react-router-dom";
 import ReportView from "../Reports/ReportView";
 
 export default function Logs() {
@@ -25,6 +26,8 @@ export default function Logs() {
     fetchLogs();
     fetchUsers();
   }, []);
+
+  const navigate = useNavigate();
 
   const fetchLogs = async () => {
     setLoading(true);
@@ -50,8 +53,8 @@ export default function Logs() {
           message,
           mode: "error",
           show: true,
-          onClose: () => (window.location.href = "/unauthorized"),
-          onConfirm: () => (window.location.href = "/unauthorized"),
+          onClose: () => navigate("/unauthorized"),
+          onConfirm: () => navigate("/unauthorized"),
         });
       } else {
         setPopup({
