@@ -15,6 +15,7 @@ import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
+import { useNavigate } from "react-router-dom";
 
 const LeadDetails = () => {
   const { id } = useParams();
@@ -27,6 +28,15 @@ const LeadDetails = () => {
   const [saving, setSaving] = useState(false);
   const [popupData, setPopupData] = useState(null);
   const [confirmPopup, setConfirmPopup] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user === undefined) return; // עדיין טוען את המשתמש
+    if (!user) return; // לא מחובר - לא עושים כלום
+    if (user.leads_page_access !== 1) {
+      navigate("/unauthorized", { replace: true });
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     fetchLead();
@@ -47,6 +57,11 @@ const LeadDetails = () => {
         });
       }
     } catch (err) {
+      
+      if (err.response?.status === 401) {
+        navigate("/", { replace: true });
+        return;
+      }
       setPopupData({
         title: "שגיאה",
         message: extractApiError(err, "שגיאה בטעינת פרטי הפנייה"),
