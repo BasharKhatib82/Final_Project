@@ -13,12 +13,21 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
-import { Popup } from "components/Tools";
+import { Popup, useUser } from "components/Tools";
 import { api } from "utils";
 
 const EditTask = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (user === undefined) return; // עדיין טוען את המשתמש
+    if (!user) return; // לא מחובר - לא עושים כלום
+    if (user.tasks_page_access !== 1) {
+      navigate("/unauthorized", { replace: true });
+    }
+  }, [user, navigate]);
 
   const [form, setForm] = useState({
     task_title: "",
@@ -62,6 +71,10 @@ const EditTask = () => {
       }
     } catch (err) {
       console.error("שגיאה בטעינת משימה:", err);
+      if (err.response?.status === 401) {
+        navigate("/", { replace: true });
+        return;
+      }
       setPopupData({
         title: "שגיאה",
         message: "שגיאה בחיבור לשרת",
