@@ -1,6 +1,7 @@
 // backend\routes\rolesRoutes.js
 
 import express from "express";
+import requirePermission from "../middlewares/permissions.js";
 import verifyToken from "../utils/verifyToken.js";
 import {
   addRole,
