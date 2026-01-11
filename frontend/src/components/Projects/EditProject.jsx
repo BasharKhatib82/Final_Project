@@ -8,7 +8,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Popup } from "components/Tools";
+import { Popup, useUser } from "components/Tools";
 import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { api } from "utils";
@@ -26,6 +26,16 @@ const EditProject = () => {
   const navigate = useNavigate();
   const { id } = useParams();
 
+  const { user } = useUser();
+
+  useEffect(() => {
+    if (user === undefined) return; // עדיין טוען את המשתמש
+    if (!user) return; // לא מחובר - לא עושים כלום
+    if (user.tasks_page_access !== 1) {
+      navigate("/unauthorized", { replace: true });
+    }
+  }, [user, navigate]);
+
   useEffect(() => {
     fetchProject();
   }, []);
@@ -39,6 +49,10 @@ const EditProject = () => {
         setError("לא ניתן לטעון את נתוני הפרויקט");
       }
     } catch (err) {
+      if (err.response?.status === 401) {
+        navigate("/", { replace: true });
+        return;
+      }
       console.error("שגיאה בטעינת פרויקט:", err);
       setError("שגיאה בטעינת נתונים מהשרת");
     }
