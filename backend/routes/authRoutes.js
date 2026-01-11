@@ -1,7 +1,7 @@
 // backend\routes\authRoutes.js
 
 import express from "express";
-import optionalAuth  from "../utils/verifyToken.js";
+import optionalAuth from "../utils/verifyToken.js";
 import {
   login,
   logout,
