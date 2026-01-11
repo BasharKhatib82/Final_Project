@@ -27,7 +27,7 @@ import About from "./Pages/About";
 import Contact from "./Pages/Contact";
 import Header from "./Pages/Header";
 import Login from "./Pages/Login";
-import Unauthorized from "./pages/Unauthorized";
+import Unauthorized from "./Pages/Unauthorized";
 import ForgotPassword from "./Pages/ForgotPassword";
 import ResetPassword from "./Pages/ResetPassword";
 
