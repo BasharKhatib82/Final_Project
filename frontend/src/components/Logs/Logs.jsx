@@ -25,17 +25,24 @@ export default function Logs() {
   const { user } = useUser();
   const navigate = useNavigate();
 
+  //  בדיקת הרשאה
   useEffect(() => {
+    if (!user) return; // עדיין נטען
+
+    if (user.logs_page_access !== 1) {
+      navigate("/unauthorized", { replace: true });
+      return;
+    }
+
+    // רק אם יש הרשאה
     fetchLogs();
     fetchUsers();
-  }, []);
-
-  // הפניה אוטומטית אם אין הרשאה
-  useEffect(() => {
-    if (!user && user.logs_page_access !== 1) {
-      navigate("/unauthorized");
-    }
   }, [user, navigate]);
+
+  // חסימה מוחלטת של רינדור
+  if (!user || user.logs_page_access !== 1) {
+    return null; // מונע מסך ריק עם layout
+  }
 
   const fetchLogs = async () => {
     setLoading(true);
