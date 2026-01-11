@@ -9,7 +9,10 @@ import jwt from "jsonwebtoken";
 export default function verifyToken(req, res, next) {
   const token = req.cookies?.token;
   if (!token) {
-    return res.status(401).json({ success: false, message: "נא להתחבר" });
+    return res.status(401).json({
+      success: false,
+      message: "הגישה לעמוד זה מיועדת למשתמשים מחוברים. אנא התחבר למערכת.",
+    });
   }
   try {
     req.user = jwt.verify(token, process.env.JWT_SECRET);
