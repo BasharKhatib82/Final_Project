@@ -148,32 +148,39 @@ const Home = () => {
     const showCheckOut = status === "checked_in";
 
     return (
-      <div className="flex justify-center gap-3">
+      <div className="flex items-center justify-center gap-4 bg-gray-100 border border-gray-300 rounded-lg p-4 shadow-sm">
         {showCheckIn && (
-          <button
-            onClick={confirmCheckIn}
-            disabled={checkInLoading}
-            className={`px-4 py-2 rounded shadow text-white ${
-              checkInLoading
-                ? "bg-green-400 cursor-not-allowed"
-                : "bg-green-600 hover:bg-green-700"
-            }`}
-          >
-            {checkInLoading ? "שולח..." : "החתמת כניסה"}
-          </button>
+          <>
+            <span className="text-gray-700 font-medium">נא לחתום כניסה</span>
+            <button
+              onClick={confirmCheckIn}
+              disabled={checkInLoading}
+              className={`px-4 py-2 rounded shadow text-white ${
+                checkInLoading
+                  ? "bg-green-400 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700"
+              }`}
+            >
+              {checkInLoading ? "שולח..." : "החתמת כניסה"}
+            </button>
+          </>
         )}
+
         {showCheckOut && (
-          <button
-            onClick={confirmCheckOut}
-            disabled={checkOutLoading}
-            className={`px-4 py-2 rounded shadow text-white ${
-              checkOutLoading
-                ? "bg-red-400 cursor-not-allowed"
-                : "bg-red-600 hover:bg-red-700"
-            }`}
-          >
-            {checkOutLoading ? "שולח..." : "החתמת יציאה"}
-          </button>
+          <>
+            <span className="text-gray-700 font-medium">נא לחתום יציאה</span>
+            <button
+              onClick={confirmCheckOut}
+              disabled={checkOutLoading}
+              className={`px-4 py-2 rounded shadow text-white ${
+                checkOutLoading
+                  ? "bg-red-400 cursor-not-allowed"
+                  : "bg-red-600 hover:bg-red-700"
+              }`}
+            >
+              {checkOutLoading ? "שולח..." : "החתמת יציאה"}
+            </button>
+          </>
         )}
       </div>
     );
