@@ -16,10 +16,6 @@ import timezone from "dayjs/plugin/timezone.js";
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-
-
-
-
 /**
  * התחברות משתמש
  * מגוף הבקשה { user_id, password } : מקבל
@@ -175,13 +171,14 @@ export function getCurrentUser(req, res) {
  * מגוף הבקשה { email } : מקבל
  * מחזיר: הודעת הצלחה או שגיאה
  */
+
 export async function forgotPassword(req, res) {
   let { email } = req.body;
   if (!email)
     return res.status(400).json({ success: false, message: "יש להזין אימייל" });
 
   try {
-    // ניקוי/ולידציה לאימייל (שומר על תאימות למסד)
+    // ולידציה וניקוי אימייל
     try {
       email = validateAndSanitizeEmail(email);
     } catch (e) {
@@ -190,6 +187,7 @@ export async function forgotPassword(req, res) {
         message: e?.message || "כתובת אימייל לא חוקית",
       });
     }
+
     const [users] = await db.query("SELECT * FROM users WHERE email = ?", [
       email,
     ]);
@@ -199,17 +197,17 @@ export async function forgotPassword(req, res) {
         .json({ success: false, message: "לא נמצא משתמש עם האימייל הזה" });
 
     const user = users[0];
-    const { token: resetToken, dateExpires } = generateResetToken();
-    const resetExpireAt = new Date(dateExpires)
-      .toISOString()
-      .slice(0, 19)
-      .replace("T", " ");
 
-    // מחיקת טוקנים ישנים של אותו משתמש
-    await db.query(`DELETE FROM password_resets WHERE user_id = ?`, [
+    // יצירת טוקן ותאריך תפוגה בפורמט מוכן
+    const { token: resetToken, dateExpires: resetExpireAt } =
+      generateResetToken();
+
+    // מחיקת טוקנים קודמים
+    await db.query("DELETE FROM password_resets WHERE user_id = ?", [
       user.user_id,
     ]);
 
+    // הכנסת טוקן חדש
     const [insertReset] = await db.query(
       "INSERT INTO password_resets (user_id, reset_token, reset_expires) VALUES (?, ?, ?)",
       [user.user_id, resetToken, resetExpireAt]
@@ -221,16 +219,12 @@ export async function forgotPassword(req, res) {
         .json({ success: false, message: "שגיאה ביצירת טוקן איפוס" });
     }
 
-    await logAction("נשלחה בקשת איפוס סיסמה  ", user.user_id)(
-      req,
-      res,
-      () => {}
-    );
-
+    await logAction("נשלחה בקשת איפוס סיסמה", user.user_id)(req, res, () => {});
     await sendResetPasswordEmail(email, resetToken);
+
     return res.json({
       success: true,
-      message: "נשלח מייל לאיפוס סיסמה - תקף ל 15 דקות",
+      message: "נשלח מייל לאיפוס סיסמה - תקף ל-15 דקות",
     });
   } catch (err) {
     console.error("forgotPassword:", err);
@@ -252,10 +246,10 @@ export async function resetPassword(req, res) {
   }
   const nowIsrael = dayjs().tz("Asia/Jerusalem").format("YYYY-MM-DD HH:mm:ss");
   try {
-   const [resetRows] = await db.query(
-     "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > ? ORDER BY id DESC LIMIT 1",
-     [token, nowIsrael]
-   );
+    const [resetRows] = await db.query(
+      "SELECT * FROM password_resets WHERE reset_token = ? AND reset_expires > ? ORDER BY id DESC LIMIT 1",
+      [token, nowIsrael]
+    );
 
     if (!resetRows.length) {
       return res
