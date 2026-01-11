@@ -37,14 +37,6 @@ export default function Leads() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user === undefined) return; // עדיין טוען את המשתמש
-    if (!user) return; // לא מחובר - לא עושים כלום
-    if (user.leads_page_access !== 1) {
-      navigate("/unauthorized", { replace: true });
-    }
-  }, [user, navigate]);
-
-  useEffect(() => {
     fetchLeads();
     fetchUsers();
     fetchProjects();
@@ -63,11 +55,6 @@ export default function Leads() {
         }))
       );
     } catch (err) {
-      if (err.response?.status === 401) {
-        navigate("/", { replace: true });
-        return;
-      }
-
       setPopup({
         title: "שגיאה",
         message: extractApiError(err, "שגיאה בטעינת פניות"),
