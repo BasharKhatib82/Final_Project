@@ -14,6 +14,7 @@ import { useParams } from "react-router-dom";
 import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { Popup } from "components/Tools";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 import { api, extractApiError } from "utils";
 
@@ -131,182 +132,191 @@ const TaskDetails = () => {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto font-rubik">
-      {/* כפתור ניווט */}
-      <div className="flex justify-center mb-4">
-        <AppButton
-          label="חזרה לרשימת משימות"
-          icon={
-            <Icon icon="icon-park-outline:back" width="1.2em" height="1.2em" />
-          }
-          variant="navigate"
-          to="/dashboard/tasks"
-        />
-      </div>
-
-      {/* פרטי משימה */}
-      <div className="bg-white rounded shadow p-6 text-gray-700 mb-6 text-right space-y-4">
-        <div className="text-xl font-semibold text-blue-700 text-center">
-          {" "}
-          פרטי משימה מספר [ {task.task_id} ]
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <strong>נושא :</strong> {task.task_title}
-          </div>
-          <div>
-            <strong>תיאור :</strong> {task.description || "-"}
-          </div>
-          <div>
-            <strong>סטטוס :</strong>{" "}
-            <span
-              className={`font-semibold ${
-                task.status === "חדשה"
-                  ? "text-green-600"
-                  : task.status === "בטיפול"
-                  ? "text-blue-600"
-                  : task.status === "טופלה"
-                  ? "text-gray-600"
-                  : "text-red-600"
-              }`}
-            >
-              {task.status}
-            </span>
-          </div>
-          <div>
-            <strong>תאריך יצירה :</strong>{" "}
-            {new Date(task.created_at).toLocaleDateString("he-IL")}
-          </div>
-          <div>
-            <strong>תאריך יעד:</strong>{" "}
-            <span
-              className={
-                new Date(task.due_date) < new Date() && task.status !== "טופלה"
-                  ? "text-red-600 font-semibold"
-                  : ""
-              }
-            >
-              {new Date(task.due_date).toLocaleDateString("he-IL")}
-            </span>
-          </div>
-
-          <div>
-            <strong>נציג מטפל:</strong>{" "}
-            {task.assigned_first_name
-              ? `${task.assigned_first_name} ${task.assigned_last_name}`
-              : "ללא"}
-          </div>
-        </div>
-      </div>
-
-      {/* תיעוד התקדמות */}
-      <h3 className="text-xl font-semibold text-blue-700 mb-4 text-center">
-        תיעוד התקדמות
-      </h3>
-
-      {progress.length === 0 ? (
-        <div className="text-center text-gray-500 mb-4">אין תיעוד עד כה</div>
-      ) : (
-        <div className="bg-white rounded shadow p-4 space-y-3 text-right text-gray-700 mb-6">
-          {progress.map((p) => (
-            <div key={p.task_progress_id} className="border-b py-2">
-              <div>
-                <strong>סטטוס:</strong> {p.status}
-              </div>
-              <div>
-                <strong>תיעוד:</strong> {p.progress_note}
-              </div>
-              <div className="text-sm text-gray-600 flex justify-between">
-                <div>
-                  <strong>עודכן ע"י:</strong> {p.user_name || "מערכת"}
-                </div>
-                <div>
-                  <strong>תאריך:</strong>{" "}
-                  {new Date(p.update_time).toLocaleDateString("he-IL")} -{" "}
-                  {new Date(p.update_time).toLocaleTimeString("he-IL", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* טופס תיעוד חדש */}
-      <div className="bg-white rounded shadow p-4 mb-6 space-y-4">
-        <h4 className="text-lg font-semibold text-blue-700 text-center">
-          הוסף תיעוד חדש
-        </h4>
-
-        <textarea
-          className="w-full border border-gray-300 rounded px-3 py-2"
-          rows="4"
-          placeholder="הקלד כאן את התיעוד החדש..."
-          value={newNote}
-          onChange={(e) => setNewNote(e.target.value)}
-        />
-
-        <div>
-          <label className="block mb-1 font-semibold">עדכן סטטוס משימה:</label>
-          <select
-            value={newStatus}
-            onChange={(e) => setNewStatus(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2"
-          >
-            <option value="חדשה">חדשה</option>
-            <option value="בטיפול">בטיפול</option>
-            <option value="טופלה">טופלה</option>
-            <option value="בוטלה">בוטלה</option>
-          </select>
-        </div>
-
-        <div className="flex justify-around pt-4">
+    <ProtectedRoute permission="tasks_page_access">
+      <div className="p-6 max-w-4xl mx-auto font-rubik">
+        {/* כפתור ניווט */}
+        <div className="flex justify-center mb-4">
           <AppButton
-            label={saving ? "שומר..." : "הוספת תיעוד"}
-            onClick={() => setConfirmPopup(true)}
+            label="חזרה לרשימת משימות"
             icon={
               <Icon
-                icon="fluent:save-edit-20-regular"
+                icon="icon-park-outline:back"
                 width="1.2em"
                 height="1.2em"
               />
             }
-            variant="normal"
-          />
-          <AppButton
-            label="ביטול הוספה"
-            icon={
-              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
-            }
-            variant="cancel"
+            variant="navigate"
             to="/dashboard/tasks"
           />
         </div>
+
+        {/* פרטי משימה */}
+        <div className="bg-white rounded shadow p-6 text-gray-700 mb-6 text-right space-y-4">
+          <div className="text-xl font-semibold text-blue-700 text-center">
+            {" "}
+            פרטי משימה מספר [ {task.task_id} ]
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <strong>נושא :</strong> {task.task_title}
+            </div>
+            <div>
+              <strong>תיאור :</strong> {task.description || "-"}
+            </div>
+            <div>
+              <strong>סטטוס :</strong>{" "}
+              <span
+                className={`font-semibold ${
+                  task.status === "חדשה"
+                    ? "text-green-600"
+                    : task.status === "בטיפול"
+                    ? "text-blue-600"
+                    : task.status === "טופלה"
+                    ? "text-gray-600"
+                    : "text-red-600"
+                }`}
+              >
+                {task.status}
+              </span>
+            </div>
+            <div>
+              <strong>תאריך יצירה :</strong>{" "}
+              {new Date(task.created_at).toLocaleDateString("he-IL")}
+            </div>
+            <div>
+              <strong>תאריך יעד:</strong>{" "}
+              <span
+                className={
+                  new Date(task.due_date) < new Date() &&
+                  task.status !== "טופלה"
+                    ? "text-red-600 font-semibold"
+                    : ""
+                }
+              >
+                {new Date(task.due_date).toLocaleDateString("he-IL")}
+              </span>
+            </div>
+
+            <div>
+              <strong>נציג מטפל:</strong>{" "}
+              {task.assigned_first_name
+                ? `${task.assigned_first_name} ${task.assigned_last_name}`
+                : "ללא"}
+            </div>
+          </div>
+        </div>
+
+        {/* תיעוד התקדמות */}
+        <h3 className="text-xl font-semibold text-blue-700 mb-4 text-center">
+          תיעוד התקדמות
+        </h3>
+
+        {progress.length === 0 ? (
+          <div className="text-center text-gray-500 mb-4">אין תיעוד עד כה</div>
+        ) : (
+          <div className="bg-white rounded shadow p-4 space-y-3 text-right text-gray-700 mb-6">
+            {progress.map((p) => (
+              <div key={p.task_progress_id} className="border-b py-2">
+                <div>
+                  <strong>סטטוס:</strong> {p.status}
+                </div>
+                <div>
+                  <strong>תיעוד:</strong> {p.progress_note}
+                </div>
+                <div className="text-sm text-gray-600 flex justify-between">
+                  <div>
+                    <strong>עודכן ע"י:</strong> {p.user_name || "מערכת"}
+                  </div>
+                  <div>
+                    <strong>תאריך:</strong>{" "}
+                    {new Date(p.update_time).toLocaleDateString("he-IL")} -{" "}
+                    {new Date(p.update_time).toLocaleTimeString("he-IL", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* טופס תיעוד חדש */}
+        <div className="bg-white rounded shadow p-4 mb-6 space-y-4">
+          <h4 className="text-lg font-semibold text-blue-700 text-center">
+            הוסף תיעוד חדש
+          </h4>
+
+          <textarea
+            className="w-full border border-gray-300 rounded px-3 py-2"
+            rows="4"
+            placeholder="הקלד כאן את התיעוד החדש..."
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+          />
+
+          <div>
+            <label className="block mb-1 font-semibold">
+              עדכן סטטוס משימה:
+            </label>
+            <select
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value)}
+              className="w-full border border-gray-300 rounded px-3 py-2"
+            >
+              <option value="חדשה">חדשה</option>
+              <option value="בטיפול">בטיפול</option>
+              <option value="טופלה">טופלה</option>
+              <option value="בוטלה">בוטלה</option>
+            </select>
+          </div>
+
+          <div className="flex justify-around pt-4">
+            <AppButton
+              label={saving ? "שומר..." : "הוספת תיעוד"}
+              onClick={() => setConfirmPopup(true)}
+              icon={
+                <Icon
+                  icon="fluent:save-edit-20-regular"
+                  width="1.2em"
+                  height="1.2em"
+                />
+              }
+              variant="normal"
+            />
+            <AppButton
+              label="ביטול הוספה"
+              icon={
+                <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+              }
+              variant="cancel"
+              to="/dashboard/tasks"
+            />
+          </div>
+        </div>
+
+        {/* פופאפים */}
+        {popupData && (
+          <Popup
+            title={popupData.title}
+            message={popupData.message}
+            mode={popupData.mode}
+            onClose={() => setPopupData(null)}
+          />
+        )}
+
+        {confirmPopup && (
+          <Popup
+            title="אישור שמירת תיעוד"
+            message="האם אתה בטוח שברצונך לשמור את התיעוד?"
+            mode="confirm"
+            onConfirm={handleSaveNote}
+            onClose={() => setConfirmPopup(false)}
+          />
+        )}
       </div>
-
-      {/* פופאפים */}
-      {popupData && (
-        <Popup
-          title={popupData.title}
-          message={popupData.message}
-          mode={popupData.mode}
-          onClose={() => setPopupData(null)}
-        />
-      )}
-
-      {confirmPopup && (
-        <Popup
-          title="אישור שמירת תיעוד"
-          message="האם אתה בטוח שברצונך לשמור את התיעוד?"
-          mode="confirm"
-          onConfirm={handleSaveNote}
-          onClose={() => setConfirmPopup(false)}
-        />
-      )}
-    </div>
+    </ProtectedRoute>
   );
 };
 

@@ -19,6 +19,7 @@ import { Popup, useUser } from "components/Tools";
 import ReportView from "../Reports/ReportView";
 import { api, extractApiError } from "utils";
 import { fetchFullNameByUserId } from "../../utils/fullNameUser";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 export default function Tasks() {
   const [tasks, setTasks] = useState([]);
@@ -368,85 +369,87 @@ export default function Tasks() {
   );
 
   return (
-    <div className="flex flex-col flex-1 p-6 text-right">
-      <ReportView
-        title="רשימת משימות"
-        columns={columns}
-        rows={tasks}
-        filtersDef={filtersDef}
-        searchableKeys={["task_title", "description"]}
-        searchPlaceholder="חיפוש לפי נושא"
-        addButton={
-          user?.permission_add_task === 1 && (
-            <AppButton
-              label="הוספת משימה חדשה"
-              icon={
-                <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
-              }
-              variant="navigate"
-              to="/dashboard/add_task"
-            />
-          )
-        }
-        defaultFilters={defaultFilters}
-        extraTopContent={bulkAssignBar}
-      />
-
-      {/* Popups */}
-      {popup && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() => setPopup(null)}
+    <ProtectedRoute permission="tasks_page_access">
+      <div className="flex flex-col flex-1 p-6 text-right">
+        <ReportView
+          title="רשימת משימות"
+          columns={columns}
+          rows={tasks}
+          filtersDef={filtersDef}
+          searchableKeys={["task_title", "description"]}
+          searchPlaceholder="חיפוש לפי נושא"
+          addButton={
+            user?.permission_add_task === 1 && (
+              <AppButton
+                label="הוספת משימה חדשה"
+                icon={
+                  <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+                }
+                variant="navigate"
+                to="/dashboard/add_task"
+              />
+            )
+          }
+          defaultFilters={defaultFilters}
+          extraTopContent={bulkAssignBar}
         />
-      )}
 
-      {repToSave && (
-        <Popup
-          title="עדכון נציג"
-          message={`"האם לעדכן את " ${fullName} " כמטפל במשימה זו ?"`}
-          mode="confirm"
-          onConfirm={handleRepSave}
-          onClose={() => {
-            setRepToSave(null);
-            setNewRepId(null);
-          }}
-        />
-      )}
+        {/* Popups */}
+        {popup && (
+          <Popup
+            title={popup.title}
+            message={popup.message}
+            mode={popup.mode}
+            onClose={() => setPopup(null)}
+          />
+        )}
 
-      {statusToSave && (
-        <Popup
-          title="עדכון סטטוס"
-          message={`האם לעדכן את סטטוס משימה ל " ${newStatus} " ?`}
-          mode="confirm"
-          onConfirm={handleStatusSave}
-          onClose={() => {
-            setStatusToSave(null);
-            setNewStatus(null);
-          }}
-        />
-      )}
+        {repToSave && (
+          <Popup
+            title="עדכון נציג"
+            message={`"האם לעדכן את " ${fullName} " כמטפל במשימה זו ?"`}
+            mode="confirm"
+            onConfirm={handleRepSave}
+            onClose={() => {
+              setRepToSave(null);
+              setNewRepId(null);
+            }}
+          />
+        )}
 
-      {taskToDelete && (
-        <Popup
-          title="ביטול משימה"
-          message={`האם לבטל משימה מספר [ ${taskToDelete} ] ?`}
-          mode="confirm"
-          onConfirm={handleDelete}
-          onClose={() => setTaskToDelete(null)}
-        />
-      )}
+        {statusToSave && (
+          <Popup
+            title="עדכון סטטוס"
+            message={`האם לעדכן את סטטוס משימה ל " ${newStatus} " ?`}
+            mode="confirm"
+            onConfirm={handleStatusSave}
+            onClose={() => {
+              setStatusToSave(null);
+              setNewStatus(null);
+            }}
+          />
+        )}
 
-      {bulkAssignConfirm && (
-        <Popup
-          title="אישור שיוך מרובה"
-          message={`האם לשייך ${selectedTasks.length} משימות?`}
-          mode="confirm"
-          onConfirm={handleBulkAssign}
-          onClose={() => setBulkAssignConfirm(false)}
-        />
-      )}
-    </div>
+        {taskToDelete && (
+          <Popup
+            title="ביטול משימה"
+            message={`האם לבטל משימה מספר [ ${taskToDelete} ] ?`}
+            mode="confirm"
+            onConfirm={handleDelete}
+            onClose={() => setTaskToDelete(null)}
+          />
+        )}
+
+        {bulkAssignConfirm && (
+          <Popup
+            title="אישור שיוך מרובה"
+            message={`האם לשייך ${selectedTasks.length} משימות?`}
+            mode="confirm"
+            onConfirm={handleBulkAssign}
+            onClose={() => setBulkAssignConfirm(false)}
+          />
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }
