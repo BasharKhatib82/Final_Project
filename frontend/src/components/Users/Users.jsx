@@ -19,6 +19,7 @@ import { AppButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
 import { api, extractApiError } from "utils";
 import { fetchFullNameByUserId } from "../../utils/fullNameUser";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 //פונקציית עזר לבדיקת סטטוס
 const isActive = (v) => v === true || v === 1 || v === "1";
@@ -198,56 +199,62 @@ export default function Users() {
   const defaultFilters = { active: "true" };
 
   return (
-    <div className="flex flex-col flex-1 p-6 text-right">
-      {loading ? (
-        <div className="text-center text-gray-600">טוען נתונים...</div>
-      ) : (
-        <ReportView
-          title="רשימת עובדים"
-          columns={columns}
-          rows={allUsers}
-          filtersDef={filtersDef}
-          searchableKeys={["first_name", "last_name", "email", "role_name"]}
-          pageSize={10}
-          emailApiBase={process.env.REACT_APP_API_URL}
-          addButton={
-            user?.permission_add_user === 1 && (
-              <AppButton
-                label="הוספת עובד חדש"
-                icon={
-                  <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
-                }
-                variant="navigate"
-                to="/dashboard/add_user"
-              />
-            )
-          }
-          defaultFilters={defaultFilters}
-          searchPlaceholder="חיפוש לפי שם או אימייל..."
-        />
-      )}
+    <ProtectedRoute permission="users_page_access">
+      <div className="flex flex-col flex-1 p-6 text-right">
+        {loading ? (
+          <div className="text-center text-gray-600">טוען נתונים...</div>
+        ) : (
+          <ReportView
+            title="רשימת עובדים"
+            columns={columns}
+            rows={allUsers}
+            filtersDef={filtersDef}
+            searchableKeys={["first_name", "last_name", "email", "role_name"]}
+            pageSize={10}
+            emailApiBase={process.env.REACT_APP_API_URL}
+            addButton={
+              user?.permission_add_user === 1 && (
+                <AppButton
+                  label="הוספת עובד חדש"
+                  icon={
+                    <Icon
+                      icon="basil:add-outline"
+                      width="1.2em"
+                      height="1.2em"
+                    />
+                  }
+                  variant="navigate"
+                  to="/dashboard/add_user"
+                />
+              )
+            }
+            defaultFilters={defaultFilters}
+            searchPlaceholder="חיפוש לפי שם או אימייל..."
+          />
+        )}
 
-      {popup.show && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() =>
-            setPopup({
-              show: false,
-              title: "",
-              message: "",
-              mode: "",
-              user_id: null,
-            })
-          }
-          onConfirm={
-            popup.mode === "confirm"
-              ? () => confirmDelete(popup.user_id)
-              : undefined
-          }
-        />
-      )}
-    </div>
+        {popup.show && (
+          <Popup
+            title={popup.title}
+            message={popup.message}
+            mode={popup.mode}
+            onClose={() =>
+              setPopup({
+                show: false,
+                title: "",
+                message: "",
+                mode: "",
+                user_id: null,
+              })
+            }
+            onConfirm={
+              popup.mode === "confirm"
+                ? () => confirmDelete(popup.user_id)
+                : undefined
+            }
+          />
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

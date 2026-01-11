@@ -16,6 +16,7 @@ import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { Popup } from "components/Tools";
 import { api, extractApiError } from "utils";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 export default function AddLead() {
   const navigate = useNavigate();
@@ -129,136 +130,140 @@ export default function AddLead() {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto font-rubik">
-      <h2 className="text-2xl font-bold text-center text-blue-700 mb-6">
-        הוספת פנייה חדשה
-      </h2>
+    <ProtectedRoute permission="leads_page_access">
+      <div className="p-6 max-w-2xl mx-auto font-rubik">
+        <h2 className="text-2xl font-bold text-center text-blue-700 mb-6">
+          הוספת פנייה חדשה
+        </h2>
 
-      <form
-        onSubmit={handleConfirm}
-        className="bg-white/85 p-6 rounded-lg shadow-lg space-y-4"
-      >
-        <div>
-          <label className="block mb-1 font-semibold">מספר טלפון:</label>
-          <input
-            type="text"
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            value={form.phone_number}
-            onChange={(e) => setForm({ ...form, phone_number: e.target.value })}
-            onBlur={handlePhoneBlur}
+        <form
+          onSubmit={handleConfirm}
+          className="bg-white/85 p-6 rounded-lg shadow-lg space-y-4"
+        >
+          <div>
+            <label className="block mb-1 font-semibold">מספר טלפון:</label>
+            <input
+              type="text"
+              className="w-full border border-gray-300 rounded px-3 py-2"
+              value={form.phone_number}
+              onChange={(e) =>
+                setForm({ ...form, phone_number: e.target.value })
+              }
+              onBlur={handlePhoneBlur}
+            />
+          </div>
+
+          {!clientExists && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block mb-1 font-semibold">שם פרטי:</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded px-3 py-2"
+                    value={form.first_name}
+                    onChange={(e) =>
+                      setForm({ ...form, first_name: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block mb-1 font-semibold">שם משפחה:</label>
+                  <input
+                    type="text"
+                    className="w-full border border-gray-300 rounded px-3 py-2"
+                    value={form.last_name}
+                    onChange={(e) =>
+                      setForm({ ...form, last_name: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">אימייל:</label>
+                <input
+                  type="email"
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block mb-1 font-semibold">עיר:</label>
+                <input
+                  type="text"
+                  className="w-full border border-gray-300 rounded px-3 py-2"
+                  value={form.city}
+                  onChange={(e) => setForm({ ...form, city: e.target.value })}
+                />
+              </div>
+            </>
+          )}
+
+          <div>
+            <label className="block mb-1 font-semibold">פרויקט:</label>
+            <select
+              className="w-full border border-gray-300 rounded px-3 py-2"
+              value={form.project_id}
+              onChange={(e) => setForm({ ...form, project_id: e.target.value })}
+            >
+              <option value="">בחר פרויקט</option>
+              {projects.map((p) => (
+                <option key={p.project_id} value={p.project_id}>
+                  {p.project_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
+          <div className="text-center flex justify-center gap-4">
+            <AppButton
+              label="הוספת פנייה"
+              type="submit"
+              icon={
+                <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+              }
+              variant="normal"
+            />
+            <AppButton
+              label="ביטול הוספה"
+              icon={
+                <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+              }
+              variant="cancel"
+              to="/dashboard/leads"
+            />
+          </div>
+        </form>
+
+        {/* אישור שמירת פנייה חדשה */}
+        {showConfirmPopup && (
+          <Popup
+            title="אישור שמירה"
+            message={`האם להוסיף פנייה חדשה עבור : " ${form.first_name} ${form.last_name} " ?`}
+            mode="confirm"
+            onConfirm={handleSubmit}
+            onClose={() => setShowConfirmPopup(false)}
           />
-        </div>
-
-        {!clientExists && (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block mb-1 font-semibold">שם פרטי:</label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                  value={form.first_name}
-                  onChange={(e) =>
-                    setForm({ ...form, first_name: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <label className="block mb-1 font-semibold">שם משפחה:</label>
-                <input
-                  type="text"
-                  className="w-full border border-gray-300 rounded px-3 py-2"
-                  value={form.last_name}
-                  onChange={(e) =>
-                    setForm({ ...form, last_name: e.target.value })
-                  }
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block mb-1 font-semibold">אימייל:</label>
-              <input
-                type="email"
-                className="w-full border border-gray-300 rounded px-3 py-2"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className="block mb-1 font-semibold">עיר:</label>
-              <input
-                type="text"
-                className="w-full border border-gray-300 rounded px-3 py-2"
-                value={form.city}
-                onChange={(e) => setForm({ ...form, city: e.target.value })}
-              />
-            </div>
-          </>
         )}
 
-        <div>
-          <label className="block mb-1 font-semibold">פרויקט:</label>
-          <select
-            className="w-full border border-gray-300 rounded px-3 py-2"
-            value={form.project_id}
-            onChange={(e) => setForm({ ...form, project_id: e.target.value })}
-          >
-            <option value="">בחר פרויקט</option>
-            {projects.map((p) => (
-              <option key={p.project_id} value={p.project_id}>
-                {p.project_name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
-        <div className="text-center flex justify-center gap-4">
-          <AppButton
-            label="הוספת פנייה"
-            type="submit"
-            icon={
-              <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
-            }
-            variant="normal"
+        {/* "הודעת הצלחה "יצירת פנייה */}
+        {successPopup && (
+          <Popup
+            title="הצלחה"
+            message={`פנייה חדשה עבור : " ${form.first_name} ${form.last_name} " נוספה בהצלחה !`}
+            mode="success"
+            onClose={() => {
+              setSuccessPopup(false);
+              navigate("/dashboard/leads");
+            }}
           />
-          <AppButton
-            label="ביטול הוספה"
-            icon={
-              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
-            }
-            variant="cancel"
-            to="/dashboard/leads"
-          />
-        </div>
-      </form>
-
-      {/* אישור שמירת פנייה חדשה */}
-      {showConfirmPopup && (
-        <Popup
-          title="אישור שמירה"
-          message={`האם להוסיף פנייה חדשה עבור : " ${form.first_name} ${form.last_name} " ?`}
-          mode="confirm"
-          onConfirm={handleSubmit}
-          onClose={() => setShowConfirmPopup(false)}
-        />
-      )}
-
-      {/* "הודעת הצלחה "יצירת פנייה */}
-      {successPopup && (
-        <Popup
-          title="הצלחה"
-          message={`פנייה חדשה עבור : " ${form.first_name} ${form.last_name} " נוספה בהצלחה !`}
-          mode="success"
-          onClose={() => {
-            setSuccessPopup(false);
-            navigate("/dashboard/leads");
-          }}
-        />
-      )}
-    </div>
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

@@ -20,6 +20,7 @@ import { Icon } from "@iconify/react";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
 import { isValidPass, getPasswordErrors } from "utils/password";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 export default function AddUser() {
   const navigate = useNavigate();
@@ -155,167 +156,177 @@ export default function AddUser() {
   };
 
   return (
-    <div className="flex justify-center items-center pt-10">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2"
-      >
-        <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
-          הוספת עובד חדש
-        </h2>
+    <ProtectedRoute permission="users_page_access">
+      <div className="flex justify-center items-center pt-10">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2"
+        >
+          <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
+            הוספת עובד חדש
+          </h2>
 
-        {/* ת.ז */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">
-            תעודת זהות
-          </label>
-          <input
-            type="text"
-            maxLength={9}
-            inputMode="numeric"
-            value={newUser.user_id}
-            onChange={handleUserIdChange}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-            placeholder="הקלד תעודת זהות"
-          />
-        </div>
-
-        {/* שם פרטי */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">שם פרטי</label>
-          <input
-            type="text"
-            value={newUser.first_name}
-            onChange={(e) =>
-              setNewUser({ ...newUser, first_name: e.target.value })
-            }
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        {/* שם משפחה */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">
-            שם משפחה
-          </label>
-          <input
-            type="text"
-            value={newUser.last_name}
-            onChange={(e) =>
-              setNewUser({ ...newUser, last_name: e.target.value })
-            }
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        {/* טלפון */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">
-            מספר טלפון
-          </label>
-          <input
-            type="text"
-            value={newUser.phone_number}
-            onChange={(e) =>
-              setNewUser({ ...newUser, phone_number: e.target.value })
-            }
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        {/* אימייל */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">אימייל</label>
-          <input
-            type="text"
-            value={newUser.email}
-            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        {/* תפקיד */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">תפקיד</label>
-          <select
-            required
-            value={newUser.role_id}
-            onChange={(e) =>
-              setNewUser({ ...newUser, role_id: e.target.value })
-            }
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 bg-white"
-          >
-            <option value="">בחר תפקיד</option>
-            {roles.map((role) => (
-              <option key={role.role_id} value={role.role_id}>
-                {role.role_name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* סיסמה */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">סיסמה</label>
-          <input
-            type="password"
-            value={newUser.password}
-            onChange={(e) =>
-              setNewUser({ ...newUser, password: e.target.value })
-            }
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        {/* הערות */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">הערות</label>
-          <textarea
-            value={newUser.notes}
-            onChange={(e) => setNewUser({ ...newUser, notes: e.target.value })}
-            rows={2}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        {/* כפתורים */}
-        <div className="flex justify-around pt-4">
-          {currentUser?.permission_add_user === 1 && (
-            <AppButton
-              label="הוספת עובד"
-              type="submit"
-              icon={
-                <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
-              }
-              variant="normal"
+          {/* ת.ז */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">
+              תעודת זהות
+            </label>
+            <input
+              type="text"
+              maxLength={9}
+              inputMode="numeric"
+              value={newUser.user_id}
+              onChange={handleUserIdChange}
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+              placeholder="הקלד תעודת זהות"
             />
-          )}
+          </div>
 
-          <AppButton
-            label="ביטול הוספה"
-            icon={
-              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
-            }
-            variant="cancel"
-            to="/dashboard/users"
+          {/* שם פרטי */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">
+              שם פרטי
+            </label>
+            <input
+              type="text"
+              value={newUser.first_name}
+              onChange={(e) =>
+                setNewUser({ ...newUser, first_name: e.target.value })
+              }
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+
+          {/* שם משפחה */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">
+              שם משפחה
+            </label>
+            <input
+              type="text"
+              value={newUser.last_name}
+              onChange={(e) =>
+                setNewUser({ ...newUser, last_name: e.target.value })
+              }
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+
+          {/* טלפון */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">
+              מספר טלפון
+            </label>
+            <input
+              type="text"
+              value={newUser.phone_number}
+              onChange={(e) =>
+                setNewUser({ ...newUser, phone_number: e.target.value })
+              }
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+
+          {/* אימייל */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">
+              אימייל
+            </label>
+            <input
+              type="text"
+              value={newUser.email}
+              onChange={(e) =>
+                setNewUser({ ...newUser, email: e.target.value })
+              }
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+
+          {/* תפקיד */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">תפקיד</label>
+            <select
+              required
+              value={newUser.role_id}
+              onChange={(e) =>
+                setNewUser({ ...newUser, role_id: e.target.value })
+              }
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 bg-white"
+            >
+              <option value="">בחר תפקיד</option>
+              {roles.map((role) => (
+                <option key={role.role_id} value={role.role_id}>
+                  {role.role_name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* סיסמה */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">סיסמה</label>
+            <input
+              type="password"
+              value={newUser.password}
+              onChange={(e) =>
+                setNewUser({ ...newUser, password: e.target.value })
+              }
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+
+          {/* הערות */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">הערות</label>
+            <textarea
+              value={newUser.notes}
+              onChange={(e) =>
+                setNewUser({ ...newUser, notes: e.target.value })
+              }
+              rows={2}
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+
+          {/* כפתורים */}
+          <div className="flex justify-around pt-4">
+            {currentUser?.permission_add_user === 1 && (
+              <AppButton
+                label="הוספת עובד"
+                type="submit"
+                icon={
+                  <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+                }
+                variant="normal"
+              />
+            )}
+
+            <AppButton
+              label="ביטול הוספה"
+              icon={
+                <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+              }
+              variant="cancel"
+              to="/dashboard/users"
+            />
+          </div>
+        </form>
+
+        {popup.show && (
+          <Popup
+            title={popup.title}
+            message={popup.message}
+            mode={popup.mode}
+            onClose={() => {
+              setPopup({ show: false, title: "", message: "", mode: "info" });
+              if (popup.mode === "success") {
+                navigate("/dashboard/users");
+              }
+            }}
+            onConfirm={popup.mode === "confirm" ? confirmCreate : undefined}
           />
-        </div>
-      </form>
-
-      {popup.show && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() => {
-            setPopup({ show: false, title: "", message: "", mode: "info" });
-            if (popup.mode === "success") {
-              navigate("/dashboard/users");
-            }
-          }}
-          onConfirm={popup.mode === "confirm" ? confirmCreate : undefined}
-        />
-      )}
-    </div>
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

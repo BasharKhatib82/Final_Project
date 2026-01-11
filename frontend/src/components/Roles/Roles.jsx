@@ -25,6 +25,7 @@ import { Popup, useUser } from "components/Tools";
 import ReportView from "../Reports/ReportView";
 import { permissionsSchema } from "constants";
 import { api, extractApiError } from "utils";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 //פונקציית עזר לבדיקת סטטוס
 const isActive = (v) => v === true || v === 1 || v === "1";
@@ -247,56 +248,62 @@ export default function Roles() {
   const defaultFilters = { active: "true" };
 
   return (
-    <div className="flex flex-col flex-1 p-6 text-right">
-      {loading ? (
-        <div className="text-center text-gray-600">טוען נתונים...</div>
-      ) : (
-        <ReportView
-          title="רשימת תפקידים"
-          columns={columns}
-          rows={allRoles}
-          filtersDef={filtersDef}
-          searchableKeys={["role_name"]}
-          pageSize={10}
-          emailApiBase={process.env.REACT_APP_API_URL}
-          addButton={
-            user?.permission_add_role === 1 && (
-              <AppButton
-                label="הוספת תפקיד חדש"
-                icon={
-                  <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
-                }
-                variant="navigate"
-                to="/dashboard/add_role"
-              />
-            )
-          }
-          defaultFilters={defaultFilters}
-          searchPlaceholder="שם תפקיד..."
-        />
-      )}
+    <ProtectedRoute permission="roles_page_access">
+      <div className="flex flex-col flex-1 p-6 text-right">
+        {loading ? (
+          <div className="text-center text-gray-600">טוען נתונים...</div>
+        ) : (
+          <ReportView
+            title="רשימת תפקידים"
+            columns={columns}
+            rows={allRoles}
+            filtersDef={filtersDef}
+            searchableKeys={["role_name"]}
+            pageSize={10}
+            emailApiBase={process.env.REACT_APP_API_URL}
+            addButton={
+              user?.permission_add_role === 1 && (
+                <AppButton
+                  label="הוספת תפקיד חדש"
+                  icon={
+                    <Icon
+                      icon="basil:add-outline"
+                      width="1.2em"
+                      height="1.2em"
+                    />
+                  }
+                  variant="navigate"
+                  to="/dashboard/add_role"
+                />
+              )
+            }
+            defaultFilters={defaultFilters}
+            searchPlaceholder="שם תפקיד..."
+          />
+        )}
 
-      {popup.show && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() =>
-            setPopup({
-              show: false,
-              title: "",
-              message: "",
-              mode: "",
-              role_id: null,
-            })
-          }
-          onConfirm={
-            popup.mode === "confirm"
-              ? () => confirmDelete(popup.role_id)
-              : undefined
-          }
-        />
-      )}
-    </div>
+        {popup.show && (
+          <Popup
+            title={popup.title}
+            message={popup.message}
+            mode={popup.mode}
+            onClose={() =>
+              setPopup({
+                show: false,
+                title: "",
+                message: "",
+                mode: "",
+                role_id: null,
+              })
+            }
+            onConfirm={
+              popup.mode === "confirm"
+                ? () => confirmDelete(popup.role_id)
+                : undefined
+            }
+          />
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

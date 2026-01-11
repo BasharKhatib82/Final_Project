@@ -24,6 +24,7 @@ import { useUser, Popup } from "components/Tools";
 import { AppButton } from "components/Buttons";
 import ReportView from "../Reports/ReportView";
 import { api, formatDate, formatTime, extractApiError } from "utils";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 export default function Attendance() {
   const [attendance, setAttendance] = useState([]);
@@ -208,44 +209,50 @@ export default function Attendance() {
   ];
 
   return (
-    <div className="flex flex-col flex-1 p-6 text-right">
-      {loading || users.length === 0 ? (
-        <div className="text-center text-gray-600">טוען נתונים...</div>
-      ) : (
-        <ReportView
-          title="רשימת נוכחות"
-          columns={columns}
-          rows={attendance}
-          filtersDef={filtersDef}
-          searchableKeys={["status", "notes", "full_name"]}
-          pageSize={10}
-          emailApiBase={api.defaults.baseURL}
-          addButton={
-            user?.permission_add_attendance === 1 ? (
-              <AppButton
-                label="הוספת נוכחות חדשה"
-                icon={
-                  <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
-                }
-                variant="navigate"
-                to="/dashboard/add_attendance"
-              />
-            ) : null
-          }
-          defaultFilters={{}}
-          searchPlaceholder=" לפי שם עובד / פעולה..."
-          filtersVariant="inline"
-        />
-      )}
+    <ProtectedRoute permission="attendance_page_access">
+      <div className="flex flex-col flex-1 p-6 text-right">
+        {loading || users.length === 0 ? (
+          <div className="text-center text-gray-600">טוען נתונים...</div>
+        ) : (
+          <ReportView
+            title="רשימת נוכחות"
+            columns={columns}
+            rows={attendance}
+            filtersDef={filtersDef}
+            searchableKeys={["status", "notes", "full_name"]}
+            pageSize={10}
+            emailApiBase={api.defaults.baseURL}
+            addButton={
+              user?.permission_add_attendance === 1 ? (
+                <AppButton
+                  label="הוספת נוכחות חדשה"
+                  icon={
+                    <Icon
+                      icon="basil:add-outline"
+                      width="1.2em"
+                      height="1.2em"
+                    />
+                  }
+                  variant="navigate"
+                  to="/dashboard/add_attendance"
+                />
+              ) : null
+            }
+            defaultFilters={{}}
+            searchPlaceholder=" לפי שם עובד / פעולה..."
+            filtersVariant="inline"
+          />
+        )}
 
-      {popup?.show && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() => setPopup(null)}
-        />
-      )}
-    </div>
+        {popup?.show && (
+          <Popup
+            title={popup.title}
+            message={popup.message}
+            mode={popup.mode}
+            onClose={() => setPopup(null)}
+          />
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

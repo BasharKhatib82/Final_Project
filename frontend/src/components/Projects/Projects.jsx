@@ -20,6 +20,7 @@ import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
 import ReportView from "../Reports/ReportView";
 import { fetchProjectNameById } from "../../utils/projectName";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 //פונקציית עזר לבדיקת סטטוס
 const isActive = (v) => v === true || v === 1 || v === "1";
@@ -63,10 +64,10 @@ export default function Projects() {
 
       setProjects(projects);
     } catch (err) {
-          if (err.response?.status === 401) {
-            navigate("/", { replace: true });
-            return;
-          }
+      if (err.response?.status === 401) {
+        navigate("/", { replace: true });
+        return;
+      }
       setPopup({
         title: "שגיאה",
         message: extractApiError(err, "שגיאה בטעינת פרויקטים"),
@@ -185,52 +186,54 @@ export default function Projects() {
   const defaultFilters = { active: "true" };
 
   return (
-    <div className="flex flex-col flex-1 p-6 text-right">
-      <ReportView
-        title="רשימת פרויקטים"
-        columns={columns}
-        rows={projects}
-        filtersDef={filtersDef}
-        searchableKeys={["project_name", "project_description"]}
-        pageSize={10}
-        searchPlaceholder="חיפוש לפי שם או תיאור..."
-        emailApiBase={api.defaults.baseURL}
-        filtersVariant="inline"
-        addButton={
-          user?.permission_add_lead === 1 && (
-            <AppButton
-              label="הוספת פרויקט חדש"
-              icon={
-                <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
-              }
-              variant="navigate"
-              to="/dashboard/add_project"
-            />
-          )
-        }
-        defaultFilters={defaultFilters}
-      />
-
-      {/* פופאפ מחיקה */}
-      {projectToDelete && (
-        <Popup
-          title="אישור מחיקת פרויקט"
-          message={`האם אתה מאשר למחוק את הפרויקט : " ${projectName} " ?`}
-          mode="confirm"
-          onConfirm={handleDeleteProject}
-          onClose={() => setProjectToDelete(null)}
+    <ProtectedRoute permission="projects_page_access">
+      <div className="flex flex-col flex-1 p-6 text-right">
+        <ReportView
+          title="רשימת פרויקטים"
+          columns={columns}
+          rows={projects}
+          filtersDef={filtersDef}
+          searchableKeys={["project_name", "project_description"]}
+          pageSize={10}
+          searchPlaceholder="חיפוש לפי שם או תיאור..."
+          emailApiBase={api.defaults.baseURL}
+          filtersVariant="inline"
+          addButton={
+            user?.permission_add_lead === 1 && (
+              <AppButton
+                label="הוספת פרויקט חדש"
+                icon={
+                  <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+                }
+                variant="navigate"
+                to="/dashboard/add_project"
+              />
+            )
+          }
+          defaultFilters={defaultFilters}
         />
-      )}
 
-      {/* פופאפ כללי */}
-      {popup?.show && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() => setPopup(null)}
-        />
-      )}
-    </div>
+        {/* פופאפ מחיקה */}
+        {projectToDelete && (
+          <Popup
+            title="אישור מחיקת פרויקט"
+            message={`האם אתה מאשר למחוק את הפרויקט : " ${projectName} " ?`}
+            mode="confirm"
+            onConfirm={handleDeleteProject}
+            onClose={() => setProjectToDelete(null)}
+          />
+        )}
+
+        {/* פופאפ כללי */}
+        {popup?.show && (
+          <Popup
+            title={popup.title}
+            message={popup.message}
+            mode={popup.mode}
+            onClose={() => setPopup(null)}
+          />
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

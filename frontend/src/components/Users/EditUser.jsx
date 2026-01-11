@@ -19,6 +19,7 @@ import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { Popup, useUser } from "components/Tools";
 import { api, extractApiError } from "utils";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 export default function EditUser() {
   const { id } = useParams();
@@ -93,8 +94,7 @@ export default function EditUser() {
         setPopup({
           show: true,
           title: "הצלחה",
-          message:
-            `פרטי המשתמש : " ${userData.first_name} ${userData.last_name} " עודכו בהצלחה !`,
+          message: `פרטי המשתמש : " ${userData.first_name} ${userData.last_name} " עודכו בהצלחה !`,
           mode: "success",
         });
       })
@@ -117,153 +117,159 @@ export default function EditUser() {
   }
 
   return (
-    <div className="flex justify-center items-center pt-10">
-      <form
-        onSubmit={handleSubmit}
-        className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2 text-right"
-      >
-        <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
-          עדכון פרטי משתמש
-        </h2>
+    <ProtectedRoute permission="users_page_access">
+      <div className="flex justify-center items-center pt-10">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-lg bg-white/85 shadow-md rounded-lg p-6 space-y-2 text-right"
+        >
+          <h2 className="font-rubik text-2xl font-semibold text-blue-700 text-center">
+            עדכון פרטי משתמש
+          </h2>
 
-        {/* שם פרטי */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">שם פרטי</label>
-          <input
-            type="text"
-            name="first_name"
-            value={userData.first_name}
-            onChange={handleChange}
-            required
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        {/* שם משפחה */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">
-            שם משפחה
-          </label>
-          <input
-            type="text"
-            name="last_name"
-            value={userData.last_name}
-            onChange={handleChange}
-            required
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        {/* טלפון */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">טלפון</label>
-          <input
-            type="text"
-            name="phone_number"
-            value={userData.phone_number || ""}
-            onChange={handlePhoneChange}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        {/* אימייל */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">אימייל</label>
-          <input
-            type="email"
-            name="email"
-            value={userData.email}
-            onChange={handleChange}
-            required
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          />
-        </div>
-
-        {/* תפקיד */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">תפקיד</label>
-          <select
-            name="role_id"
-            value={userData.role_id}
-            onChange={handleChange}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 bg-white"
-          >
-            {roles.map((role) => (
-              <option key={role.role_id} value={role.role_id}>
-                {role.role_name} {!role.active ? " 🚫 תפקיד לא פעיל" : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* הערות */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">הערות</label>
-          <textarea
-            name="notes"
-            value={userData.notes || ""}
-            onChange={handleChange}
-            rows="2"
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
-          ></textarea>
-        </div>
-
-        {/* סטטוס */}
-        <div>
-          <label className="font-rubik block mb-0.5 font-medium">סטטוס</label>
-          <select
-            name="active"
-            value={userData.active}
-            onChange={handleChange}
-            className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 bg-white"
-          >
-            <option value="1">פעיל</option>
-            <option value="0">לא פעיל</option>
-          </select>
-        </div>
-
-        {/* כפתורים */}
-        <div className="flex justify-around pt-4">
-          {currentUser?.permission_edit_user === 1 && (
-            <AppButton
-              label="שמור שינויים"
-              type="submit"
-              icon={
-                <Icon
-                  icon="fluent:save-edit-20-regular"
-                  width="1.2em"
-                  height="1.2em"
-                />
-              }
-              variant="normal"
+          {/* שם פרטי */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">
+              שם פרטי
+            </label>
+            <input
+              type="text"
+              name="first_name"
+              value={userData.first_name}
+              onChange={handleChange}
+              required
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
             />
-          )}
-          <AppButton
-            label="ביטול עריכה"
-            icon={
-              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
-            }
-            variant="cancel"
-            to="/dashboard/users"
-          />
-        </div>
-      </form>
+          </div>
 
-      {/* Popup */}
-      {popup.show && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() => {
-            setPopup({ show: false, title: "", message: "", mode: "info" });
-            if (popup.mode === "success") {
-              navigate("/dashboard/users");
-            }
-          }}
-          onConfirm={popup.mode === "confirm" ? confirmUpdate : undefined}
-        />
-      )}
-    </div>
+          {/* שם משפחה */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">
+              שם משפחה
+            </label>
+            <input
+              type="text"
+              name="last_name"
+              value={userData.last_name}
+              onChange={handleChange}
+              required
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+
+          {/* טלפון */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">טלפון</label>
+            <input
+              type="text"
+              name="phone_number"
+              value={userData.phone_number || ""}
+              onChange={handlePhoneChange}
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+
+          {/* אימייל */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">
+              אימייל
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={userData.email}
+              onChange={handleChange}
+              required
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            />
+          </div>
+
+          {/* תפקיד */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">תפקיד</label>
+            <select
+              name="role_id"
+              value={userData.role_id}
+              onChange={handleChange}
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 bg-white"
+            >
+              {roles.map((role) => (
+                <option key={role.role_id} value={role.role_id}>
+                  {role.role_name} {!role.active ? " 🚫 תפקיד לא פעיל" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* הערות */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">הערות</label>
+            <textarea
+              name="notes"
+              value={userData.notes || ""}
+              onChange={handleChange}
+              rows="2"
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2"
+            ></textarea>
+          </div>
+
+          {/* סטטוס */}
+          <div>
+            <label className="font-rubik block mb-0.5 font-medium">סטטוס</label>
+            <select
+              name="active"
+              value={userData.active}
+              onChange={handleChange}
+              className="font-rubik text-sm w-full border border-gray-300 rounded px-3 py-2 bg-white"
+            >
+              <option value="1">פעיל</option>
+              <option value="0">לא פעיל</option>
+            </select>
+          </div>
+
+          {/* כפתורים */}
+          <div className="flex justify-around pt-4">
+            {currentUser?.permission_edit_user === 1 && (
+              <AppButton
+                label="שמור שינויים"
+                type="submit"
+                icon={
+                  <Icon
+                    icon="fluent:save-edit-20-regular"
+                    width="1.2em"
+                    height="1.2em"
+                  />
+                }
+                variant="normal"
+              />
+            )}
+            <AppButton
+              label="ביטול עריכה"
+              icon={
+                <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+              }
+              variant="cancel"
+              to="/dashboard/users"
+            />
+          </div>
+        </form>
+
+        {/* Popup */}
+        {popup.show && (
+          <Popup
+            title={popup.title}
+            message={popup.message}
+            mode={popup.mode}
+            onClose={() => {
+              setPopup({ show: false, title: "", message: "", mode: "info" });
+              if (popup.mode === "success") {
+                navigate("/dashboard/users");
+              }
+            }}
+            onConfirm={popup.mode === "confirm" ? confirmUpdate : undefined}
+          />
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

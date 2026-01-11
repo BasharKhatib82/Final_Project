@@ -16,6 +16,7 @@ import { useUser, Popup } from "components/Tools";
 import { AppButton } from "components/Buttons";
 import { api, extractApiError } from "utils";
 import ReportView from "../Reports/ReportView";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
 
 export default function Leads() {
   const [leads, setLeads] = useState([]);
@@ -390,92 +391,94 @@ export default function Leads() {
   ];
   const defaultFilters = { status: "חדשה" };
   return (
-    <div className="flex flex-col flex-1 p-6 text-right">
-      <ReportView
-        title="רשימת פניות"
-        columns={columns}
-        rows={leads}
-        filtersDef={filtersDef}
-        searchableKeys={["phone_number", "full_name"]}
-        pageSize={10}
-        searchPlaceholder="חיפוש לפי שם או טלפון..."
-        emailApiBase={api.defaults.baseURL}
-        filtersVariant="inline"
-        addButton={
-          user?.permission_add_lead === 1 && (
-            <AppButton
-              label="הוספת פנייה חדשה"
-              icon={
-                <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
-              }
-              variant="navigate"
-              to="/dashboard/add_lead"
-            />
-          )
-        }
-        defaultFilters={defaultFilters}
-        extraTopContent={bulkAssignBar}
-      />
-
-      {/* Popups */}
-      {popup?.show && (
-        <Popup
-          title={popup.title}
-          message={popup.message}
-          mode={popup.mode}
-          onClose={() => setPopup(null)}
+    <ProtectedRoute permission="leads_page_access">
+      <div className="flex flex-col flex-1 p-6 text-right">
+        <ReportView
+          title="רשימת פניות"
+          columns={columns}
+          rows={leads}
+          filtersDef={filtersDef}
+          searchableKeys={["phone_number", "full_name"]}
+          pageSize={10}
+          searchPlaceholder="חיפוש לפי שם או טלפון..."
+          emailApiBase={api.defaults.baseURL}
+          filtersVariant="inline"
+          addButton={
+            user?.permission_add_lead === 1 && (
+              <AppButton
+                label="הוספת פנייה חדשה"
+                icon={
+                  <Icon icon="basil:add-outline" width="1.2em" height="1.2em" />
+                }
+                variant="navigate"
+                to="/dashboard/add_lead"
+              />
+            )
+          }
+          defaultFilters={defaultFilters}
+          extraTopContent={bulkAssignBar}
         />
-      )}
 
-      {/* הודעת עדכון נציג מטפל בפנייה */}
-      {repToSave && (
-        <Popup
-          title="עדכון נציג"
-          message="האם לעדכן נציג מטפל לפנייה זו ?"
-          mode="confirm"
-          onConfirm={handleRepSave}
-          onClose={() => {
-            setRepToSave(null);
-            setNewRepId(null);
-          }}
-        />
-      )}
+        {/* Popups */}
+        {popup?.show && (
+          <Popup
+            title={popup.title}
+            message={popup.message}
+            mode={popup.mode}
+            onClose={() => setPopup(null)}
+          />
+        )}
 
-      {/* הודעת עדכון סטטוס פנייה */}
-      {statusToSave && (
-        <Popup
-          title="עדכון סטטוס"
-          message={`האם לעדכן סטטוס פנייה מספר [ ${statusToSave} ] ?`}
-          mode="confirm"
-          onConfirm={handleStatusSave}
-          onClose={() => {
-            setStatusToSave(null);
-            setNewStatus(null);
-          }}
-        />
-      )}
+        {/* הודעת עדכון נציג מטפל בפנייה */}
+        {repToSave && (
+          <Popup
+            title="עדכון נציג"
+            message="האם לעדכן נציג מטפל לפנייה זו ?"
+            mode="confirm"
+            onConfirm={handleRepSave}
+            onClose={() => {
+              setRepToSave(null);
+              setNewRepId(null);
+            }}
+          />
+        )}
 
-      {/* הודעת מחיקת פנייה */}
-      {leadToDelete && (
-        <Popup
-          title="אישור ביטול פנייה"
-          message={`האם אתה בטוח שברצונך לבטל פנייה מספר [ ${leadToDelete} ] ?`}
-          mode="confirm"
-          onConfirm={handleDelete}
-          onClose={() => setLeadToDelete(null)}
-        />
-      )}
+        {/* הודעת עדכון סטטוס פנייה */}
+        {statusToSave && (
+          <Popup
+            title="עדכון סטטוס"
+            message={`האם לעדכן סטטוס פנייה מספר [ ${statusToSave} ] ?`}
+            mode="confirm"
+            onConfirm={handleStatusSave}
+            onClose={() => {
+              setStatusToSave(null);
+              setNewStatus(null);
+            }}
+          />
+        )}
 
-      {/* הודעת שיוך פניות מרובה */}
-      {bulkAssignConfirm && (
-        <Popup
-          title="אישור שיוך מרובה"
-          message={`האם אתה בטוח שברצונך לשייך ${selectedLeads.length} פניות לנציג שנבחר ?`}
-          mode="confirm"
-          onConfirm={handleBulkAssign}
-          onClose={() => setBulkAssignConfirm(false)}
-        />
-      )}
-    </div>
+        {/* הודעת מחיקת פנייה */}
+        {leadToDelete && (
+          <Popup
+            title="אישור ביטול פנייה"
+            message={`האם אתה בטוח שברצונך לבטל פנייה מספר [ ${leadToDelete} ] ?`}
+            mode="confirm"
+            onConfirm={handleDelete}
+            onClose={() => setLeadToDelete(null)}
+          />
+        )}
+
+        {/* הודעת שיוך פניות מרובה */}
+        {bulkAssignConfirm && (
+          <Popup
+            title="אישור שיוך מרובה"
+            message={`האם אתה בטוח שברצונך לשייך ${selectedLeads.length} פניות לנציג שנבחר ?`}
+            mode="confirm"
+            onConfirm={handleBulkAssign}
+            onClose={() => setBulkAssignConfirm(false)}
+          />
+        )}
+      </div>
+    </ProtectedRoute>
   );
 }

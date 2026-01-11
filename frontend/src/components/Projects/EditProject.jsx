@@ -12,6 +12,8 @@ import { Popup, useUser } from "components/Tools";
 import { AppButton } from "components/Buttons";
 import { Icon } from "@iconify/react";
 import { api } from "utils";
+import ProtectedRoute from "components/Tools/ProtectedRoute";
+
 
 const EditProject = () => {
   const [form, setForm] = useState({
@@ -97,107 +99,109 @@ const EditProject = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto bg-white/90 p-6 mt-8 rounded-lg shadow-md text-right">
-      <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
-        עריכת פרויקט
-      </h2>
+    <ProtectedRoute permission="projects_page_access">
+      <div className="max-w-xl mx-auto bg-white/90 p-6 mt-8 rounded-lg shadow-md text-right">
+        <h2 className="font-rubik text-2xl font-semibold text-blue-700 mb-6 text-center">
+          עריכת פרויקט
+        </h2>
 
-      {error && (
-        <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 text-center">
-          {error}
-        </div>
-      )}
+        {error && (
+          <div className="bg-red-100 text-red-700 px-4 py-2 rounded mb-4 text-center">
+            {error}
+          </div>
+        )}
 
-      <form onSubmit={handleConfirm} className="space-y-4 font-rubik">
-        <div>
-          <label className="block mb-1 font-medium">שם פרויקט *</label>
-          <input
-            type="text"
-            name="project_name"
-            value={form.project_name}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-            required
+        <form onSubmit={handleConfirm} className="space-y-4 font-rubik">
+          <div>
+            <label className="block mb-1 font-medium">שם פרויקט *</label>
+            <input
+              type="text"
+              name="project_name"
+              value={form.project_name}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">תיאור הפרויקט</label>
+            <textarea
+              name="project_description"
+              value={form.project_description}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+              rows={3}
+            />
+          </div>
+
+          <div>
+            <label className="block mb-1 font-medium">סטטוס הפרויקט</label>
+            <select
+              name="active"
+              value={form.active}
+              onChange={(e) =>
+                setForm((prev) => ({
+                  ...prev,
+                  active: Number(e.target.value),
+                }))
+              }
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+            >
+              <option value={1}>פעיל</option>
+              <option value={0}>לא פעיל</option>
+            </select>
+          </div>
+
+          <div className="flex justify-around pt-4">
+            <AppButton
+              label="שמור שינויים"
+              type="submit"
+              icon={
+                <Icon
+                  icon="fluent:save-edit-20-regular"
+                  width="1.2em"
+                  height="1.2em"
+                />
+              }
+              variant="normal"
+            />
+            <AppButton
+              label="ביטול עריכה"
+              icon={
+                <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
+              }
+              variant="cancel"
+              to="/dashboard/projects"
+            />
+          </div>
+        </form>
+
+        {/* פופאפ אישור */}
+        {confirmPopup && (
+          <Popup
+            title="אישור עדכון"
+            message={`האם אתה מאשר לעדכן את הפרויקט : " ${form.project_name} " ?`}
+            mode="confirm"
+            onConfirm={handleSubmit}
+            onClose={() => setConfirmPopup(false)}
           />
-        </div>
+        )}
 
-        <div>
-          <label className="block mb-1 font-medium">תיאור הפרויקט</label>
-          <textarea
-            name="project_description"
-            value={form.project_description}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-            rows={3}
+        {/* פופאפ הצלחה */}
+        {popupData && (
+          <Popup
+            title={popupData.title}
+            message={popupData.message}
+            mode={popupData.mode}
+            onClose={() => {
+              setPopupData(null);
+              navigate("/dashboard/projects");
+            }}
           />
-        </div>
-
-        <div>
-          <label className="block mb-1 font-medium">סטטוס הפרויקט</label>
-          <select
-            name="active"
-            value={form.active}
-            onChange={(e) =>
-              setForm((prev) => ({
-                ...prev,
-                active: Number(e.target.value),
-              }))
-            }
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-          >
-            <option value={1}>פעיל</option>
-            <option value={0}>לא פעיל</option>
-          </select>
-        </div>
-
-        <div className="flex justify-around pt-4">
-          <AppButton
-            label="שמור שינויים"
-            type="submit"
-            icon={
-              <Icon
-                icon="fluent:save-edit-20-regular"
-                width="1.2em"
-                height="1.2em"
-              />
-            }
-            variant="normal"
-          />
-          <AppButton
-            label="ביטול עריכה"
-            icon={
-              <Icon icon="hugeicons:cancel-02" width="1.2em" height="1.2em" />
-            }
-            variant="cancel"
-            to="/dashboard/projects"
-          />
-        </div>
-      </form>
-
-      {/* פופאפ אישור */}
-      {confirmPopup && (
-        <Popup
-          title="אישור עדכון"
-          message={`האם אתה מאשר לעדכן את הפרויקט : " ${form.project_name} " ?`}
-          mode="confirm"
-          onConfirm={handleSubmit}
-          onClose={() => setConfirmPopup(false)}
-        />
-      )}
-
-      {/* פופאפ הצלחה */}
-      {popupData && (
-        <Popup
-          title={popupData.title}
-          message={popupData.message}
-          mode={popupData.mode}
-          onClose={() => {
-            setPopupData(null);
-            navigate("/dashboard/projects");
-          }}
-        />
-      )}
-    </div>
+        )}
+      </div>
+    </ProtectedRoute>
   );
 };
 
