@@ -40,6 +40,14 @@ export default function Projects() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    if (user === undefined) return; // עדיין טוען את המשתמש
+    if (!user) return; // לא מחובר - לא עושים כלום
+    if (user.projects_page_access !== 1) {
+      navigate("/unauthorized", { replace: true });
+    }
+  }, [user, navigate]);
+
+  useEffect(() => {
     fetchProjects();
   }, []);
 
