@@ -1,7 +1,7 @@
 // backend\utils\passwordHelpers.js
 
 import { randomBytes } from "crypto";
-import { format, toZonedTime } from "date-fns-tz";
+import { toZonedTime } from "date-fns-tz";
 
 // שעון ישראל
 const ISRAEL_TZ = "Asia/Jerusalem";
@@ -22,12 +22,7 @@ export function getDaysSince(dateLike) {
  */
 export function generateResetToken(ttlMs = 15 * 60 * 1000) {
   const token = randomBytes(32).toString("hex");
-
-  const utcExpire = new Date(Date.now() + ttlMs);
-  const zoned = toZonedTime(utcExpire, ISRAEL_TZ);
-  const formattedExpire = format(zoned, "yyyy-MM-dd HH:mm:ss", {
-    timeZone: ISRAEL_TZ,
-  });
-
-  return { token, expires: formattedExpire }; // תואם 100% ל־MySQL
+  const utcDate = new Date(Date.now() + ttlMs);
+  const expires = toZonedTime(utcDate, ISRAEL_TZ); // Date אובייקט
+  return { token, expires };
 }
