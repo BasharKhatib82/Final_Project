@@ -63,6 +63,10 @@ export default function Projects() {
 
       setProjects(projects);
     } catch (err) {
+          if (err.response?.status === 401) {
+            navigate("/", { replace: true });
+            return;
+          }
       setPopup({
         title: "שגיאה",
         message: extractApiError(err, "שגיאה בטעינת פרויקטים"),
