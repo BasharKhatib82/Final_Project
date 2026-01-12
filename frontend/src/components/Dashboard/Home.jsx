@@ -241,13 +241,14 @@ const Home = () => {
                 (user?.admin_alert_dash === 1 &&
                   stats?.tasks_by_user_status
                     ?.filter((t) => t.status === "חדשה")
-                    ?.reduce((sum, t) => sum + t.count, "")) ||
+                    ?.reduce((sum, t) => sum + t.count, 0)) ||
                 (user?.user_alert_dash === 1 &&
                   stats?.tasks_by_user_status
                     ?.filter(
                       (t) => t.user_id === user.user_id && t.status === "חדשה"
                     )
-                    ?.reduce((sum, t) => sum + t.count, ""));
+                    ?.reduce((sum, t) => sum + t.count, 0)); // ← וגם כאן
+
               return (
                 tasksCount > 0 && (
                   <AlertBar
