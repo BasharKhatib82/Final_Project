@@ -49,6 +49,7 @@ const Home = () => {
   const fetchDashboardData = async () => {
     try {
       const res = await api.get("/dashboard");
+      console.log("📊 Dashboard Data:", res.data?.data?.leads_by_user); // הוספה
       setStats(res.data?.data || {});
     } catch (err) {
       console.error("דף שגיאה בטעינת דף ניהול :", err);
