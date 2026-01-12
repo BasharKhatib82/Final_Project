@@ -500,7 +500,15 @@ const Home = () => {
         <div className="w-full flex justify-center">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 max-w-7xl">
             <div className="bg-white rounded-xl shadow p-4 h-80">
-              <LeadsStatusPieChart data={stats?.leads_by_user_status || {}} />
+              <LeadsStatusPieChart
+                data={
+                  (user?.data_scope_self === 1
+                    ? stats?.leads_by_user_status?.filter(
+                        (l) => l.user_id === user.user_id
+                      )
+                    : stats?.leads_by_user_status) || []
+                }
+              />
             </div>
             <div className="bg-white rounded-xl shadow p-4 h-80">
               <LeadsByDateBarChart dataByDay={stats?.leads_by_day || []} />

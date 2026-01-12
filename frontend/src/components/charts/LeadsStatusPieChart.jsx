@@ -20,12 +20,29 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const LeadsStatusPieChart = ({ data }) => {
-  // אם data הוא אובייקט ולא מערך - זה הפורמט מהשרת
-  const counts = {
-    new: data?.new || 0,
-    in_progress: data?.in_progress || 0,
-    completed: data?.completed || 0,
-  };
+  // אם מגיע מערך (כמו leads_by_user_status) – נסכם לפי סטטוס
+  let counts = { new: 0, in_progress: 0, completed: 0 };
+
+  if (Array.isArray(data)) {
+    counts = {
+      new: data
+        .filter((item) => item.status === "חדשה")
+        .reduce((sum, i) => sum + i.count, 0),
+      in_progress: data
+        .filter((item) => item.status === "בטיפול")
+        .reduce((sum, i) => sum + i.count, 0),
+      completed: data
+        .filter((item) => item.status === "טופלה")
+        .reduce((sum, i) => sum + i.count, 0),
+    };
+  } else {
+    // פורמט ישן: אובייקט רגיל מהשרת
+    counts = {
+      new: data?.new || 0,
+      in_progress: data?.in_progress || 0,
+      completed: data?.completed || 0,
+    };
+  }
 
   const chartData = {
     labels: ["חדשה", "בטיפול", "טופלה"],
