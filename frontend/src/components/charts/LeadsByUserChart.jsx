@@ -28,9 +28,7 @@ ChartJS.register(BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
 const LeadsByUserChart = ({ data }) => {
   // סינון רק לעובדי שיווק ובסטטוס טופלה
-  const filtered = data.filter(
-    (item) => item.status === "טופלה" && item.role === "עובד שיווק"
-  );
+  const filtered = data.filter((item) => item.status === "טופלה");
 
   const chartData = {
     labels: filtered.map((item) => item.name),
