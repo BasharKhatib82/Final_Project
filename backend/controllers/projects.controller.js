@@ -127,6 +127,20 @@ export async function archiveProject(req, res) {
   }
 
   try {
+    // 🔹 בדיקה אם קיימות פניות משויכות
+    const [leads] = await db.query(
+      `SELECT COUNT(*) AS total FROM leads WHERE project_id = ?`,
+      [Number(id)]
+    );
+
+    if (leads[0].total > 0) {
+      return res.status(409).json({
+        success: false,
+        message: "לא ניתן למחוק פרויקט המשויך לפניות קיימות",
+      });
+    }
+
+    // 🔹 מחיקה לוגית
     const [result] = await db.query(
       `UPDATE projects SET active=0 WHERE project_id=?`,
       [Number(id)]
@@ -138,18 +152,18 @@ export async function archiveProject(req, res) {
         .json({ success: false, message: "פרויקט לא נמצא" });
     }
 
-    // שליפת שם הפרויקט לצורך הלוג
+    // 🔹 לוג
     const [rows] = await db.query(
       "SELECT project_name FROM projects WHERE project_id = ?",
       [Number(id)]
     );
-    const projectName = rows[0].project_name;
 
-    logAction(`מחיקת פרויקט : ${projectName}`, req.user?.user_id)(
+    logAction(`מחיקת פרויקט: ${rows[0].project_name}`, req.user?.user_id)(
       req,
       res,
       () => {}
     );
+
     return res.json({ success: true, message: "הפרויקט הועבר לארכיון" });
   } catch (err) {
     console.error("archiveProject:", err);

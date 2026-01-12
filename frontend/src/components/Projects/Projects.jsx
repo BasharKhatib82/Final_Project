@@ -82,9 +82,15 @@ export default function Projects() {
         throw new Error(res.data.message);
       }
     } catch (err) {
+      const status = err?.response?.status;
+      const message =
+        status === 409
+          ? "לא ניתן למחוק פרויקט המשויך לפניות קיימות"
+          : extractApiError(err, "שגיאה במחיקת פרויקט");
+
       setPopup({
-        title: "שגיאה",
-        message: extractApiError(err, "שגיאה במחיקת פרויקט"),
+        title: "מחיקה לא אפשרית",
+        message,
         mode: "error",
         show: true,
       });
