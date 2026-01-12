@@ -86,13 +86,12 @@ export default function Users() {
   // סימון משתמש כלא פעיל
   const confirmDelete = async (user_id) => {
     try {
-      // שליפת שם מלא לפי user_id
+      // שליפת שם מלא
       const fullName = await fetchFullNameByUserId(user_id);
 
-      // מחיקת המשתמש
+      // מחיקה לוגית
       await api.put(`/users/delete/${user_id}`, { active: 0 });
 
-      // פופאפ הצלחה עם השם
       setPopup({
         show: true,
         title: "הצלחה",
@@ -102,10 +101,25 @@ export default function Users() {
 
       fetchUsers();
     } catch (err) {
+      const status = err?.response?.status;
+      const reason = err?.response?.data?.reason;
+
+      let message = extractApiError(err, "אירעה שגיאה במחיקה");
+
+      if (status === 409) {
+        if (reason === "tasks") {
+          message = "לא ניתן להשבית משתמש המשויך למשימות קיימות";
+        } else if (reason === "leads") {
+          message = "לא ניתן להשבית משתמש המשויך לפניות קיימות";
+        } else {
+          message = "לא ניתן להשבית משתמש עקב נתונים משויכים";
+        }
+      }
+
       setPopup({
         show: true,
-        title: "שגיאה",
-        message: extractApiError(err, "אירעה שגיאה במחיקה"),
+        title: "מחיקה לא אפשרית",
+        message,
         mode: "error",
       });
     }

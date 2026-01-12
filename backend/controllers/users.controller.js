@@ -261,13 +261,22 @@ export async function updateUser(req, res) {
 }
 
 /**
- * מחיקה לוגית של משתמש
- * בפרמטרים id  : מקבל
- * מחזיר: הצלחה או שגיאה
+ * מחיקה לוגית של משתמש (active = 0)
+ * בדיקות:
+ * - חסימת מנהל כללי
+ * - משימות (tasks.user_id)
+ * - פניות (leads.user_id)
  */
 export async function deleteUser(req, res) {
   const userId = parseInt(req.params.id, 10);
 
+  if (!Number.isInteger(userId) || userId <= 0) {
+    return res
+      .status(400)
+      .json({ success: false, message: "מזהה משתמש לא תקין" });
+  }
+
+  // חסימת מנהל כללי
   if (userId === 1) {
     return res
       .status(403)
@@ -275,6 +284,35 @@ export async function deleteUser(req, res) {
   }
 
   try {
+    // 🔹 בדיקת משימות
+    const [tasks] = await db.query(
+      `SELECT COUNT(*) AS total FROM tasks WHERE user_id = ?`,
+      [userId]
+    );
+
+    if (tasks[0].total > 0) {
+      return res.status(409).json({
+        success: false,
+        reason: "tasks",
+        message: "לא ניתן להשבית משתמש המשויך למשימות קיימות",
+      });
+    }
+
+    // 🔹 בדיקת פניות
+    const [leads] = await db.query(
+      `SELECT COUNT(*) AS total FROM leads WHERE user_id = ?`,
+      [userId]
+    );
+
+    if (leads[0].total > 0) {
+      return res.status(409).json({
+        success: false,
+        reason: "leads",
+        message: "לא ניתן להשבית משתמש המשויך לפניות קיימות",
+      });
+    }
+
+    // 🔹 מחיקה לוגית
     const [result] = await db.query(
       "UPDATE users SET active = 0 WHERE user_id = ?",
       [userId]
@@ -285,10 +323,16 @@ export async function deleteUser(req, res) {
     }
 
     logAction(`השבתת משתמש #${userId}`, req.user?.user_id)(req, res, () => {});
-    return res.json({ success: true, message: "המשתמש הושבת בהצלחה" });
+    return res.json({
+      success: true,
+      message: "המשתמש הושבת בהצלחה",
+    });
   } catch (err) {
     console.error("שגיאה בהשבתת משתמש:", err);
-    return res.status(500).json({ success: false, message: "שגיאת שרת" });
+    return res.status(500).json({
+      success: false,
+      message: "שגיאת שרת בהשבתת משתמש",
+    });
   }
 }
 
