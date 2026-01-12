@@ -284,7 +284,7 @@ export async function deleteUser(req, res) {
   }
 
   try {
-    // 🔹 בדיקת משימות
+    //  בדיקת משימות
     const [tasks] = await db.query(
       `SELECT COUNT(*) AS total FROM tasks WHERE user_id = ?`,
       [userId]
