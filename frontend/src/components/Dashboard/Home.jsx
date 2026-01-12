@@ -269,43 +269,41 @@ const Home = () => {
             })()}
 
             {/* משימות חורגות */}
-  {(() => {
-  const overdueCount =
-    (user?.admin_alert_dash === 1 &&
-      stats?.tasks_overdue
-        ?.filter(
-          (t) =>
-            t.status === "חדשה" || t.status === "בטיפול"
-        )
-        .reduce((sum, t) => sum + t.overdue_count, 0)) ||
-    (user?.user_alert_dash === 1 &&
-      stats?.tasks_overdue
-        ?.filter(
-          (t) =>
-            t.user_id === user.user_id &&
-            (t.status === "חדשה" || t.status === "בטיפול")
-        )
-        .reduce((sum, t) => sum + t.overdue_count, 0));
-
-  return (
-    overdueCount > 0 && (
-      <AlertBar
-        icon={
-          <Icon
-            icon="noto:alarm-clock"
-            width="1.5em"
-            height="1.5em"
-          />
-        }
-        count={overdueCount}
-        text="משימות חורגות מטיפול !!"
-        color="red"
-        onClick={() => navigate("/dashboard/tasks")}
-      />
-    )
-  );
-})()}
-
+            {(() => {
+              const overdueCount =
+                (user?.admin_alert_dash === 1 &&
+                  stats?.tasks_overdue
+                    ?.filter(
+                      (t) => t.status === "חדשה" || t.status === "בטיפול"
+                    )
+                    .reduce((sum, t) => sum + t.overdue_count, 0)) ||
+                (user?.user_alert_dash === 1 &&
+                  stats?.tasks_overdue
+                    ?.filter(
+                      (t) =>
+                        t.user_id === user.user_id &&
+                        (t.status === "חדשה" || t.status === "בטיפול")
+                    )
+                    .reduce((sum, t) => sum + t.overdue_count, 0));
+              console.log("Tasks Overdue", stats?.tasks_overdue);
+              return (
+                overdueCount > 0 && (
+                  <AlertBar
+                    icon={
+                      <Icon
+                        icon="noto:alarm-clock"
+                        width="1.5em"
+                        height="1.5em"
+                      />
+                    }
+                    count={overdueCount}
+                    text="משימות חורגות מטיפול !!"
+                    color="red"
+                    onClick={() => navigate("/dashboard/tasks")}
+                  />
+                )
+              );
+            })()}
           </div>
         )}
 

@@ -140,7 +140,12 @@ export async function getDashboardSummary(req, res) {
     `,
 
     tasks_overdue: `
-  SELECT t.user_id, u.first_name, u.last_name, COUNT(*) AS overdue_count
+  SELECT 
+    t.user_id, 
+    u.first_name, 
+    u.last_name, 
+    t.status,                       
+    COUNT(*) AS overdue_count
   FROM tasks t
   JOIN users u ON t.user_id = u.user_id
   WHERE t.due_date < CURDATE()
