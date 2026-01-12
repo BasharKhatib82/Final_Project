@@ -363,6 +363,7 @@ export default function Leads() {
       name: "project_name",
       label: "פרויקט",
       type: "select",
+      disabled: user?.data_scope_self === 1,
       options: [
         { value: "", label: "כל הפרויקטים" },
         ...projects.map((p) => ({

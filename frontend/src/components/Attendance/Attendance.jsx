@@ -191,6 +191,7 @@ export default function Attendance() {
       name: "user_id",
       label: "עובד",
       type: "select",
+      disabled: user?.data_scope_self === 1,
       options: [
         { value: "", label: "כל העובדים" },
         ...users.map((u) => ({
