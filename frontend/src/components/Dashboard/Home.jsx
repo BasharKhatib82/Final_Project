@@ -505,7 +505,7 @@ const Home = () => {
             <LeadsByDateBarChart dataByDay={stats?.leads_by_day || []} />
           </div>
           <div className="bg-white rounded-xl shadow p-4 h-80">
-            <LeadsByUserChart data={stats?.leads_by_user || []} />
+            <LeadsByUserChart data={stats?.leads_by_user_status || []} />
           </div>
         </div>
 
