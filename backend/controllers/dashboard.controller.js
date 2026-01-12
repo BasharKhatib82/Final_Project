@@ -133,8 +133,6 @@ export async function getDashboardSummary(req, res) {
       FROM leads l
       JOIN users u ON l.user_id = u.user_id
       JOIN roles_permissions r ON u.role_id = r.role_id
-      WHERE MONTH(l.created_at) = MONTH(CURDATE())
-        AND YEAR(l.created_at) = YEAR(CURDATE())
       ${leadsFilter}
       GROUP BY l.user_id, l.status
       ORDER BY count DESC
