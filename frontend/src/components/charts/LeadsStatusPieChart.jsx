@@ -20,24 +20,11 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const LeadsStatusPieChart = ({ data }) => {
-  // חישוב תאריך חודש אחורה מהיום
-  const cutoff = new Date();
-  cutoff.setMonth(cutoff.getMonth() - 1);
-
-  // הבטחה ש-data תמיד יהיה מערך
-  const safeData = Array.isArray(data) ? data : [];
-
-  // סינון הפניות של חודש אחרון בלבד
-  const lastMonthData = safeData.filter(
-    (item) => new Date(item.created_at) >= cutoff
-  );
-
-  // ספירה לפי סטטוס
+  // אם data הוא אובייקט ולא מערך - זה הפורמט מהשרת
   const counts = {
-    new: lastMonthData.filter((item) => item.status === "חדשה").length,
-    in_progress: lastMonthData.filter((item) => item.status === "בטיפול")
-      .length,
-    completed: lastMonthData.filter((item) => item.status === "טופלה").length,
+    new: data?.new || 0,
+    in_progress: data?.in_progress || 0,
+    completed: data?.completed || 0,
   };
 
   const chartData = {
@@ -45,7 +32,7 @@ const LeadsStatusPieChart = ({ data }) => {
     datasets: [
       {
         data: [counts.new, counts.in_progress, counts.completed],
-        backgroundColor: ["#ef4444", "#facc15", "#22c55e"], // אדום, צהוב, ירוק
+        backgroundColor: ["#ef4444", "#facc15", "#22c55e"],
         borderColor: "#fff",
         borderWidth: 2,
       },
