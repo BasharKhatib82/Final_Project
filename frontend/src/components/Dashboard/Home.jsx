@@ -272,14 +272,20 @@ const Home = () => {
             {(() => {
               const overdueCount =
                 (user?.admin_alert_dash === 1 &&
-                  stats?.tasks_overdue?.reduce(
-                    (sum, t) => sum + t.overdue_count,
-                    0
-                  )) ||
+                  stats?.tasks_overdue
+                    ?.filter(
+                      (t) => t.status === "חדשה" || t.status === "בטיפול"
+                    )
+                    .reduce((sum, t) => sum + t.overdue_count, 0)) ||
                 (user?.user_alert_dash === 1 &&
-                  (stats?.tasks_overdue?.find((t) => t.user_id === user.user_id)
-                    ?.overdue_count ||
-                    0));
+                  stats?.tasks_overdue
+                    ?.filter(
+                      (t) =>
+                        t.user_id === user.user_id &&
+                        (t.status === "חדשה" || t.status === "בטיפול")
+                    )
+                    .reduce((sum, t) => sum + t.overdue_count, 0));
+
               return (
                 overdueCount > 0 && (
                   <AlertBar
