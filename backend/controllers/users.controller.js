@@ -294,7 +294,7 @@ export async function deleteUser(req, res) {
       return res.status(409).json({
         success: false,
         reason: "tasks",
-        message: "לא ניתן להשבית משתמש המשויך למשימות קיימות",
+        message: "לא ניתן להשבית משתמש המשויך למשימות או פניות קיימות",
       });
     }
 
@@ -308,7 +308,7 @@ export async function deleteUser(req, res) {
       return res.status(409).json({
         success: false,
         reason: "leads",
-        message: "לא ניתן להשבית משתמש המשויך לפניות קיימות",
+        message: "לא ניתן להשבית משתמש המשויך למשימות או פניות קיימות",
       });
     }
 
