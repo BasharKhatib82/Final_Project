@@ -180,46 +180,47 @@ export default function Leads() {
     }
   };
 
-  const bulkAssignBar = (
-    <div className="flex flex-wrap items-center gap-4">
-      <Icon
-        icon="icon-park:four-round-point-connection"
-        width="1.5em"
-        height="1.5em"
-      />
-      <label className="text-sm">שיוך מרובה:</label>
-      <select
-        value={bulkUserId}
-        onChange={(e) => setBulkUserId(e.target.value)}
-        className="border border-gray-300 rounded px-3 py-1 text-sm"
-      >
-        <option value="">בחר נציג</option>
-        <option value="null">ללא</option>
-        {users.map((u) => (
-          <option key={u.user_id} value={u.user_id}>
-            {u.first_name} {u.last_name}
-          </option>
-        ))}
-      </select>
-      <button
-        onClick={() => {
-          if (!selectedLeads.length || !bulkUserId) {
-            setPopup({
-              title: "שגיאה",
-              message: "יש לבחור פניות ונציג לשיוך",
-              mode: "error",
-              show: true,
-            });
-            return;
-          }
-          setBulkAssignConfirm(true);
-        }}
-        className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 text-sm"
-      >
-        שיוך {selectedLeads.length} פניות
-      </button>
-    </div>
-  );
+  const bulkAssignBar =
+    user?.data_scope_all === 1 ? (
+      <div className="flex flex-wrap items-center gap-4">
+        <Icon
+          icon="icon-park:four-round-point-connection"
+          width="1.5em"
+          height="1.5em"
+        />
+        <label className="text-sm">שיוך מרובה:</label>
+        <select
+          value={bulkUserId}
+          onChange={(e) => setBulkUserId(e.target.value)}
+          className="border border-gray-300 rounded px-3 py-1 text-sm"
+        >
+          <option value="">בחר נציג</option>
+          <option value="null">ללא</option>
+          {users.map((u) => (
+            <option key={u.user_id} value={u.user_id}>
+              {u.first_name} {u.last_name}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={() => {
+            if (!selectedLeads.length || !bulkUserId) {
+              setPopup({
+                title: "שגיאה",
+                message: "יש לבחור פניות ונציג לשיוך",
+                mode: "error",
+                show: true,
+              });
+              return;
+            }
+            setBulkAssignConfirm(true);
+          }}
+          className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 text-sm"
+        >
+          שיוך {selectedLeads.length} פניות
+        </button>
+      </div>
+    ) : null;
 
   const columns = [
     {
