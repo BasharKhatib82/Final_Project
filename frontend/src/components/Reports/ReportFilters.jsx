@@ -98,6 +98,8 @@ function Filter({ def, value, onChange, inline, filteredRows }) {
           className="border rounded px-2 py-1 text-sm"
           value={value ?? ""}
           onChange={(e) => onChange(e.target.value || "")}
+          disabled={def.disabled}
+          title={def.disabled ? "אין לך הרשאה לשנות שדה זה" : ""}
         >
           {(dynamicOptions || []).map((opt) => (
             <option key={String(opt.value)} value={opt.value}>
