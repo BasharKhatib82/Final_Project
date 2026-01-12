@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { api } from "utils";
+import Select from "react-select"; // ✅ חדש
+import axios from "axios"; // ✅ חדש
 
 export default function LandingPage() {
   const [form, setForm] = useState({
@@ -13,10 +15,12 @@ export default function LandingPage() {
   });
 
   const [projects, setProjects] = useState([]);
-  const [cities] = useState(["תל אביב", "חיפה", "ירושלים", "באר שבע", "אשדוד"]);
+  const [citiesOptions, setCitiesOptions] = useState([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
 
   useEffect(() => {
     fetchProjects();
+    fetchCities(); 
   }, []);
 
   const fetchProjects = async () => {
@@ -29,6 +33,40 @@ export default function LandingPage() {
       console.error("שגיאה בטעינת פרויקטים:", err);
     }
   };
+
+  const fetchCities = async () => {
+    setCitiesLoading(true);
+    try {
+      const res = await axios.get(
+        "https://data.gov.il/api/3/action/datastore_search",
+        {
+          params: {
+            resource_id: "d4901968-dad3-4845-a9b0-a57d027f11ab",
+            limit: 5000,
+          },
+        }
+      );
+
+      const records = res.data?.result?.records || [];
+
+      // רק שם עיר + הסרת כפילויות
+      const uniqueNames = Array.from(
+        new Set(records.map((r) => r?.שם_ישוב).filter(Boolean))
+      );
+
+      // יצירת options ל-react-select
+      const options = uniqueNames
+        .sort((a, b) => a.localeCompare(b, "he"))
+        .map((name) => ({ value: name, label: name }));
+
+      setCitiesOptions(options);
+    } catch (err) {
+      console.error("שגיאה בטעינת ערים:", err);
+    } finally {
+      setCitiesLoading(false);
+    }
+  };
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -136,19 +174,18 @@ export default function LandingPage() {
 
             <div>
               <label className="block text-sm font-medium mb-1">עיר</label>
-              <select
-                name="city"
-                value={form.city}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">בחר עיר</option>
-                {cities.map((city) => (
-                  <option key={city} value={city}>
-                    {city}
-                  </option>
-                ))}
-              </select>
+              <Select
+                options={citiesOptions}
+                isLoading={citiesLoading}
+                isSearchable
+                isClearable
+                placeholder="בחר עיר"
+                noOptionsMessage={() => "לא נמצאו ערים"}
+                value={citiesOptions.find((o) => o.value === form.city) || null}
+                onChange={(selected) =>
+                  setForm((prev) => ({ ...prev, city: selected?.value || "" }))
+                }
+              />
             </div>
 
             <div>
