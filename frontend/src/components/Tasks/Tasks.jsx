@@ -315,7 +315,7 @@ export default function Tasks() {
       name: "user_id",
       label: "נציג",
       type: "select",
-      disabled: user?.data_scope_all === 0,
+      disabled: user?.data_scope_self === 1,
       options: [
         { value: "", label: "כל הנציגים" },
         { value: "null", label: "ללא" },
