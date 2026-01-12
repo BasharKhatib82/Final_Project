@@ -333,40 +333,41 @@ export default function Tasks() {
 
   const defaultFilters = { status: "חדשה" };
 
-  const bulkAssignBar = (
-    <div className="flex items-center gap-2">
-      <label className="text-sm font-semibold">שיוך מרובה:</label>
-      <select
-        value={bulkUserId}
-        onChange={(e) => setBulkUserId(e.target.value)}
-        className="border border-gray-300 rounded px-3 py-1 text-sm"
-      >
-        <option value="">בחר נציג לשיוך</option>
-        <option value="null">ללא</option>
-        {users.map((u) => (
-          <option key={u.user_id} value={u.user_id}>
-            {u.first_name} {u.last_name}
-          </option>
-        ))}
-      </select>
-      <button
-        onClick={() => {
-          if (!selectedTasks.length || !bulkUserId) {
-            setPopup({
-              title: "שגיאה",
-              message: "יש לבחור משימות ונציג",
-              mode: "error",
-            });
-            return;
-          }
-          setBulkAssignConfirm(true);
-        }}
-        className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 text-sm"
-      >
-        שיוך {selectedTasks.length} משימות
-      </button>
-    </div>
-  );
+  const bulkAssignBar =
+    user?.data_scope_all === 1 ? (
+      <div className="flex items-center gap-2">
+        <label className="text-sm font-semibold">שיוך מרובה:</label>
+        <select
+          value={bulkUserId}
+          onChange={(e) => setBulkUserId(e.target.value)}
+          className="border border-gray-300 rounded px-3 py-1 text-sm"
+        >
+          <option value="">בחר נציג לשיוך</option>
+          <option value="null">ללא</option>
+          {users.map((u) => (
+            <option key={u.user_id} value={u.user_id}>
+              {u.first_name} {u.last_name}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={() => {
+            if (!selectedTasks.length || !bulkUserId) {
+              setPopup({
+                title: "שגיאה",
+                message: "יש לבחור משימות ונציג",
+                mode: "error",
+              });
+              return;
+            }
+            setBulkAssignConfirm(true);
+          }}
+          className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600 text-sm"
+        >
+          שיוך {selectedTasks.length} משימות
+        </button>
+      </div>
+    ) : null;
 
   return (
     <ProtectedRoute permission="tasks_page_access">
