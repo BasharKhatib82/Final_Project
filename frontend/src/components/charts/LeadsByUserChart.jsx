@@ -62,7 +62,7 @@ const LeadsByUserChart = ({ data }) => {
   return (
     <div className="w-full h-full flex flex-col">
       <h3 className="text-lg font-semibold text-gray-700 mb-2 text-center">
-        פניות שטופלו לפי עובד שיווק
+        פניות שטופלו לפי עובד ( החודש )
       </h3>
       <div className="flex-grow w-full">
         <Bar data={chartData} options={options} />
