@@ -143,7 +143,7 @@ export async function getDashboardSummary(req, res) {
       SELECT t.user_id, u.first_name, u.last_name, COUNT(*) AS overdue_count
       FROM tasks t
       JOIN users u ON t.user_id = u.user_id
-      WHERE t.due_date < CURDATE() AND t.status <> 'הושלמה'
+      WHERE t.due_date < CURDATE() AND t.status <> 'הושלמה' , 'בוטלה'
       ${tasksFilter}
       GROUP BY t.user_id
     `,
