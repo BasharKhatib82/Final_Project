@@ -240,6 +240,7 @@ export default function Tasks() {
             setNewRepId(selectedId);
           }}
           className="border border-gray-300 rounded px-2 py-1 text-sm"
+          disabled={user?.data_scope_self === 1}
         >
           <option value="">ללא</option>
           {users.map((u) => (
