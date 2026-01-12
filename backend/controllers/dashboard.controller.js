@@ -146,7 +146,7 @@ export async function getDashboardSummary(req, res) {
   WHERE t.due_date < CURDATE()
     AND t.status IN ('חדשה', 'בטיפול')
     ${tasksFilter}
-  GROUP BY t.user_id
+  GROUP BY t.user_id, t.status
 `,
   };
 
