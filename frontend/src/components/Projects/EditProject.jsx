@@ -14,7 +14,6 @@ import { Icon } from "@iconify/react";
 import { api } from "utils";
 import ProtectedRoute from "components/Tools/ProtectedRoute";
 
-
 const EditProject = () => {
   const [form, setForm] = useState({
     project_name: "",
@@ -27,15 +26,6 @@ const EditProject = () => {
   const [confirmPopup, setConfirmPopup] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
-  const { user } = useUser();
-
-  useEffect(() => {
-    if (user === undefined) return; // עדיין טוען את המשתמש
-    if (!user) return; // לא מחובר - לא עושים כלום
-    if (user.tasks_page_access !== 1) {
-      navigate("/unauthorized", { replace: true });
-    }
-  }, [user, navigate]);
 
   useEffect(() => {
     fetchProject();
@@ -51,10 +41,6 @@ const EditProject = () => {
       }
     } catch (err) {
       console.error("שגיאה בטעינת פרויקט:", err);
-      if (err.response?.status === 401) {
-        navigate("/", { replace: true });
-        return;
-      }
       setError("שגיאה בטעינת נתונים מהשרת");
     }
   };
