@@ -124,20 +124,21 @@ export async function getDashboardSummary(req, res) {
     `,
 
     leads_by_user_status: `
-SELECT 
-  CONCAT(u.first_name, ' ', u.last_name) AS name,
-  COUNT(*) AS count,
-  l.status,
-  r.role_name
-FROM leads l
-JOIN users u ON l.user_id = u.user_id
-JOIN roles_permissions r ON u.role_id = r.role_id
-WHERE MONTH(l.created_at) = MONTH(CURDATE())
-  AND YEAR(l.created_at) = YEAR(CURDATE())
-${leadsFilter}
-GROUP BY l.user_id, l.status
-ORDER BY count DESC
-    `,
+      SELECT 
+      l.user_id,
+        CONCAT(u.first_name, ' ', u.last_name) AS name,
+        COUNT(*) AS count,
+        l.status,
+        r.role_name
+      FROM leads l
+      JOIN users u ON l.user_id = u.user_id
+      JOIN roles_permissions r ON u.role_id = r.role_id
+      WHERE MONTH(l.created_at) = MONTH(CURDATE())
+        AND YEAR(l.created_at) = YEAR(CURDATE())
+      ${leadsFilter}
+      GROUP BY l.user_id, l.status
+      ORDER BY count DESC
+      `,
 
     tasks_by_user_status: `
       SELECT t.user_id, u.first_name, u.last_name, t.status, COUNT(*) AS count
@@ -274,7 +275,14 @@ ORDER BY count DESC
       })) || [];
 
     //  פניות לפי סטטוס-משתמש
-    summary.leads_by_user_status = leads_by_user_status?.[0] || [];
+    summary.leads_by_user_status =
+      leads_by_user_status?.[0]?.map((row) => ({
+        user_id: row.user_id,
+        name: row.name,
+        count: row.count,
+        status: row.status,
+        role: row.role_name,
+      })) || [];
 
     //  משימות לפי סטטוס-משתמש
     summary.tasks_by_user_status = tasks_by_user_status?.[0] || [];
